@@ -1,11 +1,12 @@
-package me.archdev.restapi
+package com.planning
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import com.planning.service.AuthService
 import me.archdev.restapi.http.HttpService
-import me.archdev.restapi.services.{AuthService, UsersService}
+import me.archdev.restapi.services.UsersService
 import me.archdev.restapi.utils.Config
 
 import scala.concurrent.ExecutionContext

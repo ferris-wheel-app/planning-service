@@ -1,10 +1,11 @@
 package me.archdev
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.planning.service.AuthService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import me.archdev.restapi.http.HttpService
 import me.archdev.restapi.models.UserEntity
-import me.archdev.restapi.services.{AuthService, UsersService}
+import me.archdev.restapi.services.UsersService
 import me.archdev.utils.InMemoryPostgresStorage._
 import org.scalatest._
 

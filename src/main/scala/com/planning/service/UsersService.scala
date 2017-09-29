@@ -1,4 +1,4 @@
-package me.archdev.restapi.services
+package com.planning.service
 
 import me.archdev.restapi.models.db.UserEntityTable
 import me.archdev.restapi.models.{UserEntity, UserEntityUpdate}

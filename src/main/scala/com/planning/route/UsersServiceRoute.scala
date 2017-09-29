@@ -1,14 +1,10 @@
-package me.archdev.restapi.http.routes
+package com.planning.route
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers.IntNumber
+import com.planning.service.AuthService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import me.archdev.restapi.http.SecurityDirectives
-import me.archdev.restapi.models.UserEntityUpdate
-import me.archdev.restapi.services.{AuthService, UsersService}
-import io.circe.generic.auto._
-import io.circe.syntax._
 
 import scala.concurrent.ExecutionContext
 
@@ -17,7 +13,6 @@ class UsersServiceRoute(val authService: AuthService,
                        )(implicit executionContext: ExecutionContext) extends FailFastCirceSupport with SecurityDirectives {
 
   import StatusCodes._
-  import usersService._
 
   val route = pathPrefix("users") {
     pathEndOrSingleSlash {
