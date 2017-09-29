@@ -1,7 +1,6 @@
 package me.archdev.utils
 
 import de.flapdoodle.embed.process.runtime.Network._
-import me.archdev.restapi.utils.FlywayService
 import ru.yandex.qatools.embed.postgresql.PostgresStarter
 import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig.{Credentials, Net, Storage, Timeout}
 import ru.yandex.qatools.embed.postgresql.config.PostgresConfig

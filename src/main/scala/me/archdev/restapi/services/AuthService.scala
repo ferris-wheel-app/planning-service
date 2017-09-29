@@ -2,7 +2,6 @@ package me.archdev.restapi.services
 
 import me.archdev.restapi.models.db.TokenEntityTable
 import me.archdev.restapi.models.{TokenEntity, UserEntity}
-import me.archdev.restapi.utils.DatabaseService
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -5,7 +5,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import me.archdev.restapi.http.HttpService
 import me.archdev.restapi.models.UserEntity
 import me.archdev.restapi.services.{AuthService, UsersService}
-import me.archdev.restapi.utils.DatabaseService
 import me.archdev.utils.InMemoryPostgresStorage._
 import org.scalatest._
 

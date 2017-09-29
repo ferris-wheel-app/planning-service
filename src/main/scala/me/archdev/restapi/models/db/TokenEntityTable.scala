@@ -1,7 +1,6 @@
 package me.archdev.restapi.models.db
 
 import me.archdev.restapi.models.TokenEntity
-import me.archdev.restapi.utils.DatabaseService
 
 trait TokenEntityTable extends UserEntityTable {
 

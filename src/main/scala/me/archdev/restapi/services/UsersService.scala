@@ -2,7 +2,6 @@ package me.archdev.restapi.services
 
 import me.archdev.restapi.models.db.UserEntityTable
 import me.archdev.restapi.models.{UserEntity, UserEntityUpdate}
-import me.archdev.restapi.utils.DatabaseService
 
 import scala.concurrent.{ExecutionContext, Future}
 

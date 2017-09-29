@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import me.archdev.restapi.http.HttpService
 import me.archdev.restapi.services.{AuthService, UsersService}
-import me.archdev.restapi.utils.{Config, DatabaseService, FlywayService}
+import me.archdev.restapi.utils.Config
 
 import scala.concurrent.ExecutionContext
 
