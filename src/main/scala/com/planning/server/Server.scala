@@ -1,5 +1,5 @@
 package com.planning.server
 
-class Server {
+abstract class Server {
 
 }
