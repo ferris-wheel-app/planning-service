@@ -1,5 +1,4 @@
 name := "planning-service"
-organization := "me.archdev"
 version := "1.0"
 scalaVersion := "2.12.3"
 
@@ -15,6 +14,7 @@ libraryDependencies ++= {
 
     "com.typesafe.slick" %% "slick" % slickVersion,
     "org.postgresql" % "postgresql" % "42.1.4",
+    "com.h2database" % "h2" % "1.4.185",
     "org.flywaydb" % "flyway-core" % "4.2.0",
 
     "com.zaxxer" % "HikariCP" % "2.7.0",

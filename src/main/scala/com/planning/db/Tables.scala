@@ -16,5 +16,5 @@ trait Tables {
     def * = (sender, content, id).mapTo[MessageRow]
   }
 
-  protected val messages = TableQuery[MessageTable]
+  lazy val messages = TableQuery[MessageTable]
 }

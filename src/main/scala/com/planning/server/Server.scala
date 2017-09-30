@@ -1,5 +1,8 @@
 package com.planning.server
 
-abstract class Server {
+import com.planning.route.Route
+import com.planning.service.ServiceComponent
 
+abstract class Server extends Route {
+  this: ServiceComponent =>
 }

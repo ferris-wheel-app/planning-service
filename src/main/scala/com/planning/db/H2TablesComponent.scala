@@ -7,5 +7,5 @@ object H2Tables extends Tables {
 }
 
 trait H2TablesComponent extends TablesComponent {
-  val tables: Tables
+  val tables = H2Tables
 }

@@ -13,6 +13,8 @@ trait RepositoryComponent {
 trait H2RepositoryComponent extends RepositoryComponent {
   this: TablesComponent =>
 
+  override val repo = new H2Repository
+
   class H2Repository extends Repository {
 
   }
