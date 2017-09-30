@@ -1,31 +1,9 @@
 package com.planning
 
-import akka.actor.ActorSystem
-import akka.event.{Logging, LoggingAdapter}
-import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
-import com.planning.service.AuthService
-import me.archdev.restapi.http.HttpService
-import me.archdev.restapi.services.UsersService
-import me.archdev.restapi.utils.Config
+import com.planning.db.H2TablesComponent
+import com.planning.repo.H2RepositoryComponent
 
-import scala.concurrent.ExecutionContext
-
-object Main extends App with Config {
-  implicit val actorSystem = ActorSystem()
-  implicit val executor: ExecutionContext = actorSystem.dispatcher
-  implicit val log: LoggingAdapter = Logging(actorSystem, getClass)
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-
-  val flywayService = new FlywayService(jdbcUrl, dbUser, dbPassword)
-  flywayService.migrateDatabaseSchema
-
-  val databaseService = new DatabaseService(jdbcUrl, dbUser, dbPassword)
-
-  val usersService = new UsersService(databaseService)
-  val authService = new AuthService(databaseService)(usersService)
-
-  val httpService = new HttpService(usersService, authService)
-
-  Http().bindAndHandle(httpService.routes, httpHost, httpPort)
+object Main extends App {
+  //with H2RepositoryComponent with H2TablesComponent {
+  println("It works!")
 }

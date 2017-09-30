@@ -1,20 +1,20 @@
 package com.planning.db
 
-import com.planning.model.Model.Message
-
 trait Tables {
   val profile: slick.jdbc.JdbcProfile
   import profile.api._
 
-  class Messages(tag: Tag)
-    extends Table[Message](tag, "message") {
+  final case class MessageRow(sender: String, content: String, id: Long = 0L)
+
+  class MessageTable(tag: Tag)
+    extends Table[MessageRow](tag, "message") {
 
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def sender = column[String]("sender")
     def content = column[String]("content")
 
-    def * = (sender, content).mapTo[Message]
+    def * = (sender, content, id).mapTo[MessageRow]
   }
 
-  protected val messages = TableQuery[Messages]
+  protected val messages = TableQuery[MessageTable]
 }

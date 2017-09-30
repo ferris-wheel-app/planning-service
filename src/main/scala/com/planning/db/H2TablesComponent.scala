@@ -6,6 +6,6 @@ object H2Tables extends Tables {
   override val profile = H2Profile
 }
 
-trait H2TablesComponent {
+trait H2TablesComponent extends TablesComponent {
   val tables: Tables
 }
