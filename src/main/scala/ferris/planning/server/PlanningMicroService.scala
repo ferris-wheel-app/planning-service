@@ -21,6 +21,8 @@ object PlanningMicroService extends PlanningServer
 
   override val logger = Logging(system, getClass)
   override val config = MicroServiceConfig
+
+  startUp()
 }
 
 //object PlanningMicroService extends App with H2PlanningRepositoryComponent with H2TablesComponent{

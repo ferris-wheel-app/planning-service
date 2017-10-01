@@ -8,7 +8,7 @@ trait PlanningRepositoryComponent {
   val repo: PlanningRepository
 
   trait PlanningRepository {
-
+    def createMessage(message: Message)
   }
 }
 
