@@ -1,4 +1,4 @@
-package com.planning.db
+package ferris.planning.db
 
 import slick.jdbc.H2Profile
 

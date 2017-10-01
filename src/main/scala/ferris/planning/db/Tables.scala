@@ -1,4 +1,4 @@
-package com.planning.db
+package ferris.planning.db
 
 trait Tables {
   val profile: slick.jdbc.JdbcProfile
