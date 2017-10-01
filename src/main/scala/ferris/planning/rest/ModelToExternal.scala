@@ -4,7 +4,6 @@ import java.util.UUID
 
 import ferris.planning.model.Model.Message
 import ferris.planning.rest.Resources.In.CreateMessage
-import ferris.planning.rest.Resources.Out.ViewMessage
 
 object ModelToExternal {
 
