@@ -3,9 +3,9 @@ package ferris.planning.service
 import ferris.planning.repo.PlanningRepositoryComponent
 
 trait PlanningServiceComponent {
-  val service: Service
+  val planningService: PlanningService
 
-  trait Service {
+  trait PlanningService {
 
   }
 }
@@ -13,7 +13,9 @@ trait PlanningServiceComponent {
 trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
   this: PlanningRepositoryComponent =>
 
-  class DefaultService extends Service {
+  override val planningService = new DefaultPlanningService
+
+  class DefaultPlanningService extends PlanningService {
 
   }
 }

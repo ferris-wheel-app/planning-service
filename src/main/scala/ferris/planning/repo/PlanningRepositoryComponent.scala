@@ -2,10 +2,12 @@ package ferris.planning.repo
 
 import ferris.planning.db.TablesComponent
 
-trait PlanningRepositoryComponent {
-  val repo: Repository
+import scala.concurrent.ExecutionContext
 
-  trait Repository {
+trait PlanningRepositoryComponent {
+  val repo: PlanningRepository
+
+  trait PlanningRepository {
 
   }
 }
@@ -13,9 +15,11 @@ trait PlanningRepositoryComponent {
 trait H2PlanningRepositoryComponent extends PlanningRepositoryComponent {
   this: TablesComponent =>
 
-  override val repo = new H2Repository
+  implicit val repoEc: ExecutionContext
 
-  class H2Repository extends Repository {
+  override val repo = new H2PlanningRepository
+
+  class H2PlanningRepository extends PlanningRepository {
 
   }
 }

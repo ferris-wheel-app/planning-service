@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext
 trait PlanningRoute {
   this: PlanningServiceComponent =>
 
-  implicit def executionContext: ExecutionContext
+  implicit def routeEc: ExecutionContext
   implicit def materializer: Materializer
 
 }
