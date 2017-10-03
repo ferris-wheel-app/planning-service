@@ -3,10 +3,9 @@ package ferris.planning.server
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.stream.ActorMaterializer
-import ferris.microservice.{MicroService, MicroServiceConfig}
+import ferris.microservice.MicroServiceConfig
 import ferris.planning.db.H2TablesComponent
 import ferris.planning.repo.H2PlanningRepositoryComponent
-import ferris.planning.route.PlanningRoute
 import ferris.planning.service.DefaultPlanningServiceComponent
 
 object PlanningMicroService extends PlanningServer

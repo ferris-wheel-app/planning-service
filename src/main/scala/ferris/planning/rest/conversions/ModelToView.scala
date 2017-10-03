@@ -1,13 +1,13 @@
-package ferris.planning.rest
+package ferris.planning.rest.conversions
 
 import ferris.planning.model.Model.Message
-import ferris.planning.rest.Resources.Out.ViewMessage
+import ferris.planning.rest.Resources.Out.MessageView
 
-object ExternalToModel {
+object ModelToView {
 
   implicit class MessageConversion(message: Message) {
-    def toExternal: ViewMessage = {
-      ViewMessage(
+    def toView: MessageView = {
+      MessageView(
         sender = message.sender,
         content = message.content
       )

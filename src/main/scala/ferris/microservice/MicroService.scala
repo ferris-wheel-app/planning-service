@@ -16,7 +16,7 @@ trait MicroService extends App with MicroServiceConfigComponent {
   implicit val executor: ExecutionContextExecutor
   implicit val materializer: Materializer
 
-  def config: MicroServiceConfig
+  val config: MicroServiceConfig
 
   val logger: LoggingAdapter
 
