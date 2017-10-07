@@ -7,14 +7,16 @@ libraryDependencies ++= {
   val scalaTestV = "3.0.4"
   val slickVersion = "3.2.1"
   val circeV = "0.8.0"
+  val mysqlConnectorVersion = "5.1.34"
   Seq(
     "com.typesafe.akka" %% "akka-http-core" % akkaV,
     "com.typesafe.akka" %% "akka-http" % akkaV,
     "de.heikoseeberger" %% "akka-http-circe" % "1.18.0",
 
     "com.typesafe.slick" %% "slick" % slickVersion,
+    "mysql" % "mysql-connector-java" % mysqlConnectorVersion,
     "org.postgresql" % "postgresql" % "42.1.4",
-    "com.h2database" % "h2" % "1.4.185",
+    "com.h2database" % "h2" % "1.4.191",
     "org.flywaydb" % "flyway-core" % "4.2.0",
 
     "com.zaxxer" % "HikariCP" % "2.7.0",
@@ -36,3 +38,7 @@ enablePlugins(DockerPlugin)
 
 dockerExposedPorts := Seq(9000)
 dockerEntrypoint := Seq("bin/%s" format executableScriptName.value, "-Dconfig.resource=docker.conf")
+
+flywayUrl := "jdbc:h2:file:./target/foobar"
+
+flywayUser := "SA"
