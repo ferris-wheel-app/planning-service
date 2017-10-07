@@ -6,11 +6,10 @@ import akka.http.scaladsl.server.PathMatchers
 import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import ferris.planning.rest.conversions.ExternalToCommand._
-import ferris.planning.rest.conversions.ModelToView._
 import ferris.planning.rest.Resources.In._
 import ferris.planning.service.PlanningServiceComponent
+import ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 import io.circe.generic.auto._
-import io.circe.syntax._
 
 import scala.concurrent.ExecutionContext
 
@@ -26,7 +25,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[MessageCreation]) { messageCreation =>
-          complete(planningService.createMessage(messageCreation.toCommand).map(_.asJson))
+          complete(planningService.createMessage(messageCreation.toCommand))
         }
       }
     }
@@ -36,7 +35,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[MessageUpdate]) { messageUpdate =>
-          complete(planningService.updateMessage(messageId, messageUpdate.toCommand).map(_.asJson))
+          complete(planningService.updateMessage(messageId, messageUpdate.toCommand))
         }
       }
     }
@@ -45,7 +44,8 @@ this: PlanningServiceComponent =>
   private val getMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { messageId =>
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getMessage(messageId).map(_.toView).map(_.asJson))
+        val message = planningService.getMessage(messageId)
+        complete(message.map(_.getOrElse (throw MessageNotFoundException())))
       }
     }
   }
