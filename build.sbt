@@ -39,6 +39,6 @@ enablePlugins(DockerPlugin)
 dockerExposedPorts := Seq(9000)
 dockerEntrypoint := Seq("bin/%s" format executableScriptName.value, "-Dconfig.resource=docker.conf")
 
-flywayUrl := "jdbc:h2:file:./target/foobar"
+flywayUrl := "jdbc:mysql://localhost:3306/planning"
 
-flywayUser := "SA"
+flywayUser := "root"
