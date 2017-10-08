@@ -1,9 +1,12 @@
 name := "planning-service"
 version := "1.0"
-scalaVersion := "2.12.3"
+scalaVersion := "2.11.8"
+crossScalaVersions := Seq("2.11.8", "2.12.3")
+resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/maven-releases/"
 
 libraryDependencies ++= {
   val akkaV = "10.0.10"
+  val scalaMajorMinorVersion = "2.11"
   val scalaTestV = "3.0.4"
   val slickVersion = "3.2.1"
   val circeV = "0.8.0"
@@ -11,9 +14,10 @@ libraryDependencies ++= {
   Seq(
     "com.typesafe.akka" %% "akka-http-core" % akkaV,
     "com.typesafe.akka" %% "akka-http" % akkaV,
-    "de.heikoseeberger" %% "akka-http-circe" % "1.18.0",
+    "de.heikoseeberger" % s"akka-http-circe_${scalaMajorMinorVersion}" % "1.19.0-M2",
 
-    "com.typesafe.slick" %% "slick" % slickVersion,
+    "com.typesafe.slick" % s"slick_${scalaMajorMinorVersion}" % slickVersion,
+    "com.typesafe.slick" % s"slick-hikaricp_${scalaMajorMinorVersion}" % "3.1.0",
     "mysql" % "mysql-connector-java" % mysqlConnectorVersion,
     "org.postgresql" % "postgresql" % "42.1.4",
     "com.h2database" % "h2" % "1.4.191",

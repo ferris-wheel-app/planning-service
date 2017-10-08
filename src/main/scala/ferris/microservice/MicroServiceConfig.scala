@@ -7,8 +7,8 @@ trait MicroServiceConfigComponent {
 }
 
 class MicroServiceConfig(config: Config) {
-  val port = config.getInt("microservice.bind.port")
-  val address = config.getString("microservice.bind.address")
+  val port = config.getInt("http.port")
+  val interface = config.getString("http.interface")
 }
 
 object MicroServiceConfig extends MicroServiceConfig(ConfigFactory.load())

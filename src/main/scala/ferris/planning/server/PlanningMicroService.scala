@@ -7,6 +7,9 @@ import ferris.microservice.MicroServiceConfig
 import ferris.planning.db.H2TablesComponent
 import ferris.planning.repo.H2PlanningRepositoryComponent
 import ferris.planning.service.DefaultPlanningServiceComponent
+import slick.basic.DatabaseConfig
+import slick.jdbc.MySQLProfile
+import slick.driver.MySQLDriver
 
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent
@@ -21,7 +24,10 @@ object PlanningMicroService extends PlanningServer
   override val logger = Logging(system, getClass)
   override val config = MicroServiceConfig
 
-  override val db = tables.profile.api.Database.forConfig("db")
+  val dbConfig: DatabaseConfig[MySQLProfile] = DatabaseConfig.forConfig("db")
+  override val db = dbConfig.db
+
+  //val db = tables.profile.api.Database.forConfig("db")
 
   startUp()
 }

@@ -23,6 +23,6 @@ trait MicroService extends App with MicroServiceConfigComponent {
   def route: Route
 
   def startUp() = {
-    Http().bindAndHandle(route, config.address, config.port)
+    Http().bindAndHandle(route, config.interface, config.port)
   }
 }
