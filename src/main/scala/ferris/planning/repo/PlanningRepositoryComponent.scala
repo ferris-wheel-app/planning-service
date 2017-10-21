@@ -15,6 +15,7 @@ trait PlanningRepositoryComponent {
   trait PlanningRepository {
     def createMessage(creation: CreateMessage): Future[Message]
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean]
+    def getMessages: Future[Seq[Message]]
     def getMessage(uuid: UUID): Future[Option[Message]]
     def deleteMessage(uuid: UUID): Future[Boolean]
   }
@@ -49,6 +50,11 @@ trait H2PlanningRepositoryComponent extends PlanningRepositoryComponent {
       val query = messageQ(uuid).map(message => (message.sender, message.content))
       val action = query.update(update.sender, update.content)
       db.run(action).map(_ > 0)
+    }
+
+    def getMessages: Future[Seq[Message]] =  {
+      val action = messages.result.map(_.map(_.asMessage))
+      db.run(action)
     }
 
     def getMessage(uuid: UUID): Future[Option[Message]] =  {

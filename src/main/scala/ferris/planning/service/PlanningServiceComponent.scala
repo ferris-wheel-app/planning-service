@@ -16,6 +16,7 @@ trait PlanningServiceComponent {
   trait PlanningService {
     def createMessage(creation: CreateMessage)(implicit ex: ExecutionContext): Future[MessageView]
     def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Boolean]
+    def getMessages(implicit ex: ExecutionContext): Future[Seq[MessageView]]
     def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[MessageView]]
     def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
   }
@@ -33,6 +34,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.updateMessage(uuid, update)
+    }
+
+    def getMessages(implicit ex: ExecutionContext): Future[Seq[MessageView]] = {
+      repo.getMessages.map(_.map(_.toView))
     }
 
     def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[MessageView]] = {

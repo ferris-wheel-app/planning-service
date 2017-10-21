@@ -1,24 +1,32 @@
 package ferris.planning.route
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers
 import akka.stream.Materializer
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import ferris.planning.rest.conversions.ExternalToCommand._
 import ferris.planning.rest.Resources.In._
+import ferris.planning.rest.Resources.Out.MessageView
 import ferris.planning.service.PlanningServiceComponent
 import ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
-import io.circe.generic.auto._
+import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends FailFastCirceSupport {
+trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
+  implicit val messageCreationFormat = jsonFormat2(MessageCreation)
+  implicit val messageUpdateFormat = jsonFormat2(MessageUpdate)
+  implicit val messageViewFormat = jsonFormat2(MessageView)
+}
+
+trait PlanningRoute extends Protocols {
 this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
   implicit val materializer: Materializer
 
+  private val apiPathSegment = "api"
   private val messagesPathSegment = "messages"
 
   private val createMessageRoute = pathPrefix(messagesPathSegment) {
@@ -33,10 +41,23 @@ this: PlanningServiceComponent =>
 
   private val updateMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { messageId =>
     pathEndOrSingleSlash {
-      post {
+      put {
         entity(as[MessageUpdate]) { messageUpdate =>
-          complete(planningService.updateMessage(messageId, messageUpdate.toCommand))
+          val updateMessage = planningService.updateMessage(messageId, messageUpdate.toCommand)
+          onSuccess(updateMessage) {
+            case true => complete(StatusCodes.OK)
+            case false => complete(StatusCodes.BadRequest)
+          }
         }
+      }
+    }
+  }
+
+  private val getMessagesRoute = pathPrefix(messagesPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        val messages = planningService.getMessages
+        complete(messages)
       }
     }
   }
@@ -53,14 +74,20 @@ this: PlanningServiceComponent =>
   private val deleteMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { messageId =>
     pathEndOrSingleSlash {
       delete {
-        val result = planningService.deleteMessage(messageId) map {
-          case true => HttpResponse(status = StatusCodes.OK, entity = "")
-          case false => HttpResponse(status = StatusCodes.NotFound)
+        val deleteMessage = planningService.deleteMessage(messageId)
+        onSuccess(deleteMessage) {
+          case true => complete(StatusCodes.OK)
+          case false => complete(StatusCodes.NotFound)
         }
-        complete(result)
       }
     }
   }
 
-  val planningRoute = createMessageRoute ~ updateMessageRoute ~ getMessageRoute ~ deleteMessageRoute
+  val planningRoute = pathPrefix(apiPathSegment) {
+    createMessageRoute ~
+    updateMessageRoute ~
+    getMessagesRoute ~
+    getMessageRoute ~
+    deleteMessageRoute
+  }
 }
