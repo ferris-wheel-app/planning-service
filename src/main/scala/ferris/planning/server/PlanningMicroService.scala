@@ -4,17 +4,14 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.stream.ActorMaterializer
 import ferris.microservice.MicroServiceConfig
-import ferris.planning.db.H2TablesComponent
-import ferris.planning.repo.H2PlanningRepositoryComponent
+import ferris.planning.db.MySQLTablesComponent
+import ferris.planning.repo.MySQLPlanningRepositoryComponent
 import ferris.planning.service.DefaultPlanningServiceComponent
-import slick.basic.DatabaseConfig
-import slick.jdbc.MySQLProfile
-import slick.driver.MySQLDriver
 
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent
-  with H2PlanningRepositoryComponent
-  with H2TablesComponent {
+  with MySQLPlanningRepositoryComponent
+  with MySQLTablesComponent {
   override implicit lazy val system = ActorSystem()
   override implicit lazy val executor = system.dispatcher
   override implicit lazy val materializer = ActorMaterializer()

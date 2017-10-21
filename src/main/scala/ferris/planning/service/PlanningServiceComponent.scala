@@ -3,7 +3,6 @@ package ferris.planning.service
 import java.util.UUID
 
 import ferris.planning.command.Commands.{CreateMessage, UpdateMessage}
-import ferris.planning.model.Model.Message
 import ferris.planning.repo.PlanningRepositoryComponent
 import ferris.planning.rest.Resources.Out.MessageView
 import ferris.planning.rest.conversions.ModelToView._

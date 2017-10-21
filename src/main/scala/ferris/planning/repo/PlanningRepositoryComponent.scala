@@ -21,7 +21,7 @@ trait PlanningRepositoryComponent {
   }
 }
 
-trait H2PlanningRepositoryComponent extends PlanningRepositoryComponent {
+trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
   this: TablesComponent =>
 
   lazy val tableConversions = new TableConversions(tables)
@@ -30,11 +30,11 @@ trait H2PlanningRepositoryComponent extends PlanningRepositoryComponent {
   import tableConversions._
 
   implicit val repoEc: ExecutionContext
-  override val repo = new H2PlanningRepository
+  override val repo = new MySQLPlanningRepository
   val db: tables.profile.api.Database
 
 
-  class H2PlanningRepository extends PlanningRepository {
+  class MySQLPlanningRepository extends PlanningRepository {
 
     def createMessage(creation: CreateMessage): Future[Message] = {
       val row = MessageRow(
@@ -70,4 +70,3 @@ trait H2PlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def messageQ(uuid: UUID) = messages.filter(_.uuid === uuid.toString)
   }
 }
-
