@@ -3,11 +3,8 @@ package com.ferris.microservice
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import akka.stream.scaladsl.Flow
-import com.typesafe.config.Config
 
 import scala.concurrent.ExecutionContextExecutor
 

@@ -7,10 +7,6 @@ import com.ferris.microservice.MicroServiceConfig
 import com.ferris.planning.db.MySQLTablesComponent
 import com.ferris.planning.repo.MySQLPlanningRepositoryComponent
 import com.ferris.planning.service.DefaultPlanningServiceComponent
-import com.ferris.microservice.MicroServiceConfig
-import com.ferris.planning.db.MySQLTablesComponent
-import com.ferris.planning.repo.MySQLPlanningRepositoryComponent
-import com.ferris.planning.service.DefaultPlanningServiceComponent
 
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent
