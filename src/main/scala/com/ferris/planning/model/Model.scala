@@ -9,7 +9,7 @@ object Model {
   case class Message (uuid: UUID, sender: String, content: String)
 
   case class BacklogItem (
-    id: UUID,
+    uuid: UUID,
     yearId: UUID,
     summary: String,
     description: String,
@@ -17,27 +17,27 @@ object Model {
   )
 
   case class Epoch (
-    id: UUID,
+    uuid: UUID,
     name: String,
     totem: String,
     question: String
   )
 
   case class Year (
-    id: UUID,
+    uuid: UUID,
     epochId: UUID,
     startDate: DateTime,
     finishDate: DateTime
   )
 
   case class Theme (
-    id: UUID,
+    uuid: UUID,
     yearId: UUID,
     name: String
   )
 
   case class Goal (
-    id: UUID,
+    uuid: UUID,
     themeId: UUID,
     backlogItems: Seq[UUID],
     summary: String,
@@ -49,7 +49,7 @@ object Model {
   )
 
   case class Thread (
-    id: UUID,
+    uuid: UUID,
     summary: String,
     description: String,
     goalId: Option[UUID],
@@ -57,7 +57,7 @@ object Model {
   )
 
   case class Weave (
-    id: UUID,
+    uuid: UUID,
     summary: String,
     description: String,
     goalId: Option[UUID],
@@ -66,7 +66,7 @@ object Model {
   )
 
   case class LaserDonut (
-    id: UUID,
+    uuid: UUID,
     summary: String,
     description: String,
     goalId: UUID,
@@ -77,7 +77,7 @@ object Model {
   )
 
   case class Portion (
-    id: UUID,
+    uuid: UUID,
     laserDonutId: UUID,
     summary: String,
     order: Int,
@@ -85,7 +85,7 @@ object Model {
   )
 
   case class Todo (
-    id: UUID,
+    uuid: UUID,
     portionId: UUID,
     description: String,
     order: Int,
@@ -93,7 +93,7 @@ object Model {
   )
 
   case class Hobby (
-    id: UUID,
+    uuid: UUID,
     goalId: Option[UUID],
     summary: String,
     description: String,
