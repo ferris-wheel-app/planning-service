@@ -16,7 +16,9 @@ object CustomizedCodeGenerator{
         "com.ferris.planning.table",
         "Tables",
         "Tables.scala"
-      )),
+      )).recover { case e: Exception =>
+        e.printStackTrace()
+      },
       20.seconds
     )
   }

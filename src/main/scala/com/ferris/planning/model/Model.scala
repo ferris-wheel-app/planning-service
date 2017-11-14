@@ -50,30 +50,30 @@ object Model {
 
   case class Thread (
     uuid: UUID,
+    goalId: Option[UUID],
     summary: String,
     description: String,
-    goalId: Option[UUID],
     status: Statuses.Status
   )
 
   case class Weave (
     uuid: UUID,
+    goalId: Option[UUID],
     summary: String,
     description: String,
-    goalId: Option[UUID],
     status: Statuses.Status,
     `type`: WeaveTypes.WeaveType
   )
 
   case class LaserDonut (
     uuid: UUID,
+    goalId: UUID,
     summary: String,
     description: String,
-    goalId: UUID,
-    status: Statuses.Status,
     milestone: String,
     order: Int,
-    typeOf: DonutTypes.DonutType
+    status: Statuses.Status,
+    `type`: DonutTypes.DonutType
   )
 
   case class Portion (
@@ -97,9 +97,9 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    typeOf: HobbyTypes.HobbyType,
     frequency: HobbyFrequencies.HobbyFrequency,
-    status: Statuses.Status
+    status: Statuses.Status,
+    `type`: HobbyTypes.HobbyType
   )
 
   object BacklogItemTypes {
