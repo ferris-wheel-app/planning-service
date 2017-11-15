@@ -11,7 +11,7 @@ object CustomizedCodeGenerator{
   def main(args: Array[String]): Unit = {
     Await.ready(
       codegen.map(_.writeToFile(
-        "slick.jdbc.H2Profile",
+        "slick.jdbc.MySQLProfile",
         args(0),
         "com.ferris.planning.table",
         "Tables",

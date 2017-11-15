@@ -13,7 +13,7 @@ create table backlog_item (
   year_id VARCHAR(36) NOT NULL,
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  type ENUM('IDEA', 'ISSUE') NOT NULL,
+  type VARCHAR(36) NOT NULL check (type in ('IDEA', 'ISSUE')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -55,8 +55,8 @@ create table goal (
   description VARCHAR(2000) NOT NULL,
   level INT(20) NOT NULL,
   priority TINYINT(1) NOT NULL,
-  status ENUM('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED') NOT NULL,
-  graduation ENUM('ABANDONED', 'THREAD', 'WEAVE', 'HOBBY', 'GOAL') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
+  graduation VARCHAR(36) NOT NULL check (graduation in ('ABANDONED', 'THREAD', 'WEAVE', 'HOBBY', 'GOAL')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -76,7 +76,7 @@ create table thread (
   goal_id VARCHAR(36),
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  status ENUM('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -87,8 +87,8 @@ create table weave (
   goal_id VARCHAR(36),
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  status ENUM('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE') NOT NULL,
-  type ENUM('PRIORITY', 'PDR', 'BAU') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
+  type VARCHAR(36) NOT NULL check (type in ('PRIORITY', 'PDR', 'BAU')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -101,8 +101,8 @@ create table laser_donut (
   description VARCHAR(2000) NOT NULL,
   milestone VARCHAR(256) NOT NULL,
   `order` INT(20) NOT NULL,
-  status ENUM('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE'),
-  type ENUM('PROJECT_FOCUSED', 'SKILL_FOCUSED') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
+  type VARCHAR(36) NOT NULL check (type in ('PROJECT_FOCUSED', 'SKILL_FOCUSED')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -113,7 +113,7 @@ create table portion (
   laser_donut_id VARCHAR(36) NOT NULL,
   summary VARCHAR(256) NOT NULL,
   `order` INT(20) NOT NULL,
-  status ENUM('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -124,7 +124,7 @@ create table todo (
   portion_id VARCHAR(36) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   `order` INT(20) NOT NULL,
-  status ENUM('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE') NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -135,9 +135,9 @@ create table hobby (
   goal_id VARCHAR(36),
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  frequency ENUM('ONE_OFF', 'CONTINUOUS'),
-  status ENUM('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE'),
-  type ENUM('ACTIVE', 'PASSIVE') NOT NULL,
+  frequency VARCHAR(36) NOT NULL check (frequency in ('ONE_OFF', 'CONTINUOUS')),
+  status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
+  type VARCHAR(36) NOT NULL check (type in ('ACTIVE', 'PASSIVE')),
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
