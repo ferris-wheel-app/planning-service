@@ -4,8 +4,6 @@ import java.util.UUID
 
 import com.ferris.planning.command.Commands.{CreateMessage, UpdateMessage}
 import com.ferris.planning.repo.PlanningRepositoryComponent
-import com.ferris.planning.command.Commands.{CreateMessage, UpdateMessage}
-import com.ferris.planning.repo.PlanningRepositoryComponent
 import com.ferris.planning.rest.Resources.Out.MessageView
 import com.ferris.planning.rest.conversions.ModelToView._
 

@@ -102,91 +102,143 @@ object Model {
     `type`: HobbyTypes.HobbyType
   )
 
+  trait DatabaseEnum {
+    def dbValue: String
+  }
+
   object BacklogItemTypes {
 
-    sealed trait BacklogItemType
+    sealed trait BacklogItemType extends DatabaseEnum
 
-    case object Idea extends BacklogItemType
+    case object Idea extends BacklogItemType {
+      override val dbValue = "IDEA"
+    }
 
-    case object Issue extends BacklogItemType
+    case object Issue extends BacklogItemType {
+      override val dbValue = "ISSUE"
+    }
   }
 
   object Statuses {
 
-    sealed trait Status
+    sealed trait Status extends DatabaseEnum
 
-    case object Unknown extends Status
+    case object Unknown extends Status {
+      override val dbValue = "UNKNOWN"
+    }
 
-    case object NotReached extends Status
+    case object NotReached extends Status {
+      override val dbValue = "NOT_REACHED"
+    }
 
-    case object NotStarted extends Status
+    case object NotStarted extends Status {
+      override val dbValue = "NOT_STARTED"
+    }
 
-    case object Incomplete extends Status
+    case object Incomplete extends Status {
+      override val dbValue = "INCOMPLETE"
+    }
 
-    case object Complete extends Status
+    case object Complete extends Status {
+      override val dbValue = "COMPLETE"
+    }
   }
 
   object GoalStatuses {
 
-    sealed trait GoalStatus
+    sealed trait GoalStatus extends DatabaseEnum
 
-    case object NotAchieved extends GoalStatus
+    case object NotAchieved extends GoalStatus {
+      override val dbValue = "NOT_ACHIEVED"
+    }
 
-    case object Employed extends GoalStatus
+    case object Employed extends GoalStatus {
+      override val dbValue = "EMPLOYED"
+    }
 
-    case object Unemployed extends GoalStatus
+    case object Unemployed extends GoalStatus {
+      override val dbValue = "UNEMPLOYED"
+    }
   }
 
   object GraduationTypes {
 
-    sealed trait GraduationType
+    sealed trait GraduationType extends DatabaseEnum
 
-    case object Abandoned extends GraduationType
+    case object Abandoned extends GraduationType {
+      override val dbValue = "ABANDONED"
+    }
 
-    case object Thread extends GraduationType
+    case object Thread extends GraduationType {
+      override val dbValue = "THREAD"
+    }
 
-    case object Weave extends GraduationType
+    case object Weave extends GraduationType {
+      override val dbValue = "WEAVE"
+    }
 
-    case object Hobby extends GraduationType
+    case object Hobby extends GraduationType {
+      override val dbValue = "HOBBY"
+    }
 
-    case object Goal extends GraduationType
+    case object Goal extends GraduationType {
+      override val dbValue = "GOAL"
+    }
   }
 
   object DonutTypes {
 
-    sealed trait DonutType
+    sealed trait DonutType extends DatabaseEnum
 
-    case object ProjectFocused extends DonutType
+    case object ProjectFocused extends DonutType {
+      override val dbValue = "PROJECT_FOCUSED"
+    }
 
-    case object SkillFocused extends DonutType
+    case object SkillFocused extends DonutType {
+      override val dbValue = "SKILL_FOCUSED"
+    }
   }
 
   object WeaveTypes {
 
-    sealed trait WeaveType
+    sealed trait WeaveType extends DatabaseEnum
 
-    case object Priority extends WeaveType
+    case object Priority extends WeaveType {
+      override val dbValue = "PRIORITY"
+    }
 
-    case object PDR extends WeaveType
+    case object PDR extends WeaveType {
+      override val dbValue = "PDR"
+    }
 
-    case object BAU extends WeaveType
+    case object BAU extends WeaveType {
+      override val dbValue = "BAU"
+    }
   }
 
   object HobbyTypes {
 
-    sealed trait HobbyType
+    sealed trait HobbyType extends DatabaseEnum
 
-    case object Active extends HobbyType
+    case object Active extends HobbyType {
+      override val dbValue = "ACTIVE"
+    }
 
-    case object Passive extends HobbyType
+    case object Passive extends HobbyType {
+      override val dbValue = "PASSIVE"
+    }
   }
 
   object HobbyFrequencies {
 
-    sealed trait HobbyFrequency
+    sealed trait HobbyFrequency extends DatabaseEnum
 
-    case object OneOff extends HobbyFrequency
+    case object OneOff extends HobbyFrequency {
+      override val dbValue = "ONE_OFF"
+    }
 
-    case object Continuous extends HobbyFrequency
+    case object Continuous extends HobbyFrequency {
+      override val dbValue = "CONTINUOUS"
+    }
   }
 }

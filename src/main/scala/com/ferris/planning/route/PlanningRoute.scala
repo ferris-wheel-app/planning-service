@@ -14,13 +14,7 @@ import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext
 
-trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val messageCreationFormat = jsonFormat2(MessageCreation)
-  implicit val messageUpdateFormat = jsonFormat2(MessageUpdate)
-  implicit val messageViewFormat = jsonFormat2(MessageView)
-}
-
-trait PlanningRoute extends Protocols {
+trait PlanningRoute extends PlanningJsonProtocol {
 this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
