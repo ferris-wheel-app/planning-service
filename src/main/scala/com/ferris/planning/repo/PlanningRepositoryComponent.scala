@@ -43,31 +43,31 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
         sender = creation.sender,
         content = creation.content
       )
-      val action = (T.Message returning T.Message.map(_.id) into ((message, id) => message.copy(id = id))) += row
+      val action = (T._MessageTable returning T._MessageTable.map(_.id) into ((message, id) => message.copy(id = id))) += row
       db.run(action) map (row => row.asMessage)
     }
 
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean] = {
-      val query = messageQ(uuid).map(message => (message.sender, message.content))
+      val query = messageByUuid(uuid).map(message => (message.sender, message.content))
       val action = query.update(update.sender, update.content)
       db.run(action).map(_ > 0)
     }
 
     def getMessages: Future[Seq[Message]] =  {
-      val action = T.Message.result.map(_.map(_.asMessage))
+      val action = T._MessageTable.result.map(_.map(_.asMessage))
       db.run(action)
     }
 
     def getMessage(uuid: UUID): Future[Option[Message]] =  {
-      val action = messageQ(uuid).result.headOption.map(_.map(_.asMessage))
+      val action = messageByUuid(uuid).result.headOption.map(_.map(_.asMessage))
       db.run(action)
     }
 
     def deleteMessage(uuid: UUID): Future[Boolean] = {
-      val action = messageQ(uuid).delete
+      val action = messageByUuid(uuid).delete
       db.run(action).map(_ > 0)
     }
 
-    private def messageQ(uuid: UUID) = T.Message.filter(_.uuid === uuid.toString)
+    private def messageByUuid(uuid: UUID) = T._MessageTable.filter(_.uuid === uuid.toString)
   }
 }

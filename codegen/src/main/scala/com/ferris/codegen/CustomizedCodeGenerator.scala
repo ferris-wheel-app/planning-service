@@ -1,11 +1,18 @@
 package com.ferris.codegen
 
 import Config._
+import slick.codegen.SourceCodeGenerator
 import slick.jdbc.H2Profile
+import slick.model.Model
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
+
+class CustomizedCodeGenerator(model: Model) extends SourceCodeGenerator(model) {
+  override def tableName =
+    dbTableName => s"_${dbTableName.toCamelCase}Table"
+}
 
 object CustomizedCodeGenerator{
   def main(args: Array[String]): Unit = {
@@ -27,6 +34,6 @@ object CustomizedCodeGenerator{
   val codegen = db.run{
     H2Profile.defaultTables.flatMap( H2Profile.createModelBuilder(_,false).buildModel )
   }.map{ model =>
-    new slick.codegen.SourceCodeGenerator(model)
+    new CustomizedCodeGenerator(model)
   }
 }

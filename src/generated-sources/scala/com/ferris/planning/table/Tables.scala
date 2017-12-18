@@ -14,11 +14,11 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItem.schema, Epoch.schema, Goal.schema, GoalBacklogItem.schema, Hobby.schema, LaserDonut.schema, Message.schema, Portion.schema, Theme.schema, Thread.schema, Todo.schema, Weave.schema, Year.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(_BacklogItemTable.schema, _EpochTable.schema, _GoalBacklogItemTable.schema, _GoalTable.schema, _HobbyTable.schema, _LaserDonutTable.schema, _MessageTable.schema, _PortionTable.schema, _ThemeTable.schema, _ThreadTable.schema, _TodoTable.schema, _WeaveTable.schema, _YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
-  /** Entity class storing rows of table BacklogItem
+  /** Entity class storing rows of table _BacklogItemTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param yearId Database column YEAR_ID SqlType(VARCHAR), Length(36,true)
@@ -33,7 +33,7 @@ trait Tables {
   }
   /** Table description of table BACKLOG_ITEM. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
-  class BacklogItem(_tableTag: Tag) extends profile.api.Table[BacklogItemRow](_tableTag, "BACKLOG_ITEM") {
+  class _BacklogItemTable(_tableTag: Tag) extends profile.api.Table[BacklogItemRow](_tableTag, "BACKLOG_ITEM") {
     def * = (id, uuid, yearId, summary, description, `type`) <> (BacklogItemRow.tupled, BacklogItemRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(yearId), Rep.Some(summary), Rep.Some(description), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> BacklogItemRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -55,10 +55,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_D) */
     val index1 = index("CONSTRAINT_INDEX_D", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table BacklogItem */
-  lazy val BacklogItem = new TableQuery(tag => new BacklogItem(tag))
+  /** Collection-like TableQuery object for table _BacklogItemTable */
+  lazy val _BacklogItemTable = new TableQuery(tag => new _BacklogItemTable(tag))
 
-  /** Entity class storing rows of table Epoch
+  /** Entity class storing rows of table _EpochTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
@@ -71,7 +71,7 @@ trait Tables {
     EpochRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String]))
   }
   /** Table description of table EPOCH. Objects of this class serve as prototypes for rows in queries. */
-  class Epoch(_tableTag: Tag) extends profile.api.Table[EpochRow](_tableTag, "EPOCH") {
+  class _EpochTable(_tableTag: Tag) extends profile.api.Table[EpochRow](_tableTag, "EPOCH") {
     def * = (id, uuid, name, totem, question) <> (EpochRow.tupled, EpochRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(totem), Rep.Some(question)).shaped.<>({r=>import r._; _1.map(_=> EpochRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -90,10 +90,41 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_3) */
     val index1 = index("CONSTRAINT_INDEX_3", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Epoch */
-  lazy val Epoch = new TableQuery(tag => new Epoch(tag))
+  /** Collection-like TableQuery object for table _EpochTable */
+  lazy val _EpochTable = new TableQuery(tag => new _EpochTable(tag))
 
-  /** Entity class storing rows of table Goal
+  /** Entity class storing rows of table _GoalBacklogItemTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param goalId Database column GOAL_ID SqlType(BIGINT)
+   *  @param backlogItemId Database column BACKLOG_ITEM_ID SqlType(BIGINT) */
+  case class GoalBacklogItemRow(id: Long, goalId: Long, backlogItemId: Long)
+  /** GetResult implicit for fetching GoalBacklogItemRow objects using plain SQL queries */
+  implicit def GetResultGoalBacklogItemRow(implicit e0: GR[Long]): GR[GoalBacklogItemRow] = GR{
+    prs => import prs._
+    GoalBacklogItemRow.tupled((<<[Long], <<[Long], <<[Long]))
+  }
+  /** Table description of table GOAL_BACKLOG_ITEM. Objects of this class serve as prototypes for rows in queries. */
+  class _GoalBacklogItemTable(_tableTag: Tag) extends profile.api.Table[GoalBacklogItemRow](_tableTag, "GOAL_BACKLOG_ITEM") {
+    def * = (id, goalId, backlogItemId) <> (GoalBacklogItemRow.tupled, GoalBacklogItemRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(goalId), Rep.Some(backlogItemId)).shaped.<>({r=>import r._; _1.map(_=> GoalBacklogItemRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column GOAL_ID SqlType(BIGINT) */
+    val goalId: Rep[Long] = column[Long]("GOAL_ID")
+    /** Database column BACKLOG_ITEM_ID SqlType(BIGINT) */
+    val backlogItemId: Rep[Long] = column[Long]("BACKLOG_ITEM_ID")
+
+    /** Foreign key referencing _BacklogItemTable (database name BACKLOG_ITEM_FK) */
+    lazy val _BacklogItemTableFk = foreignKey("BACKLOG_ITEM_FK", backlogItemId, _BacklogItemTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing _GoalTable (database name GOAL_FK) */
+    lazy val _GoalTableFk = foreignKey("GOAL_FK", goalId, _GoalTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+  }
+  /** Collection-like TableQuery object for table _GoalBacklogItemTable */
+  lazy val _GoalBacklogItemTable = new TableQuery(tag => new _GoalBacklogItemTable(tag))
+
+  /** Entity class storing rows of table _GoalTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param themeId Database column THEME_ID SqlType(VARCHAR), Length(36,true)
@@ -110,7 +141,7 @@ trait Tables {
     GoalRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[Byte], <<[String], <<[String]))
   }
   /** Table description of table GOAL. Objects of this class serve as prototypes for rows in queries. */
-  class Goal(_tableTag: Tag) extends profile.api.Table[GoalRow](_tableTag, "GOAL") {
+  class _GoalTable(_tableTag: Tag) extends profile.api.Table[GoalRow](_tableTag, "GOAL") {
     def * = (id, uuid, themeId, summary, description, level, priority, status, graduation) <> (GoalRow.tupled, GoalRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(themeId), Rep.Some(summary), Rep.Some(description), Rep.Some(level), Rep.Some(priority), Rep.Some(status), Rep.Some(graduation)).shaped.<>({r=>import r._; _1.map(_=> GoalRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -137,41 +168,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_21) */
     val index1 = index("CONSTRAINT_INDEX_21", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Goal */
-  lazy val Goal = new TableQuery(tag => new Goal(tag))
+  /** Collection-like TableQuery object for table _GoalTable */
+  lazy val _GoalTable = new TableQuery(tag => new _GoalTable(tag))
 
-  /** Entity class storing rows of table GoalBacklogItem
-   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param goalId Database column GOAL_ID SqlType(BIGINT)
-   *  @param backlogItemId Database column BACKLOG_ITEM_ID SqlType(BIGINT) */
-  case class GoalBacklogItemRow(id: Long, goalId: Long, backlogItemId: Long)
-  /** GetResult implicit for fetching GoalBacklogItemRow objects using plain SQL queries */
-  implicit def GetResultGoalBacklogItemRow(implicit e0: GR[Long]): GR[GoalBacklogItemRow] = GR{
-    prs => import prs._
-    GoalBacklogItemRow.tupled((<<[Long], <<[Long], <<[Long]))
-  }
-  /** Table description of table GOAL_BACKLOG_ITEM. Objects of this class serve as prototypes for rows in queries. */
-  class GoalBacklogItem(_tableTag: Tag) extends profile.api.Table[GoalBacklogItemRow](_tableTag, "GOAL_BACKLOG_ITEM") {
-    def * = (id, goalId, backlogItemId) <> (GoalBacklogItemRow.tupled, GoalBacklogItemRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(goalId), Rep.Some(backlogItemId)).shaped.<>({r=>import r._; _1.map(_=> GoalBacklogItemRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-
-    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
-    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
-    /** Database column GOAL_ID SqlType(BIGINT) */
-    val goalId: Rep[Long] = column[Long]("GOAL_ID")
-    /** Database column BACKLOG_ITEM_ID SqlType(BIGINT) */
-    val backlogItemId: Rep[Long] = column[Long]("BACKLOG_ITEM_ID")
-
-    /** Foreign key referencing BacklogItem (database name BACKLOG_ITEM_FK) */
-    lazy val backlogItemFk = foreignKey("BACKLOG_ITEM_FK", backlogItemId, BacklogItem)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing Goal (database name GOAL_FK) */
-    lazy val goalFk = foreignKey("GOAL_FK", goalId, Goal)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-  }
-  /** Collection-like TableQuery object for table GoalBacklogItem */
-  lazy val GoalBacklogItem = new TableQuery(tag => new GoalBacklogItem(tag))
-
-  /** Entity class storing rows of table Hobby
+  /** Entity class storing rows of table _HobbyTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
@@ -188,7 +188,7 @@ trait Tables {
   }
   /** Table description of table HOBBY. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
-  class Hobby(_tableTag: Tag) extends profile.api.Table[HobbyRow](_tableTag, "HOBBY") {
+  class _HobbyTable(_tableTag: Tag) extends profile.api.Table[HobbyRow](_tableTag, "HOBBY") {
     def * = (id, uuid, goalId, summary, description, frequency, status, `type`) <> (HobbyRow.tupled, HobbyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(frequency), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> HobbyRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -214,10 +214,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_41) */
     val index1 = index("CONSTRAINT_INDEX_41", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Hobby */
-  lazy val Hobby = new TableQuery(tag => new Hobby(tag))
+  /** Collection-like TableQuery object for table _HobbyTable */
+  lazy val _HobbyTable = new TableQuery(tag => new _HobbyTable(tag))
 
-  /** Entity class storing rows of table LaserDonut
+  /** Entity class storing rows of table _LaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
@@ -235,7 +235,7 @@ trait Tables {
   }
   /** Table description of table LASER_DONUT. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
-  class LaserDonut(_tableTag: Tag) extends profile.api.Table[LaserDonutRow](_tableTag, "LASER_DONUT") {
+  class _LaserDonutTable(_tableTag: Tag) extends profile.api.Table[LaserDonutRow](_tableTag, "LASER_DONUT") {
     def * = (id, uuid, goalId, summary, description, milestone, order, status, `type`) <> (LaserDonutRow.tupled, LaserDonutRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(milestone), Rep.Some(order), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -263,10 +263,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_E) */
     val index1 = index("CONSTRAINT_INDEX_E", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table LaserDonut */
-  lazy val LaserDonut = new TableQuery(tag => new LaserDonut(tag))
+  /** Collection-like TableQuery object for table _LaserDonutTable */
+  lazy val _LaserDonutTable = new TableQuery(tag => new _LaserDonutTable(tag))
 
-  /** Entity class storing rows of table Message
+  /** Entity class storing rows of table _MessageTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param sender Database column SENDER SqlType(VARCHAR), Length(256,true)
@@ -278,7 +278,7 @@ trait Tables {
     MessageRow.tupled((<<[Long], <<[String], <<[String], <<[String]))
   }
   /** Table description of table MESSAGE. Objects of this class serve as prototypes for rows in queries. */
-  class Message(_tableTag: Tag) extends profile.api.Table[MessageRow](_tableTag, "MESSAGE") {
+  class _MessageTable(_tableTag: Tag) extends profile.api.Table[MessageRow](_tableTag, "MESSAGE") {
     def * = (id, uuid, sender, content) <> (MessageRow.tupled, MessageRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(sender), Rep.Some(content)).shaped.<>({r=>import r._; _1.map(_=> MessageRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -295,10 +295,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_6) */
     val index1 = index("CONSTRAINT_INDEX_6", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Message */
-  lazy val Message = new TableQuery(tag => new Message(tag))
+  /** Collection-like TableQuery object for table _MessageTable */
+  lazy val _MessageTable = new TableQuery(tag => new _MessageTable(tag))
 
-  /** Entity class storing rows of table Portion
+  /** Entity class storing rows of table _PortionTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(VARCHAR), Length(36,true)
@@ -312,7 +312,7 @@ trait Tables {
     PortionRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String]))
   }
   /** Table description of table PORTION. Objects of this class serve as prototypes for rows in queries. */
-  class Portion(_tableTag: Tag) extends profile.api.Table[PortionRow](_tableTag, "PORTION") {
+  class _PortionTable(_tableTag: Tag) extends profile.api.Table[PortionRow](_tableTag, "PORTION") {
     def * = (id, uuid, laserDonutId, summary, order, status) <> (PortionRow.tupled, PortionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(laserDonutId), Rep.Some(summary), Rep.Some(order), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> PortionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -333,10 +333,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_1) */
     val index1 = index("CONSTRAINT_INDEX_1", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Portion */
-  lazy val Portion = new TableQuery(tag => new Portion(tag))
+  /** Collection-like TableQuery object for table _PortionTable */
+  lazy val _PortionTable = new TableQuery(tag => new _PortionTable(tag))
 
-  /** Entity class storing rows of table Theme
+  /** Entity class storing rows of table _ThemeTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param yearId Database column YEAR_ID SqlType(VARCHAR), Length(36,true)
@@ -348,7 +348,7 @@ trait Tables {
     ThemeRow.tupled((<<[Long], <<[String], <<[String], <<[String]))
   }
   /** Table description of table THEME. Objects of this class serve as prototypes for rows in queries. */
-  class Theme(_tableTag: Tag) extends profile.api.Table[ThemeRow](_tableTag, "THEME") {
+  class _ThemeTable(_tableTag: Tag) extends profile.api.Table[ThemeRow](_tableTag, "THEME") {
     def * = (id, uuid, yearId, name) <> (ThemeRow.tupled, ThemeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(yearId), Rep.Some(name)).shaped.<>({r=>import r._; _1.map(_=> ThemeRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -365,10 +365,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4) */
     val index1 = index("CONSTRAINT_INDEX_4", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Theme */
-  lazy val Theme = new TableQuery(tag => new Theme(tag))
+  /** Collection-like TableQuery object for table _ThemeTable */
+  lazy val _ThemeTable = new TableQuery(tag => new _ThemeTable(tag))
 
-  /** Entity class storing rows of table Thread
+  /** Entity class storing rows of table _ThreadTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
@@ -382,7 +382,7 @@ trait Tables {
     ThreadRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String]))
   }
   /** Table description of table THREAD. Objects of this class serve as prototypes for rows in queries. */
-  class Thread(_tableTag: Tag) extends profile.api.Table[ThreadRow](_tableTag, "THREAD") {
+  class _ThreadTable(_tableTag: Tag) extends profile.api.Table[ThreadRow](_tableTag, "THREAD") {
     def * = (id, uuid, goalId, summary, description, status) <> (ThreadRow.tupled, ThreadRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> ThreadRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -403,10 +403,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_9) */
     val index1 = index("CONSTRAINT_INDEX_9", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Thread */
-  lazy val Thread = new TableQuery(tag => new Thread(tag))
+  /** Collection-like TableQuery object for table _ThreadTable */
+  lazy val _ThreadTable = new TableQuery(tag => new _ThreadTable(tag))
 
-  /** Entity class storing rows of table Todo
+  /** Entity class storing rows of table _TodoTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param portionId Database column PORTION_ID SqlType(VARCHAR), Length(36,true)
@@ -420,7 +420,7 @@ trait Tables {
     TodoRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String]))
   }
   /** Table description of table TODO. Objects of this class serve as prototypes for rows in queries. */
-  class Todo(_tableTag: Tag) extends profile.api.Table[TodoRow](_tableTag, "TODO") {
+  class _TodoTable(_tableTag: Tag) extends profile.api.Table[TodoRow](_tableTag, "TODO") {
     def * = (id, uuid, portionId, description, order, status) <> (TodoRow.tupled, TodoRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -441,10 +441,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_27) */
     val index1 = index("CONSTRAINT_INDEX_27", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Todo */
-  lazy val Todo = new TableQuery(tag => new Todo(tag))
+  /** Collection-like TableQuery object for table _TodoTable */
+  lazy val _TodoTable = new TableQuery(tag => new _TodoTable(tag))
 
-  /** Entity class storing rows of table Weave
+  /** Entity class storing rows of table _WeaveTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
@@ -460,7 +460,7 @@ trait Tables {
   }
   /** Table description of table WEAVE. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
-  class Weave(_tableTag: Tag) extends profile.api.Table[WeaveRow](_tableTag, "WEAVE") {
+  class _WeaveTable(_tableTag: Tag) extends profile.api.Table[WeaveRow](_tableTag, "WEAVE") {
     def * = (id, uuid, goalId, summary, description, status, `type`) <> (WeaveRow.tupled, WeaveRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> WeaveRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -484,10 +484,10 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4E) */
     val index1 = index("CONSTRAINT_INDEX_4E", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Weave */
-  lazy val Weave = new TableQuery(tag => new Weave(tag))
+  /** Collection-like TableQuery object for table _WeaveTable */
+  lazy val _WeaveTable = new TableQuery(tag => new _WeaveTable(tag))
 
-  /** Entity class storing rows of table Year
+  /** Entity class storing rows of table _YearTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param epochId Database column EPOCH_ID SqlType(VARCHAR), Length(36,true)
@@ -500,7 +500,7 @@ trait Tables {
     YearRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[java.sql.Date]))
   }
   /** Table description of table YEAR. Objects of this class serve as prototypes for rows in queries. */
-  class Year(_tableTag: Tag) extends profile.api.Table[YearRow](_tableTag, "YEAR") {
+  class _YearTable(_tableTag: Tag) extends profile.api.Table[YearRow](_tableTag, "YEAR") {
     def * = (id, uuid, epochId, startDate, finishDate) <> (YearRow.tupled, YearRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(epochId), Rep.Some(startDate), Rep.Some(finishDate)).shaped.<>({r=>import r._; _1.map(_=> YearRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -519,6 +519,6 @@ trait Tables {
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_2) */
     val index1 = index("CONSTRAINT_INDEX_2", uuid, unique=true)
   }
-  /** Collection-like TableQuery object for table Year */
-  lazy val Year = new TableQuery(tag => new Year(tag))
+  /** Collection-like TableQuery object for table _YearTable */
+  lazy val _YearTable = new TableQuery(tag => new _YearTable(tag))
 }
