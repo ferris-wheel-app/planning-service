@@ -21,29 +21,26 @@ trait Tables {
   /** Entity class storing rows of table _BacklogItemTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
-   *  @param yearId Database column YEAR_ID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class BacklogItemRow(id: Long, uuid: String, yearId: String, summary: String, description: String, `type`: String)
+  case class BacklogItemRow(id: Long, uuid: String, summary: String, description: String, `type`: String)
   /** GetResult implicit for fetching BacklogItemRow objects using plain SQL queries */
   implicit def GetResultBacklogItemRow(implicit e0: GR[Long], e1: GR[String]): GR[BacklogItemRow] = GR{
     prs => import prs._
-    BacklogItemRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String]))
+    BacklogItemRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String]))
   }
   /** Table description of table BACKLOG_ITEM. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class _BacklogItemTable(_tableTag: Tag) extends profile.api.Table[BacklogItemRow](_tableTag, "BACKLOG_ITEM") {
-    def * = (id, uuid, yearId, summary, description, `type`) <> (BacklogItemRow.tupled, BacklogItemRow.unapply)
+    def * = (id, uuid, summary, description, `type`) <> (BacklogItemRow.tupled, BacklogItemRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(yearId), Rep.Some(summary), Rep.Some(description), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> BacklogItemRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(summary), Rep.Some(description), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> BacklogItemRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
     /** Database column UUID SqlType(VARCHAR), Length(36,true) */
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
-    /** Database column YEAR_ID SqlType(VARCHAR), Length(36,true) */
-    val yearId: Rep[String] = column[String]("YEAR_ID", O.Length(36,varying=true))
     /** Database column SUMMARY SqlType(VARCHAR), Length(256,true) */
     val summary: Rep[String] = column[String]("SUMMARY", O.Length(256,varying=true))
     /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */

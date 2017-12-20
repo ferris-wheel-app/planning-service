@@ -6,6 +6,7 @@ import com.ferris.planning.command.Commands.{CreateMessage, UpdateMessage}
 import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
+import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,6 +41,8 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     def createMessage(creation: CreateMessage): Future[Message] = {
       db.run(createMessageAction(creation)) map (row => row.asMessage)
     }
+
+    def create
 
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean] = {
       db.run(updateMessageAction(uuid, update)).map(_ > 0)
@@ -77,7 +80,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
       getMessageAction(uuid).flatMap { maybeMessage =>
         maybeMessage map { old =>
           query.update(update.sender.getOrElse(old.sender), update.content.getOrElse(old.content))
-        } getOrElse DBIO.failed(new Exception("Message not found."))
+        } getOrElse DBIO.failed(MessageNotFoundException())
       }
     }
 

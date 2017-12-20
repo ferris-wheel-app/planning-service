@@ -10,7 +10,6 @@ object Model {
 
   case class BacklogItem (
     uuid: UUID,
-    yearId: UUID,
     summary: String,
     description: String,
     `type`: BacklogItemTypes.BacklogItemType

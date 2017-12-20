@@ -13,4 +13,10 @@ object Commands {
     description: String,
     `type`: BacklogItemTypes.BacklogItemType
   )
+
+  case class UpdateBacklogItem (
+    summary: Option[String],
+    description: Option[String],
+    `type`: Option[BacklogItemTypes.BacklogItemType]
+  )
 }

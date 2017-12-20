@@ -10,7 +10,6 @@ create table message (
 create table backlog_item (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
-  year_id VARCHAR(36) NOT NULL,
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   type VARCHAR(36) NOT NULL check (type in ('IDEA', 'ISSUE')),
