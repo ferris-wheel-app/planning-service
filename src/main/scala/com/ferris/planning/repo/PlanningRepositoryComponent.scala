@@ -36,38 +36,58 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
   class MySQLPlanningRepository extends PlanningRepository {
 
+    // Endpoints
     def createMessage(creation: CreateMessage): Future[Message] = {
+      db.run(createMessageAction(creation)) map (row => row.asMessage)
+    }
+
+    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean] = {
+      db.run(updateMessageAction(uuid, update)).map(_ > 0)
+    }
+
+    def getMessages: Future[Seq[Message]] = {
+      db.run(getMessagesAction.map(_.map(_.asMessage)))
+    }
+
+    def getMessage(uuid: UUID): Future[Option[Message]] =  {
+      db.run(getMessageAction(uuid).map(_.map(_.asMessage)))
+    }
+
+    def deleteMessage(uuid: UUID): Future[Boolean] = {
+      db.run(deleteMessageAction(uuid)).map(_ > 0)
+    }
+
+    // Actions
+    private def createMessageAction(creation: CreateMessage) = {
       val row = T.MessageRow(
         id = 0L,
         uuid = UUID.randomUUID().toString,
         sender = creation.sender,
         content = creation.content
       )
-      val action = (T._MessageTable returning T._MessageTable.map(_.id) into ((message, id) => message.copy(id = id))) += row
-      db.run(action) map (row => row.asMessage)
+      insertMessageAction(row)
     }
 
-    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean] = {
+    private def insertMessageAction(row: T.MessageRow) = {
+      (T._MessageTable returning T._MessageTable.map(_.id) into ((message, id) => message.copy(id = id))) += row
+    }
+
+    private def updateMessageAction(uuid: UUID, update: UpdateMessage) = {
       val query = messageByUuid(uuid).map(message => (message.sender, message.content))
-      val action = query.update(update.sender, update.content)
-      db.run(action).map(_ > 0)
+      getMessageAction(uuid).flatMap { maybeMessage =>
+        maybeMessage map { old =>
+          query.update(update.sender.getOrElse(old.sender), update.content.getOrElse(old.content))
+        } getOrElse DBIO.failed(new Exception("Message not found."))
+      }
     }
 
-    def getMessages: Future[Seq[Message]] =  {
-      val action = T._MessageTable.result.map(_.map(_.asMessage))
-      db.run(action)
-    }
+    private def getMessagesAction = T._MessageTable.result
 
-    def getMessage(uuid: UUID): Future[Option[Message]] =  {
-      val action = messageByUuid(uuid).result.headOption.map(_.map(_.asMessage))
-      db.run(action)
-    }
+    private def getMessageAction(uuid: UUID) = messageByUuid(uuid).result.headOption
 
-    def deleteMessage(uuid: UUID): Future[Boolean] = {
-      val action = messageByUuid(uuid).delete
-      db.run(action).map(_ > 0)
-    }
+    private def deleteMessageAction(uuid: UUID) = messageByUuid(uuid).delete
 
+    // Queries
     private def messageByUuid(uuid: UUID) = T._MessageTable.filter(_.uuid === uuid.toString)
   }
 }
