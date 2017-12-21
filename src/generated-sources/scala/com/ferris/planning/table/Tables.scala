@@ -224,25 +224,25 @@ trait Tables {
    *  @param order Database column ORDER SqlType(INTEGER)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
    *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class LaserDonutRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, milestone: String, order: Int, status: String, `type`: String)
+  case class LaserDonutRow(id: Long, uuid: String, goalId: String, summary: String, description: String, milestone: String, order: Int, status: String, `type`: String)
   /** GetResult implicit for fetching LaserDonutRow objects using plain SQL queries */
-  implicit def GetResultLaserDonutRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[Int]): GR[LaserDonutRow] = GR{
+  implicit def GetResultLaserDonutRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int]): GR[LaserDonutRow] = GR{
     prs => import prs._
-    LaserDonutRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[String]))
+    LaserDonutRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[String]))
   }
   /** Table description of table LASER_DONUT. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class LaserDonutTable(_tableTag: Tag) extends profile.api.Table[LaserDonutRow](_tableTag, "LASER_DONUT") {
     def * = (id, uuid, goalId, summary, description, milestone, order, status, `type`) <> (LaserDonutRow.tupled, LaserDonutRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(milestone), Rep.Some(order), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(goalId), Rep.Some(summary), Rep.Some(description), Rep.Some(milestone), Rep.Some(order), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
     /** Database column UUID SqlType(VARCHAR), Length(36,true) */
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
     /** Database column GOAL_ID SqlType(VARCHAR), Length(36,true) */
-    val goalId: Rep[Option[String]] = column[Option[String]]("GOAL_ID", O.Length(36,varying=true))
+    val goalId: Rep[String] = column[String]("GOAL_ID", O.Length(36,varying=true))
     /** Database column SUMMARY SqlType(VARCHAR), Length(256,true) */
     val summary: Rep[String] = column[String]("SUMMARY", O.Length(256,varying=true))
     /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */

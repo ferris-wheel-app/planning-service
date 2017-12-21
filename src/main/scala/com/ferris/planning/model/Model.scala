@@ -107,6 +107,11 @@ object Model {
 
   object BacklogItemTypes {
 
+    def withName(name: String): BacklogItemType = name match {
+      case Idea.dbValue => Idea
+      case Issue.dbValue => Issue
+    }
+
     sealed trait BacklogItemType extends TypeEnum
 
     case object Idea extends BacklogItemType {
@@ -119,6 +124,14 @@ object Model {
   }
 
   object Statuses {
+
+    def withName(name: String): Status = name match {
+      case Unknown.dbValue => Unknown
+      case NotReached.dbValue => NotReached
+      case NotStarted.dbValue => NotStarted
+      case Incomplete.dbValue => Incomplete
+      case Complete.dbValue => Complete
+    }
 
     sealed trait Status extends TypeEnum
 
@@ -145,6 +158,12 @@ object Model {
 
   object GoalStatuses {
 
+    def withName(name: String): GoalStatus = name match {
+      case NotAchieved.dbValue => NotAchieved
+      case Employed.dbValue => Employed
+      case Unemployed.dbValue => Unemployed
+    }
+
     sealed trait GoalStatus extends TypeEnum
 
     case object NotAchieved extends GoalStatus {
@@ -161,6 +180,14 @@ object Model {
   }
 
   object GraduationTypes {
+
+    def withName(name: String): GraduationType = name match {
+      case Abandoned.dbValue => Abandoned
+      case Thread.dbValue => Thread
+      case Weave.dbValue => Weave
+      case Hobby.dbValue => Hobby
+      case Goal.dbValue => Goal
+    }
 
     sealed trait GraduationType extends TypeEnum
 
@@ -187,6 +214,11 @@ object Model {
 
   object DonutTypes {
 
+    def withName(name: String): DonutType = name match {
+      case ProjectFocused.dbValue => ProjectFocused
+      case SkillFocused.dbValue => SkillFocused
+    }
+
     sealed trait DonutType extends TypeEnum
 
     case object ProjectFocused extends DonutType {
@@ -199,6 +231,12 @@ object Model {
   }
 
   object WeaveTypes {
+
+    def withName(name: String): WeaveType = name match {
+      case Priority.dbValue => Priority
+      case PDR.dbValue => PDR
+      case BAU.dbValue => BAU
+    }
 
     sealed trait WeaveType extends TypeEnum
 
@@ -217,6 +255,11 @@ object Model {
 
   object HobbyTypes {
 
+    def withName(name: String): HobbyType = name match {
+      case Active.dbValue => Active
+      case Passive.dbValue => Passive
+    }
+
     sealed trait HobbyType extends TypeEnum
 
     case object Active extends HobbyType {
@@ -229,6 +272,11 @@ object Model {
   }
 
   object HobbyFrequencies {
+
+    def withName(name: String): HobbyFrequency = name match {
+      case OneOff.dbValue => OneOff
+      case Continuous.dbValue => Continuous
+    }
 
     sealed trait HobbyFrequency extends TypeEnum
 

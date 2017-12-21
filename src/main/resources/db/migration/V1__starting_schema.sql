@@ -95,7 +95,7 @@ create table weave (
 create table laser_donut (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
-  goal_id VARCHAR(36),
+  goal_id VARCHAR(36) NOT NULL,
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   milestone VARCHAR(256) NOT NULL,
