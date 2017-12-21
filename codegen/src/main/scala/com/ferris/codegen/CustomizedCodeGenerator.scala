@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 
 class CustomizedCodeGenerator(model: Model) extends SourceCodeGenerator(model) {
   override def tableName =
-    dbTableName => s"_${dbTableName.toCamelCase}Table"
+    dbTableName => s"${dbTableName.toCamelCase}Table"
 }
 
 object CustomizedCodeGenerator{

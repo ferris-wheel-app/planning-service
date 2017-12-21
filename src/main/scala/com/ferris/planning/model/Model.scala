@@ -101,13 +101,13 @@ object Model {
     `type`: HobbyTypes.HobbyType
   )
 
-  trait DatabaseEnum {
+  trait TypeEnum {
     def dbValue: String
   }
 
   object BacklogItemTypes {
 
-    sealed trait BacklogItemType extends DatabaseEnum
+    sealed trait BacklogItemType extends TypeEnum
 
     case object Idea extends BacklogItemType {
       override val dbValue = "IDEA"
@@ -120,7 +120,7 @@ object Model {
 
   object Statuses {
 
-    sealed trait Status extends DatabaseEnum
+    sealed trait Status extends TypeEnum
 
     case object Unknown extends Status {
       override val dbValue = "UNKNOWN"
@@ -145,7 +145,7 @@ object Model {
 
   object GoalStatuses {
 
-    sealed trait GoalStatus extends DatabaseEnum
+    sealed trait GoalStatus extends TypeEnum
 
     case object NotAchieved extends GoalStatus {
       override val dbValue = "NOT_ACHIEVED"
@@ -162,7 +162,7 @@ object Model {
 
   object GraduationTypes {
 
-    sealed trait GraduationType extends DatabaseEnum
+    sealed trait GraduationType extends TypeEnum
 
     case object Abandoned extends GraduationType {
       override val dbValue = "ABANDONED"
@@ -187,7 +187,7 @@ object Model {
 
   object DonutTypes {
 
-    sealed trait DonutType extends DatabaseEnum
+    sealed trait DonutType extends TypeEnum
 
     case object ProjectFocused extends DonutType {
       override val dbValue = "PROJECT_FOCUSED"
@@ -200,7 +200,7 @@ object Model {
 
   object WeaveTypes {
 
-    sealed trait WeaveType extends DatabaseEnum
+    sealed trait WeaveType extends TypeEnum
 
     case object Priority extends WeaveType {
       override val dbValue = "PRIORITY"
@@ -217,7 +217,7 @@ object Model {
 
   object HobbyTypes {
 
-    sealed trait HobbyType extends DatabaseEnum
+    sealed trait HobbyType extends TypeEnum
 
     case object Active extends HobbyType {
       override val dbValue = "ACTIVE"
@@ -230,7 +230,7 @@ object Model {
 
   object HobbyFrequencies {
 
-    sealed trait HobbyFrequency extends DatabaseEnum
+    sealed trait HobbyFrequency extends TypeEnum
 
     case object OneOff extends HobbyFrequency {
       override val dbValue = "ONE_OFF"
