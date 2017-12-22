@@ -15,6 +15,15 @@ object ExternalToCommand {
     }
   }
 
+  implicit class MessageUpdateConversion(message: MessageUpdate) {
+    def toCommand: UpdateMessage = {
+      UpdateMessage(
+        sender = message.sender,
+        content = message.content
+      )
+    }
+  }
+
   implicit class BacklogItemCreationConversion(backlogItem: BacklogItemCreation) {
     def toCommand: CreateBacklogItem = {
       CreateBacklogItem(
@@ -25,11 +34,12 @@ object ExternalToCommand {
     }
   }
 
-  implicit class MessageUpdateConversion(message: MessageUpdate) {
-    def toCommand: UpdateMessage = {
-      UpdateMessage(
-        sender = message.sender,
-        content = message.content
+  implicit class BacklogItemUpdateConversion(backlogItem: BacklogItemUpdate) {
+    def toCommand: UpdateBacklogItem = {
+      UpdateBacklogItem(
+        summary = backlogItem.summary,
+        description = backlogItem.description,
+        `type` = TypeFields.BacklogItemType.withName(backlogItem.backlogItemType)
       )
     }
   }
