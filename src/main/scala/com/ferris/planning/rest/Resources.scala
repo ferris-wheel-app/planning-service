@@ -57,6 +57,88 @@ object Resources {
       description: Option[String],
       status: Option[String]
     )
+
+    case class WeaveCreation (
+      goalId: Option[UUID],
+      summary: String,
+      description: String,
+      status: String,
+      `type`: String
+    )
+
+    case class WeaveUpdate (
+      goalId: Option[UUID],
+      summary: Option[String],
+      description: Option[String],
+      status: Option[String],
+      `type`: Option[String]
+    )
+
+    case class LaserDonutCreation (
+      goalId: UUID,
+      summary: String,
+      description: String,
+      milestone: String,
+      order: Int,
+      status: String,
+      `type`: String
+    )
+
+    case class LaserDonutUpdate (
+      goalId: Option[UUID],
+      summary: Option[String],
+      description: Option[String],
+      milestone: Option[String],
+      order: Option[Int],
+      status: Option[String],
+      `type`: Option[String]
+    )
+
+    case class PortionCreation (
+      laserDonutId: UUID,
+      summary: String,
+      order: Int,
+      status: String
+    )
+
+    case class PortionUpdate (
+      laserDonutId: Option[UUID],
+      summary: Option[String],
+      order: Option[Int],
+      status: Option[String]
+    )
+
+    case class TodoCreation (
+      portionId: UUID,
+      description: String,
+      order: Int,
+      status: String
+    )
+
+    case class TodoUpdate (
+      portionId: Option[UUID],
+      description: Option[String],
+      order: Option[Int],
+      status: Option[String]
+    )
+
+    case class HobbyCreation (
+      goalId: Option[UUID],
+      summary: String,
+      description: String,
+      frequency: String,
+      status: String,
+      `type`: String
+    )
+
+    case class HobbyUpdate (
+      goalId: Option[UUID],
+      summary: Option[String],
+      description: Option[String],
+      frequency: Option[String],
+      status: Option[String],
+      `type`: Option[String]
+    )
   }
 
   object Out {

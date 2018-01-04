@@ -135,5 +135,5 @@ class TableConversions(val tables: Tables) {
 
   implicit def sqlDate2DateTime(date: java.sql.Date): DateTime = DateTime.apply(date.getTime)
 
-  implicit def byte2Boolean(byte: Byte): Boolean = if (byte == 1) true else false
+  implicit def byte2Boolean(byte: Byte): Boolean = byte == 1
 }
