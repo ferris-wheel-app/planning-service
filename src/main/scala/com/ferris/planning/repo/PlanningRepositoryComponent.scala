@@ -6,7 +6,7 @@ import com.ferris.planning.command.Commands._
 import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
-import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
+import com.ferris.planning.service.exceptions.Exceptions._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,10 +16,69 @@ trait PlanningRepositoryComponent {
 
   trait PlanningRepository {
     def createMessage(creation: CreateMessage): Future[Message]
+    def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem]
+    def createEpoch(creation: CreateEpoch): Future[Epoch]
+    def createYear(creation: CreateYear): Future[Year]
+    def createTheme(creation: CreateTheme): Future[Theme]
+    def createGoal(creation: CreateGoal): Future[Goal]
+    def createThread(creation: CreateThread): Future[Thread]
+    def createWeave(creation: CreateWeave): Future[Weave]
+    def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut]
+    def createPortion(creation: CreatePortion): Future[Portion]
+    def createTodo(creation: CreateTodo): Future[Todo]
+    def createHobby(creation: CreateHobby): Future[Hobby]
+
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean]
+    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Boolean]
+    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Boolean]
+    def updateYear(uuid: UUID, update: UpdateYear): Future[Boolean]
+    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Boolean]
+    def updateGoal(uuid: UUID, update: UpdateGoal): Future[Boolean]
+    def updateThread(uuid: UUID, update: UpdateThread): Future[Boolean]
+    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Boolean]
+    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Boolean]
+    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Boolean]
+    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Boolean]
+    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Boolean]
+
     def getMessages: Future[Seq[Message]]
+    def getBacklogItems: Future[Seq[BacklogItem]]
+    def getEpochs: Future[Seq[Epoch]]
+    def getYears: Future[Seq[Year]]
+    def getThemes: Future[Seq[Theme]]
+    def getGoals: Future[Seq[Goal]]
+    def getThreads: Future[Seq[Thread]]
+    def getWeaves: Future[Seq[Weave]]
+    def getLaserDonuts: Future[Seq[LaserDonut]]
+    def getPortions: Future[Seq[Portion]]
+    def getTodos: Future[Seq[Todo]]
+    def getHobbies: Future[Seq[Hobby]]
+
     def getMessage(uuid: UUID): Future[Option[Message]]
+    def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
+    def getEpoch(uuid: UUID): Future[Option[Epoch]]
+    def getYear(uuid: UUID): Future[Option[Year]]
+    def getTheme(uuid: UUID): Future[Option[Theme]]
+    def getGoal(uuid: UUID): Future[Option[Goal]]
+    def getThread(uuid: UUID): Future[Option[Thread]]
+    def getWeave(uuid: UUID): Future[Option[Weave]]
+    def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]]
+    def getPortion(uuid: UUID): Future[Option[Portion]]
+    def getTodo(uuid: UUID): Future[Option[Todo]]
+    def getHobby(uuid: UUID): Future[Option[Hobby]]
+
     def deleteMessage(uuid: UUID): Future[Boolean]
+    def deleteBacklogItem(uuid: UUID): Future[Boolean]
+    def deleteEpoch(uuid: UUID): Future[Boolean]
+    def deleteYear(uuid: UUID): Future[Boolean]
+    def deleteTheme(uuid: UUID): Future[Boolean]
+    def deleteGoal(uuid: UUID): Future[Boolean]
+    def deleteThread(uuid: UUID): Future[Boolean]
+    def deleteWeave(uuid: UUID): Future[Boolean]
+    def deleteLaserDonut(uuid: UUID): Future[Boolean]
+    def deletePortion(uuid: UUID): Future[Boolean]
+    def deleteTodo(uuid: UUID): Future[Boolean]
+    def deleteHobby(uuid: UUID): Future[Boolean]
   }
 }
 
@@ -40,55 +99,52 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     // Create endpoints
     def createMessage(creation: CreateMessage): Future[Message] = db.run(createMessageAction(creation)) map (row => row.asMessage)
 
-    def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
-      // db.run(createBacklogItemAction(creation))
-      ???
-    }
+    def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = db.run(createBacklogItemAction(creation)) map (row => row.asBacklogItem)
 
-    def createEpoch(creation: CreateEpoch): Future[Epoch] = ???
+    def createEpoch(creation: CreateEpoch): Future[Epoch] = db.run(createEpochAction(creation)) map (row => row.asEpoch)
 
-    def createYear(creation: CreateYear): Future[Year] = ???
+    def createYear(creation: CreateYear): Future[Year] = db.run(createYearAction(creation)) map (row => row.asYear)
 
-    def createTheme(creation: CreateTheme): Future[Theme] = ???
+    def createTheme(creation: CreateTheme): Future[Theme] = db.run(createThemeAction(creation)) map (row => row.asTheme)
 
     def createGoal(creation: CreateGoal): Future[Goal] = ???
 
-    def createThread(creation: CreateThread): Future[Thread] = ???
+    def createThread(creation: CreateThread): Future[Thread] = db.run(createThreadAction(creation)) map (row => row.asThread)
 
-    def createWeave(creation: CreateWeave): Future[Weave] = ???
+    def createWeave(creation: CreateWeave): Future[Weave] = db.run(createWeaveAction(creation)) map (row => row.asWeave)
 
-    def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = ???
+    def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = db.run(createLaserDonutAction(creation)) map (row => row.asLaserDonut)
 
-    def createPortion(creation: CreatePortion): Future[Portion] = ???
+    def createPortion(creation: CreatePortion): Future[Portion] = db.run(createPortionAction(creation)) map (row => row.asPortion)
 
-    def createTodo(creation: CreateTodo): Future[Todo] = ???
+    def createTodo(creation: CreateTodo): Future[Todo] = db.run(createTodoAction(creation)) map (row => row.asTodo)
 
-    def createHobby(creation: CreateHobby): Future[Hobby] = ???
+    def createHobby(creation: CreateHobby): Future[Hobby] = db.run(createHobbyAction(creation)) map (row => row.asHobby)
 
     // Update endpoints
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Boolean] = db.run(updateMessageAction(uuid, update)).map(_ > 0)
 
-    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Boolean] = ???
+    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Boolean] = db.run(updateBacklogItemAction(uuid, update)).map(_ > 0)
 
-    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Boolean] = ???
+    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Boolean] = db.run(updateEpochAction(uuid, update)).map(_ > 0)
 
-    def updateYear(uuid: UUID, update: UpdateYear): Future[Boolean] = ???
+    def updateYear(uuid: UUID, update: UpdateYear): Future[Boolean] = db.run(updateYearAction(uuid, update)).map(_ > 0)
 
-    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Boolean] = ???
+    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Boolean] = db.run(updateThemeAction(uuid, update)).map(_ > 0)
 
     def updateGoal(uuid: UUID, update: UpdateGoal): Future[Boolean] = ???
 
-    def updateThread(uuid: UUID, update: UpdateThread): Future[Boolean] = ???
+    def updateThread(uuid: UUID, update: UpdateThread): Future[Boolean] = db.run(updateThreadAction(uuid, update)).map(_ > 0)
 
-    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Boolean] = ???
+    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Boolean] = db.run(updateWeaveAction(uuid, update)).map(_ > 0)
 
-    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Boolean] = ???
+    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Boolean] = db.run(updateLaserDonutAction(uuid, update)).map(_ > 0)
 
-    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Boolean] = ???
+    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Boolean] = db.run(updatePortionAction(uuid, update)).map(_ > 0)
 
-    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Boolean] = ???
+    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Boolean] = db.run(updateTodoAction(uuid, update)).map(_ > 0)
 
-    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Boolean] = ???
+    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Boolean] = db.run(updateHobbyAction(uuid, update)).map(_ > 0)
 
     // Get endpoints
     def getMessages: Future[Seq[Message]] = db.run(MessageTable.result.map(_.map(_.asMessage)))
@@ -111,13 +167,9 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     def getTheme(uuid: UUID): Future[Option[Theme]] = db.run(getThemeAction(uuid).map(_.map(_.asTheme)))
 
-    def getGoals: Future[Seq[Message]] = {
-      ???
-    }
+    def getGoals: Future[Seq[Goal]] = ???
 
-    def getGoal(uuid: UUID): Future[Option[Message]] =  {
-      ???
-    }
+    def getGoal(uuid: UUID): Future[Option[Goal]] = ???
 
     def getThreads: Future[Seq[Thread]] = db.run(ThreadTable.result.map(_.map(_.asThread)))
 
@@ -172,7 +224,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def createMessageAction(creation: CreateMessage) = {
       val row = MessageRow(
         id = 0L,
-        uuid = UUID.randomUUID().toString,
+        uuid = UUID.randomUUID,
         sender = creation.sender,
         content = creation.content
       )
@@ -182,7 +234,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def createBacklogItemAction(creation: CreateBacklogItem) = {
       val row = BacklogItemRow(
         id = 0L,
-        uuid = UUID.randomUUID().toString,
+        uuid = UUID.randomUUID,
         summary = creation.summary,
         description = creation.description,
         `type` = creation.`type`.dbValue
@@ -191,43 +243,123 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def createEpochAction(creation: CreateEpoch) = {
-      ???
+      val row = EpochRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        name = creation.name,
+        totem = creation.totem,
+        question = creation.question
+      )
+      (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
     }
 
     private def createYearAction(creation: CreateYear) = {
-      ???
+      val row = YearRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        epochId = creation.epochId,
+        startDate = creation.startDate,
+        finishDate = creation.finishDate
+      )
+      (YearTable returning YearTable.map(_.id) into ((year, id) => year.copy(id = id))) += row
     }
 
     private def createThemeAction(creation: CreateTheme) = {
-      ???
+      val row = ThemeRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        yearId = creation.yearId,
+        name = creation.name
+      )
+      (ThemeTable returning ThemeTable.map(_.id) into ((theme, id) => theme.copy(id = id))) += row
     }
 
     private def createGoalAction(creation: CreateGoal) = {
+//      val row = GoalRow(
+//        id = 0L,
+//        uuid = UUID.randomUUID,
+//        themeId = creation.themeId,
+//        backlogItemByUuid()
+//      )
       ???
     }
 
     private def createThreadAction(creation: CreateThread) = {
-      ???
+      val row = ThreadRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        goalId = creation.goalId,
+        summary = creation.summary,
+        description = creation.description,
+        status = creation.status.dbValue
+      )
+      (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
     }
 
     private def createWeaveAction(creation: CreateWeave) = {
-      ???
+      val row = WeaveRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        goalId = creation.goalId,
+        summary = creation.summary,
+        description = creation.description,
+        status = creation.status.dbValue,
+        `type` = creation.`type`.dbValue
+      )
+      (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
     }
 
     private def createLaserDonutAction(creation: CreateLaserDonut) = {
-      ???
+      val row = LaserDonutRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        goalId = creation.goalId,
+        summary = creation.summary,
+        description = creation.description,
+        milestone = creation.milestone,
+        order = creation.order,
+        status = creation.status.dbValue,
+        `type` = creation.`type`.dbValue
+      )
+      (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
     }
 
     private def createPortionAction(creation: CreatePortion) = {
-      ???
+      val row = PortionRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        laserDonutId = creation.laserDonutId,
+        summary = creation.summary,
+        order = creation.order,
+        status = creation.status.dbValue
+      )
+      (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
     }
 
-    private def createTodoAction(creation: Todo) = {
-      ???
+    private def createTodoAction(creation: CreateTodo) = {
+      val row = TodoRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        portionId = creation.portionId,
+        description = creation.description,
+        order = creation.order,
+        status = creation.status.dbValue
+      )
+      (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
     }
 
-    private def createHobbyAction(creation: Hobby) = {
-      ???
+    private def createHobbyAction(creation: CreateHobby) = {
+      val row = HobbyRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        goalId = creation.goalId,
+        summary = creation.summary,
+        description = creation.description,
+        frequency = creation.frequency.dbValue,
+        status = creation.status.dbValue,
+        `type` = creation.`type`.dbValue
+      )
+      (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
     }
 
     // Update actions
@@ -244,21 +376,38 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`))
       getBacklogItemAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description), update.`type`.map(_.dbValue).getOrElse(old.`type`))
-        } getOrElse DBIO.failed(MessageNotFoundException())
+          query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description),
+            update.`type`.map(_.dbValue).getOrElse(old.`type`))
+        } getOrElse DBIO.failed(BacklogItemNotFoundException())
       }
     }
 
     private def updateEpochAction(uuid: UUID, update: UpdateEpoch) = {
-      ???
+      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question))
+      getEpochAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question))
+        } getOrElse DBIO.failed(EpochNotFoundException())
+      }
     }
 
     private def updateYearAction(uuid: UUID, update: UpdateYear) = {
-      ???
+      val query = yearByUuid(uuid).map(epoch => (epoch.epochId, epoch.startDate, epoch.finishDate))
+      getYearAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
+            old.startDate), UpdateDate.keepOrReplace(update.finishDate, old.finishDate))
+        } getOrElse DBIO.failed(YearNotFoundException())
+      }
     }
 
     private def updateThemeAction(uuid: UUID, update: UpdateTheme) = {
-      ???
+      val query = themeByUuid(uuid).map(theme => (theme.yearId, theme.name))
+      getThemeAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name))
+        } getOrElse DBIO.failed(ThemeNotFoundException())
+      }
     }
 
     private def updateGoalAction(uuid: UUID, update: UpdateGoal) = {
@@ -266,27 +415,66 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def updateThreadAction(uuid: UUID, update: UpdateThread) = {
-      ???
+      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status))
+      getThreadAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), update.status.map(_.dbValue).getOrElse(old.status))
+        } getOrElse DBIO.failed(ThreadNotFoundException())
+      }
     }
 
     private def updateWeaveAction(uuid: UUID, update: UpdateWeave) = {
-      ???
+      val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`))
+      getWeaveAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), update.status.map(_.dbValue).getOrElse(old.status),
+            update.status.map(_.dbValue).getOrElse(old.`type`))
+        } getOrElse DBIO.failed(WeaveNotFoundException())
+      }
     }
 
     private def updateLaserDonutAction(uuid: UUID, update: UpdateLaserDonut) = {
-      ???
+      val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description, laserDonut.milestone, laserDonut.order, laserDonut.status, laserDonut.`type`))
+      getLaserDonutAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateId.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone), update.order.getOrElse(old.order),
+            update.status.map(_.dbValue).getOrElse(old.status), update.status.map(_.dbValue).getOrElse(old.`type`))
+        } getOrElse DBIO.failed(LaserDonutNotFoundException())
+      }
     }
 
     private def updatePortionAction(uuid: UUID, update: UpdatePortion) = {
-      ???
+      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.order, portion.status))
+      getPortionAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
+            update.order.getOrElse(old.order), update.status.map(_.dbValue).getOrElse(old.status))
+        } getOrElse DBIO.failed(PortionNotFoundException())
+      }
     }
 
     private def updateTodoAction(uuid: UUID, update: UpdateTodo) = {
-      ???
+      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.order, todo.status))
+      getTodoAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
+            update.order.getOrElse(old.order), update.status.map(_.dbValue).getOrElse(old.status))
+        } getOrElse DBIO.failed(TodoNotFoundException())
+      }
     }
 
     private def updateHobbyAction(uuid: UUID, update: UpdateHobby) = {
-      ???
+      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status, hobby.`type`))
+      getHobbyAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), update.frequency.map(_.dbValue).getOrElse(old.frequency),
+            update.status.map(_.dbValue).getOrElse(old.status), update.`type`.map(_.dbValue).getOrElse(old.`type`))
+        } getOrElse DBIO.failed(HobbyNotFoundException())
+      }
     }
 
     // Get actions
@@ -365,151 +553,3 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def hobbyByUuid(uuid: UUID) = HobbyTable.filter(_.uuid === uuid.toString)
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

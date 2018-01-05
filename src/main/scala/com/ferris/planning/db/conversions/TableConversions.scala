@@ -6,6 +6,8 @@ import akka.http.scaladsl.model.DateTime
 import com.ferris.planning.table.Tables
 import com.ferris.planning.model.Model._
 
+import scala.language.implicitConversions
+
 class TableConversions(val tables: Tables) {
 
   implicit class MessageBuilder(val row: tables.MessageRow) {
@@ -133,7 +135,35 @@ class TableConversions(val tables: Tables) {
     )
   }
 
+  sealed trait Update[T, U] {
+    def keepOrReplace(newVersion: Option[T], oldVersion: U): U
+  }
+
+  object UpdateId extends Update[UUID, String] {
+    override def keepOrReplace(newVersion: Option[UUID], oldVersion: String) = {
+      newVersion.map(uuid2String).getOrElse(oldVersion)
+    }
+  }
+
+  object UpdateIdOption extends Update[UUID, Option[String]] {
+    override def keepOrReplace(newVersion: Option[UUID], oldVersion: Option[String]) = {
+      newVersion.map(uuid2String).orElse(oldVersion)
+    }
+  }
+
+  object UpdateDate extends Update[DateTime, java.sql.Date] {
+    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: java.sql.Date) = {
+      newVersion.map(dateTime2SqlDate).getOrElse(oldVersion)
+    }
+  }
+
+  implicit def uuid2String(uuid: UUID): String = uuid.toString
+
+  implicit def uuid2String(uuid: Option[UUID]): Option[String] = uuid.map(_.toString)
+
   implicit def sqlDate2DateTime(date: java.sql.Date): DateTime = DateTime.apply(date.getTime)
+
+  implicit def dateTime2SqlDate(date: DateTime): java.sql.Date = new java.sql.Date(date.clicks)
 
   implicit def byte2Boolean(byte: Byte): Boolean = byte == 1
 }
