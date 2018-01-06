@@ -161,9 +161,13 @@ class TableConversions(val tables: Tables) {
 
   implicit def uuid2String(uuid: Option[UUID]): Option[String] = uuid.map(_.toString)
 
+  implicit def uuid2String(uuid: Seq[UUID]): Seq[String] = uuid.map(_.toString)
+
   implicit def sqlDate2DateTime(date: java.sql.Date): DateTime = DateTime.apply(date.getTime)
 
   implicit def dateTime2SqlDate(date: DateTime): java.sql.Date = new java.sql.Date(date.clicks)
 
   implicit def byte2Boolean(byte: Byte): Boolean = byte == 1
+
+  implicit def boolean2Byte(bool: Boolean): Byte = if (bool) 1 else 0
 }

@@ -107,7 +107,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     def createTheme(creation: CreateTheme): Future[Theme] = db.run(createThemeAction(creation)) map (row => row.asTheme)
 
-    def createGoal(creation: CreateGoal): Future[Goal] = ???
+    def createGoal(creation: CreateGoal): Future[Goal] = db.run(createGoalAction(creation)) map (row => row.asGoal)
 
     def createThread(creation: CreateThread): Future[Thread] = db.run(createThreadAction(creation)) map (row => row.asThread)
 
@@ -206,7 +206,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     def deleteTheme(uuid: UUID): Future[Boolean] = db.run(deleteMessageAction(uuid)).map(_ > 0)
 
-    def deleteGoal(uuid: UUID): Future[Boolean] = db.run(deleteGoalAction(uuid)).map(_ > 0)
+    def deleteGoal(uuid: UUID): Future[Boolean] = ???
 
     def deleteThread(uuid: UUID): Future[Boolean] = db.run(deleteThreadAction(uuid)).map(_ > 0)
 
@@ -274,14 +274,38 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
       (ThemeTable returning ThemeTable.map(_.id) into ((theme, id) => theme.copy(id = id))) += row
     }
 
-    private def createGoalAction(creation: CreateGoal) = {
-//      val row = GoalRow(
-//        id = 0L,
-//        uuid = UUID.randomUUID,
-//        themeId = creation.themeId,
-//        backlogItemByUuid()
-//      )
-      ???
+    private def createGoalAction(creation: CreateGoal): DBIO[(GoalRow, Seq[BacklogItemRow])] = {
+      insertGoalAction(creation).zip(getBacklogItemsAction(creation.backlogItems)).flatMap { case ((goal, backlogItems)) =>
+        insertGoalBacklogItemsAction(goal.id, backlogItems.map(_.id)).andThen(DBIO.successful(goal).zip(DBIO.successful(backlogItems)))
+      }.transactionally
+    }
+
+    private def insertGoalAction(creation: CreateGoal): DBIO[GoalRow] = {
+      val row = GoalRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        themeId = creation.themeId,
+        summary = creation.summary,
+        description = creation.description,
+        level = creation.level,
+        priority = creation.priority,
+        status = creation.status.dbValue,
+        graduation = creation.graduation.dbValue
+      )
+      (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
+    }
+
+    private def insertGoalBacklogItemsAction(goalId: Long, backlogItemIds: Seq[Long]): DBIO[Seq[GoalBacklogItemRow]] = {
+      DBIO.sequence(backlogItemIds.map(backlogItemId => insertGoalBacklogItemAction(goalId, backlogItemId)))
+    }
+
+    private def insertGoalBacklogItemAction(goalId: Long, backlogItemId: Long): DBIO[GoalBacklogItemRow] = {
+      val row = GoalBacklogItemRow(
+        id = 0L,
+        goalId = goalId,
+        backlogItemId = backlogItemId
+      )
+      (GoalBacklogItemTable returning GoalBacklogItemTable.map(_.id) into ((goalAndItem, id) => goalAndItem.copy(id = id))) += row
     }
 
     private def createThreadAction(creation: CreateThread) = {
@@ -480,6 +504,8 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     // Get actions
     private def getMessageAction(uuid: UUID) = messageByUuid(uuid).result.headOption
 
+    private def getBacklogItemsAction(uuids: Seq[UUID]) = backlogItemsByUuid(uuids).result
+
     private def getBacklogItemAction(uuid: UUID) = backlogItemByUuid(uuid).result.headOption
 
     private def getEpochAction(uuid: UUID) = epochByUuid(uuid).result.headOption
@@ -488,7 +514,13 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getThemeAction(uuid: UUID) = themeByUuid(uuid).result.headOption
 
-    private def getGoalAction(uuid: UUID) = goalByUuid(uuid).result.headOption
+    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow])]] = {
+      goalsWithBacklogItems.result.map(goalBacklogItems => groupByGoal(goalBacklogItems))
+    }
+
+    private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow])]] = {
+      goalByUuid(uuid).result.map(goalBacklogItems => groupByGoal(goalBacklogItems).headOption)
+    }
 
     private def getThreadAction(uuid: UUID) = threadByUuid(uuid).result.headOption
 
@@ -513,7 +545,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def deleteThemeAction(uuid: UUID) = themeByUuid(uuid).delete
 
-    private def deleteGoalAction(uuid: UUID) = goalByUuid(uuid).delete
+    private def deleteGoalAction(uuid: UUID) = ???
 
     private def deleteThreadAction(uuid: UUID) = threadByUuid(uuid).delete
 
@@ -530,6 +562,8 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
     // Queries
     private def messageByUuid(uuid: UUID) = MessageTable.filter(_.uuid === uuid.toString)
 
+    private def backlogItemsByUuid(uuids: Seq[UUID]) = BacklogItemTable.filter(_.uuid inSet uuids.map(_.toString))
+
     private def backlogItemByUuid(uuid: UUID) = BacklogItemTable.filter(_.uuid === uuid.toString)
 
     private def epochByUuid(uuid: UUID) = EpochTable.filter(_.uuid === uuid.toString)
@@ -538,7 +572,22 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def themeByUuid(uuid: UUID) = ThemeTable.filter(_.uuid === uuid.toString)
 
-    private def goalByUuid(uuid: UUID) = GoalTable.filter(_.uuid === uuid.toString)
+    private def goalByUuid(uuid: UUID) = {
+      goalsWithBacklogItems.filter { case (goal, _) => goal.uuid === uuid.toString }
+    }
+
+    private def goalsWithBacklogItems = {
+      GoalTable
+        .join(GoalBacklogItemTable)
+        .on(_.id === _.goalId)
+        .join(BacklogItemTable)
+        .on { case ((_, goalBacklogItem), backlogItem) => goalBacklogItem.backlogItemId === backlogItem.id }
+        .map { case ((goal, _), backlogItem) => (goal, backlogItem) }
+    }
+
+    private def groupByGoal(goalBacklogItems: Seq[(GoalRow, BacklogItemRow)]): Seq[(GoalRow, Seq[BacklogItemRow])] = {
+      goalBacklogItems.groupBy { case (goal, _) => goal }.map { case (goal, pairs) => (goal, pairs.map(_._2)) }.toSeq
+    }
 
     private def threadByUuid(uuid: UUID) = ThreadTable.filter(_.uuid === uuid.toString)
 
