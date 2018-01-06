@@ -167,9 +167,9 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     def getTheme(uuid: UUID): Future[Option[Theme]] = db.run(getThemeAction(uuid).map(_.map(_.asTheme)))
 
-    def getGoals: Future[Seq[Goal]] = ???
+    def getGoals: Future[Seq[Goal]] = db.run(getGoalsAction.map(_.map(_.asGoal)))
 
-    def getGoal(uuid: UUID): Future[Option[Goal]] = ???
+    def getGoal(uuid: UUID): Future[Option[Goal]] = db.run(getGoalAction(uuid).map(_.map(_.asGoal)))
 
     def getThreads: Future[Seq[Thread]] = db.run(ThreadTable.result.map(_.map(_.asThread)))
 
@@ -204,7 +204,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     def deleteYear(uuid: UUID): Future[Boolean] = db.run(deleteYearAction(uuid)).map(_ > 0)
 
-    def deleteTheme(uuid: UUID): Future[Boolean] = db.run(deleteMessageAction(uuid)).map(_ > 0)
+    def deleteTheme(uuid: UUID): Future[Boolean] = db.run(deleteThemeAction(uuid)).map(_ > 0)
 
     def deleteGoal(uuid: UUID): Future[Boolean] = ???
 
@@ -393,7 +393,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(update.sender.getOrElse(old.sender), update.content.getOrElse(old.content))
         } getOrElse DBIO.failed(MessageNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateBacklogItemAction(uuid: UUID, update: UpdateBacklogItem) = {
@@ -403,7 +403,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
           query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description),
             update.`type`.map(_.dbValue).getOrElse(old.`type`))
         } getOrElse DBIO.failed(BacklogItemNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateEpochAction(uuid: UUID, update: UpdateEpoch) = {
@@ -412,7 +412,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question))
         } getOrElse DBIO.failed(EpochNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateYearAction(uuid: UUID, update: UpdateYear) = {
@@ -422,7 +422,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
           query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
             old.startDate), UpdateDate.keepOrReplace(update.finishDate, old.finishDate))
         } getOrElse DBIO.failed(YearNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateThemeAction(uuid: UUID, update: UpdateTheme) = {
@@ -431,7 +431,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name))
         } getOrElse DBIO.failed(ThemeNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateGoalAction(uuid: UUID, update: UpdateGoal) = {
@@ -445,7 +445,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.status.map(_.dbValue).getOrElse(old.status))
         } getOrElse DBIO.failed(ThreadNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateWeaveAction(uuid: UUID, update: UpdateWeave) = {
@@ -456,7 +456,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
             update.description.getOrElse(old.description), update.status.map(_.dbValue).getOrElse(old.status),
             update.status.map(_.dbValue).getOrElse(old.`type`))
         } getOrElse DBIO.failed(WeaveNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateLaserDonutAction(uuid: UUID, update: UpdateLaserDonut) = {
@@ -467,7 +467,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
             update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone), update.order.getOrElse(old.order),
             update.status.map(_.dbValue).getOrElse(old.status), update.status.map(_.dbValue).getOrElse(old.`type`))
         } getOrElse DBIO.failed(LaserDonutNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updatePortionAction(uuid: UUID, update: UpdatePortion) = {
@@ -477,7 +477,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
           query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
             update.order.getOrElse(old.order), update.status.map(_.dbValue).getOrElse(old.status))
         } getOrElse DBIO.failed(PortionNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateTodoAction(uuid: UUID, update: UpdateTodo) = {
@@ -487,7 +487,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
           query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
             update.order.getOrElse(old.order), update.status.map(_.dbValue).getOrElse(old.status))
         } getOrElse DBIO.failed(TodoNotFoundException())
-      }
+      }.transactionally
     }
 
     private def updateHobbyAction(uuid: UUID, update: UpdateHobby) = {
@@ -498,7 +498,7 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
             update.description.getOrElse(old.description), update.frequency.map(_.dbValue).getOrElse(old.frequency),
             update.status.map(_.dbValue).getOrElse(old.status), update.`type`.map(_.dbValue).getOrElse(old.`type`))
         } getOrElse DBIO.failed(HobbyNotFoundException())
-      }
+      }.transactionally
     }
 
     // Get actions
@@ -514,13 +514,9 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getThemeAction(uuid: UUID) = themeByUuid(uuid).result.headOption
 
-    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow])]] = {
-      goalsWithBacklogItems.result.map(goalBacklogItems => groupByGoal(goalBacklogItems))
-    }
+    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow])]] = goalsWithBacklogItems.result.map(groupByGoal)
 
-    private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow])]] = {
-      goalByUuid(uuid).result.map(goalBacklogItems => groupByGoal(goalBacklogItems).headOption)
-    }
+    private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow])]] = goalWithBacklogItemsByUuid(uuid).result.map(groupByGoal(_).headOption)
 
     private def getThreadAction(uuid: UUID) = threadByUuid(uuid).result.headOption
 
@@ -545,7 +541,16 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def deleteThemeAction(uuid: UUID) = themeByUuid(uuid).delete
 
-    private def deleteGoalAction(uuid: UUID) = ???
+    private def deleteGoalAction(uuid: UUID) = {
+//      val pairsQuery = goalWithBacklogItemsByUuid(uuid)
+//        .map { case (goal, backlogItem) => (goal.id, backlogItem.id) }
+//
+//      pairsQuery.map { case (goalId, backlogItemId) =>
+//          GoalBacklogItemTable.filter(pair => pair.goalId === goalId && pair.backlogItemId === backlogItemId)
+//        }
+//      DBIO.sequence(Seq(pairsQuery.delete, goalByUuid(uuid).delete)).transactionally
+      ???
+    }
 
     private def deleteThreadAction(uuid: UUID) = threadByUuid(uuid).delete
 
@@ -572,9 +577,9 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def themeByUuid(uuid: UUID) = ThemeTable.filter(_.uuid === uuid.toString)
 
-    private def goalByUuid(uuid: UUID) = {
-      goalsWithBacklogItems.filter { case (goal, _) => goal.uuid === uuid.toString }
-    }
+    private def goalByUuid(uuid: UUID) = GoalTable.filter(_.uuid === uuid.toString)
+
+    private def goalWithBacklogItemsByUuid(uuid: UUID) = goalsWithBacklogItems.filter { case (goal, _) => goal.uuid === uuid.toString }
 
     private def goalsWithBacklogItems = {
       GoalTable
