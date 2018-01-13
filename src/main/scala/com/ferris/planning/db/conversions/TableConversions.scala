@@ -140,31 +140,31 @@ class TableConversions(val tables: Tables) {
   }
 
   object UpdateId extends Update[UUID, String] {
-    override def keepOrReplace(newVersion: Option[UUID], oldVersion: String) = {
+    override def keepOrReplace(newVersion: Option[UUID], oldVersion: String): String = {
       newVersion.map(uuid2String).getOrElse(oldVersion)
     }
   }
 
   object UpdateIdOption extends Update[UUID, Option[String]] {
-    override def keepOrReplace(newVersion: Option[UUID], oldVersion: Option[String]) = {
+    override def keepOrReplace(newVersion: Option[UUID], oldVersion: Option[String]): Option[String] = {
       newVersion.map(uuid2String).orElse(oldVersion)
     }
   }
 
   object UpdateDate extends Update[DateTime, java.sql.Date] {
-    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: java.sql.Date) = {
+    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: java.sql.Date): java.sql.Date = {
       newVersion.map(dateTime2SqlDate).getOrElse(oldVersion)
     }
   }
 
   object UpdateTypeEnum extends Update[TypeEnum, String] {
-    override def keepOrReplace(newVersion: Option[TypeEnum], oldVersion: String) = {
+    override def keepOrReplace(newVersion: Option[TypeEnum], oldVersion: String): String = {
       newVersion.map(_.dbValue).getOrElse(oldVersion)
     }
   }
 
   object UpdateBoolean extends Update[Boolean, Byte] {
-    override def keepOrReplace(newVersion: Option[Boolean], oldVersion: Byte) = {
+    override def keepOrReplace(newVersion: Option[Boolean], oldVersion: Byte): Byte = {
       newVersion.map(boolean2Byte).getOrElse(oldVersion)
     }
   }

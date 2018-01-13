@@ -7,9 +7,6 @@ import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
-import slick.dbio.DBIOAction
-import slick.dbio.Effect.{All, Transactional, Write}
-import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 

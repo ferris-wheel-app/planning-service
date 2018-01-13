@@ -1,16 +1,13 @@
 package com.ferris.planning.route
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.PathMatchers
+import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
 import com.ferris.planning.rest.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
 import com.ferris.planning.rest.Resources.In._
-import com.ferris.planning.rest.Resources.Out.MessageView
 import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
-import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext
 
@@ -74,7 +71,7 @@ this: PlanningServiceComponent =>
     }
   }
 
-  val planningRoute = pathPrefix(apiPathSegment) {
+  val planningRoute: Route = pathPrefix(apiPathSegment) {
     createMessageRoute ~
     updateMessageRoute ~
     getMessagesRoute ~
