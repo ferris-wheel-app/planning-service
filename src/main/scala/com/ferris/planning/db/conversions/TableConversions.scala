@@ -157,6 +157,18 @@ class TableConversions(val tables: Tables) {
     }
   }
 
+  object UpdateTypeEnum extends Update[TypeEnum, String] {
+    override def keepOrReplace(newVersion: Option[TypeEnum], oldVersion: String) = {
+      newVersion.map(_.dbValue).getOrElse(oldVersion)
+    }
+  }
+
+  object UpdateBoolean extends Update[Boolean, Byte] {
+    override def keepOrReplace(newVersion: Option[Boolean], oldVersion: Byte) = {
+      newVersion.map(boolean2Byte).getOrElse(oldVersion)
+    }
+  }
+
   implicit def uuid2String(uuid: UUID): String = uuid.toString
 
   implicit def uuid2String(uuid: Option[UUID]): Option[String] = uuid.map(_.toString)

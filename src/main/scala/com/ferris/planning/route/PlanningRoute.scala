@@ -37,11 +37,8 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[MessageUpdate]) { messageUpdate =>
-          val updateMessage = planningService.updateMessage(messageId, messageUpdate.toCommand)
-          onSuccess(updateMessage) {
-            case true => complete(StatusCodes.OK)
-            case false => complete(StatusCodes.BadRequest)
-          }
+          val updatedMessage = planningService.updateMessage(messageId, messageUpdate.toCommand)
+          complete(updatedMessage.map(_.getOrElse (throw MessageNotFoundException())))
         }
       }
     }
