@@ -45,7 +45,7 @@ object ApiExceptions {
 
 trait ApiExceptionFormats {
   import fommil.sjs.FamilyFormats._
-  implicit val EsvExceptionFormat: RootJsonFormat[MicroServiceException] = shapeless.cachedImplicit
+  implicit val FerrisExceptionFormat: RootJsonFormat[MicroServiceException] = shapeless.cachedImplicit
   implicit val ExceptionListFormat: RootJsonFormat[ExceptionList] = shapeless.cachedImplicit
 }
 
