@@ -25,6 +25,8 @@ lazy val rootSettings = {
     val akkaV = "2.4.16"
     val scalaTestV = "3.0.1"
     val akkaHttpV = "10.0.1"
+    val shapelessV = "2.3.3"
+    val sprayJsonShapelessV = "1.4.0"
     Seq(
       "com.typesafe.akka" %% "akka-actor" % akkaV,
       "com.typesafe.akka" %% "akka-stream" % akkaV,
@@ -34,6 +36,8 @@ lazy val rootSettings = {
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
       "com.typesafe.akka" %% "akka-http-jackson" % akkaHttpV,
       "com.typesafe.akka" %% "akka-http-xml" % akkaHttpV,
+      "com.chuusai" %% "shapeless" % shapelessV,
+      "com.github.fommil" %% "spray-json-shapeless" % sprayJsonShapelessV,
       "mysql" % "mysql-connector-java" % "5.1.40",
       "org.flywaydb" % "flyway-core" % "3.2.1",
       "org.scalatest" %% "scalatest" % scalaTestV % "test"

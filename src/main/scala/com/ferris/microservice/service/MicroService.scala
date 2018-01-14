@@ -1,4 +1,4 @@
-package com.ferris.microservice
+package com.ferris.microservice.service
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter

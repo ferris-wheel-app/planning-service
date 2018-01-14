@@ -3,7 +3,7 @@ package com.ferris.planning.server
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.stream.ActorMaterializer
-import com.ferris.microservice.MicroServiceConfig
+import com.ferris.microservice.service.MicroServiceConfig
 import com.ferris.planning.db.MySQLTablesComponent
 import com.ferris.planning.repo.MySQLPlanningRepositoryComponent
 import com.ferris.planning.service.DefaultPlanningServiceComponent

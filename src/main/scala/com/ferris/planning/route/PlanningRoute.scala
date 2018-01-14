@@ -1,9 +1,9 @@
 package com.ferris.planning.route
 
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
+import com.ferris.microservice.directive.FerrisDirectives
 import com.ferris.planning.rest.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
 import com.ferris.planning.rest.Resources.In._
@@ -11,13 +11,12 @@ import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundExceptio
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends PlanningJsonProtocol {
+trait PlanningRoute extends FerrisDirectives with PlanningJsonProtocol {
 this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
   implicit val materializer: Materializer
 
-  private val apiPathSegment = "api"
   private val messagesPathSegment = "messages"
 
   private val createMessageRoute = pathPrefix(messagesPathSegment) {
@@ -71,11 +70,9 @@ this: PlanningServiceComponent =>
     }
   }
 
-  val planningRoute: Route = pathPrefix(apiPathSegment) {
-    createMessageRoute ~
+  val planningRoute: Route = createMessageRoute ~
     updateMessageRoute ~
     getMessagesRoute ~
     getMessageRoute ~
     deleteMessageRoute
-  }
 }

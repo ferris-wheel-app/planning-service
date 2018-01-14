@@ -1,4 +1,4 @@
-package com.ferris.microservice
+package com.ferris.microservice.service
 
 import com.typesafe.config.{Config, ConfigFactory}
 
