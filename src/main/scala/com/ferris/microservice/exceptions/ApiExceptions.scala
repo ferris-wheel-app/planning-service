@@ -2,7 +2,7 @@ package com.ferris.microservice.exceptions
 
 import akka.http.scaladsl.model.StatusCodes
 import com.ferris.microservice.exceptions.ApiExceptions._
-import spray.json.RootJsonFormat
+import spray.json._
 
 object ApiExceptions {
 
@@ -45,8 +45,34 @@ object ApiExceptions {
 
 trait ApiExceptionFormats {
   import fommil.sjs.FamilyFormats._
-  implicit val FerrisExceptionFormat: RootJsonFormat[MicroServiceException] = shapeless.cachedImplicit
-  implicit val ExceptionListFormat: RootJsonFormat[ExceptionList] = shapeless.cachedImplicit
+
+  implicit val invalidFieldPayloadFormat: RootJsonFormat[InvalidFieldPayload] = jsonFormat2(InvalidFieldPayload)
+  implicit val invalidFieldExceptionFormat: RootJsonFormat[InvalidFieldException] = jsonFormat4(InvalidFieldException)
+  implicit val invalidOperationPayloadFormat: RootJsonFormat[InvalidOperationPayload] = jsonFormat1(InvalidOperationPayload)
+  implicit val invalidOperationExceptionFormat: RootJsonFormat[InvalidOperationException] = jsonFormat4(InvalidOperationException)
+  implicit val invalidInputExceptionFormat: RootJsonFormat[InvalidInputException] = jsonFormat3(InvalidInputException)
+  implicit val conflictingVersionPayloadFormat: RootJsonFormat[ConflictingVersionPayload] = jsonFormat2(ConflictingVersionPayload)
+  implicit val conflictingVersionExceptionFormat: RootJsonFormat[ConflictingVersionException] = jsonFormat4(ConflictingVersionException)
+  implicit val notFoundPayload: RootJsonFormat[NotFoundPayload] = jsonFormat1(NotFoundPayload)
+  implicit val notFoundExceptionFormat: RootJsonFormat[NotFoundException] = jsonFormat4(NotFoundException)
+  implicit val unexpectedErrorExceptionFormat: RootJsonFormat[UnexpectedErrorException] = jsonFormat3(UnexpectedErrorException)
+  implicit val unauthorisedExceptionFormat: RootJsonFormat[UnauthorisedException] = jsonFormat2(UnauthorisedException)
+
+  implicit object MicroServiceExceptionFormat extends RootJsonFormat[MicroServiceException] {
+    override def write(obj: MicroServiceException): JsValue = obj match {
+      case invalidFieldException: InvalidFieldException => invalidFieldException.toJson
+      case invalidOperationException: InvalidOperationException => invalidOperationException.toJson
+      case invalidInputException: InvalidInputException => invalidInputException.toJson
+      case conflictingVersionException: ConflictingVersionException => conflictingVersionException.toJson
+      case notFoundException: NotFoundException => notFoundException.toJson
+      case unexpectedErrorException: UnexpectedErrorException => unexpectedErrorException.toJson
+      case unauthorisedException: UnauthorisedException => unauthorisedException.toJson
+    }
+
+    override def read(json: JsValue): MicroServiceException = ???
+  }
+
+  implicit val ExceptionListFormat: RootJsonFormat[ExceptionList] = jsonFormat1(ExceptionList)
 }
 
 object ApiExceptionFormats extends ApiExceptionFormats
