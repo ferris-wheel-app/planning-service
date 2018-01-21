@@ -1,6 +1,5 @@
 package com.ferris.microservice.directive
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.{PredefinedToResponseMarshallers, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model._

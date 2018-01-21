@@ -22,25 +22,23 @@ lazy val rootSettings = {
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
   libraryDependencies ++= {
-    val akkaV = "2.4.16"
-    val scalaTestV = "3.0.1"
-    val akkaHttpV = "10.0.1"
-    val shapelessV = "2.3.3"
-    val sprayJsonShapelessV = "1.4.0"
+    val akkaV           = "2.4.16"
+    val scalaTestV      = "3.0.1"
+    val akkaHttpV       = "10.0.1"
+    val mysqlConnectorV = "5.1.40"
+    val flywayV         = "3.2.1"
     Seq(
-      "com.typesafe.akka" %% "akka-actor" % akkaV,
-      "com.typesafe.akka" %% "akka-stream" % akkaV,
-      "com.typesafe.akka" %% "akka-http-core" % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http" % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpV,
+      "com.typesafe.akka" %% "akka-actor"           % akkaV,
+      "com.typesafe.akka" %% "akka-stream"          % akkaV,
+      "com.typesafe.akka" %% "akka-http-core"       % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http"            % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpV,
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-jackson" % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-xml" % akkaHttpV,
-      "com.chuusai" %% "shapeless" % shapelessV,
-      "com.github.fommil" %% "spray-json-shapeless" % sprayJsonShapelessV,
-      "mysql" % "mysql-connector-java" % "5.1.40",
-      "org.flywaydb" % "flyway-core" % "3.2.1",
-      "org.scalatest" %% "scalatest" % scalaTestV % "test"
+      "com.typesafe.akka" %% "akka-http-jackson"    % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-xml"        % akkaHttpV,
+      "mysql"             %  "mysql-connector-java" % mysqlConnectorV,
+      "org.flywaydb"      %  "flyway-core"          % flywayV,
+      "org.scalatest"     %% "scalatest"            % scalaTestV       % "test"
     )
   }
 }
@@ -50,10 +48,10 @@ lazy val sharedSettings = Seq(
   scalaVersion := "2.12.1",
   scalacOptions := Seq("-feature", "-unchecked", "-deprecation"),
   libraryDependencies ++= Seq(
-    "com.typesafe.slick" %% "slick" % slickV,
-    "com.typesafe.slick" %% "slick-hikaricp" % slickV,
-    "org.slf4j" % "slf4j-nop" % "1.7.10",
-    "com.h2database" % "h2" % "1.4.187"
+    "com.typesafe.slick"  %% "slick"          % slickV,
+    "com.typesafe.slick"  %% "slick-hikaricp" % slickV,
+    "org.slf4j"           %  "slf4j-nop"      % "1.7.10",
+    "com.h2database"      %  "h2"             % "1.4.187"
   )
 )
 
