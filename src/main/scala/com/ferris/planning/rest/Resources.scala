@@ -7,20 +7,62 @@ import akka.http.scaladsl.model.DateTime
 object Resources {
 
   object In {
-    case class MessageCreation(sender: String, content: String)
-    case class MessageUpdate(sender: Option[String], content: Option[String])
 
-    case class BacklogItemCreation(summary: String, description: String, backlogItemType: String)
-    case class BacklogItemUpdate(summary: Option[String], description: Option[String], backlogItemType: Option[String])
+    case class MessageCreation (
+      sender: String,
+      content: String
+    )
 
-    case class EpochCreation(name: String, totem: String, question: String)
-    case class EpochUpdate(name: Option[String], totem: Option[String], question: Option[String])
+    case class MessageUpdate (
+      sender: Option[String],
+      content: Option[String]
+    )
 
-    case class YearCreation(epochId: UUID, startDate: DateTime, finishDate: DateTime)
-    case class YearUpdate(epochId: Option[UUID], startDate: Option[DateTime], finishDate: Option[DateTime])
+    case class BacklogItemCreation (
+      summary: String,
+      description: String,
+      backlogItemType: String
+    )
 
-    case class ThemeCreation(yearId: UUID, name: String)
-    case class ThemeUpdate(yearId: Option[UUID], name: Option[String])
+    case class BacklogItemUpdate (
+      summary: Option[String],
+      description: Option[String],
+      backlogItemType: Option[String]
+    )
+
+    case class EpochCreation (
+      name: String,
+      totem: String,
+      question: String
+    )
+
+    case class EpochUpdate (
+      name: Option[String],
+      totem: Option[String],
+      question: Option[String]
+    )
+
+    case class YearCreation (
+      epochId: UUID,
+      startDate: DateTime,
+      finishDate: DateTime
+    )
+
+    case class YearUpdate (
+      epochId: Option[UUID],
+      startDate: Option[DateTime],
+      finishDate: Option[DateTime]
+    )
+
+    case class ThemeCreation (
+      yearId: UUID,
+      name: String
+    )
+
+    case class ThemeUpdate(
+      yearId: Option[UUID],
+      name: Option[String]
+    )
 
     case class GoalCreation (
       themeId: UUID,
@@ -142,6 +184,11 @@ object Resources {
   }
 
   object Out {
-    case class MessageView(sender: String, content: String)
+    case class MessageView (
+      sender: String,
+      content: String
+    )
+
+
   }
 }

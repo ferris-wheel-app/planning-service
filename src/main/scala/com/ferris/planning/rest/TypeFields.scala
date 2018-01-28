@@ -22,8 +22,8 @@ object TypeFields {
     val issue = "issue"
 
     override def withName(name: String): BacklogItemType = name match {
-      case idea.toString => BacklogItemTypes.Idea
-      case issue.toString => BacklogItemTypes.Issue
+      case `idea` => BacklogItemTypes.Idea
+      case `issue` => BacklogItemTypes.Issue
       case o => throw new IllegalArgumentException(s"Invalid backlog-item type: $o")
     }
 
@@ -42,11 +42,11 @@ object TypeFields {
     val complete = "complete"
 
     override def withName(name: String): Status = name match {
-      case unknown.toString => Statuses.Unknown
-      case notReached.toString => Statuses.NotReached
-      case notStarted.toString => Statuses.NotStarted
-      case incomplete.toString => Statuses.Incomplete
-      case complete.toString => Statuses.Complete
+      case `unknown` => Statuses.Unknown
+      case `notReached` => Statuses.NotReached
+      case `notStarted` => Statuses.NotStarted
+      case `incomplete` => Statuses.Incomplete
+      case `complete` => Statuses.Complete
       case o => throw new IllegalArgumentException(s"Invalid status: $o")
     }
 
@@ -66,9 +66,9 @@ object TypeFields {
     val unemployed = "unemployed"
 
     override def withName(name: String): GoalStatus = name match {
-      case notAchieved.toString => GoalStatuses.NotAchieved
-      case employed.toString => GoalStatuses.Employed
-      case unemployed.toString => GoalStatuses.Unemployed
+      case `notAchieved` => GoalStatuses.NotAchieved
+      case `employed` => GoalStatuses.Employed
+      case `unemployed` => GoalStatuses.Unemployed
       case o => throw new IllegalArgumentException(s"Invalid goal status: $o")
     }
 
@@ -88,11 +88,11 @@ object TypeFields {
     val goal = "goal"
 
     override def withName(name: String): GraduationType = name match {
-      case abandoned.toString => GraduationTypes.Abandoned
-      case thread.toString => GraduationTypes.Thread
-      case weave.toString => GraduationTypes.Weave
-      case hobby.toString => GraduationTypes.Hobby
-      case goal.toString => GraduationTypes.Goal
+      case `abandoned` => GraduationTypes.Abandoned
+      case `thread` => GraduationTypes.Thread
+      case `weave` => GraduationTypes.Weave
+      case `hobby` => GraduationTypes.Hobby
+      case `goal` => GraduationTypes.Goal
       case o => throw new IllegalArgumentException(s"Invalid graduation type: $o")
     }
 
@@ -111,8 +111,8 @@ object TypeFields {
     val skillFocused = "skill_focused"
 
     override def withName(name: String): DonutType = name match {
-      case projectFocused.toString => DonutTypes.ProjectFocused
-      case skillFocused.toString => DonutTypes.SkillFocused
+      case `projectFocused` => DonutTypes.ProjectFocused
+      case `skillFocused` => DonutTypes.SkillFocused
       case o => throw new IllegalArgumentException(s"Invalid donut type: $o")
     }
 
@@ -129,9 +129,9 @@ object TypeFields {
     val bau = "bau"
 
     override def withName(name: String): WeaveType = name match {
-      case priority.toString => WeaveTypes.Priority
-      case pdr.toString => WeaveTypes.PDR
-      case bau.toString => WeaveTypes.BAU
+      case `priority` => WeaveTypes.Priority
+      case `pdr` => WeaveTypes.PDR
+      case `bau` => WeaveTypes.BAU
       case o => throw new IllegalArgumentException(s"Invalid weave type: $o")
     }
 
@@ -148,8 +148,8 @@ object TypeFields {
     val passive = "passive"
 
     override def withName(name: String): HobbyType = name match {
-      case active.toString => HobbyTypes.Active
-      case passive.toString => HobbyTypes.Passive
+      case `active` => HobbyTypes.Active
+      case `passive` => HobbyTypes.Passive
       case o => throw new IllegalArgumentException(s"Invalid hobby type: $o")
     }
 
@@ -165,8 +165,8 @@ object TypeFields {
     val continuous = "continuous"
 
     override def withName(name: String): HobbyFrequency = name match {
-      case oneOff.toString => HobbyFrequencies.OneOff
-      case continuous.toString => HobbyFrequencies.Continuous
+      case `oneOff` => HobbyFrequencies.OneOff
+      case `continuous` => HobbyFrequencies.Continuous
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")
     }
 
