@@ -19,12 +19,103 @@ this: PlanningServiceComponent =>
   implicit val materializer: Materializer
 
   private val messagesPathSegment = "messages"
+  private val backlogItemsPathSegment = "backlog-items"
+  private val epochsPathSegment = "epochs"
+  private val yearsPathSegment = "years"
+  private val themesPathSegment = "themes"
+  private val goalsPathSegment = "goals"
+  private val threadsPathSegment = "threads"
+  private val weavesPathSegment = "weaves"
+  private val laserDonutsPathSegment = "laser-donuts"
+  private val portionsPathSegment = "portions"
+  private val todosPathSegment = "todos"
+  private val hobbiesPathSegment = "hobbies"
 
   private val createMessageRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
       post {
-        entity(as[MessageCreation]) { messageCreation =>
-          complete(planningService.createMessage(messageCreation.toCommand).map(_.toView))
+        entity(as[MessageCreation]) { creation =>
+          complete(planningService.createMessage(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createBacklogItemRoute = pathPrefix(backlogItemsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[BacklogItemCreation]) { creation =>
+          complete(planningService.createBacklogItem(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createEpochRoute = pathPrefix(epochsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[EpochCreation]) { creation =>
+          complete(planningService.createEpoch(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createYearRoute = pathPrefix(yearsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[YearCreation]) { creation =>
+          complete(planningService.createYear(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createThemesRoute = pathPrefix(themesPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[ThemeCreation]) { creation =>
+          complete(planningService.createTheme(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createGoalRoute = pathPrefix(goalsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[GoalCreation]) { creation =>
+          complete(planningService.createGoal(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createThreadRoute = pathPrefix(threadsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[ThreadCreation]) { creation =>
+          complete(planningService.createThread(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createWeaveRoute = pathPrefix(weavesPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[WeaveCreation]) { creation =>
+          complete(planningService.createWeave(creation.toCommand).map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val createLaserDonutRoute = pathPrefix(laserDonutsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[LaserDonutCreation]) { creation =>
+          complete(planningService.createLaserDonut(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -71,9 +162,11 @@ this: PlanningServiceComponent =>
     }
   }
 
-  val planningRoute: Route = createMessageRoute ~
-    updateMessageRoute ~
-    getMessagesRoute ~
-    getMessageRoute ~
-    deleteMessageRoute
+  val planningRoute: Route = {
+    createMessageRoute ~
+      updateMessageRoute ~
+      getMessagesRoute ~
+      getMessageRoute ~
+      deleteMessageRoute
+  }
 }
