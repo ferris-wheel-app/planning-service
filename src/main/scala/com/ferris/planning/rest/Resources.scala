@@ -184,11 +184,104 @@ object Resources {
   }
 
   object Out {
+
     case class MessageView (
+      uuid: UUID,
       sender: String,
       content: String
     )
 
+    case class BacklogItemView (
+      uuid: UUID,
+      summary: String,
+      description: String,
+      `type`: String
+    )
 
+    case class EpochView (
+      uuid: UUID,
+      name: String,
+      totem: String,
+      question: String
+    )
+
+    case class YearView (
+      uuid: UUID,
+      epochId: UUID,
+      startDate: DateTime,
+      finishDate: DateTime
+    )
+
+    case class ThemeView (
+      uuid: UUID,
+      yearId: UUID,
+      name: String
+    )
+
+    case class GoalView (
+      uuid: UUID,
+      themeId: UUID,
+      backlogItems: Seq[UUID],
+      summary: String,
+      description: String,
+      level: Int,
+      priority: Boolean,
+      status: String,
+      graduation: String
+    )
+
+    case class ThreadView (
+      uuid: UUID,
+      goalId: Option[UUID],
+      summary: String,
+      description: String,
+      status: String
+    )
+
+    case class WeaveView (
+      uuid: UUID,
+      goalId: Option[UUID],
+      summary: String,
+      description: String,
+      status: String,
+      `type`: String
+    )
+
+    case class LaserDonutView (
+      uuid: UUID,
+      goalId: UUID,
+      summary: String,
+      description: String,
+      milestone: String,
+      order: Int,
+      status: String,
+      `type`: String
+    )
+
+    case class PortionView (
+      uuid: UUID,
+      laserDonutId: UUID,
+      summary: String,
+      order: Int,
+      status: String
+    )
+
+    case class TodoView (
+      uuid: UUID,
+      portionId: UUID,
+      description: String,
+      order: Int,
+      status: String
+    )
+
+    case class HobbyView (
+      uuid: UUID,
+      goalId: Option[UUID],
+      summary: String,
+      description: String,
+      frequency: String,
+      status: String,
+      `type`: String
+    )
   }
 }

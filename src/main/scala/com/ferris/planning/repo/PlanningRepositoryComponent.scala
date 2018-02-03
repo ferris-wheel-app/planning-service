@@ -82,7 +82,7 @@ trait PlanningRepositoryComponent {
   }
 }
 
-trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
+trait MySqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   this: TablesComponent =>
 
   lazy val tableConversions = new TableConversions(tables)
@@ -91,134 +91,134 @@ trait MySQLPlanningRepositoryComponent extends PlanningRepositoryComponent {
   import tableConversions._
 
   implicit val repoEc: ExecutionContext
-  override val repo = new MySQLPlanningRepository
+  override val repo = new MySqlPlanningRepository
   val db: tables.profile.api.Database
 
-  class MySQLPlanningRepository extends PlanningRepository {
+  class MySqlPlanningRepository extends PlanningRepository {
 
     // Create endpoints
-    def createMessage(creation: CreateMessage): Future[Message] = db.run(createMessageAction(creation)) map (row => row.asMessage)
+    override def createMessage(creation: CreateMessage): Future[Message] = db.run(createMessageAction(creation)) map (row => row.asMessage)
 
-    def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = db.run(createBacklogItemAction(creation)) map (row => row.asBacklogItem)
+    override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = db.run(createBacklogItemAction(creation)) map (row => row.asBacklogItem)
 
-    def createEpoch(creation: CreateEpoch): Future[Epoch] = db.run(createEpochAction(creation)) map (row => row.asEpoch)
+    override def createEpoch(creation: CreateEpoch): Future[Epoch] = db.run(createEpochAction(creation)) map (row => row.asEpoch)
 
-    def createYear(creation: CreateYear): Future[Year] = db.run(createYearAction(creation)) map (row => row.asYear)
+    override def createYear(creation: CreateYear): Future[Year] = db.run(createYearAction(creation)) map (row => row.asYear)
 
-    def createTheme(creation: CreateTheme): Future[Theme] = db.run(createThemeAction(creation)) map (row => row.asTheme)
+    override def createTheme(creation: CreateTheme): Future[Theme] = db.run(createThemeAction(creation)) map (row => row.asTheme)
 
-    def createGoal(creation: CreateGoal): Future[Goal] = db.run(createGoalAction(creation)) map (row => row.asGoal)
+    override def createGoal(creation: CreateGoal): Future[Goal] = db.run(createGoalAction(creation)) map (row => row.asGoal)
 
-    def createThread(creation: CreateThread): Future[Thread] = db.run(createThreadAction(creation)) map (row => row.asThread)
+    override def createThread(creation: CreateThread): Future[Thread] = db.run(createThreadAction(creation)) map (row => row.asThread)
 
-    def createWeave(creation: CreateWeave): Future[Weave] = db.run(createWeaveAction(creation)) map (row => row.asWeave)
+    override def createWeave(creation: CreateWeave): Future[Weave] = db.run(createWeaveAction(creation)) map (row => row.asWeave)
 
-    def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = db.run(createLaserDonutAction(creation)) map (row => row.asLaserDonut)
+    override def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = db.run(createLaserDonutAction(creation)) map (row => row.asLaserDonut)
 
-    def createPortion(creation: CreatePortion): Future[Portion] = db.run(createPortionAction(creation)) map (row => row.asPortion)
+    override def createPortion(creation: CreatePortion): Future[Portion] = db.run(createPortionAction(creation)) map (row => row.asPortion)
 
-    def createTodo(creation: CreateTodo): Future[Todo] = db.run(createTodoAction(creation)) map (row => row.asTodo)
+    override def createTodo(creation: CreateTodo): Future[Todo] = db.run(createTodoAction(creation)) map (row => row.asTodo)
 
-    def createHobby(creation: CreateHobby): Future[Hobby] = db.run(createHobbyAction(creation)) map (row => row.asHobby)
+    override def createHobby(creation: CreateHobby): Future[Hobby] = db.run(createHobbyAction(creation)) map (row => row.asHobby)
 
     // Update endpoints
-    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Option[Message]] = db.run(updateMessageAction(uuid, update)).map(row => row.map(_.asMessage))
+    override def updateMessage(uuid: UUID, update: UpdateMessage): Future[Option[Message]] = db.run(updateMessageAction(uuid, update)).map(row => row.map(_.asMessage))
 
-    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Option[BacklogItem]] = db.run(updateBacklogItemAction(uuid, update)).map(row => row.map(_.asBacklogItem))
+    override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Option[BacklogItem]] = db.run(updateBacklogItemAction(uuid, update)).map(row => row.map(_.asBacklogItem))
 
-    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Option[Epoch]] = db.run(updateEpochAction(uuid, update)).map(row => row.map(_.asEpoch))
+    override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Option[Epoch]] = db.run(updateEpochAction(uuid, update)).map(row => row.map(_.asEpoch))
 
-    def updateYear(uuid: UUID, update: UpdateYear): Future[Option[Year]] = db.run(updateYearAction(uuid, update)).map(row => row.map(_.asYear))
+    override def updateYear(uuid: UUID, update: UpdateYear): Future[Option[Year]] = db.run(updateYearAction(uuid, update)).map(row => row.map(_.asYear))
 
-    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Option[Theme]] = db.run(updateThemeAction(uuid, update)).map(row => row.map(_.asTheme))
+    override def updateTheme(uuid: UUID, update: UpdateTheme): Future[Option[Theme]] = db.run(updateThemeAction(uuid, update)).map(row => row.map(_.asTheme))
 
-    def updateGoal(uuid: UUID, update: UpdateGoal): Future[Option[Goal]] = db.run(updateGoalAction(uuid, update)).map(row => row.map(_.asGoal))
+    override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Option[Goal]] = db.run(updateGoalAction(uuid, update)).map(row => row.map(_.asGoal))
 
-    def updateThread(uuid: UUID, update: UpdateThread): Future[Option[Thread]] = db.run(updateThreadAction(uuid, update)).map(row => row.map(_.asThread))
+    override def updateThread(uuid: UUID, update: UpdateThread): Future[Option[Thread]] = db.run(updateThreadAction(uuid, update)).map(row => row.map(_.asThread))
 
-    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Option[Weave]] = db.run(updateWeaveAction(uuid, update)).map(row => row.map(_.asWeave))
+    override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Option[Weave]] = db.run(updateWeaveAction(uuid, update)).map(row => row.map(_.asWeave))
 
-    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Option[LaserDonut]] = db.run(updateLaserDonutAction(uuid, update)).map(row => row.map(_.asLaserDonut))
+    override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Option[LaserDonut]] = db.run(updateLaserDonutAction(uuid, update)).map(row => row.map(_.asLaserDonut))
 
-    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]] = db.run(updatePortionAction(uuid, update)).map(row => row.map(_.asPortion))
+    override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]] = db.run(updatePortionAction(uuid, update)).map(row => row.map(_.asPortion))
 
-    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]] = db.run(updateTodoAction(uuid, update)).map(row => row.map(_.asTodo))
+    override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]] = db.run(updateTodoAction(uuid, update)).map(row => row.map(_.asTodo))
 
-    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]] = db.run(updateHobbyAction(uuid, update)).map(row => row.map(_.asHobby))
+    override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]] = db.run(updateHobbyAction(uuid, update)).map(row => row.map(_.asHobby))
 
     // Get endpoints
-    def getMessages: Future[Seq[Message]] = db.run(MessageTable.result.map(_.map(_.asMessage)))
+    override def getMessages: Future[Seq[Message]] = db.run(MessageTable.result.map(_.map(_.asMessage)))
 
-    def getMessage(uuid: UUID): Future[Option[Message]] = db.run(getMessageAction(uuid).map(_.map(_.asMessage)))
+    override def getMessage(uuid: UUID): Future[Option[Message]] = db.run(getMessageAction(uuid).map(_.map(_.asMessage)))
 
-    def getBacklogItems: Future[Seq[BacklogItem]] = db.run(BacklogItemTable.result.map(_.map(_.asBacklogItem)))
+    override def getBacklogItems: Future[Seq[BacklogItem]] = db.run(BacklogItemTable.result.map(_.map(_.asBacklogItem)))
 
-    def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]] = db.run(getBacklogItemAction(uuid).map(_.map(_.asBacklogItem)))
+    override def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]] = db.run(getBacklogItemAction(uuid).map(_.map(_.asBacklogItem)))
 
-    def getEpochs: Future[Seq[Epoch]] = db.run(EpochTable.result.map(_.map(_.asEpoch)))
+    override def getEpochs: Future[Seq[Epoch]] = db.run(EpochTable.result.map(_.map(_.asEpoch)))
 
-    def getEpoch(uuid: UUID): Future[Option[Epoch]] = db.run(getEpochAction(uuid).map(_.map(_.asEpoch)))
+    override def getEpoch(uuid: UUID): Future[Option[Epoch]] = db.run(getEpochAction(uuid).map(_.map(_.asEpoch)))
 
-    def getYears: Future[Seq[Year]] = db.run(YearTable.result.map(_.map(_.asYear)))
+    override def getYears: Future[Seq[Year]] = db.run(YearTable.result.map(_.map(_.asYear)))
 
-    def getYear(uuid: UUID): Future[Option[Year]] = db.run(getYearAction(uuid).map(_.map(_.asYear)))
+    override def getYear(uuid: UUID): Future[Option[Year]] = db.run(getYearAction(uuid).map(_.map(_.asYear)))
 
-    def getThemes: Future[Seq[Theme]] = db.run(ThemeTable.result.map(_.map(_.asTheme)))
+    override def getThemes: Future[Seq[Theme]] = db.run(ThemeTable.result.map(_.map(_.asTheme)))
 
-    def getTheme(uuid: UUID): Future[Option[Theme]] = db.run(getThemeAction(uuid).map(_.map(_.asTheme)))
+    override def getTheme(uuid: UUID): Future[Option[Theme]] = db.run(getThemeAction(uuid).map(_.map(_.asTheme)))
 
-    def getGoals: Future[Seq[Goal]] = db.run(getGoalsAction.map(_.map(_.asGoal)))
+    override def getGoals: Future[Seq[Goal]] = db.run(getGoalsAction.map(_.map(_.asGoal)))
 
-    def getGoal(uuid: UUID): Future[Option[Goal]] = db.run(getGoalAction(uuid).map(_.map(_.asGoal)))
+    override def getGoal(uuid: UUID): Future[Option[Goal]] = db.run(getGoalAction(uuid).map(_.map(_.asGoal)))
 
-    def getThreads: Future[Seq[Thread]] = db.run(ThreadTable.result.map(_.map(_.asThread)))
+    override def getThreads: Future[Seq[Thread]] = db.run(ThreadTable.result.map(_.map(_.asThread)))
 
-    def getThread(uuid: UUID): Future[Option[Thread]] = db.run(getThreadAction(uuid).map(_.map(_.asThread)))
+    override def getThread(uuid: UUID): Future[Option[Thread]] = db.run(getThreadAction(uuid).map(_.map(_.asThread)))
 
-    def getWeaves: Future[Seq[Weave]] = db.run(WeaveTable.result.map(_.map(_.asWeave)))
+    override def getWeaves: Future[Seq[Weave]] = db.run(WeaveTable.result.map(_.map(_.asWeave)))
 
-    def getWeave(uuid: UUID): Future[Option[Weave]] = db.run(getWeaveAction(uuid).map(_.map(_.asWeave)))
+    override def getWeave(uuid: UUID): Future[Option[Weave]] = db.run(getWeaveAction(uuid).map(_.map(_.asWeave)))
 
-    def getLaserDonuts: Future[Seq[LaserDonut]] = db.run(LaserDonutTable.result.map(_.map(_.asLaserDonut)))
+    override def getLaserDonuts: Future[Seq[LaserDonut]] = db.run(LaserDonutTable.result.map(_.map(_.asLaserDonut)))
 
-    def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
+    override def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
 
-    def getPortions: Future[Seq[Portion]] = db.run(PortionTable.result.map(_.map(_.asPortion)))
+    override def getPortions: Future[Seq[Portion]] = db.run(PortionTable.result.map(_.map(_.asPortion)))
 
-    def getPortion(uuid: UUID): Future[Option[Portion]] = db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
+    override def getPortion(uuid: UUID): Future[Option[Portion]] = db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
 
-    def getTodos: Future[Seq[Todo]] = db.run(TodoTable.result.map(_.map(_.asTodo)))
+    override def getTodos: Future[Seq[Todo]] = db.run(TodoTable.result.map(_.map(_.asTodo)))
 
-    def getTodo(uuid: UUID): Future[Option[Todo]] = db.run(getTodoAction(uuid).map(_.map(_.asTodo)))
+    override def getTodo(uuid: UUID): Future[Option[Todo]] = db.run(getTodoAction(uuid).map(_.map(_.asTodo)))
 
-    def getHobbies: Future[Seq[Hobby]] = db.run(HobbyTable.result.map(_.map(_.asHobby)))
+    override def getHobbies: Future[Seq[Hobby]] = db.run(HobbyTable.result.map(_.map(_.asHobby)))
 
-    def getHobby(uuid: UUID): Future[Option[Hobby]] = db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
+    override def getHobby(uuid: UUID): Future[Option[Hobby]] = db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
 
     // Delete endpoints
-    def deleteMessage(uuid: UUID): Future[Boolean] = db.run(deleteMessageAction(uuid)).map(_ > 0)
+    override def deleteMessage(uuid: UUID): Future[Boolean] = db.run(deleteMessageAction(uuid)).map(_ > 0)
 
-    def deleteBacklogItem(uuid: UUID): Future[Boolean] = db.run(deleteBacklogItemAction(uuid)).map(_ > 0)
+    override def deleteBacklogItem(uuid: UUID): Future[Boolean] = db.run(deleteBacklogItemAction(uuid)).map(_ > 0)
 
-    def deleteEpoch(uuid: UUID): Future[Boolean] = db.run(deleteEpochAction(uuid)).map(_ > 0)
+    override def deleteEpoch(uuid: UUID): Future[Boolean] = db.run(deleteEpochAction(uuid)).map(_ > 0)
 
-    def deleteYear(uuid: UUID): Future[Boolean] = db.run(deleteYearAction(uuid)).map(_ > 0)
+    override def deleteYear(uuid: UUID): Future[Boolean] = db.run(deleteYearAction(uuid)).map(_ > 0)
 
-    def deleteTheme(uuid: UUID): Future[Boolean] = db.run(deleteThemeAction(uuid)).map(_ > 0)
+    override def deleteTheme(uuid: UUID): Future[Boolean] = db.run(deleteThemeAction(uuid)).map(_ > 0)
 
-    def deleteGoal(uuid: UUID): Future[Boolean] = db.run(deleteGoalAction(uuid)).map(_ > 0)
+    override def deleteGoal(uuid: UUID): Future[Boolean] = db.run(deleteGoalAction(uuid)).map(_ > 0)
 
-    def deleteThread(uuid: UUID): Future[Boolean] = db.run(deleteThreadAction(uuid)).map(_ > 0)
+    override def deleteThread(uuid: UUID): Future[Boolean] = db.run(deleteThreadAction(uuid)).map(_ > 0)
 
-    def deleteWeave(uuid: UUID): Future[Boolean] = db.run(deleteWeaveAction(uuid)).map(_ > 0)
+    override def deleteWeave(uuid: UUID): Future[Boolean] = db.run(deleteWeaveAction(uuid)).map(_ > 0)
 
-    def deleteLaserDonut(uuid: UUID): Future[Boolean] = db.run(deleteLaserDonutAction(uuid)).map(_ > 0)
+    override def deleteLaserDonut(uuid: UUID): Future[Boolean] = db.run(deleteLaserDonutAction(uuid)).map(_ > 0)
 
-    def deletePortion(uuid: UUID): Future[Boolean] = db.run(deletePortionAction(uuid)).map(_ > 0)
+    override def deletePortion(uuid: UUID): Future[Boolean] = db.run(deletePortionAction(uuid)).map(_ > 0)
 
-    def deleteTodo(uuid: UUID): Future[Boolean] = db.run(deleteTodoAction(uuid)).map(_ > 0)
+    override def deleteTodo(uuid: UUID): Future[Boolean] = db.run(deleteTodoAction(uuid)).map(_ > 0)
 
-    def deleteHobby(uuid: UUID): Future[Boolean] = db.run(deleteHobbyAction(uuid)).map(_ > 0)
+    override def deleteHobby(uuid: UUID): Future[Boolean] = db.run(deleteHobbyAction(uuid)).map(_ > 0)
 
     // Create actions
     private def createMessageAction(creation: CreateMessage) = {

@@ -14,7 +14,7 @@ object TypeFields {
 
   sealed trait TypeResolver[T <: TypeEnum] {
     def withName(name: String): T
-    def withType(`type`: T): String
+    def toString(`type`: T): String
   }
 
   object BacklogItemType extends TypeResolver[BacklogItemTypes.BacklogItemType] {
@@ -27,7 +27,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid backlog-item type: $o")
     }
 
-    override def withType(`type`: BacklogItemType): String = `type` match {
+    override def toString(`type`: BacklogItemType): String = `type` match {
       case BacklogItemTypes.Idea => idea
       case BacklogItemTypes.Issue => issue
       case o => throw new IllegalArgumentException(s"Invalid backlog-item type: $o")
@@ -50,7 +50,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid status: $o")
     }
 
-    override def withType(`type`: Status): String = `type` match {
+    override def toString(`type`: Status): String = `type` match {
       case Statuses.Unknown => unknown
       case Statuses.NotReached => notReached
       case Statuses.NotStarted => notStarted
@@ -72,7 +72,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid goal status: $o")
     }
 
-    override def withType(`type`: GoalStatus): String = `type` match {
+    override def toString(`type`: GoalStatus): String = `type` match {
       case GoalStatuses.NotAchieved => notAchieved
       case GoalStatuses.Employed => employed
       case GoalStatuses.Unemployed => unemployed
@@ -96,7 +96,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid graduation type: $o")
     }
 
-    override def withType(`type`: GraduationType): String = `type` match {
+    override def toString(`type`: GraduationType): String = `type` match {
       case GraduationTypes.Abandoned => abandoned
       case GraduationTypes.Thread => thread
       case GraduationTypes.Weave => weave
@@ -116,7 +116,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid donut type: $o")
     }
 
-    override def withType(`type`: DonutType): String = `type` match {
+    override def toString(`type`: DonutType): String = `type` match {
       case DonutTypes.ProjectFocused => projectFocused
       case DonutTypes.SkillFocused => skillFocused
       case o => throw new IllegalArgumentException(s"Invalid donut type: $o")
@@ -135,7 +135,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid weave type: $o")
     }
 
-    override def withType(`type`: WeaveType): String = `type` match {
+    override def toString(`type`: WeaveType): String = `type` match {
       case WeaveTypes.Priority => priority
       case WeaveTypes.PDR => pdr
       case WeaveTypes.BAU => bau
@@ -153,7 +153,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid hobby type: $o")
     }
 
-    override def withType(`type`: HobbyType): String = `type` match {
+    override def toString(`type`: HobbyType): String = `type` match {
       case HobbyTypes.Active => active
       case HobbyTypes.Passive => passive
       case o => throw new IllegalArgumentException(s"Invalid hobby type: $o")
@@ -170,7 +170,7 @@ object TypeFields {
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")
     }
 
-    override def withType(`type`: HobbyFrequency): String = `type` match {
+    override def toString(`type`: HobbyFrequency): String = `type` match {
       case HobbyFrequencies.OneOff => oneOff
       case HobbyFrequencies.Continuous => continuous
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")

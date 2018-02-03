@@ -5,12 +5,12 @@ import akka.event.Logging
 import akka.stream.ActorMaterializer
 import com.ferris.microservice.service.MicroServiceConfig
 import com.ferris.planning.db.MySQLTablesComponent
-import com.ferris.planning.repo.MySQLPlanningRepositoryComponent
+import com.ferris.planning.repo.MySqlPlanningRepositoryComponent
 import com.ferris.planning.service.DefaultPlanningServiceComponent
 
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent
-  with MySQLPlanningRepositoryComponent
+  with MySqlPlanningRepositoryComponent
   with MySQLTablesComponent {
   override implicit lazy val system = ActorSystem()
   override implicit lazy val executor = system.dispatcher

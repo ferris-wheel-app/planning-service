@@ -6,6 +6,7 @@ import akka.stream.Materializer
 import com.ferris.microservice.directive.FerrisDirectives
 import com.ferris.planning.rest.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
+import com.ferris.planning.rest.conversions.ModelToView._
 import com.ferris.planning.rest.Resources.In._
 import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 
@@ -23,7 +24,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[MessageCreation]) { messageCreation =>
-          complete(planningService.createMessage(messageCreation.toCommand))
+          complete(planningService.createMessage(messageCreation.toCommand).map(_.toView))
         }
       }
     }
@@ -33,7 +34,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[MessageUpdate]) { messageUpdate =>
-          val updatedMessage = planningService.updateMessage(messageId, messageUpdate.toCommand)
+          val updatedMessage = planningService.updateMessage(messageId, messageUpdate.toCommand).map(_.map(_.toView))
           complete(updatedMessage.map(_.getOrElse (throw MessageNotFoundException())))
         }
       }
@@ -43,7 +44,7 @@ this: PlanningServiceComponent =>
   private val getMessagesRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        val messages = planningService.getMessages
+        val messages = planningService.getMessages.map(_.map(_.toView))
         complete(messages)
       }
     }
@@ -52,7 +53,7 @@ this: PlanningServiceComponent =>
   private val getMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { messageId =>
     pathEndOrSingleSlash {
       get {
-        val message = planningService.getMessage(messageId)
+        val message = planningService.getMessage(messageId).map(_.map(_.toView))
         complete(message.map(_.getOrElse (throw MessageNotFoundException())))
       }
     }

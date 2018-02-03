@@ -6,7 +6,11 @@ import akka.http.scaladsl.model.DateTime
 
 object Model {
 
-  case class Message (uuid: UUID, sender: String, content: String)
+  case class Message (
+    uuid: UUID,
+    sender: String,
+    content: String
+  )
 
   case class BacklogItem (
     uuid: UUID,
