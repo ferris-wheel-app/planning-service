@@ -86,6 +86,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
   override val planningService = new DefaultPlanningService
 
   class DefaultPlanningService extends PlanningService {
+
     override def createMessage(creation: CreateMessage)(implicit ex: ExecutionContext): Future[Message] = {
       repo.createMessage(creation)
     }
@@ -150,6 +151,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updateYear(uuid, update)
     }
 
+    override def updateTheme(uuid: UUID, update: UpdateTheme)(implicit ex: ExecutionContext): Future[Option[Theme]] = {
+      repo.updateTheme(uuid, update)
+    }
+
     override def updateGoal(uuid: UUID, update: UpdateGoal)(implicit ex: ExecutionContext): Future[Option[Goal]] = {
       repo.updateGoal(uuid, update)
     }
@@ -174,18 +179,152 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updateTodo(uuid, update)
     }
 
-    override def upda
+    override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Option[Hobby]] = {
+      repo.updateHobby(uuid, update)
+    }
 
     override def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]] = {
       repo.getMessages
+    }
+
+    override def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]] = {
+      repo.getBacklogItems
+    }
+
+    override def getEpochs(implicit ex: ExecutionContext): Future[Seq[Epoch]] = {
+      repo.getEpochs
+    }
+
+    override def getYears(implicit ex: ExecutionContext): Future[Seq[Year]] = {
+      repo.getYears
+    }
+
+    override def getThemes(implicit ex: ExecutionContext): Future[Seq[Theme]] = {
+      repo.getThemes
+    }
+
+    override def getGoals(implicit ex: ExecutionContext): Future[Seq[Goal]] = {
+      repo.getGoals
+    }
+
+    override def getThreads(implicit ex: ExecutionContext): Future[Seq[Thread]] = {
+      repo.getThreads
+    }
+
+    override def getWeaves(implicit ex: ExecutionContext): Future[Seq[Weave]] = {
+      repo.getWeaves
+    }
+
+    override def getLaserDonuts(implicit ex: ExecutionContext): Future[Seq[LaserDonut]] = {
+      repo.getLaserDonuts
+    }
+
+    override def getPortions(implicit ex: ExecutionContext): Future[Seq[Portion]] = {
+      repo.getPortions
+    }
+
+    override def getTodos(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
+      repo.getTodos
+    }
+
+    override def getHobbies(implicit ex: ExecutionContext): Future[Seq[Hobby]] = {
+      repo.getHobbies
     }
 
     override def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Message]] = {
       repo.getMessage(uuid)
     }
 
+    override def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
+      repo.getBacklogItem(uuid)
+    }
+
+    override def getEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Epoch]] = {
+      repo.getEpoch(uuid)
+    }
+
+    override def getYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Year]] = {
+      repo.getYear(uuid)
+    }
+
+    override def getTheme(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Theme]] = {
+      repo.getTheme(uuid)
+    }
+
+    override def getGoal(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Goal]] = {
+      repo.getGoal(uuid)
+    }
+
+    override def getThread(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Thread]] = {
+      repo.getThread(uuid)
+    }
+
+    override def getWeave(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Weave]] = {
+      repo.getWeave(uuid)
+    }
+
+    override def getLaserDonut(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[LaserDonut]] = {
+      repo.getLaserDonut(uuid)
+    }
+
+    override def getPortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Portion]] = {
+      repo.getPortion(uuid)
+    }
+
+    override def getTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Todo]] = {
+      repo.getTodo(uuid)
+    }
+
+    override def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]] = {
+      repo.getHobby(uuid)
+    }
+
     override def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.deleteMessage(uuid)
+    }
+
+    override def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteBacklogItem(uuid)
+    }
+
+    override def deleteEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteEpoch(uuid)
+    }
+
+    override def deleteYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteYear(uuid)
+    }
+
+    override def deleteTheme(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteTheme(uuid)
+    }
+
+    override def deleteGoal(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteGoal(uuid)
+    }
+
+    override def deleteThread(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteThread(uuid)
+    }
+
+    override def deleteWeave(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteWeave(uuid)
+    }
+
+    override def deleteLaserDonut(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteLaserDonut(uuid)
+    }
+
+    override def deletePortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deletePortion(uuid)
+    }
+
+    override def deleteTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteTodo(uuid)
+    }
+
+    override def deleteHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteTodo(uuid)
     }
   }
 }
