@@ -1,11 +1,25 @@
 package com.ferris.planning.route
 
+import java.util.UUID
+
+import akka.http.scaladsl.model.DateTime
 import com.ferris.json.FerrisJsonSupport
 import com.ferris.planning.rest.Resources.In._
 import com.ferris.planning.rest.Resources.Out._
-import spray.json.RootJsonFormat
+import spray.json._
 
 trait PlanningJsonProtocol extends FerrisJsonSupport {
+
+  implicit object UUIDFormat extends RootJsonFormat[UUID] {
+    override def write(obj: UUID): JsValue = JsString(obj.toString)
+    override def read(json: JsValue): UUID = UUID.fromString(json.toString)
+  }
+
+  implicit object DateFormat extends RootJsonFormat[DateTime] {
+    override def write(obj: DateTime): JsValue = JsString(obj.toString)
+    override def read(json: JsValue): DateTime = ???
+  }
+
   implicit val messageCreationFormat: RootJsonFormat[MessageCreation] = jsonFormat2(MessageCreation)
   implicit val messageUpdateFormat: RootJsonFormat[MessageUpdate] = jsonFormat2(MessageUpdate)
   implicit val messageViewFormat: RootJsonFormat[MessageView] = jsonFormat3(MessageView)
@@ -49,4 +63,8 @@ trait PlanningJsonProtocol extends FerrisJsonSupport {
   implicit val todoCreationFormat: RootJsonFormat[TodoCreation] = jsonFormat4(TodoCreation)
   implicit val todoUpdateFormat: RootJsonFormat[TodoUpdate] = jsonFormat4(TodoUpdate)
   implicit val todoViewFormat: RootJsonFormat[TodoView] = jsonFormat5(TodoView)
+
+  implicit val hobbyCreationFormat: RootJsonFormat[HobbyCreation] = jsonFormat6(HobbyCreation)
+  implicit val hobbyUpdateFormat: RootJsonFormat[HobbyUpdate] = jsonFormat6(HobbyUpdate)
+  implicit val hobbyViewFormat: RootJsonFormat[HobbyView] = jsonFormat7(HobbyView)
 }

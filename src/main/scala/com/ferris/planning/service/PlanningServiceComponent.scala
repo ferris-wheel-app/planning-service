@@ -131,7 +131,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.createTodo(creation)
     }
 
-    override def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Unit = {
+    override def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
       repo.createHobby(creation)
     }
 
