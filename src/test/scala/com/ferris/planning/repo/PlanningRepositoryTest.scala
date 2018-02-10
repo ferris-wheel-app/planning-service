@@ -46,6 +46,14 @@ class PlanningRepositoryTest extends AsyncFunSpec
       retrieved should not be empty
       retrieved.get shouldBe created
     }
+
+    it("should be possible to retrieve a list of messages") {
+      val created1 = repo.createMessage(SD.messageCreation).futureValue
+      val created2 = repo.createMessage(SD.messageCreation.copy(sender = "HAL", content = "Never!")).futureValue
+      val retrieved = repo.getMessages.futureValue
+      retrieved should not be empty
+      retrieved shouldBe Seq(created1, created2)
+    }
   }
 
   describe("deleting") {
