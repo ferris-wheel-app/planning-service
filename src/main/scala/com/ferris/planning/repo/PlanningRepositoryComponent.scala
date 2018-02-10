@@ -82,7 +82,7 @@ trait PlanningRepositoryComponent {
   }
 }
 
-trait MySqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
+trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   this: TablesComponent =>
 
   lazy val tableConversions = new TableConversions(tables)
@@ -91,10 +91,10 @@ trait MySqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   import tableConversions._
 
   implicit val repoEc: ExecutionContext
-  override val repo = new MySqlPlanningRepository
+  override val repo = new SqlPlanningRepository
   val db: tables.profile.api.Database
 
-  class MySqlPlanningRepository extends PlanningRepository {
+  class SqlPlanningRepository extends PlanningRepository {
 
     // Create endpoints
     override def createMessage(creation: CreateMessage): Future[Message] = db.run(createMessageAction(creation)) map (row => row.asMessage)
