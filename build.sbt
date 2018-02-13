@@ -23,10 +23,11 @@ lazy val rootSettings = {
 
   libraryDependencies ++= {
     val akkaV           = "2.4.16"
-    val scalaTestV      = "3.0.1"
     val akkaHttpV       = "10.0.1"
     val mysqlConnectorV = "5.1.40"
     val flywayV         = "3.2.1"
+    val scalaTestV      = "3.0.1"
+    val mockitoV        = "1.10.19"
     Seq(
       "com.typesafe.akka" %% "akka-actor"           % akkaV,
       "com.typesafe.akka" %% "akka-stream"          % akkaV,
@@ -38,7 +39,8 @@ lazy val rootSettings = {
       "com.typesafe.akka" %% "akka-http-xml"        % akkaHttpV,
       "mysql"             %  "mysql-connector-java" % mysqlConnectorV,
       "org.flywaydb"      %  "flyway-core"          % flywayV,
-      "org.scalatest"     %% "scalatest"            % scalaTestV       % "test"
+      "org.scalatest"     %% "scalatest"            % scalaTestV       % Test,
+      "org.mockito"       %  "mockito-all"          % mockitoV         % Test
     )
   }
 }
