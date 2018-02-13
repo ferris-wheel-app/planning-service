@@ -22,10 +22,4 @@ object SampleData {
     sender = "Dave",
     content = "Open the pod bay doors, HAL."
   )
-
-  val message2 = Message(
-    uuid = UUID.randomUUID(),
-    sender = "HAL",
-    content = "I'm sorry, Dave. I'm afraid I can't do that."
-  )
 }
