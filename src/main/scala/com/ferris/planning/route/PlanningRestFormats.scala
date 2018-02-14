@@ -8,7 +8,7 @@ import com.ferris.planning.rest.Resources.In._
 import com.ferris.planning.rest.Resources.Out._
 import spray.json._
 
-trait PlanningJsonProtocol extends FerrisJsonSupport {
+trait PlanningRestFormats extends FerrisJsonSupport {
 
   implicit object UUIDFormat extends RootJsonFormat[UUID] {
     override def write(obj: UUID): JsValue = JsString(obj.toString)

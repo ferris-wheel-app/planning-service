@@ -1,8 +1,11 @@
 package com.ferris.planning.repo
 
+import java.util.UUID
+
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import com.ferris.planning.sample.{SampleData => SD}
+import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 
 import scala.concurrent.duration._
 
@@ -37,6 +40,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
       updated.get.sender shouldBe SD.messageUpdate.sender.get
       updated.get.content shouldBe SD.messageUpdate.content.get
     }
+
+    it("should throw an exception if a message is not found") {
+      whenReady(repo.updateMessage(UUID.randomUUID, SD.messageUpdate).failed) { exception =>
+        exception shouldBe MessageNotFoundException()
+      }
+    }
   }
 
   describe("getting") {
@@ -45,6 +54,11 @@ class PlanningRepositoryTest extends AsyncFunSpec
       val retrieved = repo.getMessage(created.uuid).futureValue
       retrieved should not be empty
       retrieved.get shouldBe created
+    }
+
+    it("should return none if a message is not found") {
+      val retrieved = repo.getMessage(UUID.randomUUID).futureValue
+      retrieved shouldBe empty
     }
 
     it("should be possible to retrieve a list of messages") {

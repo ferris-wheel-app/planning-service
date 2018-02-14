@@ -50,5 +50,15 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         verify(server.repo, times(1)).getMessage(messageId)
       }
     }
+
+    it("should be able to retrieve all messages") {
+      val server = newServer
+      val messages = Seq(SD.message, SD.message2)
+      when(server.repo.getMessages).thenReturn(Future.successful(messages))
+      whenReady(server.planningService.getMessages) { result =>
+        result shouldBe messages
+        verify(server.repo, times(1)).getMessages
+      }
+    }
   }
 }
