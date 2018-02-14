@@ -12,7 +12,7 @@ import com.ferris.planning.service.exceptions.Exceptions._
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends FerrisDirectives with PlanningJsonProtocol {
+trait PlanningRoute extends FerrisDirectives with PlanningRestFormats {
 this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
