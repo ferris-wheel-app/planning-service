@@ -2,7 +2,7 @@ package com.ferris.planning.service
 
 import java.util.UUID
 
-import com.ferris.planning.sample.{SampleData => SD}
+import com.ferris.planning.sample.SampleData.{ domain => SD}
 import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
@@ -65,7 +65,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
 
     it("should be able to retrieve all messages") {
       val server = newServer
-      val messages = Seq(SD.message, SD.message2)
+      val messages = Seq(SD.message, SD.message.copy(uuid = UUID.randomUUID))
       when(server.repo.getMessages).thenReturn(Future.successful(messages))
       whenReady(server.planningService.getMessages) { result =>
         result shouldBe messages
@@ -83,22 +83,3 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,11 +6,12 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.ActorMaterializer
 import com.ferris.microservice.exceptions.ApiExceptionFormats
-import com.ferris.microservice.service.MicroServiceConfig
+import com.ferris.microservice.service.{Envelope, MicroServiceConfig}
 import com.ferris.planning.server.PlanningServer
 import com.ferris.planning.service.PlanningServiceComponent
 import org.scalatest.{FunSpec, Matchers, Outcome}
 import org.scalatest.mockito.MockitoSugar.mock
+import spray.json._
 
 trait MockPlanningServiceComponent extends PlanningServiceComponent {
   override val planningService: PlanningService = mock[PlanningService]
@@ -20,6 +21,8 @@ trait RouteTestFramework extends FunSpec with ScalatestRouteTest with PlanningRe
 
   var testServer: PlanningServer with PlanningServiceComponent = _
   var route: Route = _
+
+  implicit def envFormat[T](implicit ev: JsonFormat[T]): RootJsonFormat[Envelope[T]] = jsonFormat2(Envelope[T])
 
   override def withFixture(test: NoArgTest): Outcome = {
     testServer = new PlanningServer with MockPlanningServiceComponent {
@@ -35,6 +38,8 @@ trait RouteTestFramework extends FunSpec with ScalatestRouteTest with PlanningRe
 
       override val logger: LoggingAdapter = Logging(system, getClass)
     }
+
+    route = testServer.route
 
     super.withFixture(test)
   }

@@ -4,7 +4,7 @@ import java.util.UUID
 
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
-import com.ferris.planning.sample.{SampleData => SD}
+import com.ferris.planning.sample.SampleData.{ domain => SD}
 import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 
 import scala.concurrent.duration._

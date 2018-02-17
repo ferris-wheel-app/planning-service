@@ -1,5 +1,6 @@
 package com.ferris.planning.route
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
@@ -9,6 +10,7 @@ import com.ferris.planning.service.PlanningServiceComponent
 import com.ferris.planning.rest.conversions.ModelToView._
 import com.ferris.planning.rest.Resources.In._
 import com.ferris.planning.service.exceptions.Exceptions._
+import spray.json._
 
 import scala.concurrent.ExecutionContext
 
@@ -35,7 +37,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[MessageCreation]) { creation =>
-          complete(planningService.createMessage(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createMessage(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -45,7 +49,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[BacklogItemCreation]) { creation =>
-          complete(planningService.createBacklogItem(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createBacklogItem(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -55,7 +59,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[EpochCreation]) { creation =>
-          complete(planningService.createEpoch(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createEpoch(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -65,7 +69,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[YearCreation]) { creation =>
-          complete(planningService.createYear(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createYear(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -75,7 +79,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[ThemeCreation]) { creation =>
-          complete(planningService.createTheme(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createTheme(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -85,7 +89,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[GoalCreation]) { creation =>
-          complete(planningService.createGoal(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createGoal(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -95,7 +99,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[ThreadCreation]) { creation =>
-          complete(planningService.createThread(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createThread(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -105,7 +109,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[WeaveCreation]) { creation =>
-          complete(planningService.createWeave(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createWeave(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -115,7 +119,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[LaserDonutCreation]) { creation =>
-          complete(planningService.createLaserDonut(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createLaserDonut(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -125,7 +129,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[PortionCreation]) { creation =>
-          complete(planningService.createPortion(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createPortion(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -135,7 +139,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[TodoCreation]) { creation =>
-          complete(planningService.createTodo(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createTodo(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -145,7 +149,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[HobbyCreation]) { creation =>
-          complete(planningService.createHobby(creation.toCommand).map(_.toView))
+          complete(StatusCodes.OK, planningService.createHobby(creation.toCommand).map(_.toView))
         }
       }
     }
@@ -156,7 +160,7 @@ this: PlanningServiceComponent =>
       put {
         entity(as[MessageUpdate]) { update =>
           val updated = planningService.updateMessage(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw MessageNotFoundException())))
+          complete(StatusCodes.OK, updated.map(_.getOrElse (throw MessageNotFoundException())))
         }
       }
     }
@@ -167,7 +171,7 @@ this: PlanningServiceComponent =>
       put {
         entity(as[BacklogItemUpdate]) { update =>
           val updated = planningService.updateBacklogItem(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw BacklogItemNotFoundException())))
+          complete(StatusCodes.OK, updated.map(_.getOrElse (throw BacklogItemNotFoundException())))
         }
       }
     }
