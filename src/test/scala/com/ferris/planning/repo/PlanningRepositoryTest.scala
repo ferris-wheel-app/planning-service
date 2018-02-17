@@ -22,16 +22,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
     super.beforeEach
   }
 
-  describe("creating") {
-    it("should be possible to create a message") {
+  describe("message creating") {
+    it("should create a message") {
       val created = repo.createMessage(SD.messageCreation).futureValue
       created.sender shouldBe SD.messageCreation.sender
       created.content shouldBe SD.messageCreation.content
     }
   }
 
-  describe("updating") {
-    it("should be possible to update a message") {
+  describe("message updating") {
+    it("should update a message") {
       val original = repo.createMessage(SD.messageCreation).futureValue
       val updated = repo.updateMessage(original.uuid, SD.messageUpdate).futureValue
       updated should not be empty
@@ -48,8 +48,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
-  describe("getting") {
-    it("should be possible to retrieve a message") {
+  describe("message retrieving") {
+    it("should retrieve a message") {
       val created = repo.createMessage(SD.messageCreation).futureValue
       val retrieved = repo.getMessage(created.uuid).futureValue
       retrieved should not be empty
@@ -61,7 +61,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
       retrieved shouldBe empty
     }
 
-    it("should be possible to retrieve a list of messages") {
+    it("should retrieve a list of messages") {
       val created1 = repo.createMessage(SD.messageCreation).futureValue
       val created2 = repo.createMessage(SD.messageCreation.copy(sender = "HAL", content = "Never!")).futureValue
       val retrieved = repo.getMessages.futureValue
@@ -70,8 +70,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
-  describe("deleting") {
-    it("should be possible to delete a message") {
+  describe("message deleting") {
+    it("should delete a message") {
       val created = repo.createMessage(SD.messageCreation).futureValue
       val deletion = repo.deleteMessage(created.uuid).futureValue
       val retrieved = repo.getMessage(created.uuid).futureValue

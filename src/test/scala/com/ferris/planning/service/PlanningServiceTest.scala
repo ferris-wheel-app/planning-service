@@ -3,6 +3,7 @@ package com.ferris.planning.service
 import java.util.UUID
 
 import com.ferris.planning.sample.{SampleData => SD}
+import com.ferris.planning.service.exceptions.Exceptions.MessageNotFoundException
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.{FunSpec, Matchers}
@@ -41,6 +42,17 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
       }
     }
 
+    it("should return an error thrown by the repository when a message is being updated") {
+      val server = newServer
+      val messageId = UUID.randomUUID
+      val expectedException = MessageNotFoundException()
+      when(server.repo.updateMessage(eqTo(messageId), eqTo(SD.messageUpdate))).thenReturn(Future.failed(expectedException))
+      whenReady(server.planningService.updateMessage(messageId, SD.messageUpdate).failed) { exception =>
+        exception shouldBe expectedException
+        verify(server.repo, times(1)).updateMessage(eqTo(messageId), eqTo(SD.messageUpdate))
+      }
+    }
+
     it("should be able to retrieve a message") {
       val server = newServer
       val messageId = UUID.randomUUID
@@ -60,5 +72,33 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         verify(server.repo, times(1)).getMessages
       }
     }
+
+    it("should be able to delete a message") {
+      val server = newServer
+      val messageId = UUID.randomUUID
+      when(server.repo.deleteMessage(messageId)).thenReturn(Future.successful(true))
+      whenReady(server.planningService.deleteMessage(messageId)) { result =>
+        result shouldBe true
+      }
+    }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

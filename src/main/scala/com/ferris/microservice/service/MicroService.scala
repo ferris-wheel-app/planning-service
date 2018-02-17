@@ -1,7 +1,7 @@
 package com.ferris.microservice.service
 
 import akka.actor.ActorSystem
-import akka.event.LoggingAdapter
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer

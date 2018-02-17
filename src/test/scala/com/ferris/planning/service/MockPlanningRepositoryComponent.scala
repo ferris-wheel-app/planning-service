@@ -1,7 +1,7 @@
 package com.ferris.planning.service
 
 import com.ferris.planning.repo.PlanningRepositoryComponent
-import org.scalatest.mockito.MockitoSugar._
+import org.scalatest.mockito.MockitoSugar.mock
 
 trait MockPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
