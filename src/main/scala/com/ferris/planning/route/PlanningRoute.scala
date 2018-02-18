@@ -14,7 +14,7 @@ import spray.json._
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends FerrisDirectives with PlanningRestFormats {
+trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with ResponseMappings {
 this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
@@ -49,7 +49,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[BacklogItemCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createBacklogItem(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createBacklogItem(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -59,7 +61,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[EpochCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createEpoch(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createEpoch(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -69,7 +73,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[YearCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createYear(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createYear(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -79,7 +85,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[ThemeCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createTheme(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createTheme(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -89,7 +97,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[GoalCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createGoal(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createGoal(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -99,7 +109,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[ThreadCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createThread(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createThread(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -109,7 +121,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[WeaveCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createWeave(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createWeave(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -119,7 +133,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[LaserDonutCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createLaserDonut(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createLaserDonut(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -129,7 +145,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[PortionCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createPortion(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createPortion(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -139,7 +157,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[TodoCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createTodo(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createTodo(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -149,7 +169,9 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       post {
         entity(as[HobbyCreation]) { creation =>
-          complete(StatusCodes.OK, planningService.createHobby(creation.toCommand).map(_.toView))
+          onSuccess(planningService.createHobby(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -159,8 +181,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[MessageUpdate]) { update =>
-          val updated = planningService.updateMessage(id, update.toCommand).map(_.map(_.toView))
-          complete(StatusCodes.OK, updated.map(_.getOrElse (throw MessageNotFoundException())))
+          onSuccess(planningService.updateMessage(id, update.toCommand))(outcome => complete(mapMessage(outcome)))
         }
       }
     }
@@ -170,8 +191,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[BacklogItemUpdate]) { update =>
-          val updated = planningService.updateBacklogItem(id, update.toCommand).map(_.map(_.toView))
-          complete(StatusCodes.OK, updated.map(_.getOrElse (throw BacklogItemNotFoundException())))
+          onSuccess(planningService.updateBacklogItem(id, update.toCommand))(outcome => complete(mapBacklogItem(outcome)))
         }
       }
     }
@@ -181,8 +201,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[EpochUpdate]) { update =>
-          val updated = planningService.updateEpoch(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw EpochNotFoundException())))
+          onSuccess(planningService.updateEpoch(id, update.toCommand))(outcome => complete(mapEpoch(outcome)))
         }
       }
     }
@@ -192,8 +211,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[YearUpdate]) { update =>
-          val updated = planningService.updateYear(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw YearNotFoundException())))
+          onSuccess(planningService.updateYear(id, update.toCommand))(outcome => complete(mapYear(outcome)))
         }
       }
     }
@@ -203,8 +221,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[ThemeUpdate]) { update =>
-          val updated = planningService.updateTheme(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw ThemeNotFoundException())))
+          onSuccess(planningService.updateTheme(id, update.toCommand))(outcome => complete(mapTheme(outcome)))
         }
       }
     }
@@ -214,8 +231,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[GoalUpdate]) { update =>
-          val updated = planningService.updateGoal(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw GoalNotFoundException())))
+          onSuccess(planningService.updateGoal(id, update.toCommand))(outcome => complete(mapGoal(outcome)))
         }
       }
     }
@@ -225,8 +241,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[ThreadUpdate]) { update =>
-          val updated = planningService.updateThread(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw ThreadNotFoundException())))
+          onSuccess(planningService.updateThread(id, update.toCommand))(outcome => complete(mapThread(outcome)))
         }
       }
     }
@@ -236,8 +251,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[WeaveUpdate]) { update =>
-          val updated = planningService.updateWeave(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw WeaveNotFoundException())))
+          onSuccess(planningService.updateWeave(id, update.toCommand))(outcome => complete(mapWeave(outcome)))
         }
       }
     }
@@ -247,8 +261,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[LaserDonutUpdate]) { update =>
-          val updated = planningService.updateLaserDonut(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw LaserDonutNotFoundException())))
+          onSuccess(planningService.updateLaserDonut(id, update.toCommand))(outcome => complete(mapLaserDonut(outcome)))
         }
       }
     }
@@ -258,8 +271,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[PortionUpdate]) { update =>
-          val updated = planningService.updatePortion(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw PortionNotFoundException())))
+          onSuccess(planningService.updatePortion(id, update.toCommand))(outcome => complete(mapPortion(outcome)))
         }
       }
     }
@@ -269,8 +281,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[TodoUpdate]) { update =>
-          val updated = planningService.updateTodo(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw TodoNotFoundException())))
+          onSuccess(planningService.updateTodo(id, update.toCommand))(outcome => complete(mapTodo(outcome)))
         }
       }
     }
@@ -280,8 +291,7 @@ this: PlanningServiceComponent =>
     pathEndOrSingleSlash {
       put {
         entity(as[HobbyUpdate]) { update =>
-          val updated = planningService.updateHobby(id, update.toCommand).map(_.map(_.toView))
-          complete(updated.map(_.getOrElse (throw HobbyNotFoundException())))
+          onSuccess(planningService.updateHobby(id, update.toCommand))(outcome => complete(mapHobby(outcome)))
         }
       }
     }
@@ -290,7 +300,9 @@ this: PlanningServiceComponent =>
   private val getMessagesRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getMessages.map(_.map(_.toView)))
+        onSuccess(planningService.getMessages) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -298,7 +310,9 @@ this: PlanningServiceComponent =>
   private val getBacklogItemsRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getBacklogItems.map(_.map(_.toView)))
+        onSuccess(planningService.getBacklogItems) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -306,7 +320,9 @@ this: PlanningServiceComponent =>
   private val getEpochsRoute = pathPrefix(epochsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getEpochs.map(_.map(_.toView)))
+        onSuccess(planningService.getEpochs) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -314,7 +330,9 @@ this: PlanningServiceComponent =>
   private val getYearsRoute = pathPrefix(yearsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getYears.map(_.map(_.toView)))
+        onSuccess(planningService.getYears) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -322,7 +340,9 @@ this: PlanningServiceComponent =>
   private val getThemesRoute = pathPrefix(themesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getThemes.map(_.map(_.toView)))
+        onSuccess(planningService.getThemes) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -330,7 +350,9 @@ this: PlanningServiceComponent =>
   private val getGoalsRoute = pathPrefix(goalsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getGoals.map(_.map(_.toView)))
+        onSuccess(planningService.getGoals) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -338,7 +360,9 @@ this: PlanningServiceComponent =>
   private val getThreadsRoute = pathPrefix(threadsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getThreads.map(_.map(_.toView)))
+        onSuccess(planningService.getThreads) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -346,7 +370,9 @@ this: PlanningServiceComponent =>
   private val getWeavesRoute = pathPrefix(weavesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getWeaves.map(_.map(_.toView)))
+        onSuccess(planningService.getWeaves) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -354,7 +380,9 @@ this: PlanningServiceComponent =>
   private val getLaserDonutsRoute = pathPrefix(laserDonutsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getLaserDonuts.map(_.map(_.toView)))
+        onSuccess(planningService.getLaserDonuts) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -362,7 +390,9 @@ this: PlanningServiceComponent =>
   private val getPortionsRoute = pathPrefix(portionsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getPortions.map(_.map(_.toView)))
+        onSuccess(planningService.getPortions) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -370,7 +400,9 @@ this: PlanningServiceComponent =>
   private val getTodosRoute = pathPrefix(todosPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getTodos.map(_.map(_.toView)))
+        onSuccess(planningService.getTodos) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -378,7 +410,9 @@ this: PlanningServiceComponent =>
   private val getHobbiesRoute = pathPrefix(hobbiesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        complete(planningService.getHobbies.map(_.map(_.toView)))
+        onSuccess(planningService.getHobbies) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
       }
     }
   }
@@ -386,8 +420,7 @@ this: PlanningServiceComponent =>
   private val getMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val message = planningService.getMessage(id).map(_.map(_.toView))
-        complete(message.map(_.getOrElse (throw MessageNotFoundException())))
+        onSuccess(planningService.getMessage(id))(outcome => complete(mapMessage(outcome)))
       }
     }
   }
@@ -395,8 +428,7 @@ this: PlanningServiceComponent =>
   private val getBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val backlogItem = planningService.getBacklogItem(id).map(_.map(_.toView))
-        complete(backlogItem.map(_.getOrElse (throw BacklogItemNotFoundException())))
+        onSuccess(planningService.getBacklogItem(id))(outcome => complete(mapBacklogItem(outcome)))
       }
     }
   }
@@ -404,8 +436,7 @@ this: PlanningServiceComponent =>
   private val getEpochRoute = pathPrefix(epochsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val epoch = planningService.getEpoch(id).map(_.map(_.toView))
-        complete(epoch.map(_.getOrElse (throw EpochNotFoundException())))
+        onSuccess(planningService.getEpoch(id))(outcome => complete(mapEpoch(outcome)))
       }
     }
   }
@@ -413,8 +444,7 @@ this: PlanningServiceComponent =>
   private val getYearRoute = pathPrefix(yearsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val year = planningService.getYear(id).map(_.map(_.toView))
-        complete(year.map(_.getOrElse (throw YearNotFoundException())))
+        onSuccess(planningService.getYear(id))(outcome => complete(mapYear(outcome)))
       }
     }
   }
@@ -422,8 +452,7 @@ this: PlanningServiceComponent =>
   private val getThemeRoute = pathPrefix(themesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val theme = planningService.getTheme(id).map(_.map(_.toView))
-        complete(theme.map(_.getOrElse (throw ThemeNotFoundException())))
+        onSuccess(planningService.getTheme(id))(outcome => complete(mapTheme(outcome)))
       }
     }
   }
@@ -431,8 +460,7 @@ this: PlanningServiceComponent =>
   private val getGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val goal = planningService.getGoal(id).map(_.map(_.toView))
-        complete(goal.map(_.getOrElse (throw GoalNotFoundException())))
+        onSuccess(planningService.getGoal(id))(outcome => complete(mapGoal(outcome)))
       }
     }
   }
@@ -440,8 +468,7 @@ this: PlanningServiceComponent =>
   private val getThreadRoute = pathPrefix(threadsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val thread = planningService.getThread(id).map(_.map(_.toView))
-        complete(thread.map(_.getOrElse (throw ThreadNotFoundException())))
+        onSuccess(planningService.getThread(id))(outcome => complete(mapThread(outcome)))
       }
     }
   }
@@ -449,8 +476,7 @@ this: PlanningServiceComponent =>
   private val getWeaveRoute = pathPrefix(weavesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val weave = planningService.getWeave(id).map(_.map(_.toView))
-        complete(weave.map(_.getOrElse (throw WeaveNotFoundException())))
+        onSuccess(planningService.getWeave(id))(outcome => complete(mapWeave(outcome)))
       }
     }
   }
@@ -458,8 +484,7 @@ this: PlanningServiceComponent =>
   private val getLaserDonutRoute = pathPrefix(laserDonutsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val laserDonut = planningService.getLaserDonut(id).map(_.map(_.toView))
-        complete(laserDonut.map(_.getOrElse (throw LaserDonutNotFoundException())))
+        onSuccess(planningService.getLaserDonut(id))(outcome => complete(mapLaserDonut(outcome)))
       }
     }
   }
@@ -467,8 +492,7 @@ this: PlanningServiceComponent =>
   private val getPortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val portion = planningService.getPortion(id).map(_.map(_.toView))
-        complete(portion.map(_.getOrElse (throw PortionNotFoundException())))
+        onSuccess(planningService.getPortion(id))(outcome => complete(mapPortion(outcome)))
       }
     }
   }
@@ -476,8 +500,7 @@ this: PlanningServiceComponent =>
   private val getTodoRoute = pathPrefix(todosPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val todo = planningService.getTodo(id).map(_.map(_.toView))
-        complete(todo.map(_.getOrElse (throw TodoNotFoundException())))
+        onSuccess(planningService.getTodo(id))(outcome => complete(mapTodo(outcome)))
       }
     }
   }
@@ -485,8 +508,7 @@ this: PlanningServiceComponent =>
   private val getHobbyRoute = pathPrefix(hobbiesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
-        val hobby = planningService.getHobby(id).map(_.map(_.toView))
-        complete(hobby.map(_.getOrElse (throw HobbyNotFoundException())))
+        onSuccess(planningService.getHobby(id))(outcome => complete(mapHobby(outcome)))
       }
     }
   }
@@ -494,10 +516,7 @@ this: PlanningServiceComponent =>
   private val deleteMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteMessage(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteMessage(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -505,10 +524,7 @@ this: PlanningServiceComponent =>
   private val deleteBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteBacklogItem(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteBacklogItem(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -516,10 +532,7 @@ this: PlanningServiceComponent =>
   private val deleteEpochRoute = pathPrefix(epochsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteEpoch(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteEpoch(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -527,10 +540,7 @@ this: PlanningServiceComponent =>
   private val deleteYearRoute = pathPrefix(yearsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteYear(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteYear(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -538,10 +548,7 @@ this: PlanningServiceComponent =>
   private val deleteThemeRoute = pathPrefix(themesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteTheme(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteTheme(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -549,10 +556,7 @@ this: PlanningServiceComponent =>
   private val deleteGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteGoal(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteGoal(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -560,10 +564,7 @@ this: PlanningServiceComponent =>
   private val deleteThreadRoute = pathPrefix(threadsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteThread(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteThread(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -571,10 +572,7 @@ this: PlanningServiceComponent =>
   private val deleteWeaveRoute = pathPrefix(weavesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteWeave(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteWeave(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -582,10 +580,7 @@ this: PlanningServiceComponent =>
   private val deleteLaserDonutRoute = pathPrefix(laserDonutsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteLaserDonut(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteLaserDonut(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -593,10 +588,7 @@ this: PlanningServiceComponent =>
   private val deletePortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deletePortion(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deletePortion(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -604,10 +596,7 @@ this: PlanningServiceComponent =>
   private val deleteTodoRoute = pathPrefix(todosPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteTodo(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteTodo(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
@@ -615,10 +604,7 @@ this: PlanningServiceComponent =>
   private val deleteHobbyRoute = pathPrefix(hobbiesPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
-        onSuccess(planningService.deleteHobby(id)) {
-          case true => complete(StatusCodes.OK)
-          case false => complete(StatusCodes.NotFound)
-        }
+        onSuccess(planningService.deleteHobby(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }
