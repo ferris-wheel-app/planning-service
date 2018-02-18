@@ -11,8 +11,14 @@ import spray.json._
 trait PlanningRestFormats extends FerrisJsonSupport {
 
   implicit object UUIDFormat extends RootJsonFormat[UUID] {
-    override def write(obj: UUID): JsValue = JsString(obj.toString)
-    override def read(json: JsValue): UUID = UUID.fromString(json.toString)
+    override def write(obj: UUID): JsValue = {
+      require(obj ne null)
+      JsString(obj.toString)
+    }
+    override def read(value: JsValue): UUID = value match {
+      case JsString(str) => UUID.fromString(str)
+      case other => throw DeserializationException(s"Expected UUID as JsString, but got $other")
+    }
   }
 
   implicit object DateFormat extends RootJsonFormat[DateTime] {

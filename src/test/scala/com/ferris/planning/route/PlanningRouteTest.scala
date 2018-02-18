@@ -22,7 +22,6 @@ class PlanningRouteTest extends RouteTestFramework {
       when(testServer.planningService.createMessage(eqTo(domain.messageCreation))(any())).thenReturn(Future.successful(domain.message))
       Post("/api/messages", rest.messageCreation) ~> route ~> check {
         status shouldBe StatusCodes.OK
-        println(s"\n${rest.message.toJson}\n")
         responseAs[Envelope[MessageView]].data shouldBe rest.message
       }
     }
