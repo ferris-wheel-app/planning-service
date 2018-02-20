@@ -28,7 +28,7 @@ object ExternalToCommand {
     override def toCommand = CreateBacklogItem(
       summary = backlogItem.summary,
       description = backlogItem.description,
-      `type` = TypeFields.BacklogItemType.withName(backlogItem.backlogItemType)
+      `type` = TypeFields.BacklogItemType.withName(backlogItem.`type`)
     )
   }
 
@@ -36,7 +36,7 @@ object ExternalToCommand {
     override def toCommand = UpdateBacklogItem(
       summary = backlogItem.summary,
       description = backlogItem.description,
-      `type` = backlogItem.backlogItemType.map(TypeFields.BacklogItemType.withName)
+      `type` = backlogItem.`type`.map(TypeFields.BacklogItemType.withName)
     )
   }
 

@@ -21,13 +21,13 @@ object Resources {
     case class BacklogItemCreation (
       summary: String,
       description: String,
-      backlogItemType: String
+      `type`: String
     )
 
     case class BacklogItemUpdate (
       summary: Option[String],
       description: Option[String],
-      backlogItemType: Option[String]
+      `type`: Option[String]
     )
 
     case class EpochCreation (
