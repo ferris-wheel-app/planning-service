@@ -47,8 +47,8 @@ object Model {
     description: String,
     level: Int,
     priority: Boolean,
-    status: GoalStatuses.GoalStatus,
-    graduation: GraduationTypes.GraduationType
+    graduation: GraduationTypes.GraduationType,
+    status: GoalStatuses.GoalStatus
   )
 
   case class Thread (
@@ -64,8 +64,8 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    status: Statuses.Status,
-    `type`: WeaveTypes.WeaveType
+    `type`: WeaveTypes.WeaveType,
+    status: Statuses.Status
   )
 
   case class LaserDonut (
@@ -75,8 +75,8 @@ object Model {
     description: String,
     milestone: String,
     order: Int,
-    status: Statuses.Status,
-    `type`: DonutTypes.DonutType
+    `type`: DonutTypes.DonutType,
+    status: Statuses.Status
   )
 
   case class Portion (
@@ -101,8 +101,8 @@ object Model {
     summary: String,
     description: String,
     frequency: HobbyFrequencies.HobbyFrequency,
-    status: Statuses.Status,
-    `type`: HobbyTypes.HobbyType
+    `type`: HobbyTypes.HobbyType,
+    status: Statuses.Status
   )
 
   trait TypeEnum {

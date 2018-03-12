@@ -71,8 +71,8 @@ object Resources {
       description: String,
       level: Int,
       priority: Boolean,
-      status: String,
-      graduation: String
+      graduation: String,
+      status: String
     )
 
     case class GoalUpdate (
@@ -82,8 +82,8 @@ object Resources {
       description: Option[String],
       level: Option[Int],
       priority: Option[Boolean],
-      status: Option[String],
-      graduation: Option[String]
+      graduation: Option[String],
+      status: Option[String]
     )
 
     case class ThreadCreation (
@@ -104,16 +104,16 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
 
     case class WeaveUpdate (
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
-      status: Option[String],
-      `type`: Option[String]
+      `type`: Option[String],
+      status: Option[String]
     )
 
     case class LaserDonutCreation (
@@ -122,8 +122,8 @@ object Resources {
       description: String,
       milestone: String,
       order: Int,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
 
     case class LaserDonutUpdate (
@@ -132,8 +132,8 @@ object Resources {
       description: Option[String],
       milestone: Option[String],
       order: Option[Int],
-      status: Option[String],
-      `type`: Option[String]
+      `type`: Option[String],
+      status: Option[String]
     )
 
     case class PortionCreation (
@@ -169,8 +169,8 @@ object Resources {
       summary: String,
       description: String,
       frequency: String,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
 
     case class HobbyUpdate (
@@ -178,8 +178,8 @@ object Resources {
       summary: Option[String],
       description: Option[String],
       frequency: Option[String],
-      status: Option[String],
-      `type`: Option[String]
+      `type`: Option[String],
+      status: Option[String]
     )
   }
 
@@ -226,8 +226,8 @@ object Resources {
       description: String,
       level: Int,
       priority: Boolean,
-      status: String,
-      graduation: String
+      graduation: String,
+      status: String
     )
 
     case class ThreadView (
@@ -243,8 +243,8 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
 
     case class LaserDonutView (
@@ -254,8 +254,8 @@ object Resources {
       description: String,
       milestone: String,
       order: Int,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
 
     case class PortionView (
@@ -280,8 +280,8 @@ object Resources {
       summary: String,
       description: String,
       frequency: String,
-      status: String,
-      `type`: String
+      `type`: String,
+      status: String
     )
   }
 }

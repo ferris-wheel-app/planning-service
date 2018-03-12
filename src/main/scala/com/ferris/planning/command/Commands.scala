@@ -64,8 +64,8 @@ object Commands {
     description: String,
     level: Int,
     priority: Boolean,
-    status: GoalStatuses.GoalStatus,
-    graduation: GraduationTypes.GraduationType
+    graduation: GraduationTypes.GraduationType,
+    status: GoalStatuses.GoalStatus
   )
 
   case class UpdateGoal (
@@ -75,8 +75,8 @@ object Commands {
     description: Option[String],
     level: Option[Int],
     priority: Option[Boolean],
-    status: Option[GoalStatuses.GoalStatus],
-    graduation: Option[GraduationTypes.GraduationType]
+    graduation: Option[GraduationTypes.GraduationType],
+    status: Option[GoalStatuses.GoalStatus]
   )
 
   case class CreateThread (
@@ -97,16 +97,16 @@ object Commands {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    status: Statuses.Status,
-    `type`: WeaveTypes.WeaveType
+    `type`: WeaveTypes.WeaveType,
+    status: Statuses.Status
   )
 
   case class UpdateWeave (
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    status: Option[Statuses.Status],
-    `type`: Option[WeaveTypes.WeaveType]
+    `type`: Option[WeaveTypes.WeaveType],
+    status: Option[Statuses.Status]
   )
 
   case class CreateLaserDonut (
@@ -115,8 +115,8 @@ object Commands {
     description: String,
     milestone: String,
     order: Int,
-    status: Statuses.Status,
-    `type`: DonutTypes.DonutType
+    `type`: DonutTypes.DonutType,
+    status: Statuses.Status
   )
 
   case class UpdateLaserDonut (
@@ -125,8 +125,8 @@ object Commands {
     description: Option[String],
     milestone: Option[String],
     order: Option[Int],
-    status: Option[Statuses.Status],
-    `type`: Option[DonutTypes.DonutType]
+    `type`: Option[DonutTypes.DonutType],
+    status: Option[Statuses.Status]
   )
 
   case class CreatePortion (
@@ -162,8 +162,8 @@ object Commands {
     summary: String,
     description: String,
     frequency: HobbyFrequencies.HobbyFrequency,
-    status: Statuses.Status,
-    `type`: HobbyTypes.HobbyType
+    `type`: HobbyTypes.HobbyType,
+    status: Statuses.Status
   )
 
   case class UpdateHobby (
@@ -171,7 +171,7 @@ object Commands {
     summary: Option[String],
     description: Option[String],
     frequency: Option[HobbyFrequencies.HobbyFrequency],
-    status: Option[Statuses.Status],
-    `type`: Option[HobbyTypes.HobbyType]
+    `type`: Option[HobbyTypes.HobbyType],
+    status: Option[Statuses.Status]
   )
 }
