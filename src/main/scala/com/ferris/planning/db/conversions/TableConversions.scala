@@ -39,7 +39,7 @@ class TableConversions(val tables: Tables) {
   implicit class YearBuilder(val row: tables.YearRow) {
     def asYear: Year = Year(
       uuid = UUID.fromString(row.uuid),
-      epochId = UUID.fromString(row.uuid),
+      epochId = UUID.fromString(row.epochId),
       startDate = row.startDate,
       finishDate = row.finishDate
     )

@@ -22,8 +22,8 @@ object SampleData {
     )
 
     val messageUpdate = UpdateMessage(
-      sender = Some("Dave"),
-      content = Some("Open the pod bay doors, HAL. Please?")
+      sender = Some("HAL"),
+      content = Some("Sorry Dave. I'm afraid I cannot do that.")
     )
 
     val message = Message(
@@ -41,7 +41,7 @@ object SampleData {
     val backlogItemUpdate = UpdateBacklogItem(
       summary = Some("I want to be the best of the best at programming"),
       description = Some("I want to be the best of the best at programming"),
-      `type` = Some(BacklogItemTypes.Issue)
+      `type` = Some(BacklogItemTypes.Idea)
     )
 
     val backlogItem = BacklogItem(
@@ -58,9 +58,9 @@ object SampleData {
     )
 
     val epochUpdate = UpdateEpoch(
-      name = Some("Messinaissance"),
-      totem = Some("Hero"),
-      question = Some("Am I capable of becoming an Übermensch?")
+      name = Some("Wakanda"),
+      totem = Some("Leader"),
+      question = Some("Is Africa capable of achieving full development?")
     )
 
     val epoch = Epoch(
@@ -96,7 +96,7 @@ object SampleData {
 
     val themeUpdate = UpdateTheme(
       yearId = Some(UUID.randomUUID),
-      name = Some("Career Capital")
+      name = Some("Mission")
     )
 
     val theme = Theme(
@@ -119,11 +119,11 @@ object SampleData {
     val goalUpdate = UpdateGoal(
       themeId = Some(UUID.randomUUID),
       backlogItems = Some(UUID.randomUUID :: UUID.randomUUID :: Nil),
-      summary = Some("Master at least one foreign language"),
-      description = Some("Learn French, Italian, and Korean"),
+      summary = Some("Learn to play an instrument"),
+      description = Some("Learn to play the piano, the guitar, and the saxophone"),
       level = Some(2),
       priority = Some(false),
-      graduation = Some(GraduationTypes.Hobby),
+      graduation = Some(GraduationTypes.Abandoned),
       status = Some(GoalStatuses.Employed)
     )
 
@@ -148,9 +148,9 @@ object SampleData {
 
     val threadUpdate = UpdateThread(
       goalId = Some(UUID.randomUUID),
-      summary = Some("Go for a run"),
-      description = Some("Go for a run"),
-      status = Some(Statuses.NotStarted)
+      summary = Some("Sleep"),
+      description = Some("Sleep for 8 hours"),
+      status = Some(Statuses.Incomplete)
     )
 
     val thread = Thread(
@@ -171,9 +171,9 @@ object SampleData {
 
     val weaveUpdate = UpdateWeave(
       goalId = Some(UUID.randomUUID),
-      summary = Some("Organise a tech lecture"),
-      description = Some("Create a presentation about Kafka"),
-      `type` = Some(WeaveTypes.PDR),
+      summary = Some("Apply your new-found Go knowledge"),
+      description = Some("Create a snuffleupagus"),
+      `type` = Some(WeaveTypes.BAU),
       status = Some(Statuses.Complete)
     )
 
@@ -190,7 +190,7 @@ object SampleData {
       goalId = UUID.randomUUID,
       summary = "Implement initial microservices",
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
-      milestone = "A basic working prototype",
+      milestone = "A deployed backend service",
       order = 1,
       `type` = DonutTypes.ProjectFocused,
       status = Statuses.Incomplete
@@ -198,8 +198,8 @@ object SampleData {
 
     val laserDonutUpdate = UpdateLaserDonut(
       goalId = Some(UUID.randomUUID),
-      summary = Some("Implement initial microservices"),
-      description = Some("Implement planning-service, timetable-service, and history-service, in a microservices-based architecture"),
+      summary = Some("Create the front-end"),
+      description = Some("Use React"),
       milestone = Some("A basic working prototype"),
       order = Some(1),
       `type` = Some(DonutTypes.ProjectFocused),
@@ -213,8 +213,8 @@ object SampleData {
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
       milestone = "A basic working prototype",
       order = 1,
-      `type` = DonutTypes.ProjectFocused,
-      status = Statuses.Incomplete
+      `type` = DonutTypes.SkillFocused,
+      status = Statuses.NotStarted
     )
 
     val portionCreation = CreatePortion(
@@ -226,8 +226,8 @@ object SampleData {
 
     val portionUpdate = UpdatePortion(
       laserDonutId = Some(UUID.randomUUID),
-      summary = Some("Write tests"),
-      order = Some(3),
+      summary = Some("Split into sub-projects"),
+      order = Some(4),
       status = Some(Statuses.Incomplete)
     )
 
@@ -248,7 +248,7 @@ object SampleData {
 
     val todoUpdate = UpdateTodo(
       portionId = Some(UUID.randomUUID),
-      description = Some("Create sample data for tests"),
+      description = Some("Create repository tests"),
       order = Some(4),
       status = Some(Statuses.Complete)
     )
@@ -272,8 +272,8 @@ object SampleData {
 
     val hobbyUpdate = UpdateHobby(
       goalId = Some(UUID.randomUUID),
-      summary = Some("Yoga"),
-      description = Some("Train in Acro-Yoga"),
+      summary = Some("Play ping-pong"),
+      description = Some("Table tennis"),
       frequency = Some(HobbyFrequencies.Continuous),
       `type` = Some(HobbyTypes.Active),
       status = Some(Statuses.NotReached)
