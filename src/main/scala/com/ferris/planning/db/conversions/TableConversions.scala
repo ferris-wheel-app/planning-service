@@ -1,5 +1,6 @@
 package com.ferris.planning.db.conversions
 
+import java.sql.Timestamp
 import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
@@ -151,9 +152,9 @@ class TableConversions(val tables: Tables) {
     }
   }
 
-  object UpdateDate extends Update[DateTime, java.sql.Date] {
-    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: java.sql.Date): java.sql.Date = {
-      newVersion.map(dateTime2SqlDate).getOrElse(oldVersion)
+  object UpdateDate extends Update[DateTime, Timestamp] {
+    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: Timestamp): Timestamp = {
+      newVersion.map(dateTime2Timestamp).getOrElse(oldVersion)
     }
   }
 
@@ -175,9 +176,9 @@ class TableConversions(val tables: Tables) {
 
   implicit def uuid2String(uuid: Seq[UUID]): Seq[String] = uuid.map(_.toString)
 
-  implicit def sqlDate2DateTime(date: java.sql.Date): DateTime = DateTime.apply(date.getTime)
+  implicit def timestamp2DateTime(date: Timestamp): DateTime = DateTime.apply(date.getTime)
 
-  implicit def dateTime2SqlDate(date: DateTime): java.sql.Date = new java.sql.Date(date.clicks)
+  implicit def dateTime2Timestamp(date: DateTime): Timestamp = new Timestamp(date.clicks)
 
   implicit def byte2Boolean(byte: Byte): Boolean = byte == 1
 

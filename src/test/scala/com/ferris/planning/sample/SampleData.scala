@@ -11,7 +11,7 @@ import com.ferris.planning.rest.TypeFields._
 
 object SampleData {
 
-  private val fullYear = 365 * 24 * 60 * 60
+  private val fullYear = 365L * 24L * 60L * 60L * 1000L
   private val currentYear = DateTime.now
   private val nextYear = currentYear.plus(fullYear)
 

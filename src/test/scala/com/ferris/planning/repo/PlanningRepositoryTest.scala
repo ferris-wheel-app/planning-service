@@ -133,6 +133,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved shouldBe Seq(created1, created2)
       }
     }
+
+    describe("deleting") {
+      it("should delete a backlog-item") {
+        val created = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val deletion = repo.deleteBacklogItem(created.uuid).futureValue
+        val retrieved = repo.getBacklogItem(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
   }
 
   describe("epoch") {
@@ -185,6 +195,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved shouldBe Seq(created1, created2)
       }
     }
+
+    describe("deleting") {
+      it("should delete a epoch") {
+        val created = repo.createEpoch(SD.epochCreation).futureValue
+        val deletion = repo.deleteEpoch(created.uuid).futureValue
+        val retrieved = repo.getEpoch(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
   }
 
   describe("year") {
@@ -235,6 +255,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val retrieved = repo.getYears.futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a year") {
+        val created = repo.createYear(SD.yearCreation).futureValue
+        val deletion = repo.deleteYear(created.uuid).futureValue
+        val retrieved = repo.getYear(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
       }
     }
   }
