@@ -78,8 +78,8 @@ object SampleData {
 
     val yearUpdate = UpdateYear(
       epochId = Some(UUID.randomUUID),
-      startDate = Some(currentYear),
-      finishDate = Some(nextYear)
+      startDate = Some(currentYear.plus(fullYear * 2)),
+      finishDate = Some(nextYear.plus(fullYear * 3))
     )
 
     val year = Year(

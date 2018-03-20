@@ -613,6 +613,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def goalWithBacklogItemsByUuid(uuid: UUID) = goalsWithBacklogItems.filter { case (goal, _) => goal.uuid === uuid.toString }
 
+    // TODO: This might be an issue...
     private def goalsWithBacklogItems = {
       GoalTable
         .join(GoalBacklogItemTable)

@@ -6,7 +6,7 @@ import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
 import com.ferris.planning.sample.SampleData.{domain => SD}
-import com.ferris.planning.service.exceptions.Exceptions.{BacklogItemNotFoundException, EpochNotFoundException, MessageNotFoundException, YearNotFoundException}
+import com.ferris.planning.service.exceptions.Exceptions._
 
 import scala.concurrent.duration._
 
@@ -263,6 +263,150 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created = repo.createYear(SD.yearCreation).futureValue
         val deletion = repo.deleteYear(created.uuid).futureValue
         val retrieved = repo.getYear(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("theme") {
+    describe("creating") {
+      it("should create a theme") {
+        val created = repo.createTheme(SD.themeCreation).futureValue
+        created.yearId shouldBe SD.themeCreation.yearId
+        created.name shouldBe SD.themeCreation.name
+      }
+    }
+
+    describe("updating") {
+      it("should update a theme") {
+        val original = repo.createTheme(SD.themeCreation).futureValue
+        val updated = repo.updateTheme(original.uuid, SD.themeUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.yearId shouldBe SD.themeUpdate.yearId.value
+        updated.value.name shouldBe SD.themeUpdate.name.value
+      }
+
+      it("should throw an exception if a theme is not found") {
+        whenReady(repo.updateTheme(UUID.randomUUID, SD.themeUpdate).failed) { exception =>
+          exception shouldBe ThemeNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a theme") {
+        val created = repo.createTheme(SD.themeCreation).futureValue
+        val retrieved = repo.getTheme(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a theme is not found") {
+        val retrieved = repo.getTheme(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of themes") {
+        val created1 = repo.createTheme(SD.themeCreation).futureValue
+        val created2 = repo.createTheme(SD.themeCreation).futureValue
+        val retrieved = repo.getThemes.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a theme") {
+        val created = repo.createTheme(SD.themeCreation).futureValue
+        val deletion = repo.deleteTheme(created.uuid).futureValue
+        val retrieved = repo.getTheme(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("goal") {
+    describe("creating") {
+      it("should create a goal") {
+        val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
+        val created = repo.createGoal(SD.goalCreation.copy(backlogItems = backlogItems)).futureValue
+        created.themeId shouldBe SD.goalCreation.themeId
+        created.backlogItems should contain theSameElementsAs backlogItems
+        created.summary shouldBe SD.goalCreation.summary
+        created.description shouldBe SD.goalCreation.description
+        created.level shouldBe SD.goalCreation.level
+        created.priority shouldBe SD.goalCreation.priority
+        created.graduation shouldBe SD.goalCreation.graduation
+        created.status shouldBe SD.goalCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a goal") {
+        val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem3 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem4 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val originalBacklogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
+        val newBacklogItems =  backlogItem3.uuid :: backlogItem4.uuid :: Nil
+        val original = repo.createGoal(SD.goalCreation.copy(backlogItems = originalBacklogItems)).futureValue
+        val updated = repo.updateGoal(original.uuid, SD.goalUpdate.copy(backlogItems = Some(newBacklogItems))).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.themeId shouldBe SD.goalUpdate.themeId.value
+        updated.value.backlogItems should contain theSameElementsAs newBacklogItems
+        updated.value.summary shouldBe SD.goalUpdate.summary.value
+        updated.value.description shouldBe SD.goalUpdate.description.value
+        updated.value.level shouldBe SD.goalUpdate.level.value
+        updated.value.priority shouldBe SD.goalUpdate.priority.value
+        updated.value.graduation shouldBe SD.goalUpdate.graduation.value
+        updated.value.status shouldBe SD.goalUpdate.status.value
+      }
+
+      it("should throw an exception if a goal is not found") {
+        whenReady(repo.updateGoal(UUID.randomUUID, SD.goalUpdate).failed) { exception =>
+          exception shouldBe GoalNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a goal") {
+        val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
+        val created = repo.createGoal(SD.goalCreation.copy(backlogItems = backlogItems)).futureValue
+        val retrieved = repo.getGoal(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a goal is not found") {
+        val retrieved = repo.getGoal(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of goals") {
+        val created1 = repo.createGoal(SD.goalCreation).futureValue
+        val created2 = repo.createGoal(SD.goalCreation).futureValue
+        val retrieved = repo.getGoals.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a goal") {
+        val created = repo.createGoal(SD.goalCreation).futureValue
+        val deletion = repo.deleteGoal(created.uuid).futureValue
+        val retrieved = repo.getGoal(created.uuid).futureValue
         deletion shouldBe true
         retrieved shouldBe empty
       }
