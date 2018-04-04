@@ -7,6 +7,7 @@ import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
+import slick.lifted.QueryBase
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -613,18 +614,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def goalWithBacklogItemsByUuid(uuid: UUID) = goalsWithBacklogItems.filter { case (goal, _) => goal.uuid === uuid.toString }
 
-    // TODO: This might be an issue...
     private def goalsWithBacklogItems = {
       GoalTable
-        .join(GoalBacklogItemTable)
+        .joinLeft(GoalBacklogItemTable)
         .on(_.id === _.goalId)
-        .join(BacklogItemTable)
-        .on { case ((_, goalBacklogItem), backlogItem) => goalBacklogItem.backlogItemId === backlogItem.id }
+        .joinLeft(BacklogItemTable)
+        .on { case ((_, goalBacklogItem), backlogItem) => goalBacklogItem.map(_.backlogItemId).getOrElse(-1L) === backlogItem.id }
         .map { case ((goal, _), backlogItem) => (goal, backlogItem) }
     }
 
-    private def groupByGoal(goalBacklogItems: Seq[(GoalRow, BacklogItemRow)]): Seq[(GoalRow, Seq[BacklogItemRow])] = {
-      goalBacklogItems.groupBy { case (goal, _) => goal }.map { case (goal, pairs) => (goal, pairs.map(_._2)) }.toSeq
+    private def groupByGoal(goalBacklogItems: Seq[(GoalRow, Option[BacklogItemRow])]): Seq[(GoalRow, Seq[BacklogItemRow])] = {
+      goalBacklogItems.groupBy { case (goal, _) => goal }.map { case (goal, pairs) => (goal, pairs.flatMap(_._2)) }.toSeq
     }
 
     private def threadByUuid(uuid: UUID) = ThreadTable.filter(_.uuid === uuid.toString)

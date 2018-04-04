@@ -107,7 +107,7 @@ object SampleData {
 
     val goalCreation = CreateGoal(
       themeId = UUID.randomUUID,
-      backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
+      backlogItems = Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
       level = 1,
@@ -118,7 +118,7 @@ object SampleData {
 
     val goalUpdate = UpdateGoal(
       themeId = Some(UUID.randomUUID),
-      backlogItems = Some(UUID.randomUUID :: UUID.randomUUID :: Nil),
+      backlogItems = Some(Nil),
       summary = Some("Learn to play an instrument"),
       description = Some("Learn to play the piano, the guitar, and the saxophone"),
       level = Some(2),

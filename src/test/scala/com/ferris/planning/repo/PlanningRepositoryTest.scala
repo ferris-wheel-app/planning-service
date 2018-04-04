@@ -378,7 +378,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
 
     describe("retrieving") {
-      it("should retrieve a goal") {
+      it("should retrieve a goal with backlog items") {
         val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
         val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
         val backlogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
@@ -388,23 +388,44 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved.value shouldBe created
       }
 
+      it("should retrieve a goal without backlog items") {
+        val created = repo.createGoal(SD.goalCreation.copy(backlogItems = Nil)).futureValue
+        val retrieved = repo.getGoal(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should retrieve a list of goals with backlog items") {
+        val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
+        val created1 = repo.createGoal(SD.goalCreation.copy(backlogItems = backlogItems)).futureValue
+        val created2 = repo.createGoal(SD.goalCreation.copy(backlogItems = backlogItems)).futureValue
+        val retrieved = repo.getGoals.futureValue
+        retrieved should not be empty
+        retrieved should contain theSameElementsAs Seq(created1, created2)
+      }
+
+      it("should retrieve a list of goals without backlog items") {
+        val created1 = repo.createGoal(SD.goalCreation.copy(backlogItems = Nil)).futureValue
+        val created2 = repo.createGoal(SD.goalCreation.copy(backlogItems = Nil)).futureValue
+        val retrieved = repo.getGoals.futureValue
+        retrieved should not be empty
+        retrieved should contain theSameElementsAs Seq(created1, created2)
+      }
+
       it("should return none if a goal is not found") {
         val retrieved = repo.getGoal(UUID.randomUUID).futureValue
         retrieved shouldBe empty
-      }
-
-      it("should retrieve a list of goals") {
-        val created1 = repo.createGoal(SD.goalCreation).futureValue
-        val created2 = repo.createGoal(SD.goalCreation).futureValue
-        val retrieved = repo.getGoals.futureValue
-        retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
       }
     }
 
     describe("deleting") {
       it("should delete a goal") {
-        val created = repo.createGoal(SD.goalCreation).futureValue
+        val backlogItem1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItem2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val backlogItems =  backlogItem1.uuid :: backlogItem2.uuid :: Nil
+        val created = repo.createGoal(SD.goalCreation.copy(backlogItems = backlogItems)).futureValue
         val deletion = repo.deleteGoal(created.uuid).futureValue
         val retrieved = repo.getGoal(created.uuid).futureValue
         deletion shouldBe true
