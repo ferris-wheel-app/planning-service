@@ -482,7 +482,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            UpdateTypeEnum.keepOrReplace(update.status, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
             .andThen(getWeaveAction(uuid))
         } getOrElse DBIO.failed(WeaveNotFoundException())
       }.transactionally
@@ -494,7 +494,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone), update.order.getOrElse(old.order),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.status, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
             .andThen(getLaserDonutAction(uuid))
         } getOrElse DBIO.failed(LaserDonutNotFoundException())
       }.transactionally

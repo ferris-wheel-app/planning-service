@@ -433,6 +433,402 @@ class PlanningRepositoryTest extends AsyncFunSpec
       }
     }
   }
+
+  describe("thread") {
+    describe("creating") {
+      it("should create a thread") {
+        val created = repo.createThread(SD.threadCreation).futureValue
+        created.goalId shouldBe SD.threadCreation.goalId
+        created.summary shouldBe SD.threadCreation.summary
+        created.description shouldBe SD.threadCreation.description
+        created.status shouldBe SD.threadCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a thread") {
+        val original = repo.createThread(SD.threadCreation).futureValue
+        val updated = repo.updateThread(original.uuid, SD.threadUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.goalId.value shouldBe SD.threadUpdate.goalId.value
+        updated.value.summary shouldBe SD.threadUpdate.summary.value
+        updated.value.description shouldBe SD.threadUpdate.description.value
+        updated.value.status shouldBe SD.threadUpdate.status.value
+      }
+
+      it("should throw an exception if a thread is not found") {
+        whenReady(repo.updateThread(UUID.randomUUID, SD.threadUpdate).failed) { exception =>
+          exception shouldBe ThreadNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a thread") {
+        val created = repo.createThread(SD.threadCreation).futureValue
+        val retrieved = repo.getThread(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a thread is not found") {
+        val retrieved = repo.getThread(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of threads") {
+        val created1 = repo.createThread(SD.threadCreation).futureValue
+        val created2 = repo.createThread(SD.threadCreation).futureValue
+        val retrieved = repo.getThreads.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a thread") {
+        val created = repo.createThread(SD.threadCreation).futureValue
+        val deletion = repo.deleteThread(created.uuid).futureValue
+        val retrieved = repo.getThread(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("weave") {
+    describe("creating") {
+      it("should create a weave") {
+        val created = repo.createWeave(SD.weaveCreation).futureValue
+        created.goalId shouldBe SD.weaveCreation.goalId
+        created.summary shouldBe SD.weaveCreation.summary
+        created.description shouldBe SD.weaveCreation.description
+        created.`type` shouldBe SD.weaveCreation.`type`
+        created.status shouldBe SD.weaveCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a weave") {
+        val original = repo.createWeave(SD.weaveCreation).futureValue
+        val updated = repo.updateWeave(original.uuid, SD.weaveUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.goalId.value shouldBe SD.weaveUpdate.goalId.value
+        updated.value.summary shouldBe SD.weaveUpdate.summary.value
+        updated.value.description shouldBe SD.weaveUpdate.description.value
+        updated.value.`type` shouldBe SD.weaveUpdate.`type`.value
+        updated.value.status shouldBe SD.weaveUpdate.status.value
+      }
+
+      it("should throw an exception if a weave is not found") {
+        whenReady(repo.updateWeave(UUID.randomUUID, SD.weaveUpdate).failed) { exception =>
+          exception shouldBe WeaveNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a weave") {
+        val created = repo.createWeave(SD.weaveCreation).futureValue
+        val retrieved = repo.getWeave(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a weave is not found") {
+        val retrieved = repo.getWeave(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of weaves") {
+        val created1 = repo.createWeave(SD.weaveCreation).futureValue
+        val created2 = repo.createWeave(SD.weaveCreation).futureValue
+        val retrieved = repo.getWeaves.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a weave") {
+        val created = repo.createWeave(SD.weaveCreation).futureValue
+        val deletion = repo.deleteWeave(created.uuid).futureValue
+        val retrieved = repo.getWeave(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("laser donut") {
+    describe("creating") {
+      it("should create a laser donut") {
+        val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        created.goalId shouldBe SD.laserDonutCreation.goalId
+        created.summary shouldBe SD.laserDonutCreation.summary
+        created.description shouldBe SD.laserDonutCreation.description
+        created.milestone shouldBe SD.laserDonutCreation.milestone
+        created.order shouldBe SD.laserDonutCreation.order
+        created.`type` shouldBe SD.laserDonutCreation.`type`
+        created.status shouldBe SD.laserDonutCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a laser donut") {
+        val original = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        val updated = repo.updateLaserDonut(original.uuid, SD.laserDonutUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.goalId shouldBe SD.laserDonutUpdate.goalId.value
+        updated.value.summary shouldBe SD.laserDonutUpdate.summary.value
+        updated.value.description shouldBe SD.laserDonutUpdate.description.value
+        updated.value.milestone shouldBe SD.laserDonutUpdate.milestone.value
+        updated.value.order shouldBe SD.laserDonutUpdate.order.value
+        updated.value.`type` shouldBe SD.laserDonutUpdate.`type`.value
+        updated.value.status shouldBe SD.laserDonutUpdate.status.value
+      }
+
+      it("should throw an exception if a laser donut is not found") {
+        whenReady(repo.updateLaserDonut(UUID.randomUUID, SD.laserDonutUpdate).failed) { exception =>
+          exception shouldBe LaserDonutNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a laser donut") {
+        val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        val retrieved = repo.getLaserDonut(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a laser donut is not found") {
+        val retrieved = repo.getLaserDonut(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of laser donuts") {
+        val created1 = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        val created2 = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        val retrieved = repo.getLaserDonuts.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a laser donuts") {
+        val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
+        val deletion = repo.deleteLaserDonut(created.uuid).futureValue
+        val retrieved = repo.getLaserDonut(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("portion") {
+    describe("creating") {
+      it("should create a portion") {
+        val created = repo.createPortion(SD.portionCreation).futureValue
+        created.laserDonutId shouldBe SD.portionCreation.laserDonutId
+        created.summary shouldBe SD.portionCreation.summary
+        created.order shouldBe SD.portionCreation.order
+        created.status shouldBe SD.portionCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a portion") {
+        val original = repo.createPortion(SD.portionCreation).futureValue
+        val updated = repo.updatePortion(original.uuid, SD.portionUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.laserDonutId shouldBe SD.portionUpdate.laserDonutId.value
+        updated.value.summary shouldBe SD.portionUpdate.summary.value
+        updated.value.order shouldBe SD.portionUpdate.order.value
+        updated.value.status shouldBe SD.portionUpdate.status.value
+      }
+
+      it("should throw an exception if a portion is not found") {
+        whenReady(repo.updatePortion(UUID.randomUUID, SD.portionUpdate).failed) { exception =>
+          exception shouldBe PortionNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a portion") {
+        val created = repo.createPortion(SD.portionCreation).futureValue
+        val retrieved = repo.getPortion(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a portion is not found") {
+        val retrieved = repo.getPortion(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of portions") {
+        val created1 = repo.createPortion(SD.portionCreation).futureValue
+        val created2 = repo.createPortion(SD.portionCreation).futureValue
+        val retrieved = repo.getPortions.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a portions") {
+        val created = repo.createPortion(SD.portionCreation).futureValue
+        val deletion = repo.deletePortion(created.uuid).futureValue
+        val retrieved = repo.getPortion(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("todo") {
+    describe("creating") {
+      it("should create a todo") {
+        val created = repo.createTodo(SD.todoCreation).futureValue
+        created.portionId shouldBe SD.todoCreation.portionId
+        created.description shouldBe SD.todoCreation.description
+        created.order shouldBe SD.todoCreation.order
+        created.status shouldBe SD.todoCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a todo") {
+        val original = repo.createTodo(SD.todoCreation).futureValue
+        val updated = repo.updateTodo(original.uuid, SD.todoUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.portionId shouldBe SD.todoUpdate.portionId.value
+        updated.value.description shouldBe SD.todoUpdate.description.value
+        updated.value.order shouldBe SD.todoUpdate.order.value
+        updated.value.status shouldBe SD.todoUpdate.status.value
+      }
+
+      it("should throw an exception if a todo is not found") {
+        whenReady(repo.updateTodo(UUID.randomUUID, SD.todoUpdate).failed) { exception =>
+          exception shouldBe TodoNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a todo") {
+        val created = repo.createTodo(SD.todoCreation).futureValue
+        val retrieved = repo.getTodo(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a todo is not found") {
+        val retrieved = repo.getTodo(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of todos") {
+        val created1 = repo.createTodo(SD.todoCreation).futureValue
+        val created2 = repo.createTodo(SD.todoCreation).futureValue
+        val retrieved = repo.getTodos.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a todos") {
+        val created = repo.createTodo(SD.todoCreation).futureValue
+        val deletion = repo.deleteTodo(created.uuid).futureValue
+        val retrieved = repo.getTodo(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("hobby") {
+    describe("creating") {
+      it("should create a hobby") {
+        val created = repo.createHobby(SD.hobbyCreation).futureValue
+        created.goalId shouldBe SD.hobbyCreation.goalId
+        created.summary shouldBe SD.hobbyCreation.summary
+        created.description shouldBe SD.hobbyCreation.description
+        created.frequency shouldBe SD.hobbyCreation.frequency
+        created.`type` shouldBe SD.hobbyCreation.`type`
+        created.status shouldBe SD.hobbyCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a hobby") {
+        val original = repo.createHobby(SD.hobbyCreation).futureValue
+        val updated = repo.updateHobby(original.uuid, SD.hobbyUpdate).futureValue
+        updated should not be empty
+        updated.value should not be original
+        updated.value.uuid shouldBe original.uuid
+        updated.value.goalId.value shouldBe SD.hobbyUpdate.goalId.value
+        updated.value.summary shouldBe SD.hobbyUpdate.summary.value
+        updated.value.description shouldBe SD.hobbyUpdate.description.value
+        updated.value.frequency shouldBe SD.hobbyUpdate.frequency.value
+        updated.value.`type` shouldBe SD.hobbyUpdate.`type`.value
+        updated.value.status shouldBe SD.hobbyUpdate.status.value
+      }
+
+      it("should throw an exception if a hobby is not found") {
+        whenReady(repo.updateHobby(UUID.randomUUID, SD.hobbyUpdate).failed) { exception =>
+          exception shouldBe HobbyNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a hobby") {
+        val created = repo.createHobby(SD.hobbyCreation).futureValue
+        val retrieved = repo.getHobby(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a hobby is not found") {
+        val retrieved = repo.getHobby(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of hobbies") {
+        val created1 = repo.createHobby(SD.hobbyCreation).futureValue
+        val created2 = repo.createHobby(SD.hobbyCreation).futureValue
+        val retrieved = repo.getHobbies.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a hobbies") {
+        val created = repo.createHobby(SD.hobbyCreation).futureValue
+        val deletion = repo.deleteHobby(created.uuid).futureValue
+        val retrieved = repo.getHobby(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
 }
 
 
