@@ -324,7 +324,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
     }
 
     override def deleteHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
-      repo.deleteTodo(uuid)
+      repo.deleteHobby(uuid)
     }
   }
 }

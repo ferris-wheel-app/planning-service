@@ -564,9 +564,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
-  describe("laser donut") {
+  describe("laser-donut") {
     describe("creating") {
-      it("should create a laser donut") {
+      it("should create a laser-donut") {
         val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         created.goalId shouldBe SD.laserDonutCreation.goalId
         created.summary shouldBe SD.laserDonutCreation.summary
@@ -579,7 +579,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
 
     describe("updating") {
-      it("should update a laser donut") {
+      it("should update a laser-donut") {
         val original = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val updated = repo.updateLaserDonut(original.uuid, SD.laserDonutUpdate).futureValue
         updated should not be empty
@@ -594,7 +594,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.status shouldBe SD.laserDonutUpdate.status.value
       }
 
-      it("should throw an exception if a laser donut is not found") {
+      it("should throw an exception if a laser-donut is not found") {
         whenReady(repo.updateLaserDonut(UUID.randomUUID, SD.laserDonutUpdate).failed) { exception =>
           exception shouldBe LaserDonutNotFoundException()
         }
@@ -602,19 +602,19 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
 
     describe("retrieving") {
-      it("should retrieve a laser donut") {
+      it("should retrieve a laser-donut") {
         val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val retrieved = repo.getLaserDonut(created.uuid).futureValue
         retrieved should not be empty
         retrieved.value shouldBe created
       }
 
-      it("should return none if a laser donut is not found") {
+      it("should return none if a laser-donut is not found") {
         val retrieved = repo.getLaserDonut(UUID.randomUUID).futureValue
         retrieved shouldBe empty
       }
 
-      it("should retrieve a list of laser donuts") {
+      it("should retrieve a list of laser-donuts") {
         val created1 = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val created2 = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val retrieved = repo.getLaserDonuts.futureValue
@@ -624,7 +624,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
 
     describe("deleting") {
-      it("should delete a laser donuts") {
+      it("should delete a laser-donuts") {
         val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val deletion = repo.deleteLaserDonut(created.uuid).futureValue
         val retrieved = repo.getLaserDonut(created.uuid).futureValue
