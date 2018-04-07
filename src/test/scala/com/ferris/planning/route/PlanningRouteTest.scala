@@ -189,7 +189,7 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
-      describe("getting backlog-item") {
+      describe("getting backlog-items") {
         it("should retrieve a list of all backlog-items") {
           val backlogItems = Seq(domain.backlogItem, domain.backlogItem.copy(uuid = UUID.randomUUID))
 
