@@ -326,6 +326,25 @@ object SampleData {
       `type` = BacklogItemType.toString(domain.backlogItem.`type`)
     )
 
+    val epochCreation = EpochCreation(
+      name = domain.epochCreation.name,
+      totem = domain.epochCreation.totem,
+      question = domain.epochCreation.question
+    )
+
+    val epochUpdate = EpochUpdate(
+      name = domain.epochUpdate.name,
+      totem = domain.epochUpdate.totem,
+      question = domain.epochUpdate.question
+    )
+
+    val epoch = EpochView(
+      uuid = domain.epoch.uuid,
+      name = domain.epoch.name,
+      totem = domain.epoch.totem,
+      question = domain.epoch.question
+    )
+
     val yearCreation = YearCreation(
       epochId = domain.yearCreation.epochId,
       startDate = domain.yearCreation.startDate,
@@ -410,7 +429,7 @@ object SampleData {
     )
 
     val thread = ThreadView(
-      uuid = UUID.randomUUID,
+      uuid = domain.thread.uuid,
       goalId = domain.thread.goalId,
       summary = domain.thread.summary,
       description = domain.thread.description,

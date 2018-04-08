@@ -17,13 +17,19 @@ trait PlanningRestFormats extends FerrisJsonSupport {
     }
     override def read(value: JsValue): UUID = value match {
       case JsString(str) => UUID.fromString(str)
-      case other => throw DeserializationException(s"Expected UUID as JsString, but got $other")
+      case other => throw DeserializationException(s"Expected a UUID as JsString, but got $other")
     }
   }
 
   implicit object DateFormat extends RootJsonFormat[DateTime] {
     override def write(obj: DateTime): JsValue = JsString(obj.toString)
-    override def read(json: JsValue): DateTime = ???
+    override def read(value: JsValue): DateTime = {
+      def exception(actual: String) = DeserializationException(s"Expected an ISO formatted date as JsString, but got $actual")
+      value match {
+        case JsString(str) => DateTime.fromIsoDateTimeString(str).getOrElse(throw exception(str))
+        case other => throw exception(other.toString)
+      }
+    }
   }
 
   implicit val messageCreationFormat: RootJsonFormat[MessageCreation] = jsonFormat2(MessageCreation)
