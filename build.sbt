@@ -9,12 +9,16 @@ lazy val root = (project in file("."))
   .settings(sourceGenerators in Compile += slickCodeGenTask.taskValue) // register automatic code generation on every compile, remove for only manual use)
   .settings(sourceManaged in Compile <<= baseDirectory { _ / generatedSourcesFolder })
   .dependsOn(codegen)
+  //.dependsOn(contract)
 
 
 /** codegen project containing the customized code generator */
 lazy val codegen = project
   .settings(sharedSettings)
   .settings(libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % slickV)
+
+lazy val contract = (project in file("planning-rest-contract"))
+  .settings(rootSettings)
 
 lazy val rootSettings = {
   scalaVersion := "2.12.1"

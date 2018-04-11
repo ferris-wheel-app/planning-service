@@ -1,8 +1,8 @@
-package com.ferris.planning.rest.conversions
+package com.ferris.planning.service.conversions
 
 import com.ferris.planning.command.Commands._
+import com.ferris.planning.contract.resource.TypeFields
 import com.ferris.planning.rest.Resources.In._
-import com.ferris.planning.rest.TypeFields
 
 object ExternalToCommand {
 

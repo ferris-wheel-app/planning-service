@@ -5,9 +5,9 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
 import com.ferris.microservice.directive.FerrisDirectives
-import com.ferris.planning.rest.conversions.ExternalToCommand._
+import com.ferris.planning.service.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
-import com.ferris.planning.rest.conversions.ModelToView._
+import com.ferris.planning.service.conversions.ModelToView._
 import com.ferris.planning.rest.Resources.In._
 import com.ferris.planning.service.exceptions.Exceptions._
 import spray.json._

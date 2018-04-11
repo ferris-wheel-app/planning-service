@@ -5,8 +5,8 @@ import java.util.UUID
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import com.ferris.microservice.service.Envelope
-import com.ferris.planning.rest.conversions.ExternalToCommand._
-import com.ferris.planning.rest.conversions.ModelToView._
+import com.ferris.planning.service.conversions.ExternalToCommand._
+import com.ferris.planning.service.conversions.ModelToView._
 import com.ferris.planning.rest.Resources.Out._
 import com.ferris.planning.sample.SampleData.{domain, rest}
 import org.mockito.Matchers.{any, eq => eqTo}
