@@ -1,5 +1,9 @@
 name := "planning-service"
+
+organization := "com.ferris"
+
 version := "1.0"
+
 scalaVersion in ThisBuild := "2.12.1"
 
 /** main project containing main source code depending on slick and codegen project */
@@ -27,23 +31,26 @@ lazy val rootSettings = {
   libraryDependencies ++= {
     val akkaV           = "2.4.16"
     val akkaHttpV       = "10.0.1"
+    val ferrisV         = "0.0.1"
     val mysqlConnectorV = "5.1.40"
     val flywayV         = "3.2.1"
     val scalaTestV      = "3.0.1"
     val mockitoV        = "1.10.19"
     Seq(
-      "com.typesafe.akka" %% "akka-actor"           % akkaV,
-      "com.typesafe.akka" %% "akka-stream"          % akkaV,
-      "com.typesafe.akka" %% "akka-http-core"       % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http"            % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-jackson"    % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-xml"        % akkaHttpV,
-      "mysql"             %  "mysql-connector-java" % mysqlConnectorV,
-      "org.flywaydb"      %  "flyway-core"          % flywayV,
-      "org.scalatest"     %% "scalatest"            % scalaTestV       % Test,
-      "org.mockito"       %  "mockito-all"          % mockitoV         % Test
+      "com.typesafe.akka" %% "akka-actor"                 % akkaV,
+      "com.typesafe.akka" %% "akka-stream"                % akkaV,
+      "com.typesafe.akka" %% "akka-http-core"             % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http"                  % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-spray-json"       % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-jackson"          % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-xml"              % akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-testkit"          % akkaHttpV,
+      "com.ferris"        %% "ferris-http-microservice"   % ferrisV,
+      "com.ferris"        %% "ferris-json-utils"          % ferrisV,
+      "mysql"             %  "mysql-connector-java"       % mysqlConnectorV,
+      "org.flywaydb"      %  "flyway-core"                % flywayV,
+      "org.scalatest"     %% "scalatest"                  % scalaTestV       % Test,
+      "org.mockito"       %  "mockito-all"                % mockitoV         % Test
     )
   }
 }

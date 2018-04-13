@@ -15,7 +15,7 @@ import spray.json._
 import scala.concurrent.ExecutionContext
 
 trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with ResponseMappings {
-this: PlanningServiceComponent =>
+  this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
   implicit val materializer: Materializer
