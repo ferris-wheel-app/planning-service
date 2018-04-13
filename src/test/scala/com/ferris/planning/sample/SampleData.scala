@@ -4,10 +4,10 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
 import com.ferris.planning.command.Commands._
+import com.ferris.planning.contract.resource.Resources.In._
+import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.model.Model._
-import com.ferris.planning.rest.Resources.In._
-import com.ferris.planning.rest.Resources.Out._
-import com.ferris.planning.rest.TypeFields._
+import com.ferris.planning.service.conversions.TypeFields._
 
 object SampleData {
 

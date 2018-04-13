@@ -8,7 +8,7 @@ import com.ferris.microservice.directive.FerrisDirectives
 import com.ferris.planning.service.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
 import com.ferris.planning.service.conversions.ModelToView._
-import com.ferris.planning.rest.Resources.In._
+import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.service.exceptions.Exceptions._
 import spray.json._
 

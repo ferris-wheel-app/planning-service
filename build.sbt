@@ -1,5 +1,6 @@
 name := "planning-service"
 version := "1.0"
+scalaVersion in ThisBuild := "2.12.1"
 
 /** main project containing main source code depending on slick and codegen project */
 lazy val root = (project in file("."))
@@ -9,7 +10,7 @@ lazy val root = (project in file("."))
   .settings(sourceGenerators in Compile += slickCodeGenTask.taskValue) // register automatic code generation on every compile, remove for only manual use)
   .settings(sourceManaged in Compile <<= baseDirectory { _ / generatedSourcesFolder })
   .dependsOn(codegen)
-  //.dependsOn(contract)
+  .dependsOn(contract)
 
 
 /** codegen project containing the customized code generator */
@@ -21,8 +22,6 @@ lazy val contract = (project in file("planning-rest-contract"))
   .settings(rootSettings)
 
 lazy val rootSettings = {
-  scalaVersion := "2.12.1"
-
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
   libraryDependencies ++= {
@@ -51,7 +50,6 @@ lazy val rootSettings = {
 
 // shared sbt config between main project and codegen project
 lazy val sharedSettings = Seq(
-  scalaVersion := "2.12.1",
   scalacOptions := Seq("-feature", "-unchecked", "-deprecation"),
   libraryDependencies ++= Seq(
     "com.typesafe.slick"  %% "slick"          % slickV,

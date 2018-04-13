@@ -1,8 +1,7 @@
 package com.ferris.planning.service.conversions
 
-import com.ferris.planning.contract.resource.TypeFields
+import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.model.Model._
-import com.ferris.planning.rest.Resources.Out._
 
 object ModelToView {
 

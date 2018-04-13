@@ -11,7 +11,8 @@ import com.ferris.planning.service.DefaultPlanningServiceComponent
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent
   with SqlPlanningRepositoryComponent
-  with MySQLTablesComponent {
+  with MySQLTablesComponent
+  with App {
   override implicit lazy val system = ActorSystem()
   override implicit lazy val executor = system.dispatcher
   override implicit lazy val materializer = ActorMaterializer()

@@ -1,10 +1,10 @@
 package com.ferris.planning.route
 
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCode, StatusCodes}
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.StatusCodes.Success
+import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.model.Model._
-import com.ferris.planning.rest.Resources.Out._
 import com.ferris.planning.service.conversions.ModelToView._
 import com.ferris.planning.service.exceptions.Exceptions._
 import spray.json.RootJsonFormat

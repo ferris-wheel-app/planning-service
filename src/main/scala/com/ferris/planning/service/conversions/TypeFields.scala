@@ -1,5 +1,15 @@
 package com.ferris.planning.service.conversions
 
+import com.ferris.planning.model.Model.BacklogItemTypes.BacklogItemType
+import com.ferris.planning.model.Model.DonutTypes.DonutType
+import com.ferris.planning.model.Model.GoalStatuses.GoalStatus
+import com.ferris.planning.model.Model.GraduationTypes.GraduationType
+import com.ferris.planning.model.Model.HobbyFrequencies.HobbyFrequency
+import com.ferris.planning.model.Model.HobbyTypes.HobbyType
+import com.ferris.planning.model.Model.Statuses.Status
+import com.ferris.planning.model.Model.WeaveTypes.WeaveType
+import com.ferris.planning.model.Model._
+
 object TypeFields {
 
   sealed trait TypeResolver[T <: TypeEnum] {

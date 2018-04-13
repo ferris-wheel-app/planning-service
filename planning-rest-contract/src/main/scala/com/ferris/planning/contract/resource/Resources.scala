@@ -2,6 +2,8 @@ package com.ferris.planning.contract.resource
 
 import java.util.UUID
 
+import akka.http.scaladsl.model.DateTime
+
 object Resources {
 
   object In {

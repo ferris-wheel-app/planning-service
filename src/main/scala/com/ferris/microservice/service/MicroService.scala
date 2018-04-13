@@ -8,7 +8,7 @@ import akka.stream.Materializer
 
 import scala.concurrent.ExecutionContextExecutor
 
-trait MicroService extends App with MicroServiceConfigComponent {
+trait MicroService extends MicroServiceConfigComponent {
   implicit val system: ActorSystem
   implicit val executor: ExecutionContextExecutor
   implicit val materializer: Materializer
