@@ -12,7 +12,6 @@ lazy val root = (project in file("."))
   .dependsOn(codegen)
   .dependsOn(contract)
 
-
 /** codegen project containing the customized code generator */
 lazy val codegen = project
   .settings(sharedSettings)
@@ -20,6 +19,7 @@ lazy val codegen = project
 
 lazy val contract = (project in file("planning-rest-contract"))
   .settings(rootSettings)
+
 
 lazy val rootSettings = {
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
@@ -58,6 +58,7 @@ lazy val sharedSettings = Seq(
     "com.h2database"      %  "h2"             % "1.4.187"
   )
 )
+
 
 lazy val slickV = "3.2.0-M2"
 lazy val generatedSourcesFolder = "src/generated-sources/scala"
