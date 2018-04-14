@@ -1,4 +1,4 @@
-package com.ferris.planning.route
+package com.ferris.planning.contract.format
 
 import com.ferris.json.FerrisJsonSupport
 import com.ferris.planning.contract.resource.Resources.In._

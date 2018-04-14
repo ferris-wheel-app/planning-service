@@ -7,6 +7,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.ActorMaterializer
 import com.ferris.microservice.exceptions.ApiExceptionFormats
 import com.ferris.microservice.service.{Envelope, MicroServiceConfig}
+import com.ferris.planning.contract.format.PlanningRestFormats
 import com.ferris.planning.server.PlanningServer
 import com.ferris.planning.service.PlanningServiceComponent
 import org.scalatest.{FunSpec, Matchers, Outcome}

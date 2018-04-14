@@ -27,6 +27,7 @@ lazy val contract = (project in file("planning-rest-contract"))
 lazy val client = (project in file("planning-service-client"))
   .settings(rootSettings)
   .settings(libraryDependencies += "com.ferris" %% "ferris-http-service-client" % dependencies.ferrisClientV)
+  .dependsOn(contract)
 
 
 lazy val rootSettings = {

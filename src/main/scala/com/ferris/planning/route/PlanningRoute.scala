@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
 import com.ferris.microservice.directive.FerrisDirectives
+import com.ferris.planning.contract.format.PlanningRestFormats
 import com.ferris.planning.service.conversions.ExternalToCommand._
 import com.ferris.planning.service.PlanningServiceComponent
 import com.ferris.planning.service.conversions.ModelToView._
