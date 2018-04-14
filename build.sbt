@@ -19,38 +19,35 @@ lazy val root = (project in file("."))
 /** codegen project containing the customized code generator */
 lazy val codegen = project
   .settings(sharedSettings)
-  .settings(libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % slickV)
+  .settings(libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % dependencies.slickV)
 
 lazy val contract = (project in file("planning-rest-contract"))
   .settings(rootSettings)
+
+lazy val client = (project in file("planning-service-client"))
+  .settings(rootSettings)
+  .settings(libraryDependencies += "com.ferris" %% "ferris-http-service-client" % dependencies.ferrisClientV)
 
 
 lazy val rootSettings = {
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
   libraryDependencies ++= {
-    val akkaV           = "2.4.16"
-    val akkaHttpV       = "10.0.1"
-    val ferrisV         = "0.0.1"
-    val mysqlConnectorV = "5.1.40"
-    val flywayV         = "3.2.1"
-    val scalaTestV      = "3.0.1"
-    val mockitoV        = "1.10.19"
     Seq(
-      "com.typesafe.akka" %% "akka-actor"                 % akkaV,
-      "com.typesafe.akka" %% "akka-stream"                % akkaV,
-      "com.typesafe.akka" %% "akka-http-core"             % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http"                  % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-spray-json"       % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-jackson"          % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-xml"              % akkaHttpV,
-      "com.typesafe.akka" %% "akka-http-testkit"          % akkaHttpV,
-      "com.ferris"        %% "ferris-http-microservice"   % ferrisV,
-      "com.ferris"        %% "ferris-json-utils"          % ferrisV,
-      "mysql"             %  "mysql-connector-java"       % mysqlConnectorV,
-      "org.flywaydb"      %  "flyway-core"                % flywayV,
-      "org.scalatest"     %% "scalatest"                  % scalaTestV       % Test,
-      "org.mockito"       %  "mockito-all"                % mockitoV         % Test
+      "com.typesafe.akka" %% "akka-actor"                 % dependencies.akkaV,
+      "com.typesafe.akka" %% "akka-stream"                % dependencies.akkaV,
+      "com.typesafe.akka" %% "akka-http-core"             % dependencies.akkaHttpV,
+      "com.typesafe.akka" %% "akka-http"                  % dependencies.akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-spray-json"       % dependencies.akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-jackson"          % dependencies.akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-xml"              % dependencies.akkaHttpV,
+      "com.typesafe.akka" %% "akka-http-testkit"          % dependencies.akkaHttpV,
+      "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroserviceV,
+      "com.ferris"        %% "ferris-json-utils"          % dependencies.ferrisJsonUtilsV,
+      "mysql"             %  "mysql-connector-java"       % dependencies.mysqlConnectorV,
+      "org.flywaydb"      %  "flyway-core"                % dependencies.flywayV,
+      "org.scalatest"     %% "scalatest"                  % dependencies.scalaTestV       % Test,
+      "org.mockito"       %  "mockito-all"                % dependencies.mockitoV         % Test
     )
   }
 }
@@ -59,15 +56,26 @@ lazy val rootSettings = {
 lazy val sharedSettings = Seq(
   scalacOptions := Seq("-feature", "-unchecked", "-deprecation"),
   libraryDependencies ++= Seq(
-    "com.typesafe.slick"  %% "slick"          % slickV,
-    "com.typesafe.slick"  %% "slick-hikaricp" % slickV,
+    "com.typesafe.slick"  %% "slick"          % dependencies.slickV,
+    "com.typesafe.slick"  %% "slick-hikaricp" % dependencies.slickV,
     "org.slf4j"           %  "slf4j-nop"      % "1.7.10",
     "com.h2database"      %  "h2"             % "1.4.187"
   )
 )
 
+lazy val dependencies = new {
+  val akkaV                       = "2.4.16"
+  val akkaHttpV                   = "10.0.1"
+  val ferrisMicroserviceV         = "0.0.1"
+  val ferrisJsonUtilsV            = "0.0.1"
+  val ferrisClientV               = "0.0.1"
+  val slickV                      = "3.2.0-M2"
+  val mysqlConnectorV             = "5.1.40"
+  val flywayV                     = "3.2.1"
+  val scalaTestV                  = "3.0.1"
+  val mockitoV                    = "1.10.19"
+}
 
-lazy val slickV = "3.2.0-M2"
 lazy val generatedSourcesFolder = "src/generated-sources/scala"
 
 // code generation task that calls the customized code generator
