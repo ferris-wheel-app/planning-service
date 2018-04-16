@@ -71,6 +71,7 @@ trait ResponseMappings {
     case None => throw HobbyNotFoundException()
   }
 
-  def mapDeletion(deleted: Boolean): ToResponseMarshallable =
-    if (deleted) StatusCodes.OK else StatusCodes.NotFound
+  def mapDeletion(deleted: Boolean): (Success, DeletionResultView) =
+    if (deleted) (StatusCodes.OK, DeletionResult.successful)
+    else (StatusCodes.OK, DeletionResult.unsuccessful)
 }

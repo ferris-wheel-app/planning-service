@@ -283,5 +283,14 @@ object Resources {
       `type`: String,
       status: String
     )
+    
+    case class DeletionResultView(
+      isSuccessful: Boolean
+    )
+
+    object DeletionResult {
+      def successful = DeletionResultView(true)
+      def unsuccessful = DeletionResultView(false)
+    }
   }
 }

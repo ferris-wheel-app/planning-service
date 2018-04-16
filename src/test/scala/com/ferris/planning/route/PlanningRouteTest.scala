@@ -103,6 +103,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteMessage(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/messages/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteMessage(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -113,7 +114,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteMessage(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/messages/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteMessage(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -208,6 +210,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteBacklogItem(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/backlog-items/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteBacklogItem(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -218,7 +221,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteBacklogItem(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/backlog-items/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteBacklogItem(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -313,6 +317,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteEpoch(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/epochs/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteEpoch(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -323,7 +328,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteEpoch(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/epochs/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteEpoch(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -418,6 +424,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteYear(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/years/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteYear(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -428,7 +435,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteYear(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/years/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteYear(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -523,6 +531,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteTheme(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/themes/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteTheme(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -533,7 +542,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteTheme(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/themes/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteTheme(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -628,6 +638,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteGoal(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/goals/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteGoal(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -638,7 +649,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteGoal(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/goals/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteGoal(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -733,6 +745,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteThread(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/threads/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteThread(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -743,7 +756,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteThread(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/threads/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteThread(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -838,6 +852,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteWeave(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/weaves/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteWeave(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -848,7 +863,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteWeave(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/weaves/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteWeave(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -943,6 +959,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteLaserDonut(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/laser-donuts/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteLaserDonut(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -953,7 +970,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteLaserDonut(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/laser-donuts/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteLaserDonut(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1048,6 +1066,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deletePortion(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/portions/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deletePortion(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1058,7 +1077,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deletePortion(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/portions/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deletePortion(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1153,6 +1173,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteTodo(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/todos/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteTodo(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1163,7 +1184,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteTodo(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/todos/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteTodo(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1258,6 +1280,7 @@ class PlanningRouteTest extends RouteTestFramework {
           when(testServer.planningService.deleteHobby(eqTo(id))(any())).thenReturn(Future.successful(true))
           Delete(s"/api/hobbies/$id") ~> route ~> check {
             status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.successful
             verify(testServer.planningService, times(1)).deleteHobby(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1268,7 +1291,8 @@ class PlanningRouteTest extends RouteTestFramework {
 
           when(testServer.planningService.deleteHobby(eqTo(id))(any())).thenReturn(Future.successful(false))
           Delete(s"/api/hobbies/$id") ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResultView]].data shouldBe DeletionResult.unsuccessful
             verify(testServer.planningService, times(1)).deleteHobby(eqTo(id))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }

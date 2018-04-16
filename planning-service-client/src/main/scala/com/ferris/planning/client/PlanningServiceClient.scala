@@ -1,5 +1,7 @@
 package com.ferris.planning.client
 
+import java.util.UUID
+
 import akka.http.scaladsl.model.Uri
 import Uri.{Path, Query}
 import Uri.Path._
@@ -21,10 +23,23 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def createMessage(creation: MessageCreation): Future[MessageView] = {
+  def createMessage(creation: MessageCreation): Future[MessageView] =
     makePostRequest[MessageCreation, MessageView](
       Uri(path = apiPath / messagesPath),
       creation
     ).mapTo[MessageView]
-  }
+
+  def updateMessage(id: UUID, update: MessageUpdate): Future[MessageView] =
+    makePutRequest[MessageUpdate, MessageView](
+      Uri(path = apiPath / messagesPath),
+      update
+    ).mapTo[MessageView]
+
+  def message(id: UUID): Future[Option[MessageView]] =
+    makeGetRequest[MessageView](Uri(path = apiPath / messagesPath / id.toString)).mapTo[Option[MessageView]]
+
+  def messages: Future[List[MessageView]] =
+    makeGetRequest[List[MessageView]](Uri(path = apiPath / messagesPath)).mapTo[List[MessageView]]
+
+  //def deleteMessage(id: UUID)
 }
