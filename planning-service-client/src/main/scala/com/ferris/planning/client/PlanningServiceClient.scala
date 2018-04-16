@@ -3,7 +3,6 @@ package com.ferris.planning.client
 import java.util.UUID
 
 import akka.http.scaladsl.model.Uri
-import Uri.{Path, Query}
 import Uri.Path._
 import akka.stream.ActorMaterializer
 import com.ferris.planning.contract.format.PlanningRestFormats
@@ -21,25 +20,18 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   private val messagesPath = "messages"
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   def createMessage(creation: MessageCreation): Future[MessageView] =
-    makePostRequest[MessageCreation, MessageView](
-      Uri(path = apiPath / messagesPath),
-      creation
-    ).mapTo[MessageView]
+    makePostRequest[MessageCreation, MessageView](Uri(path = apiPath / messagesPath), creation)
 
   def updateMessage(id: UUID, update: MessageUpdate): Future[MessageView] =
-    makePutRequest[MessageUpdate, MessageView](
-      Uri(path = apiPath / messagesPath),
-      update
-    ).mapTo[MessageView]
+    makePutRequest[MessageUpdate, MessageView](Uri(path = apiPath / messagesPath / id.toString), update)
 
   def message(id: UUID): Future[Option[MessageView]] =
-    makeGetRequest[MessageView](Uri(path = apiPath / messagesPath / id.toString)).mapTo[Option[MessageView]]
+    makeGetRequest[Option[MessageView]](Uri(path = apiPath / messagesPath / id.toString))
 
   def messages: Future[List[MessageView]] =
-    makeGetRequest[List[MessageView]](Uri(path = apiPath / messagesPath)).mapTo[List[MessageView]]
+    makeGetRequest[List[MessageView]](Uri(path = apiPath / messagesPath))
 
-  //def deleteMessage(id: UUID)
+  def deleteMessage(id: UUID): Future[DeletionResultView] =
+    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / messagesPath / id.toString))
 }

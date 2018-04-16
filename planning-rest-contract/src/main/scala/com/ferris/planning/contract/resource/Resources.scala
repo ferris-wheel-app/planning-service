@@ -289,8 +289,8 @@ object Resources {
     )
 
     object DeletionResult {
-      def successful = DeletionResultView(true)
-      def unsuccessful = DeletionResultView(false)
+      val successful = DeletionResultView(true)
+      val unsuccessful = DeletionResultView(false)
     }
   }
 }
