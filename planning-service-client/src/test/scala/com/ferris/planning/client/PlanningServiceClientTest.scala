@@ -33,7 +33,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
   implicit def envFormat[T](implicit ev: JsonFormat[T]): RootJsonFormat[Envelope[T]] = jsonFormat2(Envelope[T])
 
   describe("a planning service client") {
-    describe("handling messages") {
+    describe("handling creations") {
       it("should be able to create a message") {
         val creationRequest = Marshal(SD.messageCreation.toJson).to[RequestEntity].futureValue
         val creationResponse = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
@@ -42,7 +42,9 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
           response shouldBe SD.message
         }
       }
+    }
 
+    describe("handling updates") {
       it("should be able to update a message") {
         val id = UUID.randomUUID
         val updateRequest = Marshal(SD.messageUpdate.toJson).to[RequestEntity].futureValue
@@ -52,7 +54,9 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
           response shouldBe SD.message
         }
       }
+    }
 
+    describe("handling retrievals") {
       it("should be able to retrieve a message") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
@@ -70,7 +74,9 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
           response shouldBe list
         }
       }
+    }
 
+    describe("handling deletions") {
       it("should be able to delete a message") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
