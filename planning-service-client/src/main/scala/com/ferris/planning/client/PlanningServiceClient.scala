@@ -71,7 +71,7 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def updateMessage(id: UUID, update: MessageUpdate): Future[MessageView] =
     makePutRequest[MessageUpdate, MessageView](Uri(path = apiPath / messagesPath / id.toString), update)
 
-  def updateBacklogItems(id: UUID, update: BacklogItemUpdate): Future[BacklogItemView] =
+  def updateBacklogItem(id: UUID, update: BacklogItemUpdate): Future[BacklogItemView] =
     makePutRequest[BacklogItemUpdate, BacklogItemView](Uri(path = apiPath / backlogItemsPath / id.toString), update)
 
   def updateEpoch(id: UUID, update: EpochUpdate): Future[EpochView] =
