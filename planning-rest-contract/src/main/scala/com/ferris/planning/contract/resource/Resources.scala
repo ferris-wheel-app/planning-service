@@ -284,13 +284,13 @@ object Resources {
       status: String
     )
     
-    case class DeletionResultView(
+    case class DeletionResult(
       isSuccessful: Boolean
     )
 
     object DeletionResult {
-      val successful = DeletionResultView(true)
-      val unsuccessful = DeletionResultView(false)
+      val successful = DeletionResult(true)
+      val unsuccessful = DeletionResult(false)
     }
   }
 }

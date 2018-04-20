@@ -179,39 +179,39 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
     makeGetRequest[List[HobbyView]](Uri(path = apiPath / hobbiesPath))
 
 
-  def deleteMessage(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / messagesPath / id.toString))
+  def deleteMessage(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / messagesPath / id.toString))
 
-  def deleteBacklogItem(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / backlogItemsPath / id.toString))
+  def deleteBacklogItem(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / backlogItemsPath / id.toString))
 
-  def deleteEpoch(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / epochsPath / id.toString))
+  def deleteEpoch(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / epochsPath / id.toString))
 
-  def deleteYear(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / yearsPath / id.toString))
+  def deleteYear(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / yearsPath / id.toString))
 
-  def deleteTheme(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / themesPath / id.toString))
+  def deleteTheme(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / themesPath / id.toString))
 
-  def deleteGoal(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / goalsPath / id.toString))
+  def deleteGoal(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / goalsPath / id.toString))
 
-  def deleteThread(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / threadsPath / id.toString))
+  def deleteThread(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / threadsPath / id.toString))
 
-  def deleteWeave(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / weavesPath / id.toString))
+  def deleteWeave(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / weavesPath / id.toString))
 
-  def deleteLaserDonut(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / laserDonutsPath / id.toString))
+  def deleteLaserDonut(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / laserDonutsPath / id.toString))
 
-  def deletePortion(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / portionsPath / id.toString))
+  def deletePortion(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / portionsPath / id.toString))
 
-  def deleteTodo(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / todosPath / id.toString))
+  def deleteTodo(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / todosPath / id.toString))
 
-  def deleteHobby(id: UUID): Future[DeletionResultView] =
-    makeDeleteRequest[DeletionResultView](Uri(path = apiPath / hobbiesPath / id.toString))
+  def deleteHobby(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / hobbiesPath / id.toString))
 }

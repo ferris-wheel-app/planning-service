@@ -54,5 +54,5 @@ trait PlanningRestFormats extends FerrisJsonSupport {
   implicit val hobbyUpdateFormat: RootJsonFormat[HobbyUpdate] = jsonFormat6(HobbyUpdate)
   implicit val hobbyViewFormat: RootJsonFormat[HobbyView] = jsonFormat7(HobbyView)
 
-  implicit val deletionResultFormat: RootJsonFormat[DeletionResultView] = jsonFormat1(DeletionResultView)
+  implicit val deletionResultFormat: RootJsonFormat[DeletionResult] = jsonFormat1(DeletionResult.apply)
 }
