@@ -105,6 +105,14 @@ object Model {
     status: Statuses.Status
   )
 
+  case class Tier (
+    laserDonuts: List[UUID]
+  )
+
+  case class PyramidOfImportance (
+    tiers: List[Tier]
+  )
+
   trait TypeEnum {
     def dbValue: String
   }

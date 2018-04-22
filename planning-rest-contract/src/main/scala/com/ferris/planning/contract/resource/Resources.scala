@@ -181,6 +181,22 @@ object Resources {
       `type`: Option[String],
       status: Option[String]
     )
+
+    case class TierCreation (
+      laserDonuts: List[UUID]
+    )
+
+    case class TierUpdate (
+      laserDonuts: List[UUID]
+    )
+
+    case class PyramidOfImportanceCreation (
+      tiers: List[TierCreation]
+    )
+
+    case class PyramidOfImportanceUpdate (
+      tiers: List[TierUpdate]
+    )
   }
 
   object Out {
@@ -258,6 +274,12 @@ object Resources {
       status: String
     )
 
+    case class SlimLaserDonutView (
+      uuid: UUID,
+      summary: String,
+      status: String
+    )
+
     case class PortionView (
       uuid: UUID,
       laserDonutId: UUID,
@@ -282,6 +304,14 @@ object Resources {
       frequency: String,
       `type`: String,
       status: String
+    )
+
+    case class TierView (
+      laserDonuts: List[SlimLaserDonutView]
+    )
+
+    case class PyramidOfImportanceView (
+      tiers: List[TierView]
     )
     
     case class DeletionResult(

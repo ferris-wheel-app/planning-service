@@ -42,6 +42,8 @@ trait PlanningRestFormats extends FerrisJsonSupport {
   implicit val laserDonutUpdateFormat: RootJsonFormat[LaserDonutUpdate] = jsonFormat7(LaserDonutUpdate)
   implicit val laserDonutViewFormat: RootJsonFormat[LaserDonutView] = jsonFormat8(LaserDonutView)
 
+  implicit val slimLaserDonutViewFormat: RootJsonFormat[SlimLaserDonutView] = jsonFormat3(SlimLaserDonutView)
+
   implicit val portionCreationFormat: RootJsonFormat[PortionCreation] = jsonFormat4(PortionCreation)
   implicit val portionUpdateFormat: RootJsonFormat[PortionUpdate] = jsonFormat4(PortionUpdate)
   implicit val portionViewFormat: RootJsonFormat[PortionView] = jsonFormat5(PortionView)
@@ -53,6 +55,14 @@ trait PlanningRestFormats extends FerrisJsonSupport {
   implicit val hobbyCreationFormat: RootJsonFormat[HobbyCreation] = jsonFormat6(HobbyCreation)
   implicit val hobbyUpdateFormat: RootJsonFormat[HobbyUpdate] = jsonFormat6(HobbyUpdate)
   implicit val hobbyViewFormat: RootJsonFormat[HobbyView] = jsonFormat7(HobbyView)
+
+  implicit val tierCreationFormat: RootJsonFormat[TierCreation] = jsonFormat1(TierCreation)
+  implicit val tierUpdateFormat: RootJsonFormat[TierUpdate] = jsonFormat1(TierUpdate)
+  implicit val tierViewFormat: RootJsonFormat[TierView] = jsonFormat1(TierView)
+
+  implicit val pyramidOfImportanceCreationFormat: RootJsonFormat[PyramidOfImportanceCreation] = jsonFormat1(PyramidOfImportanceCreation)
+  implicit val pyramidOfImportanceUpdateFormat: RootJsonFormat[PyramidOfImportanceUpdate] = jsonFormat1(PyramidOfImportanceUpdate)
+  implicit val pyramidOfImportanceViewFormat: RootJsonFormat[PyramidOfImportanceView] = jsonFormat1(PyramidOfImportanceView)
 
   implicit val deletionResultFormat: RootJsonFormat[DeletionResult] = jsonFormat1(DeletionResult.apply)
 }
