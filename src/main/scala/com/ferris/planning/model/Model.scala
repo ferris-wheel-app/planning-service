@@ -74,7 +74,7 @@ object Model {
     summary: String,
     description: String,
     milestone: String,
-    order: Int,
+    portions: List[UUID],
     `type`: DonutTypes.DonutType,
     status: Statuses.Status
   )
@@ -83,7 +83,7 @@ object Model {
     uuid: UUID,
     laserDonutId: UUID,
     summary: String,
-    order: Int,
+    todos: List[UUID],
     status: Statuses.Status
   )
 
@@ -91,7 +91,6 @@ object Model {
     uuid: UUID,
     portionId: UUID,
     description: String,
-    order: Int,
     status: Statuses.Status
   )
 
