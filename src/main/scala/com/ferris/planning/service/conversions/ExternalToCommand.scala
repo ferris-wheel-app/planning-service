@@ -155,7 +155,6 @@ object ExternalToCommand {
       summary = laserDonut.summary,
       description = laserDonut.description,
       milestone = laserDonut.milestone,
-      order = laserDonut.order,
       status = TypeFields.Status.withName(laserDonut.status),
       `type` = TypeFields.DonutType.withName(laserDonut.`type`)
     )
@@ -167,7 +166,6 @@ object ExternalToCommand {
       summary = laserDonut.summary,
       description = laserDonut.description,
       milestone = laserDonut.milestone,
-      order = laserDonut.order,
       status = laserDonut.status.map(TypeFields.Status.withName),
       `type` = laserDonut.`type`.map(TypeFields.DonutType.withName)
     )
@@ -177,7 +175,6 @@ object ExternalToCommand {
     override def toCommand = CreatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      order = portion.order,
       status = TypeFields.Status.withName(portion.status)
     )
   }
@@ -186,7 +183,6 @@ object ExternalToCommand {
     override def toCommand = UpdatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      order = portion.order,
       status = portion.status.map(TypeFields.Status.withName)
     )
   }
@@ -195,7 +191,6 @@ object ExternalToCommand {
     override def toCommand = CreateTodo(
       portionId = todo.portionId,
       description = todo.description,
-      order = todo.order,
       status = TypeFields.Status.withName(todo.status)
     )
   }
@@ -204,7 +199,6 @@ object ExternalToCommand {
     override def toCommand = UpdateTodo(
       portionId = todo.portionId,
       description = todo.description,
-      order = todo.order,
       status = todo.status.map(TypeFields.Status.withName)
     )
   }

@@ -38,18 +38,18 @@ trait PlanningRestFormats extends FerrisJsonSupport {
   implicit val weaveUpdateFormat: RootJsonFormat[WeaveUpdate] = jsonFormat5(WeaveUpdate)
   implicit val weaveViewFormat: RootJsonFormat[WeaveView] = jsonFormat6(WeaveView)
 
-  implicit val laserDonutCreationFormat: RootJsonFormat[LaserDonutCreation] = jsonFormat7(LaserDonutCreation)
-  implicit val laserDonutUpdateFormat: RootJsonFormat[LaserDonutUpdate] = jsonFormat7(LaserDonutUpdate)
+  implicit val laserDonutCreationFormat: RootJsonFormat[LaserDonutCreation] = jsonFormat6(LaserDonutCreation)
+  implicit val laserDonutUpdateFormat: RootJsonFormat[LaserDonutUpdate] = jsonFormat6(LaserDonutUpdate)
   implicit val laserDonutViewFormat: RootJsonFormat[LaserDonutView] = jsonFormat8(LaserDonutView)
 
   implicit val slimLaserDonutViewFormat: RootJsonFormat[SlimLaserDonutView] = jsonFormat3(SlimLaserDonutView)
 
-  implicit val portionCreationFormat: RootJsonFormat[PortionCreation] = jsonFormat4(PortionCreation)
-  implicit val portionUpdateFormat: RootJsonFormat[PortionUpdate] = jsonFormat4(PortionUpdate)
+  implicit val portionCreationFormat: RootJsonFormat[PortionCreation] = jsonFormat3(PortionCreation)
+  implicit val portionUpdateFormat: RootJsonFormat[PortionUpdate] = jsonFormat3(PortionUpdate)
   implicit val portionViewFormat: RootJsonFormat[PortionView] = jsonFormat5(PortionView)
 
-  implicit val todoCreationFormat: RootJsonFormat[TodoCreation] = jsonFormat4(TodoCreation)
-  implicit val todoUpdateFormat: RootJsonFormat[TodoUpdate] = jsonFormat4(TodoUpdate)
+  implicit val todoCreationFormat: RootJsonFormat[TodoCreation] = jsonFormat3(TodoCreation)
+  implicit val todoUpdateFormat: RootJsonFormat[TodoUpdate] = jsonFormat3(TodoUpdate)
   implicit val todoViewFormat: RootJsonFormat[TodoView] = jsonFormat5(TodoView)
 
   implicit val hobbyCreationFormat: RootJsonFormat[HobbyCreation] = jsonFormat6(HobbyCreation)

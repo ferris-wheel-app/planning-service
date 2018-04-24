@@ -121,7 +121,6 @@ object Resources {
       summary: String,
       description: String,
       milestone: String,
-      order: Int,
       `type`: String,
       status: String
     )
@@ -131,7 +130,6 @@ object Resources {
       summary: Option[String],
       description: Option[String],
       milestone: Option[String],
-      order: Option[Int],
       `type`: Option[String],
       status: Option[String]
     )
@@ -139,28 +137,24 @@ object Resources {
     case class PortionCreation (
       laserDonutId: UUID,
       summary: String,
-      order: Int,
       status: String
     )
 
     case class PortionUpdate (
       laserDonutId: Option[UUID],
       summary: Option[String],
-      order: Option[Int],
       status: Option[String]
     )
 
     case class TodoCreation (
       portionId: UUID,
       description: String,
-      order: Int,
       status: String
     )
 
     case class TodoUpdate (
       portionId: Option[UUID],
       description: Option[String],
-      order: Option[Int],
       status: Option[String]
     )
 
