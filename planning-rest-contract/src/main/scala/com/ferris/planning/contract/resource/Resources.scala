@@ -182,6 +182,10 @@ object Resources {
       status: Option[String]
     )
 
+    case class ListUpdate (
+      update: List[UUID]
+    )
+
     case class TierCreation (
       laserDonuts: List[UUID]
     )

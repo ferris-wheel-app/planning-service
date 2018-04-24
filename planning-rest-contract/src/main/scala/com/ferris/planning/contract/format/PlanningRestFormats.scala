@@ -60,6 +60,8 @@ trait PlanningRestFormats extends FerrisJsonSupport {
   implicit val tierUpdateFormat: RootJsonFormat[TierUpdate] = jsonFormat1(TierUpdate)
   implicit val tierViewFormat: RootJsonFormat[TierView] = jsonFormat1(TierView)
 
+  implicit val listUpdateFormat: RootJsonFormat[ListUpdate] = jsonFormat1(ListUpdate)
+
   implicit val pyramidOfImportanceCreationFormat: RootJsonFormat[PyramidOfImportanceCreation] = jsonFormat1(PyramidOfImportanceCreation)
   implicit val pyramidOfImportanceUpdateFormat: RootJsonFormat[PyramidOfImportanceUpdate] = jsonFormat1(PyramidOfImportanceUpdate)
   implicit val pyramidOfImportanceViewFormat: RootJsonFormat[PyramidOfImportanceView] = jsonFormat1(PyramidOfImportanceView)

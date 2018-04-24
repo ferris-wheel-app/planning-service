@@ -114,7 +114,6 @@ object Commands {
     summary: String,
     description: String,
     milestone: String,
-    order: Int,
     `type`: DonutTypes.DonutType,
     status: Statuses.Status
   )
@@ -124,7 +123,6 @@ object Commands {
     summary: Option[String],
     description: Option[String],
     milestone: Option[String],
-    order: Option[Int],
     `type`: Option[DonutTypes.DonutType],
     status: Option[Statuses.Status]
   )
@@ -132,28 +130,24 @@ object Commands {
   case class CreatePortion (
     laserDonutId: UUID,
     summary: String,
-    order: Int,
     status: Statuses.Status
   )
 
   case class UpdatePortion (
     laserDonutId: Option[UUID],
     summary: Option[String],
-    order: Option[Int],
     status: Option[Statuses.Status]
   )
 
   case class CreateTodo (
     portionId: UUID,
     description: String,
-    order: Int,
     status: Statuses.Status
   )
 
   case class UpdateTodo (
     portionId: Option[UUID],
     description: Option[String],
-    order: Option[Int],
     status: Option[Statuses.Status]
   )
 
@@ -173,5 +167,9 @@ object Commands {
     frequency: Option[HobbyFrequencies.HobbyFrequency],
     `type`: Option[HobbyTypes.HobbyType],
     status: Option[Statuses.Status]
+  )
+
+  case class UpdateList (
+    update: List[UUID]
   )
 }
