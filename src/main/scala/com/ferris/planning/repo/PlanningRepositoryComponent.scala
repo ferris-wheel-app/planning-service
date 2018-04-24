@@ -7,7 +7,10 @@ import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
+import slick.dbio.DBIOAction
+import slick.dbio.Effect.{Read, Transactional, Write}
 import slick.lifted.QueryBase
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -347,16 +350,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
     }
 
-    private def createPortionAction(creation: CreatePortion) = {
-      val row = PortionRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        laserDonutId = creation.laserDonutId,
-        summary = creation.summary,
-        order = creation.order,
-        status = creation.status.dbValue
-      )
-      (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
+    private def createPortionAction(creation: CreatePortion): DBIOAction[FixedSqlAction[tableConversions.tables.PortionRow, NoStream, Write], NoStream, Read with Transactional] = {
+      sortByOrder(portionsByParentId(creation.laserDonutId)).result.map { existingPortions =>
+        val row = PortionRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          laserDonutId = creation.laserDonutId,
+          summary = creation.summary,
+          order = existingPortions.headOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue
+        )
+        (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
+      }.transactionally
     }
 
     private def createTodoAction(creation: CreateTodo) = {
@@ -489,11 +494,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def updateLaserDonutAction(uuid: UUID, update: UpdateLaserDonut) = {
-      val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description, laserDonut.milestone, laserDonut.order, laserDonut.status, laserDonut.`type`))
+      val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description, laserDonut.milestone, laserDonut.status, laserDonut.`type`))
       getLaserDonutAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone), update.order.getOrElse(old.order),
+            update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
             .andThen(getLaserDonutAction(uuid))
         } getOrElse DBIO.failed(LaserDonutNotFoundException())
@@ -501,22 +506,22 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def updatePortionAction(uuid: UUID, update: UpdatePortion) = {
-      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.order, portion.status))
+      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status))
       getPortionAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
-            update.order.getOrElse(old.order), UpdateTypeEnum.keepOrReplace(update.status, old.status))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status))
             .andThen(getPortionAction(uuid))
         } getOrElse DBIO.failed(PortionNotFoundException())
       }.transactionally
     }
 
     private def updateTodoAction(uuid: UUID, update: UpdateTodo) = {
-      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.order, todo.status))
+      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status))
       getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
-            update.order.getOrElse(old.order), UpdateTypeEnum.keepOrReplace(update.status, old.status))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status))
             .andThen(getTodoAction(uuid))
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
@@ -635,7 +640,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def portionByUuid(uuid: UUID) = PortionTable.filter(_.uuid === uuid.toString)
 
+    private def portionsByParentId(uuid: UUID): Query[PortionTable, PortionRow, Seq] = PortionTable.filter(_.laserDonutId === uuid.toString)
+
+    private def sortByOrder(query: Query[PortionTable, PortionRow, Seq]) = query.sortBy(_.order)
+
     private def todoByUuid(uuid: UUID) = TodoTable.filter(_.uuid === uuid.toString)
+
+    private def todosByParentId(uuid: UUID) = TodoTable.filter(_.portionId === uuid.toString)
 
     private def hobbyByUuid(uuid: UUID) = HobbyTable.filter(_.uuid === uuid.toString)
   }
