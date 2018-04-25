@@ -544,6 +544,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }.transactionally
     }
 
+    private def updatePortionsAction(laserDonutId: UUID, update: UpdateList) = {
+      portionsByParentId(laserDonutId).result.flatMap { portions =>
+        update.reordered.filterNot(id => portions.map(_.uuid).contains(id.toString)) match {
+          case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
+            portionByUuid(uuid).map(_.order).update(index + 1)
+          })
+          case outliers => DBIO.failed(InvalidPortionsUpdateException(laserDonutId, outliers))
+        }
+      }.transactionally
+    }
+
     private def updateTodoAction(uuid: UUID, update: UpdateTodo) = {
       val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status))
       getTodoAction(uuid).flatMap { maybeObj =>

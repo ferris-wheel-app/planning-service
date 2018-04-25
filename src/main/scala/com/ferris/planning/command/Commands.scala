@@ -170,6 +170,6 @@ object Commands {
   )
 
   case class UpdateList (
-    update: List[UUID]
+    reordered: List[UUID]
   )
 }

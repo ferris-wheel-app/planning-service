@@ -30,11 +30,11 @@ object Exceptions {
 
   case class HobbyNotFoundException(message: String = "hobby not found") extends PlanningServiceException(message)
 
-  case class InvalidPortionsUpdateException(laserDonutId: UUID, portionIds: List[UUID]) extends PlanningServiceException() {
+  case class InvalidPortionsUpdateException(laserDonutId: UUID, portionIds: Seq[UUID]) extends PlanningServiceException() {
     override def getMessage: String = s"the portions (${portionIds.mkString(", ")}) do not belong to the laser-donut $laserDonutId"
   }
 
-  case class InvalidTodosUpdateException(portionId: UUID, todoIds: List[UUID]) extends PlanningServiceException() {
+  case class InvalidTodosUpdateException(portionId: UUID, todoIds: Seq[UUID]) extends PlanningServiceException() {
     override def getMessage: String = s"the todos (${todoIds.mkString(", ")}) do not belong to the portion $portionId"
   }
 }

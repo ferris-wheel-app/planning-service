@@ -177,7 +177,7 @@ object Resources {
     )
 
     case class ListUpdate (
-      update: List[UUID]
+      reordered: List[UUID]
     )
 
     case class TierCreation (
