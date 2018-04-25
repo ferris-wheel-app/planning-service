@@ -191,7 +191,6 @@ object SampleData {
       summary = "Implement initial microservices",
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
       milestone = "A deployed backend service",
-      order = 1,
       `type` = DonutTypes.ProjectFocused,
       status = Statuses.Incomplete
     )
@@ -201,7 +200,6 @@ object SampleData {
       summary = Some("Create the front-end"),
       description = Some("Use React"),
       milestone = Some("A basic working prototype"),
-      order = Some(1),
       `type` = Some(DonutTypes.ProjectFocused),
       status = Some(Statuses.Incomplete)
     )
@@ -220,14 +218,12 @@ object SampleData {
     val portionCreation = CreatePortion(
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
-      order = 3,
       status = Statuses.Incomplete
     )
 
     val portionUpdate = UpdatePortion(
       laserDonutId = Some(UUID.randomUUID),
       summary = Some("Split into sub-projects"),
-      order = Some(4),
       status = Some(Statuses.Incomplete)
     )
 
@@ -242,14 +238,12 @@ object SampleData {
     val todoCreation = CreateTodo(
       portionId = UUID.randomUUID,
       description = "Create sample data for tests",
-      order = 4,
       status = Statuses.Complete
     )
 
     val todoUpdate = UpdateTodo(
       portionId = Some(UUID.randomUUID),
       description = Some("Create repository tests"),
-      order = Some(4),
       status = Some(Statuses.Complete)
     )
 
@@ -466,7 +460,6 @@ object SampleData {
       summary = domain.laserDonutCreation.summary,
       description = domain.laserDonutCreation.description,
       milestone = domain.laserDonutCreation.milestone,
-      order = domain.laserDonutCreation.order,
       `type` = DonutType.toString(domain.laserDonutCreation.`type`),
       status = Status.toString(domain.laserDonutCreation.status)
     )
@@ -476,7 +469,6 @@ object SampleData {
       summary = domain.laserDonutUpdate.summary,
       description = domain.laserDonutUpdate.description,
       milestone = domain.laserDonutUpdate.milestone,
-      order = domain.laserDonutUpdate.order,
       `type` = domain.laserDonutUpdate.`type`.map(DonutType.toString),
       status = domain.laserDonutUpdate.status.map(Status.toString)
     )
@@ -495,14 +487,12 @@ object SampleData {
     val portionCreation = PortionCreation(
       laserDonutId = domain.portionCreation.laserDonutId,
       summary = domain.portionCreation.summary,
-      order = domain.portionCreation.order,
       status = Status.toString(domain.portionCreation.status)
     )
 
     val portionUpdate = PortionUpdate(
       laserDonutId = domain.portionUpdate.laserDonutId,
       summary = domain.portionUpdate.summary,
-      order = domain.portionUpdate.order,
       status = domain.portionUpdate.status.map(Status.toString)
     )
 
@@ -517,14 +507,12 @@ object SampleData {
     val todoCreation = TodoCreation(
       portionId = domain.todoCreation.portionId,
       description = domain.todoCreation.description,
-      order = domain.todoCreation.order,
       status = Status.toString(domain.todoCreation.status)
     )
 
     val todoUpdate = TodoUpdate(
       portionId = domain.todoUpdate.portionId,
       description = domain.todoUpdate.description,
-      order = domain.todoUpdate.order,
       status = domain.todoUpdate.status.map(Status.toString)
     )
 

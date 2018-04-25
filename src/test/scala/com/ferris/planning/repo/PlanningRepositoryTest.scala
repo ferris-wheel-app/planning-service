@@ -572,7 +572,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         created.summary shouldBe SD.laserDonutCreation.summary
         created.description shouldBe SD.laserDonutCreation.description
         created.milestone shouldBe SD.laserDonutCreation.milestone
-        created.order shouldBe SD.laserDonutCreation.order
         created.`type` shouldBe SD.laserDonutCreation.`type`
         created.status shouldBe SD.laserDonutCreation.status
       }
@@ -589,7 +588,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.summary shouldBe SD.laserDonutUpdate.summary.value
         updated.value.description shouldBe SD.laserDonutUpdate.description.value
         updated.value.milestone shouldBe SD.laserDonutUpdate.milestone.value
-        updated.value.order shouldBe SD.laserDonutUpdate.order.value
         updated.value.`type` shouldBe SD.laserDonutUpdate.`type`.value
         updated.value.status shouldBe SD.laserDonutUpdate.status.value
       }
@@ -640,7 +638,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created = repo.createPortion(SD.portionCreation).futureValue
         created.laserDonutId shouldBe SD.portionCreation.laserDonutId
         created.summary shouldBe SD.portionCreation.summary
-        created.order shouldBe SD.portionCreation.order
         created.status shouldBe SD.portionCreation.status
       }
     }
@@ -654,7 +651,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.uuid shouldBe original.uuid
         updated.value.laserDonutId shouldBe SD.portionUpdate.laserDonutId.value
         updated.value.summary shouldBe SD.portionUpdate.summary.value
-        updated.value.order shouldBe SD.portionUpdate.order.value
         updated.value.status shouldBe SD.portionUpdate.status.value
       }
 
@@ -704,7 +700,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created = repo.createTodo(SD.todoCreation).futureValue
         created.portionId shouldBe SD.todoCreation.portionId
         created.description shouldBe SD.todoCreation.description
-        created.order shouldBe SD.todoCreation.order
         created.status shouldBe SD.todoCreation.status
       }
     }
@@ -718,7 +713,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.uuid shouldBe original.uuid
         updated.value.portionId shouldBe SD.todoUpdate.portionId.value
         updated.value.description shouldBe SD.todoUpdate.description.value
-        updated.value.order shouldBe SD.todoUpdate.order.value
         updated.value.status shouldBe SD.todoUpdate.status.value
       }
 

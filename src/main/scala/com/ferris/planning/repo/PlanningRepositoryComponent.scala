@@ -52,11 +52,17 @@ trait PlanningRepositoryComponent {
     def getThemes: Future[Seq[Theme]]
     def getGoals: Future[Seq[Goal]]
     def getThreads: Future[Seq[Thread]]
+    def getThreads(goalId: UUID): Future[Seq[Thread]]
     def getWeaves: Future[Seq[Weave]]
+    def getWeaves(goalId: UUID): Future[Seq[Weave]]
     def getLaserDonuts: Future[Seq[LaserDonut]]
+    def getLaserDonuts(goalId: UUID): Future[Seq[LaserDonut]]
     def getPortions: Future[Seq[Portion]]
+    def getPortions(laserDonutId: UUID): Future[Seq[Portion]]
     def getTodos: Future[Seq[Todo]]
+    def getTodos(portionId: UUID): Future[Seq[Todo]]
     def getHobbies: Future[Seq[Hobby]]
+    def getHobbies(goalId: UUID): Future[Seq[Hobby]]
 
     def getMessage(uuid: UUID): Future[Option[Message]]
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
@@ -177,25 +183,37 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def getThreads: Future[Seq[Thread]] = db.run(ThreadTable.result.map(_.map(_.asThread)))
 
+    override def getThreads(goalId: UUID): Future[Seq[Thread]] = db.run(threadsByParentId(goalId).result.map(_.map(_.asThread)))
+
     override def getThread(uuid: UUID): Future[Option[Thread]] = db.run(getThreadAction(uuid).map(_.map(_.asThread)))
 
     override def getWeaves: Future[Seq[Weave]] = db.run(WeaveTable.result.map(_.map(_.asWeave)))
+
+    override def getWeaves(goalId: UUID): Future[Seq[Weave]] = db.run(weavesByParentId(goalId).result.map(_.map(_.asWeave)))
 
     override def getWeave(uuid: UUID): Future[Option[Weave]] = db.run(getWeaveAction(uuid).map(_.map(_.asWeave)))
 
     override def getLaserDonuts: Future[Seq[LaserDonut]] = db.run(LaserDonutTable.result.map(_.map(_.asLaserDonut)))
 
+    override def getLaserDonuts(goalId: UUID): Future[Seq[LaserDonut]] = db.run(laserDonutsByParentId(goalId).result.map(_.map(_.asLaserDonut)))
+
     override def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
 
     override def getPortions: Future[Seq[Portion]] = db.run(PortionTable.result.map(_.map(_.asPortion)))
+
+    override def getPortions(laserDonutId: UUID): Future[Seq[Portion]] = db.run(portionsByParentId(laserDonutId).result.map(_.map(_.asPortion)))
 
     override def getPortion(uuid: UUID): Future[Option[Portion]] = db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
 
     override def getTodos: Future[Seq[Todo]] = db.run(TodoTable.result.map(_.map(_.asTodo)))
 
+    override def getTodos(portionId: UUID): Future[Seq[Todo]] = db.run(todosByParentId(portionId).result.map(_.map(_.asTodo)))
+
     override def getTodo(uuid: UUID): Future[Option[Todo]] = db.run(getTodoAction(uuid).map(_.map(_.asTodo)))
 
     override def getHobbies: Future[Seq[Hobby]] = db.run(HobbyTable.result.map(_.map(_.asHobby)))
+
+    override def getHobbies(goalId: UUID): Future[Seq[Hobby]] = db.run(hobbiesByParentId(goalId).result.map(_.map(_.asHobby)))
 
     override def getHobby(uuid: UUID): Future[Option[Hobby]] = db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
 
@@ -336,28 +354,30 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def createLaserDonutAction(creation: CreateLaserDonut) = {
-      val row = LaserDonutRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        goalId = creation.goalId,
-        summary = creation.summary,
-        description = creation.description,
-        milestone = creation.milestone,
-        order = creation.order,
-        status = creation.status.dbValue,
-        `type` = creation.`type`.dbValue
-      )
-      (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
+      laserDonutsByParentId(creation.goalId).result.flatMap { existingLaserDonuts =>
+        val row = LaserDonutRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          milestone = creation.milestone,
+          order = existingLaserDonuts.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          `type` = creation.`type`.dbValue
+        )
+        (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
+      }.transactionally
     }
 
-    private def createPortionAction(creation: CreatePortion): DBIOAction[FixedSqlAction[tableConversions.tables.PortionRow, NoStream, Write], NoStream, Read with Transactional] = {
-      sortByOrder(portionsByParentId(creation.laserDonutId)).result.map { existingPortions =>
+    private def createPortionAction(creation: CreatePortion) = {
+      portionsByParentId(creation.laserDonutId).result.flatMap { existingPortions =>
         val row = PortionRow(
           id = 0L,
           uuid = UUID.randomUUID,
           laserDonutId = creation.laserDonutId,
           summary = creation.summary,
-          order = existingPortions.headOption.map(_.order + 1).getOrElse(1),
+          order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue
         )
         (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
@@ -365,15 +385,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def createTodoAction(creation: CreateTodo) = {
-      val row = TodoRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        portionId = creation.portionId,
-        description = creation.description,
-        order = creation.order,
-        status = creation.status.dbValue
-      )
-      (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
+      todosByParentId(creation.portionId).result.flatMap { existingTodos =>
+        val row = TodoRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          portionId = creation.portionId,
+          description = creation.description,
+          order = existingTodos.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue
+        )
+        (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
+      }.transactionally
     }
 
     private def createHobbyAction(creation: CreateHobby) = {
@@ -634,20 +656,26 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def threadByUuid(uuid: UUID) = ThreadTable.filter(_.uuid === uuid.toString)
 
+    private def threadsByParentId(goalId: UUID) = ThreadTable.filter(_.goalId === goalId.toString)
+
     private def weaveByUuid(uuid: UUID) = WeaveTable.filter(_.uuid === uuid.toString)
+
+    private def weavesByParentId(goalId: UUID) = WeaveTable.filter(_.goalId === goalId.toString)
 
     private def laserDonutByUuid(uuid: UUID) = LaserDonutTable.filter(_.uuid === uuid.toString)
 
+    private def laserDonutsByParentId(goalId: UUID) = LaserDonutTable.filter(_.goalId === goalId.toString).sortBy(_.order)
+
     private def portionByUuid(uuid: UUID) = PortionTable.filter(_.uuid === uuid.toString)
 
-    private def portionsByParentId(uuid: UUID): Query[PortionTable, PortionRow, Seq] = PortionTable.filter(_.laserDonutId === uuid.toString)
-
-    private def sortByOrder(query: Query[PortionTable, PortionRow, Seq]) = query.sortBy(_.order)
+    private def portionsByParentId(laserDonutId: UUID) = PortionTable.filter(_.laserDonutId === laserDonutId.toString).sortBy(_.order)
 
     private def todoByUuid(uuid: UUID) = TodoTable.filter(_.uuid === uuid.toString)
 
-    private def todosByParentId(uuid: UUID) = TodoTable.filter(_.portionId === uuid.toString)
+    private def todosByParentId(portionId: UUID) = TodoTable.filter(_.portionId === portionId.toString).sortBy(_.order)
 
     private def hobbyByUuid(uuid: UUID) = HobbyTable.filter(_.uuid === uuid.toString)
+
+    private def hobbiesByParentId(goalId: UUID) = HobbyTable.filter(_.goalId === goalId.toString)
   }
 }

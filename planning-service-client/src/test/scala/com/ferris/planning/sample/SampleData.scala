@@ -187,7 +187,6 @@ object SampleData {
     summary = "Implement initial microservices",
     description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
     milestone = "A deployed backend service",
-    order = 1,
     `type` = "project_focused",
     status = "incomplete"
   )
@@ -197,7 +196,6 @@ object SampleData {
     summary = Some("Create the front-end"),
     description = Some("Use React"),
     milestone = Some("A basic working prototype"),
-    order = Some(1),
     `type` = Some("project_focused"),
     status = Some("incomplete")
   )
@@ -216,14 +214,12 @@ object SampleData {
   val portionCreation = PortionCreation(
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
-    order = 3,
     status = "incomplete"
   )
 
   val portionUpdate = PortionUpdate(
     laserDonutId = Some(UUID.randomUUID),
     summary = Some("Split into sub-projects"),
-    order = Some(4),
     status = Some("incomplete")
   )
 
@@ -238,14 +234,12 @@ object SampleData {
   val todoCreation = TodoCreation(
     portionId = UUID.randomUUID,
     description = "Create sample data for tests",
-    order = 4,
     status = "complete"
   )
 
   val todoUpdate = TodoUpdate(
     portionId = Some(UUID.randomUUID),
     description = Some("Create repository tests"),
-    order = Some(4),
     status = Some("complete")
   )
 
