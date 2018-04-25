@@ -42,7 +42,9 @@ trait PlanningRepositoryComponent {
     def updateWeave(uuid: UUID, update: UpdateWeave): Future[Option[Weave]]
     def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Option[LaserDonut]]
     def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]]
+    def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]]
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]]
+    def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]]
 
     def getMessages: Future[Seq[Message]]
@@ -152,7 +154,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]] = db.run(updatePortionAction(uuid, update)).map(row => row.map(_.asPortion))
 
+    override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = ???
+
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]] = db.run(updateTodoAction(uuid, update)).map(row => row.map(_.asTodo))
+
+    override def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]] = ???
 
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]] = db.run(updateHobbyAction(uuid, update)).map(row => row.map(_.asHobby))
 

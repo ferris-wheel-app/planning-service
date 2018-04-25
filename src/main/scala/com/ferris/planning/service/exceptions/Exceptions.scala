@@ -1,8 +1,10 @@
 package com.ferris.planning.service.exceptions
 
+import java.util.UUID
+
 object Exceptions {
 
-  sealed abstract class PlanningServiceException(message: String) extends Exception(message)
+  sealed abstract class PlanningServiceException(message: String = "oops!") extends Exception(message)
 
   case class MessageNotFoundException(message: String = "message not found") extends PlanningServiceException(message)
 
@@ -27,4 +29,12 @@ object Exceptions {
   case class TodoNotFoundException(message: String = "to-do not found") extends PlanningServiceException(message)
 
   case class HobbyNotFoundException(message: String = "hobby not found") extends PlanningServiceException(message)
+
+  case class InvalidPortionsUpdateException(laserDonutId: UUID, portionIds: List[UUID]) extends PlanningServiceException() {
+    override def getMessage: String = s"the portions (${portionIds.mkString(", ")}) do not belong to the laser-donut $laserDonutId"
+  }
+
+  case class InvalidTodosUpdateException(portionId: UUID, todoIds: List[UUID]) extends PlanningServiceException() {
+    override def getMessage: String = s"the todos (${todoIds.mkString(", ")}) do not belong to the portion $portionId"
+  }
 }
