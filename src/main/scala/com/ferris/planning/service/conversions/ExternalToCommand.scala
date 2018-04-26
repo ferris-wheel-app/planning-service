@@ -224,4 +224,10 @@ object ExternalToCommand {
       `type` = hobby.`type`.map(TypeFields.HobbyType.withName)
     )
   }
+
+  implicit class ListUpdateConversion(list: ListUpdate) extends CommandConversion[UpdateList] {
+    override def toCommand = UpdateList(
+      reordered = list.reordered
+    )
+  }
 }

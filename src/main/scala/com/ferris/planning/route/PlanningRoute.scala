@@ -265,11 +265,35 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val updatePortionsRoute = pathPrefix(laserDonutsPathSegment / PathMatchers.JavaUUID / portionsPathSegment) { laserDonutId =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[ListUpdate]) { update =>
+          onSuccess(planningService.updatePortions(laserDonutId, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.map(_.toView))
+          }
+        }
+      }
+    }
+  }
+
   private val updatePortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       put {
         entity(as[PortionUpdate]) { update =>
           onSuccess(planningService.updatePortion(id, update.toCommand))(outcome => complete(mapPortion(outcome)))
+        }
+      }
+    }
+  }
+
+  private val updateTodosRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[ListUpdate]) { update =>
+          onSuccess(planningService.updateTodos(portionId, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.map(_.toView))
+          }
         }
       }
     }
@@ -365,10 +389,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val getThreadsByGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID / threadsPathSegment) { goalId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getThreads(goalId)) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getWeavesRoute = pathPrefix(weavesPathSegment) {
     pathEndOrSingleSlash {
       get {
         onSuccess(planningService.getWeaves) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getWeavesByGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID / weavesPathSegment) { goalId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getWeaves(goalId)) { response =>
           complete(StatusCodes.OK, response.map(_.toView))
         }
       }
@@ -385,10 +429,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val getLaserDonutsByGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID / laserDonutsPathSegment) { goalId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getLaserDonuts(goalId)) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getPortionsRoute = pathPrefix(portionsPathSegment) {
     pathEndOrSingleSlash {
       get {
         onSuccess(planningService.getPortions) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getPortionsByLaserDonutRoute = pathPrefix(laserDonutsPathSegment / PathMatchers.JavaUUID / portionsPathSegment) { laserDonutId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getPortions(laserDonutId)) { response =>
           complete(StatusCodes.OK, response.map(_.toView))
         }
       }
@@ -405,10 +469,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val getTodosByPortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getTodos(portionId)) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getHobbiesRoute = pathPrefix(hobbiesPathSegment) {
     pathEndOrSingleSlash {
       get {
         onSuccess(planningService.getHobbies) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getHobbiesByGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID / hobbiesPathSegment) { goalId =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getHobbies(goalId)) { response =>
           complete(StatusCodes.OK, response.map(_.toView))
         }
       }
@@ -630,7 +714,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     updateWeaveRoute ~
     updateLaserDonutRoute ~
     updatePortionRoute ~
+    updatePortionsRoute ~
     updateTodoRoute ~
+    updateTodosRoute ~
     updateHobbyRoute ~
     getMessagesRoute ~
     getBacklogItemsRoute ~
@@ -639,11 +725,17 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     getThemesRoute ~
     getGoalsRoute ~
     getThreadsRoute ~
+    getThreadsByGoalRoute ~
     getWeavesRoute ~
+    getWeavesByGoalRoute ~
     getLaserDonutsRoute ~
+    getLaserDonutsByGoalRoute ~
     getPortionsRoute ~
+    getPortionsByLaserDonutRoute ~
     getTodosRoute ~
+    getTodosByPortionRoute ~
     getHobbiesRoute ~
+    getHobbiesByGoalRoute ~
     getMessageRoute ~
     getBacklogItemRoute ~
     getEpochRoute ~
