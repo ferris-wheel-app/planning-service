@@ -154,11 +154,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]] = db.run(updatePortionAction(uuid, update)).map(row => row.map(_.asPortion))
 
-    override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = ???
+    override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = db.run(updatePortionsAction(laserDonutId, update)).map(_.map(_.asPortion))
 
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]] = db.run(updateTodoAction(uuid, update)).map(row => row.map(_.asTodo))
 
-    override def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]] = ???
+    override def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]] = db.run(updateTodosAction(portionId, update)).map(_.map(_.asTodo))
 
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]] = db.run(updateHobbyAction(uuid, update)).map(row => row.map(_.asHobby))
 
@@ -545,11 +545,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def updatePortionsAction(laserDonutId: UUID, update: UpdateList) = {
+      def getPortionsAction(uuids: Seq[String]) = {
+        PortionTable.filter(_.uuid inSet uuids).sortBy(_.order).result
+      }
       portionsByParentId(laserDonutId).result.flatMap { portions =>
-        update.reordered.filterNot(id => portions.map(_.uuid).contains(id.toString)) match {
+        val portionIds = portions.map(_.uuid)
+        update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
           case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
             portionByUuid(uuid).map(_.order).update(index + 1)
-          })
+          }).andThen(getPortionsAction(portionIds))
           case outliers => DBIO.failed(InvalidPortionsUpdateException(laserDonutId, outliers))
         }
       }.transactionally
@@ -563,6 +567,21 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
             UpdateTypeEnum.keepOrReplace(update.status, old.status))
             .andThen(getTodoAction(uuid))
         } getOrElse DBIO.failed(TodoNotFoundException())
+      }.transactionally
+    }
+
+    private def updateTodosAction(portionId: UUID, update: UpdateList) = {
+      def getTodosAction(uuids: Seq[String]) = {
+        TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
+      }
+      todosByParentId(portionId).result.flatMap { todos =>
+        val todoIds = todos.map(_.uuid)
+        update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
+          case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
+            todoByUuid(uuid).map(_.order).update(index + 1)
+          }).andThen(getTodosAction(todoIds))
+          case outliers => DBIO.failed(InvalidTodosUpdateException(portionId, outliers))
+        }
       }.transactionally
     }
 
