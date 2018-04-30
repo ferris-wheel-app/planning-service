@@ -545,13 +545,20 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         PortionTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
       portionsByParentId(laserDonutId).result.flatMap { portions =>
-        val portionIds = portions.map(_.uuid)
-        update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
-          case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
-            portionByUuid(uuid).map(_.order).update(index + 1)
-          }).andThen(getPortionsAction(portionIds))
-          case outliers => DBIO.failed(InvalidPortionsUpdateException(laserDonutId, outliers))
+        if (portions.size <= update.reordered.size) {
+          val portionIds = portions.map(_.uuid)
+          update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
+            case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
+              portionByUuid(uuid).map(_.order).update(index + 1)
+            }).andThen(getPortionsAction(portionIds))
+            case outliers => DBIO.failed(
+              InvalidPortionsUpdateException(s"the portions (${outliers.mkString(", ")}) do not belong to the laser-donut $laserDonutId")
+            )
+          }
         }
+        else DBIO.failed(
+          InvalidPortionsUpdateException("the length of the update list should be the same as the number of portions for the laser-donut")
+        )
       }.transactionally
     }
 
@@ -571,13 +578,20 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
       todosByParentId(portionId).result.flatMap { todos =>
-        val todoIds = todos.map(_.uuid)
-        update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
-          case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
-            todoByUuid(uuid).map(_.order).update(index + 1)
-          }).andThen(getTodosAction(todoIds))
-          case outliers => DBIO.failed(InvalidTodosUpdateException(portionId, outliers))
+        if (todos.size <= update.reordered.size) {
+          val todoIds = todos.map(_.uuid)
+          update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
+            case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
+              todoByUuid(uuid).map(_.order).update(index + 1)
+            }).andThen(getTodosAction(todoIds))
+            case outliers => DBIO.failed(
+              InvalidTodosUpdateException(s"the todos (${outliers.mkString(", ")}) do not belong to the portion $portionId")
+            )
+          }
         }
+        else DBIO.failed(
+          InvalidTodosUpdateException("the length of the update list should be the same as the number of todos for the portion")
+        )
       }.transactionally
     }
 

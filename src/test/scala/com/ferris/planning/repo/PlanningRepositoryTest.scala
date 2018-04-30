@@ -2,6 +2,7 @@ package com.ferris.planning.repo
 
 import java.util.UUID
 
+import com.ferris.planning.command.Commands.UpdateList
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
@@ -485,6 +486,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
+
+      it("should retrieve a list of threads based on the goal they belong to") {
+        val goalId = UUID.randomUUID
+        val otherGoalId = UUID.randomUUID
+        val created1 = repo.createThread(SD.threadCreation.copy(goalId = Some(goalId))).futureValue
+        val created2 = repo.createThread(SD.threadCreation.copy(goalId = Some(goalId))).futureValue
+        repo.createThread(SD.threadCreation.copy(goalId = Some(otherGoalId))).futureValue
+        val retrieved = repo.getThreads(goalId).futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
     }
 
     describe("deleting") {
@@ -548,6 +560,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created1 = repo.createWeave(SD.weaveCreation).futureValue
         val created2 = repo.createWeave(SD.weaveCreation).futureValue
         val retrieved = repo.getWeaves.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+
+      it("should retrieve a list of weaves based on the goal they belong to") {
+        val goalId = UUID.randomUUID
+        val otherGoalId = UUID.randomUUID
+        val created1 = repo.createWeave(SD.weaveCreation.copy(goalId = Some(goalId))).futureValue
+        val created2 = repo.createWeave(SD.weaveCreation.copy(goalId = Some(goalId))).futureValue
+        repo.createWeave(SD.weaveCreation.copy(goalId = Some(otherGoalId))).futureValue
+        val retrieved = repo.getWeaves(goalId).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
@@ -619,6 +642,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
+
+      it("should retrieve a list of laser-donuts based on the goal they belong to") {
+        val goalId = UUID.randomUUID
+        val otherGoalId = UUID.randomUUID
+        val created1 = repo.createLaserDonut(SD.laserDonutCreation.copy(goalId = goalId)).futureValue
+        val created2 = repo.createLaserDonut(SD.laserDonutCreation.copy(goalId = goalId)).futureValue
+        repo.createLaserDonut(SD.laserDonutCreation.copy(goalId = otherGoalId)).futureValue
+        val retrieved = repo.getLaserDonuts(goalId).futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
     }
 
     describe("deleting") {
@@ -654,6 +688,43 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.status shouldBe SD.portionUpdate.status.value
       }
 
+      it("should reorder a list of portions that belong to a laser-donut") {
+        val laserDonutId = UUID.randomUUID
+        val first = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val second = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val third = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val beforeUpdate = repo.getPortions(laserDonutId).futureValue
+        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+
+        repo.updatePortions(laserDonutId, update).futureValue
+        val afterUpdate = repo.getPortions(laserDonutId).futureValue
+
+        beforeUpdate should contain theSameElementsInOrderAs (first :: second :: third :: Nil)
+        afterUpdate should contain theSameElementsInOrderAs (second.copy(order = 1) :: third.copy(order = 2) :: first.copy(order = 3) :: Nil)
+      }
+
+      it("should throw an exception if an invalid portion id is given in the update list") {
+        val laserDonutId = UUID.randomUUID
+        val first = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val second = repo.createPortion(SD.portionCreation.copy(laserDonutId = UUID.randomUUID)).futureValue
+        val third = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+        whenReady(repo.updatePortions(laserDonutId, update).failed) { exception =>
+          exception shouldBe InvalidPortionsUpdateException(s"the portions (${second.uuid}) do not belong to the laser-donut $laserDonutId")
+        }
+      }
+
+      it("should throw an exception the update list is not the same as the number of portions for a laser-donut") {
+        val laserDonutId = UUID.randomUUID
+        val first = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val second = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val update = UpdateList(second.uuid :: first.uuid :: Nil)
+        whenReady(repo.updatePortions(laserDonutId, update).failed) { exception =>
+          exception shouldBe InvalidPortionsUpdateException("the length of the update list should be the same as the number of portions for the laser-donut")
+        }
+      }
+
       it("should throw an exception if a portion is not found") {
         whenReady(repo.updatePortion(UUID.randomUUID, SD.portionUpdate).failed) { exception =>
           exception shouldBe PortionNotFoundException()
@@ -678,6 +749,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created1 = repo.createPortion(SD.portionCreation).futureValue
         val created2 = repo.createPortion(SD.portionCreation).futureValue
         val retrieved = repo.getPortions.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+
+      it("should retrieve a list of portions based on the laser-donut they belong to") {
+        val laserDonutId = UUID.randomUUID
+        val otherLaserDonutId = UUID.randomUUID
+        val created1 = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val created2 = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        repo.createPortion(SD.portionCreation.copy(laserDonutId = otherLaserDonutId)).futureValue
+        val retrieved = repo.getPortions(laserDonutId).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
@@ -716,6 +798,43 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.status shouldBe SD.todoUpdate.status.value
       }
 
+      it("should reorder a list of todos that belong to a portion") {
+        val portionId = UUID.randomUUID
+        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val third = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val beforeUpdate = repo.getTodos(portionId).futureValue
+        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+
+        repo.updateTodos(portionId, update).futureValue
+        val afterUpdate = repo.getTodos(portionId).futureValue
+
+        beforeUpdate should contain theSameElementsInOrderAs (first :: second :: third :: Nil)
+        afterUpdate should contain theSameElementsInOrderAs (second.copy(order = 1) :: third.copy(order = 2) :: first.copy(order = 3) :: Nil)
+      }
+
+      it("should throw an exception if an invalid todo id is given in the update list") {
+        val portionId = UUID.randomUUID
+        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(portionId = UUID.randomUUID)).futureValue
+        val third = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+        whenReady(repo.updateTodos(portionId, update).failed) { exception =>
+          exception shouldBe InvalidTodosUpdateException(s"the todos (${second.uuid}) do not belong to the portion $portionId")
+        }
+      }
+
+      it("should throw an exception the update list is not the same as the number of todos for a portion") {
+        val portionId = UUID.randomUUID
+        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val update = UpdateList(second.uuid :: first.uuid :: Nil)
+        whenReady(repo.updateTodos(portionId, update).failed) { exception =>
+          exception shouldBe InvalidTodosUpdateException("the length of the update list should be the same as the number of todos for the portion")
+        }
+      }
+
       it("should throw an exception if a todo is not found") {
         whenReady(repo.updateTodo(UUID.randomUUID, SD.todoUpdate).failed) { exception =>
           exception shouldBe TodoNotFoundException()
@@ -740,6 +859,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created1 = repo.createTodo(SD.todoCreation).futureValue
         val created2 = repo.createTodo(SD.todoCreation).futureValue
         val retrieved = repo.getTodos.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+
+      it("should retrieve a list of todos based on the portion they belong to") {
+        val portionId = UUID.randomUUID
+        val otherPortionId = UUID.randomUUID
+        val created1 = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val created2 = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        repo.createTodo(SD.todoCreation.copy(portionId = otherPortionId)).futureValue
+        val retrieved = repo.getTodos(portionId).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
@@ -808,6 +938,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created1 = repo.createHobby(SD.hobbyCreation).futureValue
         val created2 = repo.createHobby(SD.hobbyCreation).futureValue
         val retrieved = repo.getHobbies.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+
+      it("should retrieve a list of hobbies based on the goal they belong to") {
+        val goalId = UUID.randomUUID
+        val otherGoalId = UUID.randomUUID
+        val created1 = repo.createHobby(SD.hobbyCreation.copy(goalId = Some(goalId))).futureValue
+        val created2 = repo.createHobby(SD.hobbyCreation.copy(goalId = Some(goalId))).futureValue
+        repo.createHobby(SD.hobbyCreation.copy(goalId = Some(otherGoalId))).futureValue
+        val retrieved = repo.getHobbies(goalId).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
