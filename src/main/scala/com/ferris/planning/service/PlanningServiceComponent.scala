@@ -46,17 +46,17 @@ trait PlanningServiceComponent {
     def getYears(implicit ex: ExecutionContext): Future[Seq[Year]]
     def getThemes(implicit ex: ExecutionContext): Future[Seq[Theme]]
     def getGoals(implicit ex: ExecutionContext): Future[Seq[Goal]]
-    def getThreads(implicit ex: ExecutionContext): Future[Seq[Thread]]
+    def getThreads()(implicit ex: ExecutionContext): Future[Seq[Thread]]
     def getThreads(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Thread]]
-    def getWeaves(implicit ex: ExecutionContext): Future[Seq[Weave]]
+    def getWeaves()(implicit ex: ExecutionContext): Future[Seq[Weave]]
     def getWeaves(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Weave]]
-    def getLaserDonuts(implicit ex: ExecutionContext): Future[Seq[LaserDonut]]
+    def getLaserDonuts()(implicit ex: ExecutionContext): Future[Seq[LaserDonut]]
     def getLaserDonuts(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[LaserDonut]]
-    def getPortions(implicit ex: ExecutionContext): Future[Seq[Portion]]
+    def getPortions()(implicit ex: ExecutionContext): Future[Seq[Portion]]
     def getPortions(laserDonutId: UUID)(implicit ex: ExecutionContext): Future[Seq[Portion]]
-    def getTodos(implicit ex: ExecutionContext): Future[Seq[Todo]]
+    def getTodos()(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def getTodos(portionId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]]
-    def getHobbies(implicit ex: ExecutionContext): Future[Seq[Hobby]]
+    def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getHobbies(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Hobby]]
 
     def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Message]]
@@ -223,7 +223,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getGoals
     }
 
-    override def getThreads(implicit ex: ExecutionContext): Future[Seq[Thread]] = {
+    override def getThreads()(implicit ex: ExecutionContext): Future[Seq[Thread]] = {
       repo.getThreads
     }
 
@@ -231,7 +231,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getThreads(goalId)
     }
 
-    override def getWeaves(implicit ex: ExecutionContext): Future[Seq[Weave]] = {
+    override def getWeaves()(implicit ex: ExecutionContext): Future[Seq[Weave]] = {
       repo.getWeaves
     }
 
@@ -239,7 +239,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getWeaves(goalId)
     }
 
-    override def getLaserDonuts(implicit ex: ExecutionContext): Future[Seq[LaserDonut]] = {
+    override def getLaserDonuts()(implicit ex: ExecutionContext): Future[Seq[LaserDonut]] = {
       repo.getLaserDonuts
     }
 
@@ -247,7 +247,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getLaserDonuts(goalId)
     }
 
-    override def getPortions(implicit ex: ExecutionContext): Future[Seq[Portion]] = {
+    override def getPortions()(implicit ex: ExecutionContext): Future[Seq[Portion]] = {
       repo.getPortions
     }
 
@@ -255,7 +255,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getPortions(laserDonutId)
     }
 
-    override def getTodos(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
+    override def getTodos()(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
       repo.getTodos
     }
 
@@ -263,7 +263,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getTodos(portionId)
     }
 
-    override def getHobbies(implicit ex: ExecutionContext): Future[Seq[Hobby]] = {
+    override def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]] = {
       repo.getHobbies
     }
 

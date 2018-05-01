@@ -8,6 +8,7 @@ import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.service.conversions.ExternalToCommand._
 import com.ferris.planning.service.conversions.ModelToView._
 import com.ferris.planning.sample.SampleData.{domain, rest}
+import com.ferris.planning.service.exceptions.Exceptions.{InvalidPortionsUpdateException, InvalidTodosUpdateException}
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, verifyNoMoreInteractions, when}
 
@@ -728,11 +729,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all threads") {
           val threads = Seq(domain.thread, domain.thread.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getThreads(any())).thenReturn(Future.successful(threads))
+          when(testServer.planningService.getThreads()(any())).thenReturn(Future.successful(threads))
           Get(s"/api/threads") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[ThreadView]]].data shouldBe threads.map(_.toView)
-            verify(testServer.planningService, times(1)).getThreads(any())
+            verify(testServer.planningService, times(1)).getThreads()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+        
+        it("should retrieve a list of threads that belong to a specific goal") {
+          val goalId = UUID.randomUUID
+          val threads = Seq(domain.thread, domain.thread.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getThreads(eqTo(goalId))(any())).thenReturn(Future.successful(threads))
+          Get(s"/api/goals/$goalId/threads") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[ThreadView]]].data shouldBe threads.map(_.toView)
+            verify(testServer.planningService, times(1)).getThreads(eqTo(goalId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -835,11 +849,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all weaves") {
           val weaves = Seq(domain.weave, domain.weave.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getWeaves(any())).thenReturn(Future.successful(weaves))
+          when(testServer.planningService.getWeaves()(any())).thenReturn(Future.successful(weaves))
           Get(s"/api/weaves") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[WeaveView]]].data shouldBe weaves.map(_.toView)
-            verify(testServer.planningService, times(1)).getWeaves(any())
+            verify(testServer.planningService, times(1)).getWeaves()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of weaves that belong to a specific goal") {
+          val goalId = UUID.randomUUID
+          val weaves = Seq(domain.weave, domain.weave.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getWeaves(eqTo(goalId))(any())).thenReturn(Future.successful(weaves))
+          Get(s"/api/goals/$goalId/weaves") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[WeaveView]]].data shouldBe weaves.map(_.toView)
+            verify(testServer.planningService, times(1)).getWeaves(eqTo(goalId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -942,11 +969,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all laser-donuts") {
           val laserDonuts = Seq(domain.laserDonut, domain.laserDonut.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getLaserDonuts(any())).thenReturn(Future.successful(laserDonuts))
+          when(testServer.planningService.getLaserDonuts()(any())).thenReturn(Future.successful(laserDonuts))
           Get(s"/api/laser-donuts") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[LaserDonutView]]].data shouldBe laserDonuts.map(_.toView)
-            verify(testServer.planningService, times(1)).getLaserDonuts(any())
+            verify(testServer.planningService, times(1)).getLaserDonuts()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of laser-donuts that belong to a specific goal") {
+          val goalId = UUID.randomUUID
+          val laserDonuts = Seq(domain.laserDonut, domain.laserDonut.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getLaserDonuts(eqTo(goalId))(any())).thenReturn(Future.successful(laserDonuts))
+          Get(s"/api/goals/$goalId/laser-donuts") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[LaserDonutView]]].data shouldBe laserDonuts.map(_.toView)
+            verify(testServer.planningService, times(1)).getLaserDonuts(eqTo(goalId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -1020,6 +1060,35 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
+      describe("updating a list of portions") {
+        it("should respond with the updated list of portions") {
+          val laserDonutId = UUID.randomUUID
+          val update = rest.listUpdate
+          val updated = domain.portion :: domain.portion :: Nil
+
+          when(testServer.planningService.updatePortions(eqTo(laserDonutId), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/laser-donuts/$laserDonutId/portions", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[PortionView]]].data shouldBe updated.map(_.toView)
+            verify(testServer.planningService, times(1)).updatePortions(eqTo(laserDonutId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the update is invalid") {
+          val laserDonutId = UUID.randomUUID
+          val update = rest.listUpdate
+          val exception = InvalidPortionsUpdateException("Wrong!")
+
+          when(testServer.planningService.updatePortions(eqTo(laserDonutId), eqTo(update.toCommand))(any())).thenReturn(Future.failed(exception))
+          Put(s"/api/laser-donuts/$laserDonutId/portions", update) ~> route ~> check {
+            status shouldBe StatusCodes.BadRequest
+            verify(testServer.planningService, times(1)).updatePortions(eqTo(laserDonutId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
       describe("getting a portion") {
         it("should respond with the requested portion") {
           val id = UUID.randomUUID
@@ -1049,11 +1118,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all portions") {
           val portions = Seq(domain.portion, domain.portion.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getPortions(any())).thenReturn(Future.successful(portions))
+          when(testServer.planningService.getPortions()(any())).thenReturn(Future.successful(portions))
           Get(s"/api/portions") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[PortionView]]].data shouldBe portions.map(_.toView)
-            verify(testServer.planningService, times(1)).getPortions(any())
+            verify(testServer.planningService, times(1)).getPortions()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of portions that belong to a laser-donut") {
+          val laserDonutId = UUID.randomUUID
+          val portions = Seq(domain.portion, domain.portion.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getPortions(eqTo(laserDonutId))(any())).thenReturn(Future.successful(portions))
+          Get(s"/api/laser-donuts/$laserDonutId/portions") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[PortionView]]].data shouldBe portions.map(_.toView)
+            verify(testServer.planningService, times(1)).getPortions(eqTo(laserDonutId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -1127,6 +1209,35 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
+      describe("updating a list of todos") {
+        it("should respond with the updated list of todos") {
+          val portionId = UUID.randomUUID
+          val update = rest.listUpdate
+          val updated = domain.todo :: domain.todo :: Nil
+
+          when(testServer.planningService.updateTodos(eqTo(portionId), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/portions/$portionId/todos", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[TodoView]]].data shouldBe updated.map(_.toView)
+            verify(testServer.planningService, times(1)).updateTodos(eqTo(portionId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the update is invalid") {
+          val portionId = UUID.randomUUID
+          val update = rest.listUpdate
+          val exception = InvalidTodosUpdateException("Wrong!")
+
+          when(testServer.planningService.updateTodos(eqTo(portionId), eqTo(update.toCommand))(any())).thenReturn(Future.failed(exception))
+          Put(s"/api/portions/$portionId/todos", update) ~> route ~> check {
+            status shouldBe StatusCodes.BadRequest
+            verify(testServer.planningService, times(1)).updateTodos(eqTo(portionId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
       describe("getting a todo") {
         it("should respond with the requested todo") {
           val id = UUID.randomUUID
@@ -1156,11 +1267,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all todos") {
           val todos = Seq(domain.todo, domain.todo.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getTodos(any())).thenReturn(Future.successful(todos))
+          when(testServer.planningService.getTodos()(any())).thenReturn(Future.successful(todos))
           Get(s"/api/todos") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[TodoView]]].data shouldBe todos.map(_.toView)
-            verify(testServer.planningService, times(1)).getTodos(any())
+            verify(testServer.planningService, times(1)).getTodos()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of todos that belong to a specific portion") {
+          val portionId = UUID.randomUUID
+          val todos = Seq(domain.todo, domain.todo.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getTodos(eqTo(portionId))(any())).thenReturn(Future.successful(todos))
+          Get(s"/api/portions/$portionId/todos") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[TodoView]]].data shouldBe todos.map(_.toView)
+            verify(testServer.planningService, times(1)).getTodos(eqTo(portionId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -1263,11 +1387,24 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all hobbies") {
           val hobbies = Seq(domain.hobby, domain.hobby.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getHobbies(any())).thenReturn(Future.successful(hobbies))
+          when(testServer.planningService.getHobbies()(any())).thenReturn(Future.successful(hobbies))
           Get(s"/api/hobbies") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[HobbyView]]].data shouldBe hobbies.map(_.toView)
-            verify(testServer.planningService, times(1)).getHobbies(any())
+            verify(testServer.planningService, times(1)).getHobbies()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of hobbies that belong to a specific goal") {
+          val goalId = UUID.randomUUID
+          val hobbies = Seq(domain.hobby, domain.hobby.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getHobbies(eqTo(goalId))(any())).thenReturn(Future.successful(hobbies))
+          Get(s"/api/goals/$goalId/hobbies") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[HobbyView]]].data shouldBe hobbies.map(_.toView)
+            verify(testServer.planningService, times(1)).getHobbies(eqTo(goalId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }

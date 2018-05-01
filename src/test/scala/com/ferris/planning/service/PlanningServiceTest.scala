@@ -493,7 +493,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve threads that belong to a goal") {
+      it("should be able to retrieve threads that belong to a specific goal") {
         val server = newServer
         val goalId = UUID.randomUUID
         val threads = Seq(SD.thread, SD.thread.copy(uuid = UUID.randomUUID))
@@ -574,7 +574,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve weaves that belong to a goal") {
+      it("should be able to retrieve weaves that belong to a specific goal") {
         val server = newServer
         val goalId = UUID.randomUUID
         val weaves = Seq(SD.weave, SD.weave.copy(uuid = UUID.randomUUID))
@@ -655,7 +655,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve laser-donuts that belong to a goal") {
+      it("should be able to retrieve laser-donuts that belong to a specific goal") {
         val server = newServer
         val goalId = UUID.randomUUID
         val laserDonuts = Seq(SD.laserDonut, SD.laserDonut.copy(uuid = UUID.randomUUID))
@@ -714,7 +714,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to update a list of portions that belong to a laser-donut") {
+      it("should be able to update a list of portions that belong to a specific laser-donut") {
         val server = newServer
         val laserDonutId = UUID.randomUUID
         val updated = SD.portion :: SD.portion :: Nil
@@ -760,7 +760,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve portions that belong to a laser-donut") {
+      it("should be able to retrieve portions that belong to a specific laser-donut") {
         val server = newServer
         val laserDonutId = UUID.randomUUID
         val portions = Seq(SD.portion, SD.portion.copy(uuid = UUID.randomUUID))
@@ -819,7 +819,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to reorder a list of todos that belong to a portion") {
+      it("should be able to reorder a list of todos that belong to a specific portion") {
         val server = newServer
         val portionId = UUID.randomUUID
         val updated = SD.todo :: SD.todo :: Nil
@@ -865,7 +865,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve todos that belong to a portion") {
+      it("should be able to retrieve todos that belong to a specific portion") {
         val server = newServer
         val portionId = UUID.randomUUID
         val todos = Seq(SD.todo, SD.todo.copy(uuid = UUID.randomUUID))
@@ -946,7 +946,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to retrieve hobbies that belong to a goal") {
+      it("should be able to retrieve hobbies that belong to a specific goal") {
         val server = newServer
         val goalId = UUID.randomUUID
         val hobbies = Seq(SD.hobby, SD.hobby.copy(uuid = UUID.randomUUID))

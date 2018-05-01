@@ -688,7 +688,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.status shouldBe SD.portionUpdate.status.value
       }
 
-      it("should reorder a list of portions that belong to a laser-donut") {
+      it("should reorder a list of portions that belong to a specific laser-donut") {
         val laserDonutId = UUID.randomUUID
         val first = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
         val second = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
@@ -798,7 +798,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.status shouldBe SD.todoUpdate.status.value
       }
 
-      it("should reorder a list of todos that belong to a portion") {
+      it("should reorder a list of todos that belong to a specific portion") {
         val portionId = UUID.randomUUID
         val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
         val second = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
