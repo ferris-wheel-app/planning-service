@@ -282,6 +282,10 @@ object SampleData {
       `type` = HobbyTypes.Active,
       status = Statuses.NotReached
     )
+
+    val listUpdate = UpdateList(
+      reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
+    )
   }
 
   object rest {
@@ -550,6 +554,10 @@ object SampleData {
       frequency = HobbyFrequency.toString(domain.hobby.frequency),
       `type` = HobbyType.toString(domain.hobby.`type`),
       status = Status.toString(domain.hobby.status)
+    )
+
+    val listUpdate = ListUpdate(
+      reordered = domain.listUpdate.reordered
     )
   }
 }

@@ -493,6 +493,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to retrieve threads that belong to a goal") {
+        val server = newServer
+        val goalId = UUID.randomUUID
+        val threads = Seq(SD.thread, SD.thread.copy(uuid = UUID.randomUUID))
+        when(server.repo.getThreads(goalId)).thenReturn(Future.successful(threads))
+        whenReady(server.planningService.getThreads(goalId)) { result =>
+          result shouldBe threads
+          verify(server.repo, times(1)).getThreads(goalId)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to delete a thread") {
         val server = newServer
         val id = UUID.randomUUID
@@ -558,6 +570,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.getWeaves) { result =>
           result shouldBe weaves
           verify(server.repo, times(1)).getWeaves
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve weaves that belong to a goal") {
+        val server = newServer
+        val goalId = UUID.randomUUID
+        val weaves = Seq(SD.weave, SD.weave.copy(uuid = UUID.randomUUID))
+        when(server.repo.getWeaves(goalId)).thenReturn(Future.successful(weaves))
+        whenReady(server.planningService.getWeaves(goalId)) { result =>
+          result shouldBe weaves
+          verify(server.repo, times(1)).getWeaves(goalId)
           verifyNoMoreInteractions(server.repo)
         }
       }
@@ -631,6 +655,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to retrieve laser-donuts that belong to a goal") {
+        val server = newServer
+        val goalId = UUID.randomUUID
+        val laserDonuts = Seq(SD.laserDonut, SD.laserDonut.copy(uuid = UUID.randomUUID))
+        when(server.repo.getLaserDonuts(goalId)).thenReturn(Future.successful(laserDonuts))
+        whenReady(server.planningService.getLaserDonuts(goalId)) { result =>
+          result shouldBe laserDonuts
+          verify(server.repo, times(1)).getLaserDonuts(goalId)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to delete a laser-donut") {
         val server = newServer
         val id = UUID.randomUUID
@@ -678,6 +714,30 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to update a list of portions that belong to a laser-donut") {
+        val server = newServer
+        val laserDonutId = UUID.randomUUID
+        val updated = SD.portion :: SD.portion :: Nil
+        when(server.repo.updatePortions(eqTo(laserDonutId), eqTo(SD.listUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updatePortions(laserDonutId, SD.listUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updatePortions(eqTo(laserDonutId), eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a list of portions is being updated") {
+        val server = newServer
+        val laserDonutId = UUID.randomUUID
+        val expectedException = InvalidPortionsUpdateException("Wrong!")
+        when(server.repo.updatePortions(eqTo(laserDonutId), eqTo(SD.listUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updatePortions(laserDonutId, SD.listUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updatePortions(eqTo(laserDonutId), eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to retrieve a portion") {
         val server = newServer
         val id = UUID.randomUUID
@@ -696,6 +756,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.getPortions) { result =>
           result shouldBe portions
           verify(server.repo, times(1)).getPortions
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve portions that belong to a laser-donut") {
+        val server = newServer
+        val laserDonutId = UUID.randomUUID
+        val portions = Seq(SD.portion, SD.portion.copy(uuid = UUID.randomUUID))
+        when(server.repo.getPortions(laserDonutId)).thenReturn(Future.successful(portions))
+        whenReady(server.planningService.getPortions(laserDonutId)) { result =>
+          result shouldBe portions
+          verify(server.repo, times(1)).getPortions(laserDonutId)
           verifyNoMoreInteractions(server.repo)
         }
       }
@@ -747,6 +819,30 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to reorder a list of todos that belong to a portion") {
+        val server = newServer
+        val portionId = UUID.randomUUID
+        val updated = SD.todo :: SD.todo :: Nil
+        when(server.repo.updateTodos(eqTo(portionId), eqTo(SD.listUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateTodos(portionId, SD.listUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateTodos(eqTo(portionId), eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a list of todos is being updated") {
+        val server = newServer
+        val portionId = UUID.randomUUID
+        val expectedException = InvalidTodosUpdateException("Wrong!")
+        when(server.repo.updateTodos(eqTo(portionId), eqTo(SD.listUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateTodos(portionId, SD.listUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateTodos(eqTo(portionId), eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to retrieve a todo") {
         val server = newServer
         val id = UUID.randomUUID
@@ -765,6 +861,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.getTodos) { result =>
           result shouldBe todos
           verify(server.repo, times(1)).getTodos
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve todos that belong to a portion") {
+        val server = newServer
+        val portionId = UUID.randomUUID
+        val todos = Seq(SD.todo, SD.todo.copy(uuid = UUID.randomUUID))
+        when(server.repo.getTodos(portionId)).thenReturn(Future.successful(todos))
+        whenReady(server.planningService.getTodos(portionId)) { result =>
+          result shouldBe todos
+          verify(server.repo, times(1)).getTodos(portionId)
           verifyNoMoreInteractions(server.repo)
         }
       }
@@ -834,6 +942,18 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.getHobbies) { result =>
           result shouldBe hobbies
           verify(server.repo, times(1)).getHobbies
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve hobbies that belong to a goal") {
+        val server = newServer
+        val goalId = UUID.randomUUID
+        val hobbies = Seq(SD.hobby, SD.hobby.copy(uuid = UUID.randomUUID))
+        when(server.repo.getHobbies(goalId)).thenReturn(Future.successful(hobbies))
+        whenReady(server.planningService.getHobbies(goalId)) { result =>
+          result shouldBe hobbies
+          verify(server.repo, times(1)).getHobbies(goalId)
           verifyNoMoreInteractions(server.repo)
         }
       }
