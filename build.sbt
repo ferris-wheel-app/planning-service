@@ -45,6 +45,7 @@ lazy val rootSettings = {
       "com.typesafe.akka" %% "akka-http-testkit"          % dependencies.akkaHttpV,
       "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroserviceV,
       "com.ferris"        %% "ferris-json-utils"          % dependencies.ferrisJsonUtilsV,
+      "com.github.fommil" %% "spray-json-shapeless"       % dependencies.fommilV,
       "mysql"             %  "mysql-connector-java"       % dependencies.mysqlConnectorV,
       "org.flywaydb"      %  "flyway-core"                % dependencies.flywayV,
       "org.scalatest"     %% "scalatest"                  % dependencies.scalaTestV       % Test,
@@ -74,6 +75,7 @@ lazy val dependencies = new {
   val mysqlConnectorV             = "5.1.40"
   val flywayV                     = "3.2.1"
   val scalaTestV                  = "3.0.1"
+  val fommilV                     = "1.4.0"
   val mockitoV                    = "1.10.19"
 }
 
