@@ -1,8 +1,8 @@
 package com.ferris.planning.command
 
+import java.time.LocalDate
 import java.util.UUID
 
-import akka.http.scaladsl.model.DateTime
 import com.ferris.planning.model.Model._
 
 object Commands {
@@ -37,14 +37,14 @@ object Commands {
 
   case class CreateYear (
     epochId: UUID,
-    startDate: DateTime,
-    finishDate: DateTime
+    startDate: LocalDate,
+    finishDate: LocalDate
   )
 
   case class UpdateYear (
     epochId: Option[UUID],
-    startDate: Option[DateTime],
-    finishDate: Option[DateTime]
+    startDate: Option[LocalDate],
+    finishDate: Option[LocalDate]
   )
 
   case class CreateTheme (

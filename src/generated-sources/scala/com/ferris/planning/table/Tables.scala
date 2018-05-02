@@ -488,13 +488,13 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param epochId Database column EPOCH_ID SqlType(VARCHAR), Length(36,true)
-   *  @param startDate Database column START_DATE SqlType(TIMESTAMP)
-   *  @param finishDate Database column FINISH_DATE SqlType(TIMESTAMP) */
-  case class YearRow(id: Long, uuid: String, epochId: String, startDate: java.sql.Timestamp, finishDate: java.sql.Timestamp)
+   *  @param startDate Database column START_DATE SqlType(DATE)
+   *  @param finishDate Database column FINISH_DATE SqlType(DATE) */
+  case class YearRow(id: Long, uuid: String, epochId: String, startDate: java.sql.Date, finishDate: java.sql.Date)
   /** GetResult implicit for fetching YearRow objects using plain SQL queries */
-  implicit def GetResultYearRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp]): GR[YearRow] = GR{
+  implicit def GetResultYearRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Date]): GR[YearRow] = GR{
     prs => import prs._
-    YearRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Timestamp], <<[java.sql.Timestamp]))
+    YearRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[java.sql.Date]))
   }
   /** Table description of table YEAR. Objects of this class serve as prototypes for rows in queries. */
   class YearTable(_tableTag: Tag) extends profile.api.Table[YearRow](_tableTag, "YEAR") {
@@ -508,10 +508,10 @@ trait Tables {
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
     /** Database column EPOCH_ID SqlType(VARCHAR), Length(36,true) */
     val epochId: Rep[String] = column[String]("EPOCH_ID", O.Length(36,varying=true))
-    /** Database column START_DATE SqlType(TIMESTAMP) */
-    val startDate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("START_DATE")
-    /** Database column FINISH_DATE SqlType(TIMESTAMP) */
-    val finishDate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("FINISH_DATE")
+    /** Database column START_DATE SqlType(DATE) */
+    val startDate: Rep[java.sql.Date] = column[java.sql.Date]("START_DATE")
+    /** Database column FINISH_DATE SqlType(DATE) */
+    val finishDate: Rep[java.sql.Date] = column[java.sql.Date]("FINISH_DATE")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_2) */
     val index1 = index("CONSTRAINT_INDEX_2", uuid, unique=true)

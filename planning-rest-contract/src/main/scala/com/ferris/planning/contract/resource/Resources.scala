@@ -1,8 +1,7 @@
 package com.ferris.planning.contract.resource
 
+import java.time.LocalDate
 import java.util.UUID
-
-import akka.http.scaladsl.model.DateTime
 
 object Resources {
 
@@ -44,14 +43,14 @@ object Resources {
 
     case class YearCreation (
       epochId: UUID,
-      startDate: DateTime,
-      finishDate: DateTime
+      startDate: LocalDate,
+      finishDate: LocalDate
     )
 
     case class YearUpdate (
       epochId: Option[UUID],
-      startDate: Option[DateTime],
-      finishDate: Option[DateTime]
+      startDate: Option[LocalDate],
+      finishDate: Option[LocalDate]
     )
 
     case class ThemeCreation (
@@ -222,8 +221,8 @@ object Resources {
     case class YearView (
       uuid: UUID,
       epochId: UUID,
-      startDate: DateTime,
-      finishDate: DateTime
+      startDate: LocalDate,
+      finishDate: LocalDate
     )
 
     case class ThemeView (

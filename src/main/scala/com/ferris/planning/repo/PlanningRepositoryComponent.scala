@@ -1,5 +1,6 @@
 package com.ferris.planning.repo
 
+import java.sql.Date
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
@@ -282,8 +283,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         id = 0L,
         uuid = UUID.randomUUID,
         epochId = creation.epochId,
-        startDate = creation.startDate,
-        finishDate = creation.finishDate
+        startDate = Date.valueOf(creation.startDate),
+        finishDate = Date.valueOf(creation.finishDate)
       )
       (YearTable returning YearTable.map(_.id) into ((year, id) => year.copy(id = id))) += row
     }

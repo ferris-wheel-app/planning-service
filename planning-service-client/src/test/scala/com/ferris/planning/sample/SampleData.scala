@@ -1,16 +1,15 @@
 package com.ferris.planning.sample
 
+import java.time.LocalDate
 import java.util.UUID
 
-import akka.http.scaladsl.model.DateTime
 import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.contract.resource.Resources.Out._
 
 object SampleData {
 
-  private val fullYear = 365L * 24L * 60L * 60L * 1000L
-  private val currentYear = DateTime.now
-  private val nextYear = currentYear.plus(fullYear)
+  private val currentYear = LocalDate.now
+  private val nextYear = currentYear.plusYears(1)
 
   val messageCreation = MessageCreation(
     sender = "Dave",
@@ -74,8 +73,8 @@ object SampleData {
 
   val yearUpdate = YearUpdate(
     epochId = Some(UUID.randomUUID),
-    startDate = Some(currentYear.plus(fullYear * 2)),
-    finishDate = Some(nextYear.plus(fullYear * 3))
+    startDate = Some(currentYear.plusYears(2)),
+    finishDate = Some(nextYear.plusYears(3))
   )
 
   val year = YearView(

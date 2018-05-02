@@ -31,8 +31,8 @@ create table year (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
   epoch_id VARCHAR(36) NOT NULL,
-  start_date TIMESTAMP NOT NULL,
-  finish_date TIMESTAMP NOT NULL,
+  start_date DATE NOT NULL,
+  finish_date DATE NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;

@@ -1,8 +1,7 @@
 package com.ferris.planning.model
 
+import java.time.LocalDate
 import java.util.UUID
-
-import akka.http.scaladsl.model.DateTime
 
 object Model {
 
@@ -29,8 +28,8 @@ object Model {
   case class Year (
     uuid: UUID,
     epochId: UUID,
-    startDate: DateTime,
-    finishDate: DateTime
+    startDate: LocalDate,
+    finishDate: LocalDate
   )
 
   case class Theme (

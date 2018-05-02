@@ -1,6 +1,7 @@
 package com.ferris.planning.db.conversions
 
-import java.sql.Timestamp
+import java.sql.{Date, Timestamp}
+import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
@@ -41,8 +42,8 @@ class TableConversions(val tables: Tables) {
     def asYear: Year = Year(
       uuid = UUID.fromString(row.uuid),
       epochId = UUID.fromString(row.epochId),
-      startDate = row.startDate,
-      finishDate = row.finishDate
+      startDate = row.startDate.toLocalDate,
+      finishDate = row.finishDate.toLocalDate
     )
   }
 
@@ -152,9 +153,9 @@ class TableConversions(val tables: Tables) {
     }
   }
 
-  object UpdateDate extends Update[DateTime, Timestamp] {
-    override def keepOrReplace(newVersion: Option[DateTime], oldVersion: Timestamp): Timestamp = {
-      newVersion.map(dateTime2Timestamp).getOrElse(oldVersion)
+  object UpdateDate extends Update[LocalDate, Date] {
+    override def keepOrReplace(newVersion: Option[LocalDate], oldVersion: Date): Date = {
+      newVersion.map(localDate2SqlDate).getOrElse(oldVersion)
     }
   }
 
@@ -178,7 +179,7 @@ class TableConversions(val tables: Tables) {
 
   implicit def timestamp2DateTime(date: Timestamp): DateTime = DateTime.apply(date.getTime)
 
-  implicit def dateTime2Timestamp(date: DateTime): Timestamp = new Timestamp(date.clicks)
+  implicit def localDate2SqlDate(date: LocalDate): Date = Date.valueOf(date)
 
   implicit def byte2Boolean(byte: Byte): Boolean = byte == 1
 
