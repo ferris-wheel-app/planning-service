@@ -1,5 +1,6 @@
 package com.ferris.planning.service.conversions
 
+import com.ferris.planning.contract.resource.TypeFields
 import com.ferris.planning.model.Model.BacklogItemTypes.BacklogItemType
 import com.ferris.planning.model.Model.DonutTypes.DonutType
 import com.ferris.planning.model.Model.GoalStatuses.GoalStatus
@@ -10,7 +11,7 @@ import com.ferris.planning.model.Model.Statuses.Status
 import com.ferris.planning.model.Model.WeaveTypes.WeaveType
 import com.ferris.planning.model.Model._
 
-object TypeFields {
+object TypeResolvers {
 
   sealed trait TypeResolver[T <: TypeEnum] {
     def withName(name: String): T
@@ -18,8 +19,7 @@ object TypeFields {
   }
 
   object BacklogItemType extends TypeResolver[BacklogItemTypes.BacklogItemType] {
-    val idea = "idea"
-    val issue = "issue"
+    import TypeFields.BacklogItemType._
 
     override def withName(name: String): BacklogItemType = name match {
       case `idea` => BacklogItemTypes.Idea
@@ -35,11 +35,7 @@ object TypeFields {
   }
 
   object Status extends TypeResolver[Statuses.Status] {
-    val unknown = "unknown"
-    val notReached = "not_reached"
-    val notStarted = "not_started"
-    val incomplete = "incomplete"
-    val complete = "complete"
+    import TypeFields.Status._
 
     override def withName(name: String): Status = name match {
       case `unknown` => Statuses.Unknown
@@ -61,9 +57,7 @@ object TypeFields {
   }
 
   object GoalStatus extends TypeResolver[GoalStatuses.GoalStatus] {
-    val notAchieved = "not_achieved"
-    val employed = "employed"
-    val unemployed = "unemployed"
+    import TypeFields.GoalStatus._
 
     override def withName(name: String): GoalStatus = name match {
       case `notAchieved` => GoalStatuses.NotAchieved
@@ -81,11 +75,7 @@ object TypeFields {
   }
 
   object GraduationType extends TypeResolver[GraduationTypes.GraduationType] {
-    val abandoned = "abandoned"
-    val thread = "thread"
-    val weave = "weave"
-    val hobby = "hobby"
-    val goal = "goal"
+    import TypeFields.GraduationType._
 
     override def withName(name: String): GraduationType = name match {
       case `abandoned` => GraduationTypes.Abandoned
@@ -107,8 +97,7 @@ object TypeFields {
   }
 
   object DonutType extends TypeResolver[DonutTypes.DonutType] {
-    val projectFocused = "project_focused"
-    val skillFocused = "skill_focused"
+    import TypeFields.DonutType._
 
     override def withName(name: String): DonutType = name match {
       case `projectFocused` => DonutTypes.ProjectFocused
@@ -124,9 +113,7 @@ object TypeFields {
   }
 
   object WeaveType extends TypeResolver[WeaveTypes.WeaveType] {
-    val priority = "priority"
-    val pdr = "pdr"
-    val bau = "bau"
+    import TypeFields.WeaveType._
 
     override def withName(name: String): WeaveType = name match {
       case `priority` => WeaveTypes.Priority
@@ -144,8 +131,7 @@ object TypeFields {
   }
 
   object HobbyType extends TypeResolver[HobbyTypes.HobbyType] {
-    val active = "active"
-    val passive = "passive"
+    import TypeFields.HobbyType._
 
     override def withName(name: String): HobbyType = name match {
       case `active` => HobbyTypes.Active
@@ -161,8 +147,7 @@ object TypeFields {
   }
 
   object HobbyFrequency extends TypeResolver[HobbyFrequencies.HobbyFrequency] {
-    val oneOff = "one_off"
-    val continuous = "continuous"
+    import TypeFields.HobbyFrequency._
 
     override def withName(name: String): HobbyFrequency = name match {
       case `oneOff` => HobbyFrequencies.OneOff

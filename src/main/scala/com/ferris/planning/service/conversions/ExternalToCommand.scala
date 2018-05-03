@@ -27,7 +27,7 @@ object ExternalToCommand {
     override def toCommand = CreateBacklogItem(
       summary = backlogItem.summary,
       description = backlogItem.description,
-      `type` = TypeFields.BacklogItemType.withName(backlogItem.`type`)
+      `type` = TypeResolvers.BacklogItemType.withName(backlogItem.`type`)
     )
   }
 
@@ -35,7 +35,7 @@ object ExternalToCommand {
     override def toCommand = UpdateBacklogItem(
       summary = backlogItem.summary,
       description = backlogItem.description,
-      `type` = backlogItem.`type`.map(TypeFields.BacklogItemType.withName)
+      `type` = backlogItem.`type`.map(TypeResolvers.BacklogItemType.withName)
     )
   }
 
@@ -93,8 +93,8 @@ object ExternalToCommand {
       description = goal.description,
       level = goal.level,
       priority = goal.priority,
-      status = TypeFields.GoalStatus.withName(goal.status),
-      graduation = TypeFields.GraduationType.withName(goal.graduation)
+      status = TypeResolvers.GoalStatus.withName(goal.status),
+      graduation = TypeResolvers.GraduationType.withName(goal.graduation)
     )
   }
 
@@ -106,8 +106,8 @@ object ExternalToCommand {
       description = goal.description,
       level = goal.level,
       priority = goal.priority,
-      status = goal.status.map(TypeFields.GoalStatus.withName),
-      graduation = goal.graduation.map(TypeFields.GraduationType.withName)
+      status = goal.status.map(TypeResolvers.GoalStatus.withName),
+      graduation = goal.graduation.map(TypeResolvers.GraduationType.withName)
     )
   }
 
@@ -116,7 +116,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      status = TypeFields.Status.withName(thread.status)
+      status = TypeResolvers.Status.withName(thread.status)
     )
   }
 
@@ -125,7 +125,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      status = thread.status.map(TypeFields.Status.withName)
+      status = thread.status.map(TypeResolvers.Status.withName)
     )
   }
 
@@ -134,8 +134,8 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
-      status = TypeFields.Status.withName(weave.status),
-      `type` = TypeFields.WeaveType.withName(weave.`type`)
+      status = TypeResolvers.Status.withName(weave.status),
+      `type` = TypeResolvers.WeaveType.withName(weave.`type`)
     )
   }
 
@@ -144,8 +144,8 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
-      status = weave.status.map(TypeFields.Status.withName),
-      `type` = weave.`type`.map(TypeFields.WeaveType.withName)
+      status = weave.status.map(TypeResolvers.Status.withName),
+      `type` = weave.`type`.map(TypeResolvers.WeaveType.withName)
     )
   }
 
@@ -155,8 +155,8 @@ object ExternalToCommand {
       summary = laserDonut.summary,
       description = laserDonut.description,
       milestone = laserDonut.milestone,
-      status = TypeFields.Status.withName(laserDonut.status),
-      `type` = TypeFields.DonutType.withName(laserDonut.`type`)
+      status = TypeResolvers.Status.withName(laserDonut.status),
+      `type` = TypeResolvers.DonutType.withName(laserDonut.`type`)
     )
   }
 
@@ -166,8 +166,8 @@ object ExternalToCommand {
       summary = laserDonut.summary,
       description = laserDonut.description,
       milestone = laserDonut.milestone,
-      status = laserDonut.status.map(TypeFields.Status.withName),
-      `type` = laserDonut.`type`.map(TypeFields.DonutType.withName)
+      status = laserDonut.status.map(TypeResolvers.Status.withName),
+      `type` = laserDonut.`type`.map(TypeResolvers.DonutType.withName)
     )
   }
 
@@ -175,7 +175,7 @@ object ExternalToCommand {
     override def toCommand = CreatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      status = TypeFields.Status.withName(portion.status)
+      status = TypeResolvers.Status.withName(portion.status)
     )
   }
 
@@ -183,7 +183,7 @@ object ExternalToCommand {
     override def toCommand = UpdatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      status = portion.status.map(TypeFields.Status.withName)
+      status = portion.status.map(TypeResolvers.Status.withName)
     )
   }
 
@@ -191,7 +191,7 @@ object ExternalToCommand {
     override def toCommand = CreateTodo(
       portionId = todo.portionId,
       description = todo.description,
-      status = TypeFields.Status.withName(todo.status)
+      status = TypeResolvers.Status.withName(todo.status)
     )
   }
 
@@ -199,7 +199,7 @@ object ExternalToCommand {
     override def toCommand = UpdateTodo(
       portionId = todo.portionId,
       description = todo.description,
-      status = todo.status.map(TypeFields.Status.withName)
+      status = todo.status.map(TypeResolvers.Status.withName)
     )
   }
 
@@ -208,9 +208,9 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
-      frequency = TypeFields.HobbyFrequency.withName(hobby.frequency),
-      status = TypeFields.Status.withName(hobby.status),
-      `type` = TypeFields.HobbyType.withName(hobby.`type`)
+      frequency = TypeResolvers.HobbyFrequency.withName(hobby.frequency),
+      status = TypeResolvers.Status.withName(hobby.status),
+      `type` = TypeResolvers.HobbyType.withName(hobby.`type`)
     )
   }
 
@@ -219,9 +219,9 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
-      frequency = hobby.frequency.map(TypeFields.HobbyFrequency.withName),
-      status = hobby.status.map(TypeFields.Status.withName),
-      `type` = hobby.`type`.map(TypeFields.HobbyType.withName)
+      frequency = hobby.frequency.map(TypeResolvers.HobbyFrequency.withName),
+      status = hobby.status.map(TypeResolvers.Status.withName),
+      `type` = hobby.`type`.map(TypeResolvers.HobbyType.withName)
     )
   }
 

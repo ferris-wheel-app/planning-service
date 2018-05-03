@@ -21,7 +21,7 @@ object ModelToView {
         uuid = backlogItem.uuid,
         summary = backlogItem.summary,
         description = backlogItem.description,
-        `type` = TypeFields.BacklogItemType.toString(backlogItem.`type`)
+        `type` = TypeResolvers.BacklogItemType.toString(backlogItem.`type`)
       )
     }
   }
@@ -68,8 +68,8 @@ object ModelToView {
         description = goal.description,
         level = goal.level,
         priority = goal.priority,
-        status = TypeFields.GoalStatus.toString(goal.status),
-        graduation = TypeFields.GraduationType.toString(goal.graduation)
+        status = TypeResolvers.GoalStatus.toString(goal.status),
+        graduation = TypeResolvers.GraduationType.toString(goal.graduation)
       )
     }
   }
@@ -81,7 +81,7 @@ object ModelToView {
         goalId = thread.goalId,
         summary = thread.summary,
         description = thread.description,
-        status = TypeFields.Status.toString(thread.status)
+        status = TypeResolvers.Status.toString(thread.status)
       )
     }
   }
@@ -93,8 +93,8 @@ object ModelToView {
         goalId = weave.goalId,
         summary = weave.summary,
         description = weave.description,
-        status = TypeFields.Status.toString(weave.status),
-        `type` = TypeFields.WeaveType.toString(weave.`type`)
+        status = TypeResolvers.Status.toString(weave.status),
+        `type` = TypeResolvers.WeaveType.toString(weave.`type`)
       )
     }
   }
@@ -108,8 +108,8 @@ object ModelToView {
         description = laserDonut.description,
         milestone = laserDonut.milestone,
         order = laserDonut.order,
-        status = TypeFields.Status.toString(laserDonut.status),
-        `type` = TypeFields.DonutType.toString(laserDonut.`type`)
+        status = TypeResolvers.Status.toString(laserDonut.status),
+        `type` = TypeResolvers.DonutType.toString(laserDonut.`type`)
       )
     }
   }
@@ -121,7 +121,7 @@ object ModelToView {
         laserDonutId = portion.laserDonutId,
         summary = portion.summary,
         order = portion.order,
-        status = TypeFields.Status.toString(portion.status)
+        status = TypeResolvers.Status.toString(portion.status)
       )
     }
   }
@@ -133,7 +133,7 @@ object ModelToView {
         portionId = todo.portionId,
         description = todo.description,
         order = todo.order,
-        status = TypeFields.Status.toString(todo.status)
+        status = TypeResolvers.Status.toString(todo.status)
       )
     }
   }
@@ -145,9 +145,9 @@ object ModelToView {
         goalId = hobby.goalId,
         summary = hobby.summary,
         description = hobby.description,
-        frequency = TypeFields.HobbyFrequency.toString(hobby.frequency),
-        status = TypeFields.Status.toString(hobby.status),
-        `type` = TypeFields.HobbyType.toString(hobby.`type`)
+        frequency = TypeResolvers.HobbyFrequency.toString(hobby.frequency),
+        status = TypeResolvers.Status.toString(hobby.status),
+        `type` = TypeResolvers.HobbyType.toString(hobby.`type`)
       )
     }
   }

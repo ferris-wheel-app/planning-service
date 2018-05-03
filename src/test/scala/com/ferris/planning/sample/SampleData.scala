@@ -7,7 +7,7 @@ import com.ferris.planning.command.Commands._
 import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.model.Model._
-import com.ferris.planning.service.conversions.TypeFields._
+import com.ferris.planning.service.conversions.TypeResolvers._
 
 object SampleData {
 
