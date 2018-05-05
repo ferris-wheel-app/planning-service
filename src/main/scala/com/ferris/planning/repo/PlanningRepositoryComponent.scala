@@ -284,7 +284,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         uuid = UUID.randomUUID,
         epochId = creation.epochId,
         startDate = Date.valueOf(creation.startDate),
-        finishDate = Date.valueOf(creation.finishDate)
+        finishDate = Date.valueOf(creation.startDate.plusYears(1))
       )
       (YearTable returning YearTable.map(_.id) into ((year, id) => year.copy(id = id))) += row
     }
@@ -452,7 +452,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       getYearAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
-            old.startDate), UpdateDate.keepOrReplace(update.finishDate, old.finishDate))
+            old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate))
             .andThen(getYearAction(uuid))
         } getOrElse DBIO.failed(YearNotFoundException())
       }.transactionally

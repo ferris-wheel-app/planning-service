@@ -214,7 +214,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created = repo.createYear(SD.yearCreation).futureValue
         created.epochId shouldBe SD.yearCreation.epochId
         created.startDate shouldBe SD.yearCreation.startDate
-        created.finishDate shouldBe SD.yearCreation.finishDate
+        created.finishDate shouldBe SD.yearCreation.startDate.plusYears(1)
       }
     }
 
@@ -227,7 +227,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.value.uuid shouldBe original.uuid
         updated.value.epochId shouldBe SD.yearUpdate.epochId.value
         updated.value.startDate shouldBe SD.yearUpdate.startDate.value
-        updated.value.finishDate shouldBe SD.yearUpdate.finishDate.value
+        updated.value.finishDate shouldBe SD.yearUpdate.startDate.value.plusYears(1)
       }
 
       it("should throw an exception if a year is not found") {

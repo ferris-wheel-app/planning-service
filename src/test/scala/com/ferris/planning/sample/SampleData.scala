@@ -71,14 +71,12 @@ object SampleData {
 
     val yearCreation = CreateYear(
       epochId = UUID.randomUUID,
-      startDate = currentYear,
-      finishDate = nextYear
+      startDate = currentYear
     )
 
     val yearUpdate = UpdateYear(
       epochId = Some(UUID.randomUUID),
-      startDate = Some(currentYear.plusYears(2)),
-      finishDate = Some(nextYear.plusYears(3))
+      startDate = Some(currentYear.plusYears(2))
     )
 
     val year = Year(
@@ -344,14 +342,12 @@ object SampleData {
 
     val yearCreation = YearCreation(
       epochId = domain.yearCreation.epochId,
-      startDate = domain.yearCreation.startDate,
-      finishDate = domain.yearCreation.finishDate
+      startDate = domain.yearCreation.startDate
     )
 
     val yearUpdate = YearUpdate(
       epochId = domain.yearUpdate.epochId,
-      startDate = domain.yearUpdate.startDate,
-      finishDate = domain.yearUpdate.finishDate
+      startDate = domain.yearUpdate.startDate
     )
 
     val year = YearView(

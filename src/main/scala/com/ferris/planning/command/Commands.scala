@@ -37,14 +37,12 @@ object Commands {
 
   case class CreateYear (
     epochId: UUID,
-    startDate: LocalDate,
-    finishDate: LocalDate
+    startDate: LocalDate
   )
 
   case class UpdateYear (
     epochId: Option[UUID],
-    startDate: Option[LocalDate],
-    finishDate: Option[LocalDate]
+    startDate: Option[LocalDate]
   )
 
   case class CreateTheme (

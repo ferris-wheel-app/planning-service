@@ -58,16 +58,14 @@ object ExternalToCommand {
   implicit class YearCreationConversion(year: YearCreation) extends CommandConversion[CreateYear] {
     override def toCommand = CreateYear(
       epochId = year.epochId,
-      startDate = year.startDate,
-      finishDate = year.finishDate
+      startDate = year.startDate
     )
   }
 
   implicit class YearUpdateConversion(year: YearUpdate) extends CommandConversion[UpdateYear] {
     override def toCommand = UpdateYear(
       epochId = year.epochId,
-      startDate = year.startDate,
-      finishDate = year.finishDate
+      startDate = year.startDate
     )
   }
 

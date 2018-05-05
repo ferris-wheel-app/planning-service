@@ -49,14 +49,12 @@ object Resources {
 
     case class YearCreation (
       epochId: UUID,
-      startDate: LocalDate,
-      finishDate: LocalDate
+      startDate: LocalDate
     )
 
     case class YearUpdate (
       epochId: Option[UUID],
-      startDate: Option[LocalDate],
-      finishDate: Option[LocalDate]
+      startDate: Option[LocalDate]
     )
 
     case class ThemeCreation (
