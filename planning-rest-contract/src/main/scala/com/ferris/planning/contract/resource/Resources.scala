@@ -3,6 +3,8 @@ package com.ferris.planning.contract.resource
 import java.time.LocalDate
 import java.util.UUID
 
+import com.ferris.planning.contract.validation.InputValidators._
+
 object Resources {
 
   object In {
@@ -21,13 +23,17 @@ object Resources {
       summary: String,
       description: String,
       `type`: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class BacklogItemUpdate (
       summary: Option[String],
       description: Option[String],
       `type`: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class EpochCreation (
       name: String,
@@ -72,7 +78,9 @@ object Resources {
       priority: Boolean,
       graduation: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class GoalUpdate (
       themeId: Option[UUID],
@@ -83,21 +91,27 @@ object Resources {
       priority: Option[Boolean],
       graduation: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ThreadCreation (
       goalId: Option[UUID],
       summary: String,
       description: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ThreadUpdate (
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class WeaveCreation (
       goalId: Option[UUID],
@@ -105,7 +119,9 @@ object Resources {
       description: String,
       `type`: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class WeaveUpdate (
       goalId: Option[UUID],
@@ -113,7 +129,9 @@ object Resources {
       description: Option[String],
       `type`: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class LaserDonutCreation (
       goalId: UUID,
@@ -122,7 +140,9 @@ object Resources {
       milestone: String,
       `type`: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class LaserDonutUpdate (
       goalId: Option[UUID],
@@ -131,31 +151,41 @@ object Resources {
       milestone: Option[String],
       `type`: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class PortionCreation (
       laserDonutId: UUID,
       summary: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class PortionUpdate (
       laserDonutId: Option[UUID],
       summary: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class TodoCreation (
       portionId: UUID,
       description: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class TodoUpdate (
       portionId: Option[UUID],
       description: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class HobbyCreation (
       goalId: Option[UUID],
@@ -164,7 +194,9 @@ object Resources {
       frequency: String,
       `type`: String,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class HobbyUpdate (
       goalId: Option[UUID],
@@ -173,27 +205,25 @@ object Resources {
       frequency: Option[String],
       `type`: Option[String],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ListUpdate (
-      reordered: List[UUID]
+      reordered: Seq[UUID]
     )
 
-    case class TierCreation (
-      laserDonuts: List[UUID]
-    )
+    case class TierUpsert(
+      laserDonuts: Seq[UUID]
+    ) {
+      checkValidity(this)
+    }
 
-    case class TierUpdate (
-      laserDonuts: List[UUID]
-    )
-
-    case class PyramidOfImportanceCreation (
-      tiers: List[TierCreation]
-    )
-
-    case class PyramidOfImportanceUpdate (
-      tiers: List[TierUpdate]
-    )
+    case class PyramidOfImportanceUpsert(
+      tiers: Seq[TierUpsert]
+    ) {
+      checkValidity(this)
+    }
   }
 
   object Out {
