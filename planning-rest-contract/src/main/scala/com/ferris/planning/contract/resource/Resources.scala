@@ -332,11 +332,11 @@ object Resources {
     )
 
     case class TierView (
-      laserDonuts: List[SlimLaserDonutView]
+      laserDonuts: Seq[SlimLaserDonutView]
     )
 
     case class PyramidOfImportanceView (
-      tiers: List[TierView]
+      tiers: Seq[TierView]
     )
     
     case class DeletionResult(

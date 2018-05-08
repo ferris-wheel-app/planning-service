@@ -170,4 +170,12 @@ object Commands {
   case class UpdateList (
     reordered: Seq[UUID]
   )
+
+  case class UpsertTier(
+    laserDonuts: Seq[UUID]
+  )
+
+  case class UpsertPyramidOfImportance(
+    tiers: Seq[UpsertTier]
+  )
 }

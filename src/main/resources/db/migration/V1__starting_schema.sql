@@ -140,3 +140,13 @@ create table hobby (
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
+
+create table pyramid_of_importance (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  laser_donut_id BIGINT NOT NULL,
+  tier INT(20) NOT NULL,
+  current TINYINT(1) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (laser_donut_id),
+  CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;

@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, PyramidOfImportanceTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -332,6 +332,41 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table PortionTable */
   lazy val PortionTable = new TableQuery(tag => new PortionTable(tag))
+
+  /** Entity class storing rows of table PyramidOfImportanceTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
+   *  @param tier Database column TIER SqlType(INTEGER)
+   *  @param current Database column CURRENT SqlType(TINYINT) */
+  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
+  /** GetResult implicit for fetching PyramidOfImportanceRow objects using plain SQL queries */
+  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[PyramidOfImportanceRow] = GR{
+    prs => import prs._
+    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int], <<[Byte]))
+  }
+  /** Table description of table PYRAMID_OF_IMPORTANCE. Objects of this class serve as prototypes for rows in queries. */
+  class PyramidOfImportanceTable(_tableTag: Tag) extends profile.api.Table[PyramidOfImportanceRow](_tableTag, "PYRAMID_OF_IMPORTANCE") {
+    def * = (id, laserDonutId, tier, current) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column LASER_DONUT_ID SqlType(BIGINT) */
+    val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
+    /** Database column TIER SqlType(INTEGER) */
+    val tier: Rep[Int] = column[Int]("TIER")
+    /** Database column CURRENT SqlType(TINYINT) */
+    val current: Rep[Byte] = column[Byte]("CURRENT")
+
+    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
+    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (laserDonutId) (database name CONSTRAINT_INDEX_17) */
+    val index1 = index("CONSTRAINT_INDEX_17", laserDonutId, unique=true)
+  }
+  /** Collection-like TableQuery object for table PyramidOfImportanceTable */
+  lazy val PyramidOfImportanceTable = new TableQuery(tag => new PyramidOfImportanceTable(tag))
 
   /** Entity class storing rows of table ThemeTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
