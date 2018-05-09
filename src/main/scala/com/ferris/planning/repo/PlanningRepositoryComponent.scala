@@ -80,6 +80,7 @@ trait PlanningRepositoryComponent {
     def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
+    def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
     def deleteMessage(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
@@ -630,6 +631,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
     }
 
+    override def getPyramidOfImportance = {
+
+    }
+
     // Delete endpoints
     override def deleteMessage(uuid: UUID): Future[Boolean] = {
       val action = messageByUuid(uuid).delete
@@ -764,6 +769,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getHobbyAction(uuid: UUID) = {
       hobbyByUuid(uuid).result.headOption
+    }
+
+    private def getPyramidOfImportanceAction = {
+      PyramidOfImportanceTable.result.flatMap { pyramidRows =>
+        pyramidRows.map { pyramidRow =>
+          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).map {
+            case Some(laserDonutRow) =>
+          }
+        }
+      }
     }
 
     // Queries
