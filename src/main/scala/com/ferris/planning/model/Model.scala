@@ -105,11 +105,11 @@ object Model {
   )
 
   case class Tier (
-    laserDonuts: List[UUID]
+    laserDonuts: Seq[UUID]
   )
 
   case class PyramidOfImportance (
-    tiers: List[Tier]
+    tiers: Seq[Tier]
   )
 
   trait TypeEnum {

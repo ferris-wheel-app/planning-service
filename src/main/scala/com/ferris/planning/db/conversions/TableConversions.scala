@@ -137,6 +137,18 @@ class TableConversions(val tables: Tables) {
     )
   }
 
+  implicit class PyramidBuilder(val rows: Seq[tables.PyramidOfImportanceRow]) {
+    def asPyramid: PyramidOfImportance = {
+      rows.groupBy(_.tier).map { case (tierNumber, laserDonutRows) =>
+        PyramidOfImportance(
+          tiers = Tier(
+            laserDonuts = laserDonutRows.map(_.laserDonutId)
+          )
+        )
+      }
+    }
+  }
+
   sealed trait Update[T, U] {
     def keepOrReplace(newVersion: Option[T], oldVersion: U): U
   }

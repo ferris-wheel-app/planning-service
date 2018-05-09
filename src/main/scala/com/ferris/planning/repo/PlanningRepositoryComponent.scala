@@ -44,7 +44,7 @@ trait PlanningRepositoryComponent {
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]]
 
-    def upsertPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
+    def upsertPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean]
     def refreshPyramidOfImportance(): Future[PyramidOfImportance]
 
     def getMessages: Future[Seq[Message]]
@@ -486,6 +486,27 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         } getOrElse DBIO.failed(HobbyNotFoundException())
       }.transactionally
       db.run(action).map(row => row.map(_.asHobby))
+    }
+
+    override def upsertPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean] = {
+      val insertions = for {
+        (tier, tierNumber) <- pyramid.tiers.zipWithIndex
+        laserDonutUuid <- tier.laserDonuts
+      } yield {
+        getLaserDonutAction(laserDonutUuid).flatMap {
+          case Some(laserDonut) =>
+            val row = PyramidOfImportanceRow(
+              id = 0L,
+              laserDonutId = laserDonut.id,
+              tier = tierNumber,
+              current = false
+            )
+            PyramidOfImportanceTable += row
+          case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
+        }
+      }
+      val action = DBIO.sequence(insertions)
+      db.run(action).map(_.forall(_ > 0))
     }
 
     // Get endpoints
