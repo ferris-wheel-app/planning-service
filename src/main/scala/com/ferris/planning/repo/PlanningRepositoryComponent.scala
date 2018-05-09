@@ -772,12 +772,19 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getPyramidOfImportanceAction = {
-      PyramidOfImportanceTable.result.flatMap { pyramidRows =>
-        pyramidRows.map { pyramidRow =>
-          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).result.map { laserDonutRow =>
+//      PyramidOfImportanceTable.result.flatMap { pyramidRows =>
+//        pyramidRows.map { pyramidRow =>
+//          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).result.map { laserDonutRows =>
+//            laserDonutRows.map {
+//              (pyramidRow, laserDonutRow)
+//            }
+//          }
+//        }
+//      }
 
-          }
-        }
+      for {
+        pyramidRows <- PyramidOfImportanceTable.result
+        laserDonutRows <- LaserDonutTable.filter(_.id inSet pyramidRows.laserDonutId).result
       }
     }
 
