@@ -774,8 +774,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getPyramidOfImportanceAction = {
       PyramidOfImportanceTable.result.flatMap { pyramidRows =>
         pyramidRows.map { pyramidRow =>
-          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).map {
-            case Some(laserDonutRow) =>
+          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).result.map { laserDonutRow =>
+
           }
         }
       }
