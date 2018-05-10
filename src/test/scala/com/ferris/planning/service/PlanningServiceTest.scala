@@ -37,9 +37,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.message
-        when(server.repo.updateMessage(eqTo(id), eqTo(SD.messageUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateMessage(eqTo(id), eqTo(SD.messageUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateMessage(id, SD.messageUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateMessage(eqTo(id), eqTo(SD.messageUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -106,9 +106,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.backlogItem
-        when(server.repo.updateBacklogItem(eqTo(id), eqTo(SD.backlogItemUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateBacklogItem(eqTo(id), eqTo(SD.backlogItemUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateBacklogItem(id, SD.backlogItemUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateBacklogItem(eqTo(id), eqTo(SD.backlogItemUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -175,9 +175,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.epoch
-        when(server.repo.updateEpoch(eqTo(id), eqTo(SD.epochUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateEpoch(eqTo(id), eqTo(SD.epochUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateEpoch(id, SD.epochUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateEpoch(eqTo(id), eqTo(SD.epochUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -244,9 +244,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.year
-        when(server.repo.updateYear(eqTo(id), eqTo(SD.yearUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateYear(eqTo(id), eqTo(SD.yearUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateYear(id, SD.yearUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateYear(eqTo(id), eqTo(SD.yearUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -313,9 +313,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.theme
-        when(server.repo.updateTheme(eqTo(id), eqTo(SD.themeUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateTheme(eqTo(id), eqTo(SD.themeUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateTheme(id, SD.themeUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateTheme(eqTo(id), eqTo(SD.themeUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -382,9 +382,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.goal
-        when(server.repo.updateGoal(eqTo(id), eqTo(SD.goalUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateGoal(eqTo(id), eqTo(SD.goalUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateGoal(id, SD.goalUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateGoal(eqTo(id), eqTo(SD.goalUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -451,9 +451,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.thread
-        when(server.repo.updateThread(eqTo(id), eqTo(SD.threadUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateThread(eqTo(id), eqTo(SD.threadUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateThread(id, SD.threadUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateThread(eqTo(id), eqTo(SD.threadUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -532,9 +532,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.weave
-        when(server.repo.updateWeave(eqTo(id), eqTo(SD.weaveUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateWeave(eqTo(id), eqTo(SD.weaveUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateWeave(id, SD.weaveUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateWeave(eqTo(id), eqTo(SD.weaveUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -613,9 +613,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.laserDonut
-        when(server.repo.updateLaserDonut(eqTo(id), eqTo(SD.laserDonutUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateLaserDonut(eqTo(id), eqTo(SD.laserDonutUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateLaserDonut(id, SD.laserDonutUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateLaserDonut(eqTo(id), eqTo(SD.laserDonutUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -694,9 +694,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.portion
-        when(server.repo.updatePortion(eqTo(id), eqTo(SD.portionUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updatePortion(eqTo(id), eqTo(SD.portionUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updatePortion(id, SD.portionUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updatePortion(eqTo(id), eqTo(SD.portionUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -799,9 +799,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.todo
-        when(server.repo.updateTodo(eqTo(id), eqTo(SD.todoUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateTodo(eqTo(id), eqTo(SD.todoUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateTodo(id, SD.todoUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateTodo(eqTo(id), eqTo(SD.todoUpdate))
           verifyNoMoreInteractions(server.repo)
         }
@@ -904,9 +904,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val updated = SD.hobby
-        when(server.repo.updateHobby(eqTo(id), eqTo(SD.hobbyUpdate))).thenReturn(Future.successful(Some(updated)))
+        when(server.repo.updateHobby(eqTo(id), eqTo(SD.hobbyUpdate))).thenReturn(Future.successful(updated))
         whenReady(server.planningService.updateHobby(id, SD.hobbyUpdate)) { result =>
-          result shouldBe Some(updated)
+          result shouldBe updated
           verify(server.repo, times(1)).updateHobby(eqTo(id), eqTo(SD.hobbyUpdate))
           verifyNoMoreInteractions(server.repo)
         }

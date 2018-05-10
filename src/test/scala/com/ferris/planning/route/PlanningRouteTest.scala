@@ -36,22 +36,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.messageUpdate
           val updated = domain.message
 
-          when(testServer.planningService.updateMessage(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateMessage(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/messages/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[MessageView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateMessage(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the message is not found") {
-          val id = UUID.randomUUID
-          val update = rest.messageUpdate
-
-          when(testServer.planningService.updateMessage(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/messages/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateMessage(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -143,22 +131,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.backlogItemUpdate
           val updated = domain.backlogItem
 
-          when(testServer.planningService.updateBacklogItem(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateBacklogItem(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/backlog-items/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[BacklogItemView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateBacklogItem(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the backlog-item is not found") {
-          val id = UUID.randomUUID
-          val update = rest.backlogItemUpdate
-
-          when(testServer.planningService.updateBacklogItem(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/backlog-items/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateBacklogItem(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -250,22 +226,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.epochUpdate
           val updated = domain.epoch
 
-          when(testServer.planningService.updateEpoch(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateEpoch(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/epochs/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[EpochView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateEpoch(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the epoch is not found") {
-          val id = UUID.randomUUID
-          val update = rest.epochUpdate
-
-          when(testServer.planningService.updateEpoch(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/epochs/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateEpoch(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -357,22 +321,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.yearUpdate
           val updated = domain.year
 
-          when(testServer.planningService.updateYear(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateYear(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/years/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[YearView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateYear(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the year is not found") {
-          val id = UUID.randomUUID
-          val update = rest.yearUpdate
-
-          when(testServer.planningService.updateYear(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/years/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateYear(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -464,22 +416,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.themeUpdate
           val updated = domain.theme
 
-          when(testServer.planningService.updateTheme(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateTheme(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/themes/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[ThemeView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateTheme(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the theme is not found") {
-          val id = UUID.randomUUID
-          val update = rest.themeUpdate
-
-          when(testServer.planningService.updateTheme(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/themes/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateTheme(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -571,22 +511,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.goalUpdate
           val updated = domain.goal
 
-          when(testServer.planningService.updateGoal(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateGoal(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/goals/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[GoalView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateGoal(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the goal is not found") {
-          val id = UUID.randomUUID
-          val update = rest.goalUpdate
-
-          when(testServer.planningService.updateGoal(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/goals/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateGoal(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -678,22 +606,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.threadUpdate
           val updated = domain.thread
 
-          when(testServer.planningService.updateThread(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateThread(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/threads/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[ThreadView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateThread(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the thread is not found") {
-          val id = UUID.randomUUID
-          val update = rest.threadUpdate
-
-          when(testServer.planningService.updateThread(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/threads/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateThread(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -798,22 +714,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.weaveUpdate
           val updated = domain.weave
 
-          when(testServer.planningService.updateWeave(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateWeave(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/weaves/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[WeaveView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateWeave(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the weave is not found") {
-          val id = UUID.randomUUID
-          val update = rest.weaveUpdate
-
-          when(testServer.planningService.updateWeave(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/weaves/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateWeave(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -918,22 +822,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.laserDonutUpdate
           val updated = domain.laserDonut
 
-          when(testServer.planningService.updateLaserDonut(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateLaserDonut(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/laser-donuts/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[LaserDonutView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateLaserDonut(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the laser-donut is not found") {
-          val id = UUID.randomUUID
-          val update = rest.laserDonutUpdate
-
-          when(testServer.planningService.updateLaserDonut(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/laser-donuts/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateLaserDonut(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1038,22 +930,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.portionUpdate
           val updated = domain.portion
 
-          when(testServer.planningService.updatePortion(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updatePortion(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/portions/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[PortionView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updatePortion(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the portion is not found") {
-          val id = UUID.randomUUID
-          val update = rest.portionUpdate
-
-          when(testServer.planningService.updatePortion(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/portions/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updatePortion(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1187,22 +1067,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.todoUpdate
           val updated = domain.todo
 
-          when(testServer.planningService.updateTodo(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateTodo(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/todos/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[TodoView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateTodo(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the todo is not found") {
-          val id = UUID.randomUUID
-          val update = rest.todoUpdate
-
-          when(testServer.planningService.updateTodo(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/todos/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateTodo(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
@@ -1336,22 +1204,10 @@ class PlanningRouteTest extends RouteTestFramework {
           val update = rest.hobbyUpdate
           val updated = domain.hobby
 
-          when(testServer.planningService.updateHobby(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(Some(updated)))
+          when(testServer.planningService.updateHobby(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
           Put(s"/api/hobbies/$id", update) ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[HobbyView]].data shouldBe updated.toView
-            verify(testServer.planningService, times(1)).updateHobby(eqTo(id), eqTo(update.toCommand))(any())
-            verifyNoMoreInteractions(testServer.planningService)
-          }
-        }
-
-        it("should respond with the appropriate error if the hobby is not found") {
-          val id = UUID.randomUUID
-          val update = rest.hobbyUpdate
-
-          when(testServer.planningService.updateHobby(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(None))
-          Put(s"/api/hobbies/$id", update) ~> route ~> check {
-            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).updateHobby(eqTo(id), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }

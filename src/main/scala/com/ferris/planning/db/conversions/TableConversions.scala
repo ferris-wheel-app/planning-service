@@ -137,15 +137,14 @@ class TableConversions(val tables: Tables) {
     )
   }
 
-  implicit class PyramidBuilder(val rows: Seq[tables.PyramidOfImportanceRow]) {
-    def asPyramid: PyramidOfImportance = {
-      rows.groupBy(_.tier).map { case (tierNumber, laserDonutRows) =>
-        PyramidOfImportance(
-          tiers = Tier(
-            laserDonuts = laserDonutRows.map(_.laserDonutId)
-          )
-        )
-      }
+  implicit class PyramidBuilder(val rows: Seq[(tables.PyramidOfImportanceRow, tables.LaserDonutRow)]) {
+    def asPyramid: Option[PyramidOfImportance] = rows match {
+      case Nil => None
+      case _ =>
+        val tiers = rows.groupBy(_._1.tier).map { case (tierNumber, laserDonutRows) =>
+          (tierNumber, Tier(laserDonutRows.map(row => UUID.fromString(row._2.uuid))))
+        }.toSeq.sortBy(_._1).map(_._2)
+        Some(PyramidOfImportance(tiers = tiers))
     }
   }
 

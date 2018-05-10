@@ -28,23 +28,22 @@ trait PlanningRepositoryComponent {
     def createPortion(creation: CreatePortion): Future[Portion]
     def createTodo(creation: CreateTodo): Future[Todo]
     def createHobby(creation: CreateHobby): Future[Hobby]
+    def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean]
 
-    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Option[Message]]
-    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Option[BacklogItem]]
-    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Option[Epoch]]
-    def updateYear(uuid: UUID, update: UpdateYear): Future[Option[Year]]
-    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Option[Theme]]
-    def updateGoal(uuid: UUID, update: UpdateGoal): Future[Option[Goal]]
-    def updateThread(uuid: UUID, update: UpdateThread): Future[Option[Thread]]
-    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Option[Weave]]
-    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Option[LaserDonut]]
-    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]]
+    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Message]
+    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
+    def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch]
+    def updateYear(uuid: UUID, update: UpdateYear): Future[Year]
+    def updateTheme(uuid: UUID, update: UpdateTheme): Future[Theme]
+    def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal]
+    def updateThread(uuid: UUID, update: UpdateThread): Future[Thread]
+    def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave]
+    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[LaserDonut]
+    def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion]
     def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]]
-    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]]
+    def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
-    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]]
-
-    def upsertPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean]
+    def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
     def refreshPyramidOfImportance(): Future[PyramidOfImportance]
 
     def getMessages: Future[Seq[Message]]
@@ -282,65 +281,86 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action) map (row => row.asHobby)
     }
 
+    override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean] = {
+      val insertions = for {
+        (tier, tierNumber) <- pyramid.tiers.zipWithIndex
+        laserDonutUuid <- tier.laserDonuts
+      } yield {
+        getLaserDonutAction(laserDonutUuid).flatMap {
+          case Some(laserDonut) =>
+            val row = PyramidOfImportanceRow(
+              id = 0L,
+              laserDonutId = laserDonut.id,
+              tier = tierNumber,
+              current = false
+            )
+            PyramidOfImportanceTable += row
+          case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
+        }
+      }
+      val action = DBIO.sequence(insertions)
+      db.run(action).map(_.forall(_ > 0))
+    }
+
     // Update endpoints
-    override def updateMessage(uuid: UUID, update: UpdateMessage): Future[Option[Message]] = {
+    override def updateMessage(uuid: UUID, update: UpdateMessage): Future[Message] = {
       val query = messageByUuid(uuid).map(message => (message.sender, message.content))
       val action = getMessageAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.sender.getOrElse(old.sender), update.content.getOrElse(old.content))
-            .andThen(getMessageAction(uuid))
+            .andThen(getMessageAction(uuid).map(_.head))
         } getOrElse DBIO.failed(MessageNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asMessage))
+      db.run(action).map(row => row.asMessage)
     }
 
-    override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[Option[BacklogItem]] = {
+    override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`))
       val action = getBacklogItemAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description),
             UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
-            .andThen(getBacklogItemAction(uuid))
+            .andThen(getBacklogItemAction(uuid).map(_.head))
         } getOrElse DBIO.failed(BacklogItemNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asBacklogItem))
+      db.run(action).map(row => row.asBacklogItem)
     }
 
-    override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Option[Epoch]] = {
+    override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch] = {
       val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question))
       val action = getEpochAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question))
-            .andThen(getEpochAction(uuid))
+            .andThen(getEpochAction(uuid).map(_.head))
         } getOrElse DBIO.failed(EpochNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asEpoch))
+      db.run(action).map(row => row.asEpoch)
     }
 
-    override def updateYear(uuid: UUID, update: UpdateYear): Future[Option[Year]] = {
+    override def updateYear(uuid: UUID, update: UpdateYear): Future[Year] = {
       val query = yearByUuid(uuid).map(epoch => (epoch.epochId, epoch.startDate, epoch.finishDate))
       val action = getYearAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
             old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate))
-            .andThen(getYearAction(uuid))
+            .andThen(getYearAction(uuid).map(_.head))
         } getOrElse DBIO.failed(YearNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asYear))
+      db.run(action).map(row => row.asYear)
     }
 
-    override def updateTheme(uuid: UUID, update: UpdateTheme): Future[Option[Theme]] = {
+    override def updateTheme(uuid: UUID, update: UpdateTheme): Future[Theme] = {
       val query = themeByUuid(uuid).map(theme => (theme.yearId, theme.name))
       val action = getThemeAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name))
-            .andThen(getThemeAction(uuid))
+            .andThen(getThemeAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThemeNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asTheme))
+      db.run(action).map(row => row.asTheme)
     }
 
-    override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Option[Goal]] = {
+    override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal] = {
       def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow) = {
         goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.level, goal.priority, goal.status, goal.graduation))
           .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
@@ -358,64 +378,64 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
                   for {
                     _ <- GoalBacklogItemTable.filter(_.goalId === old.id).delete
                     newBacklogItems <- getBacklogItemsAction(backlogItems)
-                    result <- insertGoalBacklogItemsAction(old.id, newBacklogItems.map(_.id)).andThen(getGoalAction(uuid))
+                    result <- insertGoalBacklogItemsAction(old.id, newBacklogItems.map(_.id)).andThen(getGoalAction(uuid).map(_.head))
                   } yield result
-                case None => getGoalAction(uuid)
+                case None => getGoalAction(uuid).map(_.head)
               }
             }
         } getOrElse DBIO.failed(GoalNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asGoal))
+      db.run(action).map(row => row.asGoal)
     }
 
-    override def updateThread(uuid: UUID, update: UpdateThread): Future[Option[Thread]] = {
+    override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
       val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status))
       val action = getThreadAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status))
-            .andThen(getThreadAction(uuid))
+            .andThen(getThreadAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThreadNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asThread))
+      db.run(action).map(row => row.asThread)
     }
 
-    override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Option[Weave]] = {
+    override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave] = {
       val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`))
       val action = getWeaveAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
             UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
-            .andThen(getWeaveAction(uuid))
+            .andThen(getWeaveAction(uuid).map(_.head))
         } getOrElse DBIO.failed(WeaveNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asWeave))
+      db.run(action).map(row => row.asWeave)
     }
 
-    override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[Option[LaserDonut]] = {
+    override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[LaserDonut] = {
       val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description, laserDonut.milestone, laserDonut.status, laserDonut.`type`))
       val action = getLaserDonutAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
-            .andThen(getLaserDonutAction(uuid))
+            .andThen(getLaserDonutAction(uuid).map(_.head))
         } getOrElse DBIO.failed(LaserDonutNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asLaserDonut))
+      db.run(action).map(row => row.asLaserDonut)
     }
 
-    override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Option[Portion]] = {
+    override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion] = {
       val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status))
       val action = getPortionAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
             UpdateTypeEnum.keepOrReplace(update.status, old.status))
-            .andThen(getPortionAction(uuid))
+            .andThen(getPortionAction(uuid).map(_.head))
         } getOrElse DBIO.failed(PortionNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asPortion))
+      db.run(action).map(row => row.asPortion)
     }
 
     override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = {
@@ -441,16 +461,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(_.map(_.asPortion))
     }
 
-    override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Option[Todo]] = {
+    override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
       val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
             UpdateTypeEnum.keepOrReplace(update.status, old.status))
-            .andThen(getTodoAction(uuid))
+            .andThen(getTodoAction(uuid).map(_.head))
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asTodo))
+      db.run(action).map(row => row.asTodo)
     }
 
     override def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]] = {
@@ -476,38 +496,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(_.map(_.asTodo))
     }
 
-    override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Option[Hobby]] = {
+    override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby] = {
       val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status, hobby.`type`))
       val action = getHobbyAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.frequency, old.frequency),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
-            .andThen(getHobbyAction(uuid))
+            .andThen(getHobbyAction(uuid).map(_.head))
         } getOrElse DBIO.failed(HobbyNotFoundException())
       }.transactionally
-      db.run(action).map(row => row.map(_.asHobby))
-    }
-
-    override def upsertPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean] = {
-      val insertions = for {
-        (tier, tierNumber) <- pyramid.tiers.zipWithIndex
-        laserDonutUuid <- tier.laserDonuts
-      } yield {
-        getLaserDonutAction(laserDonutUuid).flatMap {
-          case Some(laserDonut) =>
-            val row = PyramidOfImportanceRow(
-              id = 0L,
-              laserDonutId = laserDonut.id,
-              tier = tierNumber,
-              current = false
-            )
-            PyramidOfImportanceTable += row
-          case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
-        }
-      }
-      val action = DBIO.sequence(insertions)
-      db.run(action).map(_.forall(_ > 0))
+      db.run(action).map(row => row.asHobby)
     }
 
     // Get endpoints
@@ -631,8 +630,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
     }
 
-    override def getPyramidOfImportance = {
-
+    override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {
+      db.run(getPyramidOfImportanceAction)
     }
 
     // Delete endpoints
@@ -772,20 +771,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getPyramidOfImportanceAction = {
-//      PyramidOfImportanceTable.result.flatMap { pyramidRows =>
-//        pyramidRows.map { pyramidRow =>
-//          LaserDonutTable.filter(_.id === pyramidRow.laserDonutId).result.map { laserDonutRows =>
-//            laserDonutRows.map {
-//              (pyramidRow, laserDonutRow)
-//            }
-//          }
-//        }
-//      }
-
-      for {
-        pyramidRows <- PyramidOfImportanceTable.result
-        laserDonutRows <- LaserDonutTable.filter(_.id inSet pyramidRows.laserDonutId).result
-      }
+      (for {
+        pyramidRow <- PyramidOfImportanceTable
+        laserDonutRow <- LaserDonutTable if laserDonutRow.id === pyramidRow.laserDonutId
+      } yield (pyramidRow, laserDonutRow)).result.map(_.asPyramid)
     }
 
     // Queries

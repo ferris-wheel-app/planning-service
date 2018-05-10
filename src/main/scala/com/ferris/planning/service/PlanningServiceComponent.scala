@@ -25,20 +25,20 @@ trait PlanningServiceComponent {
     def createTodo(creation: CreateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby]
 
-    def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Option[Message]]
-    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
-    def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Option[Epoch]]
-    def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Option[Year]]
-    def updateTheme(uuid: UUID, update: UpdateTheme)(implicit ex: ExecutionContext): Future[Option[Theme]]
-    def updateGoal(uuid: UUID, update: UpdateGoal)(implicit ex: ExecutionContext): Future[Option[Goal]]
-    def updateThread(uuid: UUID, update: UpdateThread)(implicit ex: ExecutionContext): Future[Option[Thread]]
-    def updateWeave(uuid: UUID, update: UpdateWeave)(implicit ex: ExecutionContext): Future[Option[Weave]]
-    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut)(implicit ex: ExecutionContext): Future[Option[LaserDonut]]
-    def updatePortion(uuid: UUID, update: UpdatePortion)(implicit ex: ExecutionContext): Future[Option[Portion]]
+    def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message]
+    def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
+    def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
+    def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Year]
+    def updateTheme(uuid: UUID, update: UpdateTheme)(implicit ex: ExecutionContext): Future[Theme]
+    def updateGoal(uuid: UUID, update: UpdateGoal)(implicit ex: ExecutionContext): Future[Goal]
+    def updateThread(uuid: UUID, update: UpdateThread)(implicit ex: ExecutionContext): Future[Thread]
+    def updateWeave(uuid: UUID, update: UpdateWeave)(implicit ex: ExecutionContext): Future[Weave]
+    def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut)(implicit ex: ExecutionContext): Future[LaserDonut]
+    def updatePortion(uuid: UUID, update: UpdatePortion)(implicit ex: ExecutionContext): Future[Portion]
     def updatePortions(laserDonutId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Portion]]
-    def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Option[Todo]]
+    def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
-    def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Option[Hobby]]
+    def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby]
 
     def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]]
     def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]]
@@ -143,43 +143,43 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.createHobby(creation)
     }
 
-    override def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Option[Message]] = {
+    override def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message] = {
       repo.updateMessage(uuid, update)
     }
 
-    override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
+    override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
       repo.updateBacklogItem(uuid, update)
     }
 
-    override def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Option[Epoch]] = {
+    override def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Epoch] = {
       repo.updateEpoch(uuid, update)
     }
 
-    override def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Option[Year]] = {
+    override def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Year] = {
       repo.updateYear(uuid, update)
     }
 
-    override def updateTheme(uuid: UUID, update: UpdateTheme)(implicit ex: ExecutionContext): Future[Option[Theme]] = {
+    override def updateTheme(uuid: UUID, update: UpdateTheme)(implicit ex: ExecutionContext): Future[Theme] = {
       repo.updateTheme(uuid, update)
     }
 
-    override def updateGoal(uuid: UUID, update: UpdateGoal)(implicit ex: ExecutionContext): Future[Option[Goal]] = {
+    override def updateGoal(uuid: UUID, update: UpdateGoal)(implicit ex: ExecutionContext): Future[Goal] = {
       repo.updateGoal(uuid, update)
     }
 
-    override def updateThread(uuid: UUID, update: UpdateThread)(implicit ex: ExecutionContext): Future[Option[Thread]] = {
+    override def updateThread(uuid: UUID, update: UpdateThread)(implicit ex: ExecutionContext): Future[Thread] = {
       repo.updateThread(uuid, update)
     }
 
-    override def updateWeave(uuid: UUID, update: UpdateWeave)(implicit ex: ExecutionContext): Future[Option[Weave]] = {
+    override def updateWeave(uuid: UUID, update: UpdateWeave)(implicit ex: ExecutionContext): Future[Weave] = {
       repo.updateWeave(uuid, update)
     }
 
-    override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut)(implicit ex: ExecutionContext): Future[Option[LaserDonut]] = {
+    override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut)(implicit ex: ExecutionContext): Future[LaserDonut] = {
       repo.updateLaserDonut(uuid, update)
     }
 
-    override def updatePortion(uuid: UUID, update: UpdatePortion)(implicit ex: ExecutionContext): Future[Option[Portion]] = {
+    override def updatePortion(uuid: UUID, update: UpdatePortion)(implicit ex: ExecutionContext): Future[Portion] = {
       repo.updatePortion(uuid, update)
     }
 
@@ -187,7 +187,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updatePortions(laserDonutId, update)
     }
 
-    override def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Option[Todo]] = {
+    override def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Todo] = {
       repo.updateTodo(uuid, update)
     }
 
@@ -195,7 +195,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updateTodos(portionId, update)
     }
 
-    override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Option[Hobby]] = {
+    override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
       repo.updateHobby(uuid, update)
     }
 

@@ -37,11 +37,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a message") {
         val original = repo.createMessage(SD.messageCreation).futureValue
         val updated = repo.updateMessage(original.uuid, SD.messageUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.sender shouldBe SD.messageUpdate.sender.value
-        updated.value.content shouldBe SD.messageUpdate.content.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.sender shouldBe SD.messageUpdate.sender.value
+        updated.content shouldBe SD.messageUpdate.content.value
       }
 
       it("should throw an exception if a message is not found") {
@@ -98,12 +97,11 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a backlog item") {
         val original = repo.createBacklogItem(SD.backlogItemCreation).futureValue
         val updated = repo.updateBacklogItem(original.uuid, SD.backlogItemUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.summary shouldBe SD.backlogItemUpdate.summary.value
-        updated.value.description shouldBe SD.backlogItemUpdate.description.value
-        updated.value.`type` shouldBe SD.backlogItemUpdate.`type`.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.summary shouldBe SD.backlogItemUpdate.summary.value
+        updated.description shouldBe SD.backlogItemUpdate.description.value
+        updated.`type` shouldBe SD.backlogItemUpdate.`type`.value
       }
 
       it("should throw an exception if a message is not found") {
@@ -160,12 +158,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update an epoch") {
         val original = repo.createEpoch(SD.epochCreation).futureValue
         val updated = repo.updateEpoch(original.uuid, SD.epochUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.name shouldBe SD.epochUpdate.name.value
-        updated.value.totem shouldBe SD.epochUpdate.totem.value
-        updated.value.question shouldBe SD.epochUpdate.question.value
+        updated.uuid shouldBe original.uuid
+        updated.name shouldBe SD.epochUpdate.name.value
+        updated.totem shouldBe SD.epochUpdate.totem.value
+        updated.question shouldBe SD.epochUpdate.question.value
       }
 
       it("should throw an exception if an epoch is not found") {
@@ -222,12 +218,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a year") {
         val original = repo.createYear(SD.yearCreation).futureValue
         val updated = repo.updateYear(original.uuid, SD.yearUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.epochId shouldBe SD.yearUpdate.epochId.value
-        updated.value.startDate shouldBe SD.yearUpdate.startDate.value
-        updated.value.finishDate shouldBe SD.yearUpdate.startDate.value.plusYears(1)
+        updated.uuid shouldBe original.uuid
+        updated.epochId shouldBe SD.yearUpdate.epochId.value
+        updated.startDate shouldBe SD.yearUpdate.startDate.value
+        updated.finishDate shouldBe SD.yearUpdate.startDate.value.plusYears(1)
       }
 
       it("should throw an exception if a year is not found") {
@@ -283,11 +277,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a theme") {
         val original = repo.createTheme(SD.themeCreation).futureValue
         val updated = repo.updateTheme(original.uuid, SD.themeUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.yearId shouldBe SD.themeUpdate.yearId.value
-        updated.value.name shouldBe SD.themeUpdate.name.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.yearId shouldBe SD.themeUpdate.yearId.value
+        updated.name shouldBe SD.themeUpdate.name.value
       }
 
       it("should throw an exception if a theme is not found") {
@@ -358,17 +351,15 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val newBacklogItems =  backlogItem3.uuid :: backlogItem4.uuid :: Nil
         val original = repo.createGoal(SD.goalCreation.copy(backlogItems = originalBacklogItems)).futureValue
         val updated = repo.updateGoal(original.uuid, SD.goalUpdate.copy(backlogItems = Some(newBacklogItems))).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.themeId shouldBe SD.goalUpdate.themeId.value
-        updated.value.backlogItems should contain theSameElementsAs newBacklogItems
-        updated.value.summary shouldBe SD.goalUpdate.summary.value
-        updated.value.description shouldBe SD.goalUpdate.description.value
-        updated.value.level shouldBe SD.goalUpdate.level.value
-        updated.value.priority shouldBe SD.goalUpdate.priority.value
-        updated.value.graduation shouldBe SD.goalUpdate.graduation.value
-        updated.value.status shouldBe SD.goalUpdate.status.value
+        updated.uuid shouldBe original.uuid
+        updated.themeId shouldBe SD.goalUpdate.themeId.value
+        updated.backlogItems should contain theSameElementsAs newBacklogItems
+        updated.summary shouldBe SD.goalUpdate.summary.value
+        updated.description shouldBe SD.goalUpdate.description.value
+        updated.level shouldBe SD.goalUpdate.level.value
+        updated.priority shouldBe SD.goalUpdate.priority.value
+        updated.graduation shouldBe SD.goalUpdate.graduation.value
+        updated.status shouldBe SD.goalUpdate.status.value
       }
 
       it("should throw an exception if a goal is not found") {
@@ -450,13 +441,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a thread") {
         val original = repo.createThread(SD.threadCreation).futureValue
         val updated = repo.updateThread(original.uuid, SD.threadUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.goalId.value shouldBe SD.threadUpdate.goalId.value
-        updated.value.summary shouldBe SD.threadUpdate.summary.value
-        updated.value.description shouldBe SD.threadUpdate.description.value
-        updated.value.status shouldBe SD.threadUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.goalId.value shouldBe SD.threadUpdate.goalId.value
+        updated.summary shouldBe SD.threadUpdate.summary.value
+        updated.description shouldBe SD.threadUpdate.description.value
+        updated.status shouldBe SD.threadUpdate.status.value
       }
 
       it("should throw an exception if a thread is not found") {
@@ -526,14 +516,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a weave") {
         val original = repo.createWeave(SD.weaveCreation).futureValue
         val updated = repo.updateWeave(original.uuid, SD.weaveUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.goalId.value shouldBe SD.weaveUpdate.goalId.value
-        updated.value.summary shouldBe SD.weaveUpdate.summary.value
-        updated.value.description shouldBe SD.weaveUpdate.description.value
-        updated.value.`type` shouldBe SD.weaveUpdate.`type`.value
-        updated.value.status shouldBe SD.weaveUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.goalId.value shouldBe SD.weaveUpdate.goalId.value
+        updated.summary shouldBe SD.weaveUpdate.summary.value
+        updated.description shouldBe SD.weaveUpdate.description.value
+        updated.`type` shouldBe SD.weaveUpdate.`type`.value
+        updated.status shouldBe SD.weaveUpdate.status.value
       }
 
       it("should throw an exception if a weave is not found") {
@@ -604,15 +593,14 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a laser-donut") {
         val original = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val updated = repo.updateLaserDonut(original.uuid, SD.laserDonutUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.goalId shouldBe SD.laserDonutUpdate.goalId.value
-        updated.value.summary shouldBe SD.laserDonutUpdate.summary.value
-        updated.value.description shouldBe SD.laserDonutUpdate.description.value
-        updated.value.milestone shouldBe SD.laserDonutUpdate.milestone.value
-        updated.value.`type` shouldBe SD.laserDonutUpdate.`type`.value
-        updated.value.status shouldBe SD.laserDonutUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.goalId shouldBe SD.laserDonutUpdate.goalId.value
+        updated.summary shouldBe SD.laserDonutUpdate.summary.value
+        updated.description shouldBe SD.laserDonutUpdate.description.value
+        updated.milestone shouldBe SD.laserDonutUpdate.milestone.value
+        updated.`type` shouldBe SD.laserDonutUpdate.`type`.value
+        updated.status shouldBe SD.laserDonutUpdate.status.value
       }
 
       it("should throw an exception if a laser-donut is not found") {
@@ -680,12 +668,11 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a portion") {
         val original = repo.createPortion(SD.portionCreation).futureValue
         val updated = repo.updatePortion(original.uuid, SD.portionUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.laserDonutId shouldBe SD.portionUpdate.laserDonutId.value
-        updated.value.summary shouldBe SD.portionUpdate.summary.value
-        updated.value.status shouldBe SD.portionUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.laserDonutId shouldBe SD.portionUpdate.laserDonutId.value
+        updated.summary shouldBe SD.portionUpdate.summary.value
+        updated.status shouldBe SD.portionUpdate.status.value
       }
 
       it("should reorder a list of portions that belong to a specific laser-donut") {
@@ -790,12 +777,11 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a todo") {
         val original = repo.createTodo(SD.todoCreation).futureValue
         val updated = repo.updateTodo(original.uuid, SD.todoUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.portionId shouldBe SD.todoUpdate.portionId.value
-        updated.value.description shouldBe SD.todoUpdate.description.value
-        updated.value.status shouldBe SD.todoUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.portionId shouldBe SD.todoUpdate.portionId.value
+        updated.description shouldBe SD.todoUpdate.description.value
+        updated.status shouldBe SD.todoUpdate.status.value
       }
 
       it("should reorder a list of todos that belong to a specific portion") {
@@ -903,15 +889,14 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should update a hobby") {
         val original = repo.createHobby(SD.hobbyCreation).futureValue
         val updated = repo.updateHobby(original.uuid, SD.hobbyUpdate).futureValue
-        updated should not be empty
-        updated.value should not be original
-        updated.value.uuid shouldBe original.uuid
-        updated.value.goalId.value shouldBe SD.hobbyUpdate.goalId.value
-        updated.value.summary shouldBe SD.hobbyUpdate.summary.value
-        updated.value.description shouldBe SD.hobbyUpdate.description.value
-        updated.value.frequency shouldBe SD.hobbyUpdate.frequency.value
-        updated.value.`type` shouldBe SD.hobbyUpdate.`type`.value
-        updated.value.status shouldBe SD.hobbyUpdate.status.value
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.goalId.value shouldBe SD.hobbyUpdate.goalId.value
+        updated.summary shouldBe SD.hobbyUpdate.summary.value
+        updated.description shouldBe SD.hobbyUpdate.description.value
+        updated.frequency shouldBe SD.hobbyUpdate.frequency.value
+        updated.`type` shouldBe SD.hobbyUpdate.`type`.value
+        updated.status shouldBe SD.hobbyUpdate.status.value
       }
 
       it("should throw an exception if a hobby is not found") {

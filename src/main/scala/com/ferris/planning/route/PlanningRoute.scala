@@ -179,7 +179,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[MessageUpdate]) { update =>
-          onSuccess(planningService.updateMessage(id, update.toCommand))(outcome => complete(mapMessage(outcome)))
+          onSuccess(planningService.updateMessage(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -189,7 +191,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[BacklogItemUpdate]) { update =>
-          onSuccess(planningService.updateBacklogItem(id, update.toCommand))(outcome => complete(mapBacklogItem(outcome)))
+          onSuccess(planningService.updateBacklogItem(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -199,7 +203,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[EpochUpdate]) { update =>
-          onSuccess(planningService.updateEpoch(id, update.toCommand))(outcome => complete(mapEpoch(outcome)))
+          onSuccess(planningService.updateEpoch(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -209,7 +215,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[YearUpdate]) { update =>
-          onSuccess(planningService.updateYear(id, update.toCommand))(outcome => complete(mapYear(outcome)))
+          onSuccess(planningService.updateYear(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -219,7 +227,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[ThemeUpdate]) { update =>
-          onSuccess(planningService.updateTheme(id, update.toCommand))(outcome => complete(mapTheme(outcome)))
+          onSuccess(planningService.updateTheme(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -229,7 +239,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[GoalUpdate]) { update =>
-          onSuccess(planningService.updateGoal(id, update.toCommand))(outcome => complete(mapGoal(outcome)))
+          onSuccess(planningService.updateGoal(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -239,7 +251,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[ThreadUpdate]) { update =>
-          onSuccess(planningService.updateThread(id, update.toCommand))(outcome => complete(mapThread(outcome)))
+          onSuccess(planningService.updateThread(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -249,7 +263,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[WeaveUpdate]) { update =>
-          onSuccess(planningService.updateWeave(id, update.toCommand))(outcome => complete(mapWeave(outcome)))
+          onSuccess(planningService.updateWeave(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -259,7 +275,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[LaserDonutUpdate]) { update =>
-          onSuccess(planningService.updateLaserDonut(id, update.toCommand))(outcome => complete(mapLaserDonut(outcome)))
+          onSuccess(planningService.updateLaserDonut(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -281,7 +299,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[PortionUpdate]) { update =>
-          onSuccess(planningService.updatePortion(id, update.toCommand))(outcome => complete(mapPortion(outcome)))
+          onSuccess(planningService.updatePortion(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -303,7 +323,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[TodoUpdate]) { update =>
-          onSuccess(planningService.updateTodo(id, update.toCommand))(outcome => complete(mapTodo(outcome)))
+          onSuccess(planningService.updateTodo(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
@@ -313,7 +335,9 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       put {
         entity(as[HobbyUpdate]) { update =>
-          onSuccess(planningService.updateHobby(id, update.toCommand))(outcome => complete(mapHobby(outcome)))
+          onSuccess(planningService.updateHobby(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
         }
       }
     }
