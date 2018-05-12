@@ -60,7 +60,7 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
           backlogItems = (1 to 11).map(_ => UUID.randomUUID)
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Backlog Items must be up to a list of 10 or fewer", Some(InvalidFieldPayload("backlogItems")))
+      val expected = InvalidFieldException("InvalidField", "Backlog Items must be a maximum of 10 items", Some(InvalidFieldPayload("backlogItems")))
       caught shouldBe expected
     }
 
@@ -111,7 +111,7 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
           backlogItems = Some((1 to 11).map(_ => UUID.randomUUID))
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Backlog Items must be up to a list of 10 or fewer", Some(InvalidFieldPayload("backlogItems")))
+      val expected = InvalidFieldException("InvalidField", "Backlog Items must be a maximum of 10 items", Some(InvalidFieldPayload("backlogItems")))
       caught shouldBe expected
     }
 
@@ -453,21 +453,29 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
 
   describe("validating a tier upsert") {
     it("should allow the creation of a valid object") {
-      TierUpsert(laserDonuts = UUID.randomUUID :: UUID.randomUUID :: Nil)
+      TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID))
     }
 
-    it("should throw an exception if there are more than 5 laser-donuts") {
+    it("should throw an exception if there are more than 10 laser-donuts") {
       val caught = intercept[InvalidFieldException] {
-        TierUpsert(laserDonuts = (1 to 6).map(_ => UUID.randomUUID))
+        TierUpsert(laserDonuts = (1 to 11).map(_ => UUID.randomUUID))
       }
-      val expected = InvalidFieldException("InvalidField", "Laser Donuts must be up to a list of 5 or fewer", Some(InvalidFieldPayload("laserDonuts")))
+      val expected = InvalidFieldException("InvalidField", "Laser Donuts must be a maximum of 10 items", Some(InvalidFieldPayload("laserDonuts")))
+      caught shouldBe expected
+    }
+
+    it("should throw an exception if there are less than 5 laser-donuts") {
+      val caught = intercept[InvalidFieldException] {
+        TierUpsert(laserDonuts = Nil)
+      }
+      val expected = InvalidFieldException("InvalidField", "Laser Donuts must be a minimum of 5 items", Some(InvalidFieldPayload("laserDonuts")))
       caught shouldBe expected
     }
 
     it("should throw an exception if there are duplicated laser-donuts") {
       val duplicatedId = UUID.randomUUID
       val caught = intercept[InvalidFieldException] {
-        TierUpsert(laserDonuts = duplicatedId :: duplicatedId :: UUID.randomUUID :: Nil)
+        TierUpsert(laserDonuts = (duplicatedId :: duplicatedId :: Nil) ++ (1 to 3).map(_ => UUID.randomUUID))
       }
       val expected = InvalidFieldException("InvalidField", "Laser Donuts cannot contain duplicate entries", Some(InvalidFieldPayload("laserDonuts")))
       caught shouldBe expected
@@ -480,22 +488,25 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
         tiers = List(
           TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
           TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
+          TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
+          TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
           TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID))
         )
       )
     }
 
-    it("should throw an exception if there are less than 5 laser-donuts on the top tier") {
+    it("should throw an exception if there are less than 5 tiers in a pyramid") {
       val caught = intercept[InvalidFieldException] {
         PyramidOfImportanceUpsert(
           tiers = List(
-            TierUpsert(laserDonuts = (1 to 2).map(_ => UUID.randomUUID)),
+            TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
             TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID)),
             TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID))
           )
         )
       }
-      val expected = InvalidFieldException("InvalidField", "There have to be a minimum of 5 laser-donuts on the top tier of the pyramid", Some(InvalidFieldPayload("tiers")))
+      val expected = InvalidFieldException("InvalidField", "Tiers must be a minimum of 5 items", Some(InvalidFieldPayload("tiers")))
+      caught.message shouldBe "Tiers must be a minimum of 5 items"
       caught shouldBe expected
     }
   }

@@ -28,7 +28,7 @@ trait PlanningRepositoryComponent {
     def createPortion(creation: CreatePortion): Future[Portion]
     def createTodo(creation: CreateTodo): Future[Todo]
     def createHobby(creation: CreateHobby): Future[Hobby]
-    def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean]
+    def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
 
     def updateMessage(uuid: UUID, update: UpdateMessage): Future[Message]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
@@ -79,7 +79,7 @@ trait PlanningRepositoryComponent {
     def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
-    def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
+    def getPyramidOfImportance: Future[PyramidOfImportance]
 
     def deleteMessage(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
@@ -281,7 +281,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action) map (row => row.asHobby)
     }
 
-    override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[Boolean] = {
+    override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance] = {
       val insertions = for {
         (tier, tierNumber) <- pyramid.tiers.zipWithIndex
         laserDonutUuid <- tier.laserDonuts
@@ -294,12 +294,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
               tier = tierNumber,
               current = false
             )
-            PyramidOfImportanceTable += row
+            ((PyramidOfImportanceTable returning PyramidOfImportanceTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
           case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
         }
       }
       val action = DBIO.sequence(insertions)
-      db.run(action).map(_.forall(_ > 0))
+      db.run(action).map(_.asPyramid)
     }
 
     // Update endpoints
@@ -630,7 +630,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
     }
 
-    override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {
+    override def getPyramidOfImportance: Future[PyramidOfImportance] = {
       db.run(getPyramidOfImportanceAction)
     }
 

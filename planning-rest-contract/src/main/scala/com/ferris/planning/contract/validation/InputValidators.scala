@@ -15,9 +15,10 @@ object InputValidators {
   val TiersField = "tiers"
 
   val MaxGoalBacklogItemsSize = 10
-  val MaxTierSize = 5
+  val MaxTierSize = 10
+  val MinTierSize = 5
   val MinTopTierSize = 5
-
+  val MinPyramidSize = 5
 
   def checkValidity(backlogItemCreation: BacklogItemCreation): Unit = {
     checkField(BacklogItemType.values.contains(backlogItemCreation.`type`), TypeField)
@@ -99,17 +100,20 @@ object InputValidators {
 
   def checkValidity(tierCreation: TierUpsert): Unit = {
     checkMaxSize(tierCreation.laserDonuts, LaserDonutsField, MaxTierSize)
+    checkMinSize(tierCreation.laserDonuts, LaserDonutsField, MinTierSize)
     checkForDuplication(tierCreation.laserDonuts, LaserDonutsField)
   }
 
   def checkValidity(pyramidCreation: PyramidOfImportanceUpsert): Unit = {
-    if (pyramidCreation.tiers.headOption.map(_.laserDonuts.size).sum < MinTopTierSize) {
-      throw InvalidFieldException("InvalidField", "There have to be a minimum of 5 laser-donuts on the top tier of the pyramid", Some(InvalidFieldPayload("tiers")))
-    }
+    checkMinSize(pyramidCreation.tiers, TiersField, MinPyramidSize)
   }
 
   private def checkMaxSize[T](list: Seq[T], name: String, max: Int): Unit = {
-    checkField(list.size <= max, name, s"${camelCaseToSpaced(name)} must be up to a list of $max or fewer")
+    checkField(list.size <= max, name, s"${camelCaseToSpaced(name)} must be a maximum of $max items")
+  }
+
+  private def checkMinSize[T](list: Seq[T], name: String, min: Int): Unit = {
+    checkField(list.size >= min, name, s"${camelCaseToSpaced(name)} must be a minimum of $min items")
   }
 
   private def checkForDuplication[A](ls: Seq[A], name: String): Unit = {
