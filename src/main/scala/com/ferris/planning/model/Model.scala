@@ -137,7 +137,8 @@ object Model {
   )
 
   case class PyramidOfImportance (
-    tiers: Seq[Tier]
+    tiers: Seq[Tier],
+    currentLaserDonut: Option[UUID]
   )
 
   trait TypeEnum {

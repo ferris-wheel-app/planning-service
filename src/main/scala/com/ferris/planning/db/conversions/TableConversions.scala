@@ -170,7 +170,8 @@ class TableConversions(val tables: Tables) {
       val tiers = rows.groupBy(_._1.tier).map { case (tierNumber, laserDonutRows) =>
         (tierNumber, Tier(laserDonutRows.map(row => UUID.fromString(row._2.uuid))))
       }.toSeq.sortBy(_._1).map(_._2)
-      PyramidOfImportance(tiers = tiers)
+      val currentLaserDonut = rows.find(_._1.current).map(row => UUID.fromString(row._2.uuid))
+      PyramidOfImportance(tiers = tiers, currentLaserDonut = currentLaserDonut)
     }
   }
 

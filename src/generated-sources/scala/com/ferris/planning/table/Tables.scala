@@ -418,18 +418,19 @@ trait Tables {
   /** Entity class storing rows of table PyramidOfImportanceTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
-   *  @param tier Database column TIER SqlType(INTEGER) */
-  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int)
+   *  @param tier Database column TIER SqlType(INTEGER)
+   *  @param current Database column CURRENT SqlType(TINYINT) */
+  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
   /** GetResult implicit for fetching PyramidOfImportanceRow objects using plain SQL queries */
-  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int]): GR[PyramidOfImportanceRow] = GR{
+  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[PyramidOfImportanceRow] = GR{
     prs => import prs._
-    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int]))
+    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int], <<[Byte]))
   }
   /** Table description of table PYRAMID_OF_IMPORTANCE. Objects of this class serve as prototypes for rows in queries. */
   class PyramidOfImportanceTable(_tableTag: Tag) extends profile.api.Table[PyramidOfImportanceRow](_tableTag, "PYRAMID_OF_IMPORTANCE") {
-    def * = (id, laserDonutId, tier) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
+    def * = (id, laserDonutId, tier, current) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -437,6 +438,8 @@ trait Tables {
     val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
     /** Database column TIER SqlType(INTEGER) */
     val tier: Rep[Int] = column[Int]("TIER")
+    /** Database column CURRENT SqlType(TINYINT) */
+    val current: Rep[Byte] = column[Byte]("CURRENT")
 
     /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
     lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)

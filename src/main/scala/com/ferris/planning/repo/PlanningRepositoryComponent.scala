@@ -320,7 +320,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
             val row = PyramidOfImportanceRow(
               id = 0L,
               laserDonutId = laserDonut.id,
-              tier = tierNumber
+              tier = tierNumber,
+              current = false
             )
             ((PyramidOfImportanceTable returning PyramidOfImportanceTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
           case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
