@@ -1,6 +1,6 @@
 package com.ferris.planning.sample
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
@@ -47,7 +47,9 @@ object SampleData {
       uuid = UUID.randomUUID,
       summary = "I need to get my shit together",
       description = "I need to get my shit together",
-      `type` = BacklogItemTypes.Issue
+      `type` = BacklogItemTypes.Issue,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val epochCreation = CreateEpoch(
@@ -66,7 +68,9 @@ object SampleData {
       uuid = UUID.randomUUID,
       name = "Messinaissance",
       totem = "Hero",
-      question = "Am I capable of becoming an Übermensch?"
+      question = "Am I capable of becoming an Übermensch?",
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val yearCreation = CreateYear(
@@ -83,7 +87,9 @@ object SampleData {
       uuid = UUID.randomUUID,
       epochId = UUID.randomUUID,
       startDate = currentYear,
-      finishDate = nextYear
+      finishDate = nextYear,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val themeCreation = CreateTheme(
@@ -99,7 +105,9 @@ object SampleData {
     val theme = Theme(
       uuid = UUID.randomUUID,
       yearId = UUID.randomUUID,
-      name = "Career Capital"
+      name = "Career Capital",
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val goalCreation = CreateGoal(
@@ -133,7 +141,9 @@ object SampleData {
       level = 1,
       priority = false,
       graduation = GraduationTypes.Hobby,
-      status = GoalStatuses.NotAchieved
+      status = GoalStatuses.NotAchieved,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val threadCreation = CreateThread(
@@ -155,7 +165,10 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      status = Statuses.NotStarted
+      status = Statuses.NotStarted,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val weaveCreation = CreateWeave(
@@ -180,7 +193,10 @@ object SampleData {
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
       `type` = WeaveTypes.PDR,
-      status = Statuses.NotStarted
+      status = Statuses.NotStarted,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val laserDonutCreation = CreateLaserDonut(
@@ -209,7 +225,10 @@ object SampleData {
       milestone = "A basic working prototype",
       order = 1,
       `type` = DonutTypes.SkillFocused,
-      status = Statuses.NotStarted
+      status = Statuses.NotStarted,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val portionCreation = CreatePortion(
@@ -229,7 +248,10 @@ object SampleData {
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
       order = 13,
-      status = Statuses.Incomplete
+      status = Statuses.Incomplete,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val todoCreation = CreateTodo(
@@ -249,7 +271,10 @@ object SampleData {
       portionId = UUID.randomUUID,
       description = "Create sample data for tests",
       order = 4,
-      status = Statuses.Complete
+      status = Statuses.Complete,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val hobbyCreation = CreateHobby(
@@ -277,7 +302,10 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.NotReached
+      status = Statuses.NotReached,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
     )
 
     val listUpdate = UpdateList(
@@ -318,7 +346,9 @@ object SampleData {
       uuid = domain.backlogItem.uuid,
       summary = domain.backlogItem.summary,
       description = domain.backlogItem.description,
-      `type` = BacklogItemType.toString(domain.backlogItem.`type`)
+      `type` = BacklogItemType.toString(domain.backlogItem.`type`),
+      createdOn = domain.backlogItem.createdOn,
+      lastModified = domain.backlogItem.lastModified
     )
 
     val epochCreation = EpochCreation(
@@ -337,7 +367,9 @@ object SampleData {
       uuid = domain.epoch.uuid,
       name = domain.epoch.name,
       totem = domain.epoch.totem,
-      question = domain.epoch.question
+      question = domain.epoch.question,
+      createdOn = domain.epoch.createdOn,
+      lastModified = domain.epoch.lastModified
     )
 
     val yearCreation = YearCreation(
@@ -354,7 +386,9 @@ object SampleData {
       uuid = domain.year.uuid,
       epochId = domain.year.epochId,
       startDate = domain.year.startDate,
-      finishDate = domain.year.finishDate
+      finishDate = domain.year.finishDate,
+      createdOn = domain.year.createdOn,
+      lastModified = domain.year.lastModified
     )
 
     val themeCreation = ThemeCreation(
@@ -370,7 +404,9 @@ object SampleData {
     val theme = ThemeView(
       uuid = domain.theme.uuid,
       yearId = domain.theme.yearId,
-      name = domain.theme.name
+      name = domain.theme.name,
+      createdOn = domain.theme.createdOn,
+      lastModified = domain.theme.lastModified
     )
 
     val goalCreation = GoalCreation(
@@ -404,7 +440,9 @@ object SampleData {
       level = domain.goal.level,
       priority = domain.goal.priority,
       graduation = GraduationType.toString(domain.goal.graduation),
-      status = GoalStatus.toString(domain.goal.status)
+      status = GoalStatus.toString(domain.goal.status),
+      createdOn = domain.goal.createdOn,
+      lastModified = domain.goal.lastModified
     )
 
     val threadCreation = ThreadCreation(
@@ -426,7 +464,10 @@ object SampleData {
       goalId = domain.thread.goalId,
       summary = domain.thread.summary,
       description = domain.thread.description,
-      status = Status.toString(domain.thread.status)
+      status = Status.toString(domain.thread.status),
+      createdOn = domain.thread.createdOn,
+      lastModified = domain.thread.lastModified,
+      lastPerformed = domain.thread.lastPerformed
     )
 
     val weaveCreation = WeaveCreation(
@@ -451,7 +492,10 @@ object SampleData {
       summary = domain.weave.summary,
       description = domain.weave.description,
       `type` = WeaveType.toString(domain.weave.`type`),
-      status = Status.toString(domain.weave.status)
+      status = Status.toString(domain.weave.status),
+      createdOn = domain.weave.createdOn,
+      lastModified = domain.weave.lastModified,
+      lastPerformed = domain.weave.lastPerformed
     )
 
     val laserDonutCreation = LaserDonutCreation(
@@ -480,7 +524,10 @@ object SampleData {
       milestone = domain.laserDonut.milestone,
       order = domain.laserDonut.order,
       `type` = DonutType.toString(domain.laserDonut.`type`),
-      status = Status.toString(domain.laserDonut.status)
+      status = Status.toString(domain.laserDonut.status),
+      createdOn = domain.laserDonut.createdOn,
+      lastModified = domain.laserDonut.lastModified,
+      lastPerformed = domain.laserDonut.lastPerformed
     )
 
     val portionCreation = PortionCreation(
@@ -500,7 +547,10 @@ object SampleData {
       laserDonutId = domain.portion.laserDonutId,
       summary = domain.portion.summary,
       order = domain.portion.order,
-      status = Status.toString(domain.portion.status)
+      status = Status.toString(domain.portion.status),
+      createdOn = domain.portion.createdOn,
+      lastModified = domain.portion.lastModified,
+      lastPerformed = domain.portion.lastPerformed
     )
 
     val todoCreation = TodoCreation(
@@ -520,7 +570,10 @@ object SampleData {
       portionId = domain.todo.portionId,
       description = domain.todo.description,
       order = domain.todo.order,
-      status = Status.toString(domain.todo.status)
+      status = Status.toString(domain.todo.status),
+      createdOn = domain.todo.createdOn,
+      lastModified = domain.todo.lastModified,
+      lastPerformed = domain.todo.lastPerformed
     )
 
     val hobbyCreation = HobbyCreation(
@@ -548,7 +601,10 @@ object SampleData {
       description = domain.hobby.description,
       frequency = HobbyFrequency.toString(domain.hobby.frequency),
       `type` = HobbyType.toString(domain.hobby.`type`),
-      status = Status.toString(domain.hobby.status)
+      status = Status.toString(domain.hobby.status),
+      createdOn = domain.hobby.createdOn,
+      lastModified = domain.hobby.lastModified,
+      lastPerformed = domain.hobby.lastPerformed
     )
 
     val listUpdate = ListUpdate(

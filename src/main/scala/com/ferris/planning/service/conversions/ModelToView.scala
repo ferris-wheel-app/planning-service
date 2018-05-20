@@ -21,7 +21,9 @@ object ModelToView {
         uuid = backlogItem.uuid,
         summary = backlogItem.summary,
         description = backlogItem.description,
-        `type` = TypeResolvers.BacklogItemType.toString(backlogItem.`type`)
+        `type` = TypeResolvers.BacklogItemType.toString(backlogItem.`type`),
+        createdOn = backlogItem.createdOn,
+        lastModified = backlogItem.lastModified
       )
     }
   }
@@ -32,7 +34,9 @@ object ModelToView {
         uuid = epoch.uuid,
         name = epoch.name,
         totem = epoch.totem,
-        question = epoch.question
+        question = epoch.question,
+        createdOn = epoch.createdOn,
+        lastModified = epoch.lastModified
       )
     }
   }
@@ -43,7 +47,9 @@ object ModelToView {
         uuid = year.uuid,
         epochId = year.epochId,
         startDate = year.startDate,
-        finishDate = year.finishDate
+        finishDate = year.finishDate,
+        createdOn = year.createdOn,
+        lastModified = year.lastModified
       )
     }
   }
@@ -53,7 +59,9 @@ object ModelToView {
       ThemeView(
         uuid = theme.uuid,
         yearId = theme.yearId,
-        name = theme.name
+        name = theme.name,
+        createdOn = theme.createdOn,
+        lastModified = theme.lastModified
       )
     }
   }
@@ -69,7 +77,9 @@ object ModelToView {
         level = goal.level,
         priority = goal.priority,
         status = TypeResolvers.GoalStatus.toString(goal.status),
-        graduation = TypeResolvers.GraduationType.toString(goal.graduation)
+        graduation = TypeResolvers.GraduationType.toString(goal.graduation),
+        createdOn = goal.createdOn,
+        lastModified = goal.lastModified
       )
     }
   }
@@ -81,7 +91,10 @@ object ModelToView {
         goalId = thread.goalId,
         summary = thread.summary,
         description = thread.description,
-        status = TypeResolvers.Status.toString(thread.status)
+        status = TypeResolvers.Status.toString(thread.status),
+        createdOn = thread.createdOn,
+        lastModified = thread.lastModified,
+        lastPerformed = thread.lastPerformed
       )
     }
   }
@@ -94,7 +107,10 @@ object ModelToView {
         summary = weave.summary,
         description = weave.description,
         status = TypeResolvers.Status.toString(weave.status),
-        `type` = TypeResolvers.WeaveType.toString(weave.`type`)
+        `type` = TypeResolvers.WeaveType.toString(weave.`type`),
+        createdOn = weave.createdOn,
+        lastModified = weave.lastModified,
+        lastPerformed = weave.lastPerformed
       )
     }
   }
@@ -109,7 +125,10 @@ object ModelToView {
         milestone = laserDonut.milestone,
         order = laserDonut.order,
         status = TypeResolvers.Status.toString(laserDonut.status),
-        `type` = TypeResolvers.DonutType.toString(laserDonut.`type`)
+        `type` = TypeResolvers.DonutType.toString(laserDonut.`type`),
+        createdOn = laserDonut.createdOn,
+        lastModified = laserDonut.lastModified,
+        lastPerformed = laserDonut.lastPerformed
       )
     }
   }
@@ -121,7 +140,10 @@ object ModelToView {
         laserDonutId = portion.laserDonutId,
         summary = portion.summary,
         order = portion.order,
-        status = TypeResolvers.Status.toString(portion.status)
+        status = TypeResolvers.Status.toString(portion.status),
+        createdOn = portion.createdOn,
+        lastModified = portion.lastModified,
+        lastPerformed = portion.lastPerformed
       )
     }
   }
@@ -133,7 +155,10 @@ object ModelToView {
         portionId = todo.portionId,
         description = todo.description,
         order = todo.order,
-        status = TypeResolvers.Status.toString(todo.status)
+        status = TypeResolvers.Status.toString(todo.status),
+        createdOn = todo.createdOn,
+        lastModified = todo.lastModified,
+        lastPerformed = todo.lastPerformed
       )
     }
   }
@@ -147,7 +172,10 @@ object ModelToView {
         description = hobby.description,
         frequency = TypeResolvers.HobbyFrequency.toString(hobby.frequency),
         status = TypeResolvers.Status.toString(hobby.status),
-        `type` = TypeResolvers.HobbyType.toString(hobby.`type`)
+        `type` = TypeResolvers.HobbyType.toString(hobby.`type`),
+        createdOn = hobby.createdOn,
+        lastModified = hobby.lastModified,
+        lastPerformed = hobby.lastPerformed
       )
     }
   }

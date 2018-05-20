@@ -45,7 +45,7 @@ object SampleData {
     description = "I need to get my shit together",
     `type` = "issue",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now)
   )
 
   val epochCreation = EpochCreation(
@@ -66,7 +66,7 @@ object SampleData {
     totem = "Hero",
     question = "Am I capable of becoming an Übermensch?",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now)
   )
 
   val yearCreation = YearCreation(
@@ -85,7 +85,7 @@ object SampleData {
     startDate = currentYear,
     finishDate = nextYear,
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now)
   )
 
   val themeCreation = ThemeCreation(
@@ -103,7 +103,7 @@ object SampleData {
     yearId = UUID.randomUUID,
     name = "Career Capital",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now)
   )
 
   val goalCreation = GoalCreation(
@@ -139,7 +139,7 @@ object SampleData {
     graduation = "hobby",
     status = "not_achieved",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now)
   )
 
   val threadCreation = ThreadCreation(
@@ -163,8 +163,8 @@ object SampleData {
     description = "Go for a run",
     status = "not_Started",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 
   val weaveCreation = WeaveCreation(
@@ -191,8 +191,8 @@ object SampleData {
     `type` = "pdr",
     status = "not_started",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 
   val laserDonutCreation = LaserDonutCreation(
@@ -223,8 +223,8 @@ object SampleData {
     `type` = "skill_focused",
     status = "not_started",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 
   val portionCreation = PortionCreation(
@@ -246,8 +246,8 @@ object SampleData {
     order = 13,
     status = "incomplete",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 
   val todoCreation = TodoCreation(
@@ -269,8 +269,8 @@ object SampleData {
     order = 4,
     status = "complete",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 
   val hobbyCreation = HobbyCreation(
@@ -300,7 +300,7 @@ object SampleData {
     `type` = "active",
     status = "not_reached",
     createdOn = LocalDateTime.now,
-    lastModified = LocalDateTime.now,
-    lastPerformed = LocalDateTime.now
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
   )
 }

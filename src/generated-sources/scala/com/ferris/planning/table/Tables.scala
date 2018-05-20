@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, PyramidOfImportanceTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, PyramidOfImportanceTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -60,6 +60,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table BacklogItemTable */
   lazy val BacklogItemTable = new TableQuery(tag => new BacklogItemTable(tag))
+
+  /** Entity class storing rows of table CurrentActivityTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param currentLaserDonut Database column CURRENT_LASER_DONUT SqlType(BIGINT)
+   *  @param currentPortion Database column CURRENT_PORTION SqlType(BIGINT)
+   *  @param lastUpdated Database column LAST_UPDATED SqlType(TIMESTAMP) */
+  case class CurrentActivityRow(id: Long, currentLaserDonut: Long, currentPortion: Long, lastUpdated: java.sql.Timestamp)
+  /** GetResult implicit for fetching CurrentActivityRow objects using plain SQL queries */
+  implicit def GetResultCurrentActivityRow(implicit e0: GR[Long], e1: GR[java.sql.Timestamp]): GR[CurrentActivityRow] = GR{
+    prs => import prs._
+    CurrentActivityRow.tupled((<<[Long], <<[Long], <<[Long], <<[java.sql.Timestamp]))
+  }
+  /** Table description of table CURRENT_ACTIVITY. Objects of this class serve as prototypes for rows in queries. */
+  class CurrentActivityTable(_tableTag: Tag) extends profile.api.Table[CurrentActivityRow](_tableTag, "CURRENT_ACTIVITY") {
+    def * = (id, currentLaserDonut, currentPortion, lastUpdated) <> (CurrentActivityRow.tupled, CurrentActivityRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(currentLaserDonut), Rep.Some(currentPortion), Rep.Some(lastUpdated)).shaped.<>({r=>import r._; _1.map(_=> CurrentActivityRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column CURRENT_LASER_DONUT SqlType(BIGINT) */
+    val currentLaserDonut: Rep[Long] = column[Long]("CURRENT_LASER_DONUT")
+    /** Database column CURRENT_PORTION SqlType(BIGINT) */
+    val currentPortion: Rep[Long] = column[Long]("CURRENT_PORTION")
+    /** Database column LAST_UPDATED SqlType(TIMESTAMP) */
+    val lastUpdated: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("LAST_UPDATED")
+
+    /** Foreign key referencing LaserDonutTable (database name CURRENT_LASER_DONUT_FK) */
+    lazy val laserDonutTableFk = foreignKey("CURRENT_LASER_DONUT_FK", currentLaserDonut, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing PortionTable (database name CURRENT_PORTION_FK) */
+    lazy val portionTableFk = foreignKey("CURRENT_PORTION_FK", currentPortion, PortionTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (currentLaserDonut,currentPortion) (database name CONSTRAINT_INDEX_8) */
+    val index1 = index("CONSTRAINT_INDEX_8", (currentLaserDonut, currentPortion), unique=true)
+  }
+  /** Collection-like TableQuery object for table CurrentActivityTable */
+  lazy val CurrentActivityTable = new TableQuery(tag => new CurrentActivityTable(tag))
 
   /** Entity class storing rows of table EpochTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey

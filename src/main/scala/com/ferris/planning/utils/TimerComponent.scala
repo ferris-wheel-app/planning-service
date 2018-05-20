@@ -6,8 +6,7 @@ trait TimerComponent {
   def timer: Timer
 
   trait Timer {
-    def timestampOfNow: Timestamp
-    def now: Long
+    def now: Timestamp
   }
 }
 
@@ -15,7 +14,6 @@ trait DefaultTimerComponent extends TimerComponent {
   val timer: Timer = Timer
 
   private object Timer extends Timer {
-    override def timestampOfNow: Timestamp = new Timestamp(System.currentTimeMillis())
-    override def now: Long = System.currentTimeMillis()
+    override def now: Timestamp = new Timestamp(System.currentTimeMillis())
   }
 }

@@ -177,3 +177,14 @@ create table pyramid_of_importance (
   UNIQUE KEY (laser_donut_id),
   CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
+
+create table current_activity (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  current_laser_donut BIGINT NOT NULL,
+  current_portion BIGINT NOT NULL,
+  last_updated TIMESTAMP NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (current_laser_donut, current_portion),
+  CONSTRAINT current_laser_donut_fk FOREIGN KEY (current_laser_donut) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT current_portion_fk FOREIGN KEY (current_portion) REFERENCES portion (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;

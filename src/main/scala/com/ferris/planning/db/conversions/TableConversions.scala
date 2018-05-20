@@ -27,7 +27,7 @@ class TableConversions(val tables: Tables) {
       description = row.description,
       `type` = BacklogItemTypes.withName(row.`type`),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime)
     )
   }
 
@@ -38,7 +38,7 @@ class TableConversions(val tables: Tables) {
       totem = row.totem,
       question = row.question,
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime)
     )
   }
 
@@ -49,7 +49,7 @@ class TableConversions(val tables: Tables) {
       startDate = row.startDate.toLocalDate,
       finishDate = row.finishDate.toLocalDate,
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime)
     )
   }
 
@@ -59,7 +59,7 @@ class TableConversions(val tables: Tables) {
       yearId = UUID.fromString(row.yearId),
       name = row.name,
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime)
     )
   }
 
@@ -76,7 +76,7 @@ class TableConversions(val tables: Tables) {
         status = GoalStatuses.withName(goal.status),
         graduation = GraduationTypes.withName(goal.graduation),
         createdOn = goal.createdOn.toLocalDateTime,
-        lastModified = goal.lastModified.toLocalDateTime
+        lastModified = goal.lastModified.map(_.toLocalDateTime)
       )
     }
   }
@@ -89,8 +89,8 @@ class TableConversions(val tables: Tables) {
       description = row.description,
       status = Statuses.withName(row.status),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 
@@ -103,8 +103,8 @@ class TableConversions(val tables: Tables) {
       status = Statuses.withName(row.status),
       `type` = WeaveTypes.withName(row.`type`),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 
@@ -119,8 +119,8 @@ class TableConversions(val tables: Tables) {
       status = Statuses.withName(row.status),
       `type` = DonutTypes.withName(row.`type`),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 
@@ -132,8 +132,8 @@ class TableConversions(val tables: Tables) {
       order = row.order,
       status = Statuses.withName(row.status),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 
@@ -145,8 +145,8 @@ class TableConversions(val tables: Tables) {
       order = row.order,
       status = Statuses.withName(row.status),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 
@@ -160,8 +160,8 @@ class TableConversions(val tables: Tables) {
       status = Statuses.withName(row.status),
       `type` = HobbyTypes.withName(row.`type`),
       createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.toLocalDateTime,
-      lastPerformed = row.lastPerformed.toLocalDateTime
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
     )
   }
 

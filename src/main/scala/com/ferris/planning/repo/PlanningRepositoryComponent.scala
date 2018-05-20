@@ -1,6 +1,6 @@
 package com.ferris.planning.repo
 
-import java.sql.Date
+import java.sql.{Date, Timestamp}
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
@@ -45,7 +45,7 @@ trait PlanningRepositoryComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
-    def refreshPyramidOfImportance(): Future[PyramidOfImportance]
+    //def refreshPyramidOfImportance(): Future[PyramidOfImportance]
 
     def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -75,9 +75,9 @@ trait PlanningRepositoryComponent {
     def getThread(uuid: UUID): Future[Option[Thread]]
     def getWeave(uuid: UUID): Future[Option[Weave]]
     def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]]
-    def getCurrentLaserDonut: Future[Option[LaserDonut]]
+    //def getCurrentLaserDonut: Future[Option[LaserDonut]]
     def getPortion(uuid: UUID): Future[Option[Portion]]
-    def getCurrentPortion: Future[Option[Portion]]
+    //def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
     def getPyramidOfImportance: Future[PyramidOfImportance]
@@ -130,7 +130,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         summary = creation.summary,
         description = creation.description,
         `type` = creation.`type`.dbValue,
-        createdOn = timer.timestampOfNow,
+        createdOn = timer.now,
         lastModified = None
       )
       val action = (BacklogItemTable returning BacklogItemTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
@@ -143,7 +143,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         uuid = UUID.randomUUID,
         name = creation.name,
         totem = creation.totem,
-        question = creation.question
+        question = creation.question,
+        createdOn = timer.now,
+        lastModified = None
       )
       val action = (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
       db.run(action) map (row => row.asEpoch)
@@ -155,7 +157,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         uuid = UUID.randomUUID,
         epochId = creation.epochId,
         startDate = Date.valueOf(creation.startDate),
-        finishDate = Date.valueOf(creation.startDate.plusYears(1))
+        finishDate = Date.valueOf(creation.startDate.plusYears(1)),
+        createdOn = timer.now,
+        lastModified = None
       )
       val action = (YearTable returning YearTable.map(_.id) into ((year, id) => year.copy(id = id))) += row
       db.run(action) map (row => row.asYear)
@@ -166,7 +170,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         id = 0L,
         uuid = UUID.randomUUID,
         yearId = creation.yearId,
-        name = creation.name
+        name = creation.name,
+        createdOn = timer.now,
+        lastModified = None
       )
       val action = (ThemeTable returning ThemeTable.map(_.id) into ((theme, id) => theme.copy(id = id))) += row
       db.run(action) map (row => row.asTheme)
@@ -183,7 +189,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           level = creation.level,
           priority = creation.priority,
           status = creation.status.dbValue,
-          graduation = creation.graduation.dbValue
+          graduation = creation.graduation.dbValue,
+          createdOn = timer.now,
+          lastModified = None
         )
         (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
       }
@@ -201,7 +209,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         goalId = creation.goalId,
         summary = creation.summary,
         description = creation.description,
-        status = creation.status.dbValue
+        status = creation.status.dbValue,
+        createdOn = timer.now,
+        lastModified = None,
+        lastPerformed = None
       )
       val action = (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
       db.run(action) map (row => row.asThread)
@@ -215,7 +226,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         summary = creation.summary,
         description = creation.description,
         status = creation.status.dbValue,
-        `type` = creation.`type`.dbValue
+        `type` = creation.`type`.dbValue,
+        createdOn = timer.now,
+        lastModified = None,
+        lastPerformed = None
       )
       val action = (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
       db.run(action) map (row => row.asWeave)
@@ -232,7 +246,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           milestone = creation.milestone,
           order = existingLaserDonuts.lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue,
-          `type` = creation.`type`.dbValue
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.now,
+          lastModified = None,
+          lastPerformed = None
         )
         (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
       }.transactionally
@@ -247,7 +264,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           laserDonutId = creation.laserDonutId,
           summary = creation.summary,
           order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
-          status = creation.status.dbValue
+          status = creation.status.dbValue,
+          createdOn = timer.now,
+          lastModified = None,
+          lastPerformed = None
         )
         (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
       }.transactionally
@@ -262,7 +282,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           portionId = creation.portionId,
           description = creation.description,
           order = existingTodos.lastOption.map(_.order + 1).getOrElse(1),
-          status = creation.status.dbValue
+          status = creation.status.dbValue,
+          createdOn = timer.now,
+          lastModified = None,
+          lastPerformed = None
         )
         (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
       }.transactionally
@@ -278,7 +301,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         description = creation.description,
         frequency = creation.frequency.dbValue,
         status = creation.status.dbValue,
-        `type` = creation.`type`.dbValue
+        `type` = creation.`type`.dbValue,
+        createdOn = timer.now,
+        lastModified = None,
+        lastPerformed = None
       )
       val action = (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
       db.run(action) map (row => row.asHobby)
@@ -294,8 +320,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
             val row = PyramidOfImportanceRow(
               id = 0L,
               laserDonutId = laserDonut.id,
-              tier = tierNumber,
-              current = false
+              tier = tierNumber
             )
             ((PyramidOfImportanceTable returning PyramidOfImportanceTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
           case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
@@ -318,11 +343,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
-      val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`))
+      val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`, item.lastModified))
       val action = getBacklogItemAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description),
-            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), Some(timer.now))
             .andThen(getBacklogItemAction(uuid).map(_.head))
         } getOrElse DBIO.failed(BacklogItemNotFoundException())
       }.transactionally
@@ -330,10 +355,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch] = {
-      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question))
+      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question, epoch.lastModified))
       val action = getEpochAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question))
+          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
+            Some(timer.now))
             .andThen(getEpochAction(uuid).map(_.head))
         } getOrElse DBIO.failed(EpochNotFoundException())
       }.transactionally
@@ -341,11 +367,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateYear(uuid: UUID, update: UpdateYear): Future[Year] = {
-      val query = yearByUuid(uuid).map(epoch => (epoch.epochId, epoch.startDate, epoch.finishDate))
+      val query = yearByUuid(uuid).map(epoch => (epoch.epochId, epoch.startDate, epoch.finishDate, epoch.lastModified))
       val action = getYearAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
-            old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate))
+            old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate), Some(timer.now))
             .andThen(getYearAction(uuid).map(_.head))
         } getOrElse DBIO.failed(YearNotFoundException())
       }.transactionally
@@ -353,10 +379,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateTheme(uuid: UUID, update: UpdateTheme): Future[Theme] = {
-      val query = themeByUuid(uuid).map(theme => (theme.yearId, theme.name))
+      val query = themeByUuid(uuid).map(theme => (theme.yearId, theme.name, theme.lastModified))
       val action = getThemeAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name))
+          query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name), Some(timer.now))
             .andThen(getThemeAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThemeNotFoundException())
       }.transactionally
@@ -365,11 +391,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal] = {
       def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow) = {
-        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.level, goal.priority, goal.status, goal.graduation))
+        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.level, goal.priority, goal.status,
+          goal.graduation, goal.lastModified))
           .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.level.getOrElse(old.level),
             UpdateBoolean.keepOrReplace(update.priority, old.priority), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation))
+            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.now))
       }
 
       val action = getGoalAction(uuid).flatMap { maybeObj =>
@@ -392,11 +419,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
-      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.summary :: update.description :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status,
+        thread.lastModified, thread.lastPerformed))
       val action = getThreadAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status))
+            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            lastModified, lastPerformed)
             .andThen(getThreadAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThreadNotFoundException())
       }.transactionally
@@ -404,12 +437,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave] = {
-      val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.summary :: update.description :: update.`type` :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`,
+        weave.lastModified, weave.lastPerformed))
       val action = getWeaveAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
             .andThen(getWeaveAction(uuid).map(_.head))
         } getOrElse DBIO.failed(WeaveNotFoundException())
       }.transactionally
@@ -417,12 +455,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[LaserDonut] = {
-      val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description, laserDonut.milestone, laserDonut.status, laserDonut.`type`))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.summary :: update.description :: update.milestone :: update.`type` :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description,
+        laserDonut.milestone, laserDonut.status, laserDonut.`type`, laserDonut.lastModified, laserDonut.lastPerformed))
       val action = getLaserDonutAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.milestone.getOrElse(old.milestone),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`),
+            lastModified, lastPerformed)
             .andThen(getLaserDonutAction(uuid).map(_.head))
         } getOrElse DBIO.failed(LaserDonutNotFoundException())
       }.transactionally
@@ -430,11 +474,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion] = {
-      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.laserDonutId :: update.summary :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status,
+        portion.lastModified, portion.lastPerformed))
       val action = getPortionAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
             .andThen(getPortionAction(uuid).map(_.head))
         } getOrElse DBIO.failed(PortionNotFoundException())
       }.transactionally
@@ -465,11 +514,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
-      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.portionId :: update.description :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status, todo.lastModified, todo.lastPerformed))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
             .andThen(getTodoAction(uuid).map(_.head))
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
@@ -500,12 +553,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby] = {
-      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status, hobby.`type`))
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.summary :: update.description :: update.frequency :: update.`type` :: Nil,
+        performanceUpdate = update.status :: Nil
+      )
+      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status,
+        hobby.`type`, hobby.lastModified, hobby.lastPerformed))
       val action = getHobbyAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.frequency, old.frequency),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`))
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`),
+            lastModified, lastPerformed)
             .andThen(getHobbyAction(uuid).map(_.head))
         } getOrElse DBIO.failed(HobbyNotFoundException())
       }.transactionally
@@ -872,6 +931,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def hobbiesByParentId(goalId: UUID) = {
       HobbyTable.filter(_.goalId === goalId.toString)
+    }
+
+    private def getUpdateTimes(contentUpdate: Seq[Option[Any]], performanceUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {
+      val now = timer.now
+      val lastModified = if (contentUpdate.exists(_.nonEmpty)) Some(now) else None
+      val lastPerformed = if (performanceUpdate.exists(_.nonEmpty)) Some(now) else None
+      (lastModified, lastPerformed)
     }
   }
 }
