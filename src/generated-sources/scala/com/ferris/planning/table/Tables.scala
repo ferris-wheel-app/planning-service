@@ -23,19 +23,21 @@ trait Tables {
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
-   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class BacklogItemRow(id: Long, uuid: String, summary: String, description: String, `type`: String)
+   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+  case class BacklogItemRow(id: Long, uuid: String, summary: String, description: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching BacklogItemRow objects using plain SQL queries */
-  implicit def GetResultBacklogItemRow(implicit e0: GR[Long], e1: GR[String]): GR[BacklogItemRow] = GR{
+  implicit def GetResultBacklogItemRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[BacklogItemRow] = GR{
     prs => import prs._
-    BacklogItemRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String]))
+    BacklogItemRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table BACKLOG_ITEM. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class BacklogItemTable(_tableTag: Tag) extends profile.api.Table[BacklogItemRow](_tableTag, "BACKLOG_ITEM") {
-    def * = (id, uuid, summary, description, `type`) <> (BacklogItemRow.tupled, BacklogItemRow.unapply)
+    def * = (id, uuid, summary, description, `type`, createdOn, lastModified) <> (BacklogItemRow.tupled, BacklogItemRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(summary), Rep.Some(description), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> BacklogItemRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(summary), Rep.Some(description), Rep.Some(`type`), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> BacklogItemRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -48,6 +50,10 @@ trait Tables {
     /** Database column TYPE SqlType(VARCHAR), Length(36,true)
      *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `type`: Rep[String] = column[String]("TYPE", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_D) */
     val index1 = index("CONSTRAINT_INDEX_D", uuid, unique=true)
@@ -60,18 +66,20 @@ trait Tables {
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
    *  @param totem Database column TOTEM SqlType(VARCHAR), Length(256,true)
-   *  @param question Database column QUESTION SqlType(VARCHAR), Length(256,true) */
-  case class EpochRow(id: Long, uuid: String, name: String, totem: String, question: String)
+   *  @param question Database column QUESTION SqlType(VARCHAR), Length(256,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+  case class EpochRow(id: Long, uuid: String, name: String, totem: String, question: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching EpochRow objects using plain SQL queries */
-  implicit def GetResultEpochRow(implicit e0: GR[Long], e1: GR[String]): GR[EpochRow] = GR{
+  implicit def GetResultEpochRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[EpochRow] = GR{
     prs => import prs._
-    EpochRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String]))
+    EpochRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table EPOCH. Objects of this class serve as prototypes for rows in queries. */
   class EpochTable(_tableTag: Tag) extends profile.api.Table[EpochRow](_tableTag, "EPOCH") {
-    def * = (id, uuid, name, totem, question) <> (EpochRow.tupled, EpochRow.unapply)
+    def * = (id, uuid, name, totem, question, createdOn, lastModified) <> (EpochRow.tupled, EpochRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(totem), Rep.Some(question)).shaped.<>({r=>import r._; _1.map(_=> EpochRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(totem), Rep.Some(question), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> EpochRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -83,6 +91,10 @@ trait Tables {
     val totem: Rep[String] = column[String]("TOTEM", O.Length(256,varying=true))
     /** Database column QUESTION SqlType(VARCHAR), Length(256,true) */
     val question: Rep[String] = column[String]("QUESTION", O.Length(256,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_3) */
     val index1 = index("CONSTRAINT_INDEX_3", uuid, unique=true)
@@ -130,18 +142,20 @@ trait Tables {
    *  @param level Database column LEVEL SqlType(INTEGER)
    *  @param priority Database column PRIORITY SqlType(TINYINT)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
-   *  @param graduation Database column GRADUATION SqlType(VARCHAR), Length(36,true) */
-  case class GoalRow(id: Long, uuid: String, themeId: String, summary: String, description: String, level: Int, priority: Byte, status: String, graduation: String)
+   *  @param graduation Database column GRADUATION SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+  case class GoalRow(id: Long, uuid: String, themeId: String, summary: String, description: String, level: Int, priority: Byte, status: String, graduation: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching GoalRow objects using plain SQL queries */
-  implicit def GetResultGoalRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[Byte]): GR[GoalRow] = GR{
+  implicit def GetResultGoalRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[Byte], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[GoalRow] = GR{
     prs => import prs._
-    GoalRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[Byte], <<[String], <<[String]))
+    GoalRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[Byte], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table GOAL. Objects of this class serve as prototypes for rows in queries. */
   class GoalTable(_tableTag: Tag) extends profile.api.Table[GoalRow](_tableTag, "GOAL") {
-    def * = (id, uuid, themeId, summary, description, level, priority, status, graduation) <> (GoalRow.tupled, GoalRow.unapply)
+    def * = (id, uuid, themeId, summary, description, level, priority, status, graduation, createdOn, lastModified) <> (GoalRow.tupled, GoalRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(themeId), Rep.Some(summary), Rep.Some(description), Rep.Some(level), Rep.Some(priority), Rep.Some(status), Rep.Some(graduation)).shaped.<>({r=>import r._; _1.map(_=> GoalRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(themeId), Rep.Some(summary), Rep.Some(description), Rep.Some(level), Rep.Some(priority), Rep.Some(status), Rep.Some(graduation), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> GoalRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -161,6 +175,10 @@ trait Tables {
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
     /** Database column GRADUATION SqlType(VARCHAR), Length(36,true) */
     val graduation: Rep[String] = column[String]("GRADUATION", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_21) */
     val index1 = index("CONSTRAINT_INDEX_21", uuid, unique=true)
@@ -176,19 +194,22 @@ trait Tables {
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param frequency Database column FREQUENCY SqlType(VARCHAR), Length(36,true)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
-   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class HobbyRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, frequency: String, status: String, `type`: String)
+   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class HobbyRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, frequency: String, status: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching HobbyRow objects using plain SQL queries */
-  implicit def GetResultHobbyRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]]): GR[HobbyRow] = GR{
+  implicit def GetResultHobbyRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[HobbyRow] = GR{
     prs => import prs._
-    HobbyRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String], <<[String]))
+    HobbyRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table HOBBY. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class HobbyTable(_tableTag: Tag) extends profile.api.Table[HobbyRow](_tableTag, "HOBBY") {
-    def * = (id, uuid, goalId, summary, description, frequency, status, `type`) <> (HobbyRow.tupled, HobbyRow.unapply)
+    def * = (id, uuid, goalId, summary, description, frequency, status, `type`, createdOn, lastModified, lastPerformed) <> (HobbyRow.tupled, HobbyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(frequency), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> HobbyRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(frequency), Rep.Some(status), Rep.Some(`type`), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> HobbyRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -207,6 +228,12 @@ trait Tables {
     /** Database column TYPE SqlType(VARCHAR), Length(36,true)
      *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `type`: Rep[String] = column[String]("TYPE", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_41) */
     val index1 = index("CONSTRAINT_INDEX_41", uuid, unique=true)
@@ -223,19 +250,22 @@ trait Tables {
    *  @param milestone Database column MILESTONE SqlType(VARCHAR), Length(256,true)
    *  @param order Database column ORDER SqlType(INTEGER)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
-   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class LaserDonutRow(id: Long, uuid: String, goalId: String, summary: String, description: String, milestone: String, order: Int, status: String, `type`: String)
+   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class LaserDonutRow(id: Long, uuid: String, goalId: String, summary: String, description: String, milestone: String, order: Int, status: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching LaserDonutRow objects using plain SQL queries */
-  implicit def GetResultLaserDonutRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int]): GR[LaserDonutRow] = GR{
+  implicit def GetResultLaserDonutRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[LaserDonutRow] = GR{
     prs => import prs._
-    LaserDonutRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[String]))
+    LaserDonutRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table LASER_DONUT. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class LaserDonutTable(_tableTag: Tag) extends profile.api.Table[LaserDonutRow](_tableTag, "LASER_DONUT") {
-    def * = (id, uuid, goalId, summary, description, milestone, order, status, `type`) <> (LaserDonutRow.tupled, LaserDonutRow.unapply)
+    def * = (id, uuid, goalId, summary, description, milestone, order, status, `type`, createdOn, lastModified, lastPerformed) <> (LaserDonutRow.tupled, LaserDonutRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(goalId), Rep.Some(summary), Rep.Some(description), Rep.Some(milestone), Rep.Some(order), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(goalId), Rep.Some(summary), Rep.Some(description), Rep.Some(milestone), Rep.Some(order), Rep.Some(status), Rep.Some(`type`), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> LaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11, _12)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -256,6 +286,12 @@ trait Tables {
     /** Database column TYPE SqlType(VARCHAR), Length(36,true)
      *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `type`: Rep[String] = column[String]("TYPE", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_E) */
     val index1 = index("CONSTRAINT_INDEX_E", uuid, unique=true)
@@ -301,18 +337,21 @@ trait Tables {
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param order Database column ORDER SqlType(INTEGER)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true) */
-  case class PortionRow(id: Long, uuid: String, laserDonutId: String, summary: String, order: Int, status: String)
+   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class PortionRow(id: Long, uuid: String, laserDonutId: String, summary: String, order: Int, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching PortionRow objects using plain SQL queries */
-  implicit def GetResultPortionRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int]): GR[PortionRow] = GR{
+  implicit def GetResultPortionRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[PortionRow] = GR{
     prs => import prs._
-    PortionRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String]))
+    PortionRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table PORTION. Objects of this class serve as prototypes for rows in queries. */
   class PortionTable(_tableTag: Tag) extends profile.api.Table[PortionRow](_tableTag, "PORTION") {
-    def * = (id, uuid, laserDonutId, summary, order, status) <> (PortionRow.tupled, PortionRow.unapply)
+    def * = (id, uuid, laserDonutId, summary, order, status, createdOn, lastModified, lastPerformed) <> (PortionRow.tupled, PortionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(laserDonutId), Rep.Some(summary), Rep.Some(order), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> PortionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(laserDonutId), Rep.Some(summary), Rep.Some(order), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> PortionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -326,6 +365,12 @@ trait Tables {
     val order: Rep[Int] = column[Int]("ORDER")
     /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_1) */
     val index1 = index("CONSTRAINT_INDEX_1", uuid, unique=true)
@@ -336,19 +381,18 @@ trait Tables {
   /** Entity class storing rows of table PyramidOfImportanceTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
-   *  @param tier Database column TIER SqlType(INTEGER)
-   *  @param current Database column CURRENT SqlType(TINYINT) */
-  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
+   *  @param tier Database column TIER SqlType(INTEGER) */
+  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int)
   /** GetResult implicit for fetching PyramidOfImportanceRow objects using plain SQL queries */
-  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[PyramidOfImportanceRow] = GR{
+  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int]): GR[PyramidOfImportanceRow] = GR{
     prs => import prs._
-    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int], <<[Byte]))
+    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int]))
   }
   /** Table description of table PYRAMID_OF_IMPORTANCE. Objects of this class serve as prototypes for rows in queries. */
   class PyramidOfImportanceTable(_tableTag: Tag) extends profile.api.Table[PyramidOfImportanceRow](_tableTag, "PYRAMID_OF_IMPORTANCE") {
-    def * = (id, laserDonutId, tier, current) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
+    def * = (id, laserDonutId, tier) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -356,8 +400,6 @@ trait Tables {
     val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
     /** Database column TIER SqlType(INTEGER) */
     val tier: Rep[Int] = column[Int]("TIER")
-    /** Database column CURRENT SqlType(TINYINT) */
-    val current: Rep[Byte] = column[Byte]("CURRENT")
 
     /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
     lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
@@ -372,18 +414,20 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param yearId Database column YEAR_ID SqlType(VARCHAR), Length(36,true)
-   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true) */
-  case class ThemeRow(id: Long, uuid: String, yearId: String, name: String)
+   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+  case class ThemeRow(id: Long, uuid: String, yearId: String, name: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching ThemeRow objects using plain SQL queries */
-  implicit def GetResultThemeRow(implicit e0: GR[Long], e1: GR[String]): GR[ThemeRow] = GR{
+  implicit def GetResultThemeRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[ThemeRow] = GR{
     prs => import prs._
-    ThemeRow.tupled((<<[Long], <<[String], <<[String], <<[String]))
+    ThemeRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table THEME. Objects of this class serve as prototypes for rows in queries. */
   class ThemeTable(_tableTag: Tag) extends profile.api.Table[ThemeRow](_tableTag, "THEME") {
-    def * = (id, uuid, yearId, name) <> (ThemeRow.tupled, ThemeRow.unapply)
+    def * = (id, uuid, yearId, name, createdOn, lastModified) <> (ThemeRow.tupled, ThemeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(yearId), Rep.Some(name)).shaped.<>({r=>import r._; _1.map(_=> ThemeRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(yearId), Rep.Some(name), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> ThemeRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -393,6 +437,10 @@ trait Tables {
     val yearId: Rep[String] = column[String]("YEAR_ID", O.Length(36,varying=true))
     /** Database column NAME SqlType(VARCHAR), Length(256,true) */
     val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4) */
     val index1 = index("CONSTRAINT_INDEX_4", uuid, unique=true)
@@ -406,18 +454,21 @@ trait Tables {
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true) */
-  case class ThreadRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, status: String)
+   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class ThreadRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching ThreadRow objects using plain SQL queries */
-  implicit def GetResultThreadRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]]): GR[ThreadRow] = GR{
+  implicit def GetResultThreadRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[ThreadRow] = GR{
     prs => import prs._
-    ThreadRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String]))
+    ThreadRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table THREAD. Objects of this class serve as prototypes for rows in queries. */
   class ThreadTable(_tableTag: Tag) extends profile.api.Table[ThreadRow](_tableTag, "THREAD") {
-    def * = (id, uuid, goalId, summary, description, status) <> (ThreadRow.tupled, ThreadRow.unapply)
+    def * = (id, uuid, goalId, summary, description, status, createdOn, lastModified, lastPerformed) <> (ThreadRow.tupled, ThreadRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> ThreadRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> ThreadRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -431,6 +482,12 @@ trait Tables {
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
     /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_9) */
     val index1 = index("CONSTRAINT_INDEX_9", uuid, unique=true)
@@ -444,18 +501,21 @@ trait Tables {
    *  @param portionId Database column PORTION_ID SqlType(VARCHAR), Length(36,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param order Database column ORDER SqlType(INTEGER)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true) */
-  case class TodoRow(id: Long, uuid: String, portionId: String, description: String, order: Int, status: String)
+   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class TodoRow(id: Long, uuid: String, portionId: String, description: String, order: Int, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching TodoRow objects using plain SQL queries */
-  implicit def GetResultTodoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int]): GR[TodoRow] = GR{
+  implicit def GetResultTodoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[TodoRow] = GR{
     prs => import prs._
-    TodoRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String]))
+    TodoRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table TODO. Objects of this class serve as prototypes for rows in queries. */
   class TodoTable(_tableTag: Tag) extends profile.api.Table[TodoRow](_tableTag, "TODO") {
-    def * = (id, uuid, portionId, description, order, status) <> (TodoRow.tupled, TodoRow.unapply)
+    def * = (id, uuid, portionId, description, order, status, createdOn, lastModified, lastPerformed) <> (TodoRow.tupled, TodoRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(status)).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -469,6 +529,12 @@ trait Tables {
     val order: Rep[Int] = column[Int]("ORDER")
     /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_27) */
     val index1 = index("CONSTRAINT_INDEX_27", uuid, unique=true)
@@ -483,19 +549,22 @@ trait Tables {
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
-   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true) */
-  case class WeaveRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, status: String, `type`: String)
+   *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class WeaveRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, status: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching WeaveRow objects using plain SQL queries */
-  implicit def GetResultWeaveRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]]): GR[WeaveRow] = GR{
+  implicit def GetResultWeaveRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[WeaveRow] = GR{
     prs => import prs._
-    WeaveRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String]))
+    WeaveRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table WEAVE. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class WeaveTable(_tableTag: Tag) extends profile.api.Table[WeaveRow](_tableTag, "WEAVE") {
-    def * = (id, uuid, goalId, summary, description, status, `type`) <> (WeaveRow.tupled, WeaveRow.unapply)
+    def * = (id, uuid, goalId, summary, description, status, `type`, createdOn, lastModified, lastPerformed) <> (WeaveRow.tupled, WeaveRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(`type`)).shaped.<>({r=>import r._; _1.map(_=> WeaveRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(`type`), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> WeaveRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -512,6 +581,12 @@ trait Tables {
     /** Database column TYPE SqlType(VARCHAR), Length(36,true)
      *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `type`: Rep[String] = column[String]("TYPE", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4E) */
     val index1 = index("CONSTRAINT_INDEX_4E", uuid, unique=true)
@@ -524,18 +599,20 @@ trait Tables {
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param epochId Database column EPOCH_ID SqlType(VARCHAR), Length(36,true)
    *  @param startDate Database column START_DATE SqlType(DATE)
-   *  @param finishDate Database column FINISH_DATE SqlType(DATE) */
-  case class YearRow(id: Long, uuid: String, epochId: String, startDate: java.sql.Date, finishDate: java.sql.Date)
+   *  @param finishDate Database column FINISH_DATE SqlType(DATE)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+  case class YearRow(id: Long, uuid: String, epochId: String, startDate: java.sql.Date, finishDate: java.sql.Date, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching YearRow objects using plain SQL queries */
-  implicit def GetResultYearRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Date]): GR[YearRow] = GR{
+  implicit def GetResultYearRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Date], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[YearRow] = GR{
     prs => import prs._
-    YearRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[java.sql.Date]))
+    YearRow.tupled((<<[Long], <<[String], <<[String], <<[java.sql.Date], <<[java.sql.Date], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table YEAR. Objects of this class serve as prototypes for rows in queries. */
   class YearTable(_tableTag: Tag) extends profile.api.Table[YearRow](_tableTag, "YEAR") {
-    def * = (id, uuid, epochId, startDate, finishDate) <> (YearRow.tupled, YearRow.unapply)
+    def * = (id, uuid, epochId, startDate, finishDate, createdOn, lastModified) <> (YearRow.tupled, YearRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(epochId), Rep.Some(startDate), Rep.Some(finishDate)).shaped.<>({r=>import r._; _1.map(_=> YearRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(epochId), Rep.Some(startDate), Rep.Some(finishDate), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> YearRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -547,6 +624,10 @@ trait Tables {
     val startDate: Rep[java.sql.Date] = column[java.sql.Date]("START_DATE")
     /** Database column FINISH_DATE SqlType(DATE) */
     val finishDate: Rep[java.sql.Date] = column[java.sql.Date]("FINISH_DATE")
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_2) */
     val index1 = index("CONSTRAINT_INDEX_2", uuid, unique=true)

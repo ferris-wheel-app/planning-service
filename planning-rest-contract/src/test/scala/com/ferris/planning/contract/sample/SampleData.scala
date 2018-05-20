@@ -1,6 +1,6 @@
 package com.ferris.planning.contract.sample
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.contract.resource.Resources.In._
@@ -43,7 +43,9 @@ object SampleData {
     uuid = UUID.randomUUID,
     summary = "I need to get my shit together",
     description = "I need to get my shit together",
-    `type` = "issue"
+    `type` = "issue",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now
   )
 
   val epochCreation = EpochCreation(
@@ -62,7 +64,9 @@ object SampleData {
     uuid = UUID.randomUUID,
     name = "Messinaissance",
     totem = "Hero",
-    question = "Am I capable of becoming an Übermensch?"
+    question = "Am I capable of becoming an Übermensch?",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now
   )
 
   val yearCreation = YearCreation(
@@ -79,7 +83,9 @@ object SampleData {
     uuid = UUID.randomUUID,
     epochId = UUID.randomUUID,
     startDate = currentYear,
-    finishDate = nextYear
+    finishDate = nextYear,
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now
   )
 
   val themeCreation = ThemeCreation(
@@ -95,7 +101,9 @@ object SampleData {
   val theme = ThemeView(
     uuid = UUID.randomUUID,
     yearId = UUID.randomUUID,
-    name = "Career Capital"
+    name = "Career Capital",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now
   )
 
   val goalCreation = GoalCreation(
@@ -129,7 +137,9 @@ object SampleData {
     level = 1,
     priority = false,
     graduation = "hobby",
-    status = "not_achieved"
+    status = "not_achieved",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now
   )
 
   val threadCreation = ThreadCreation(
@@ -151,7 +161,10 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    status = "not_Started"
+    status = "not_Started",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 
   val weaveCreation = WeaveCreation(
@@ -176,7 +189,10 @@ object SampleData {
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
     `type` = "pdr",
-    status = "not_started"
+    status = "not_started",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 
   val laserDonutCreation = LaserDonutCreation(
@@ -205,7 +221,10 @@ object SampleData {
     milestone = "A basic working prototype",
     order = 1,
     `type` = "skill_focused",
-    status = "not_started"
+    status = "not_started",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 
   val portionCreation = PortionCreation(
@@ -225,7 +244,10 @@ object SampleData {
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
     order = 13,
-    status = "incomplete"
+    status = "incomplete",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 
   val todoCreation = TodoCreation(
@@ -245,7 +267,10 @@ object SampleData {
     portionId = UUID.randomUUID,
     description = "Create sample data for tests",
     order = 4,
-    status = "complete"
+    status = "complete",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 
   val hobbyCreation = HobbyCreation(
@@ -273,6 +298,9 @@ object SampleData {
     description = "Train in Acro-Yoga",
     frequency = "continuous",
     `type` = "active",
-    status = "not_reached"
+    status = "not_reached",
+    createdOn = LocalDateTime.now,
+    lastModified = LocalDateTime.now,
+    lastPerformed = LocalDateTime.now
   )
 }

@@ -25,7 +25,9 @@ class TableConversions(val tables: Tables) {
       uuid = UUID.fromString(row.uuid),
       summary = row.summary,
       description = row.description,
-      `type` = BacklogItemTypes.withName(row.`type`)
+      `type` = BacklogItemTypes.withName(row.`type`),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime
     )
   }
 
@@ -34,7 +36,9 @@ class TableConversions(val tables: Tables) {
       uuid = UUID.fromString(row.uuid),
       name = row.name,
       totem = row.totem,
-      question = row.question
+      question = row.question,
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime
     )
   }
 
@@ -43,7 +47,9 @@ class TableConversions(val tables: Tables) {
       uuid = UUID.fromString(row.uuid),
       epochId = UUID.fromString(row.epochId),
       startDate = row.startDate.toLocalDate,
-      finishDate = row.finishDate.toLocalDate
+      finishDate = row.finishDate.toLocalDate,
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime
     )
   }
 
@@ -51,7 +57,9 @@ class TableConversions(val tables: Tables) {
     def asTheme: Theme = Theme(
       uuid = UUID.fromString(row.uuid),
       yearId = UUID.fromString(row.yearId),
-      name = row.name
+      name = row.name,
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime
     )
   }
 
@@ -66,7 +74,9 @@ class TableConversions(val tables: Tables) {
         level = goal.level,
         priority = goal.priority,
         status = GoalStatuses.withName(goal.status),
-        graduation = GraduationTypes.withName(goal.graduation)
+        graduation = GraduationTypes.withName(goal.graduation),
+        createdOn = goal.createdOn.toLocalDateTime,
+        lastModified = goal.lastModified.toLocalDateTime
       )
     }
   }
@@ -77,7 +87,10 @@ class TableConversions(val tables: Tables) {
       goalId = row.goalId.map(UUID.fromString),
       summary = row.summary,
       description = row.description,
-      status = Statuses.withName(row.status)
+      status = Statuses.withName(row.status),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 
@@ -88,7 +101,10 @@ class TableConversions(val tables: Tables) {
       summary = row.summary,
       description = row.description,
       status = Statuses.withName(row.status),
-      `type` = WeaveTypes.withName(row.`type`)
+      `type` = WeaveTypes.withName(row.`type`),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 
@@ -101,7 +117,10 @@ class TableConversions(val tables: Tables) {
       milestone = row.milestone,
       order = row.order,
       status = Statuses.withName(row.status),
-      `type` = DonutTypes.withName(row.`type`)
+      `type` = DonutTypes.withName(row.`type`),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 
@@ -111,7 +130,10 @@ class TableConversions(val tables: Tables) {
       laserDonutId = UUID.fromString(row.laserDonutId),
       summary = row.summary,
       order = row.order,
-      status = Statuses.withName(row.status)
+      status = Statuses.withName(row.status),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 
@@ -121,7 +143,10 @@ class TableConversions(val tables: Tables) {
       portionId = UUID.fromString(row.portionId),
       description = row.description,
       order = row.order,
-      status = Statuses.withName(row.status)
+      status = Statuses.withName(row.status),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 
@@ -133,7 +158,10 @@ class TableConversions(val tables: Tables) {
       description = row.description,
       frequency = HobbyFrequencies.withName(row.frequency),
       status = Statuses.withName(row.status),
-      `type` = HobbyTypes.withName(row.`type`)
+      `type` = HobbyTypes.withName(row.`type`),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.toLocalDateTime,
+      lastPerformed = row.lastPerformed.toLocalDateTime
     )
   }
 

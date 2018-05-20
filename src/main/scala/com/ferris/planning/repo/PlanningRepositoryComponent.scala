@@ -8,6 +8,7 @@ import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
+import com.ferris.planning.utils.TimerComponent
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -97,7 +98,7 @@ trait PlanningRepositoryComponent {
 }
 
 trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
-  this: TablesComponent =>
+  this: TablesComponent with TimerComponent =>
 
   lazy val tableConversions = new TableConversions(tables)
   import tableConversions.tables._
@@ -128,7 +129,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         uuid = UUID.randomUUID,
         summary = creation.summary,
         description = creation.description,
-        `type` = creation.`type`.dbValue
+        `type` = creation.`type`.dbValue,
+        createdOn = timer.timestampOfNow,
+        lastModified = None
       )
       val action = (BacklogItemTable returning BacklogItemTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
       db.run(action) map (row => row.asBacklogItem)

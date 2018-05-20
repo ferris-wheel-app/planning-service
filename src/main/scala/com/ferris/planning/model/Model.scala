@@ -1,6 +1,6 @@
 package com.ferris.planning.model
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 object Model {
@@ -15,27 +15,35 @@ object Model {
     uuid: UUID,
     summary: String,
     description: String,
-    `type`: BacklogItemTypes.BacklogItemType
+    `type`: BacklogItemTypes.BacklogItemType,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Epoch (
     uuid: UUID,
     name: String,
     totem: String,
-    question: String
+    question: String,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Year (
     uuid: UUID,
     epochId: UUID,
     startDate: LocalDate,
-    finishDate: LocalDate
+    finishDate: LocalDate,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Theme (
     uuid: UUID,
     yearId: UUID,
-    name: String
+    name: String,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Goal (
@@ -47,7 +55,9 @@ object Model {
     level: Int,
     priority: Boolean,
     graduation: GraduationTypes.GraduationType,
-    status: GoalStatuses.GoalStatus
+    status: GoalStatuses.GoalStatus,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Thread (
@@ -55,7 +65,10 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class Weave (
@@ -64,7 +77,10 @@ object Model {
     summary: String,
     description: String,
     `type`: WeaveTypes.WeaveType,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class LaserDonut (
@@ -75,7 +91,10 @@ object Model {
     milestone: String,
     order: Int,
     `type`: DonutTypes.DonutType,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class Portion (
@@ -83,7 +102,10 @@ object Model {
     laserDonutId: UUID,
     summary: String,
     order: Int,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class Todo (
@@ -91,7 +113,10 @@ object Model {
     portionId: UUID,
     description: String,
     order: Int,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class Hobby (
@@ -101,7 +126,10 @@ object Model {
     description: String,
     frequency: HobbyFrequencies.HobbyFrequency,
     `type`: HobbyTypes.HobbyType,
-    status: Statuses.Status
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
   )
 
   case class Tier (

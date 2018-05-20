@@ -1,6 +1,6 @@
 package com.ferris.planning.contract.resource
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.contract.validation.InputValidators._
@@ -236,27 +236,35 @@ object Resources {
       uuid: UUID,
       summary: String,
       description: String,
-      `type`: String
+      `type`: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class EpochView (
       uuid: UUID,
       name: String,
       totem: String,
-      question: String
+      question: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class YearView (
       uuid: UUID,
       epochId: UUID,
       startDate: LocalDate,
-      finishDate: LocalDate
+      finishDate: LocalDate,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class ThemeView (
       uuid: UUID,
       yearId: UUID,
-      name: String
+      name: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class GoalView (
@@ -268,7 +276,9 @@ object Resources {
       level: Int,
       priority: Boolean,
       graduation: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class ThreadView (
@@ -276,7 +286,10 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class WeaveView (
@@ -285,7 +298,10 @@ object Resources {
       summary: String,
       description: String,
       `type`: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class LaserDonutView (
@@ -296,13 +312,19 @@ object Resources {
       milestone: String,
       order: Int,
       `type`: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class SlimLaserDonutView (
       uuid: UUID,
       summary: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class PortionView (
@@ -310,7 +332,10 @@ object Resources {
       laserDonutId: UUID,
       summary: String,
       order: Int,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class TodoView (
@@ -318,7 +343,10 @@ object Resources {
       portionId: UUID,
       description: String,
       order: Int,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class HobbyView (
@@ -328,7 +356,10 @@ object Resources {
       description: String,
       frequency: String,
       `type`: String,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class TierView (

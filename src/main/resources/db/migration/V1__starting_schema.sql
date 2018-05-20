@@ -1,8 +1,8 @@
 create table message (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
-  sender varchar(256) NOT NULL,
-  content varchar(2000) NOT NULL,
+  sender VARCHAR(256) NOT NULL,
+  content VARCHAR(2000) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -13,6 +13,8 @@ create table backlog_item (
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   type VARCHAR(36) NOT NULL check (type in ('IDEA', 'ISSUE')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -23,6 +25,8 @@ create table epoch (
   name VARCHAR(256) NOT NULL,
   totem VARCHAR(256) NOT NULL,
   question VARCHAR(256) NOT NULL,
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -33,6 +37,8 @@ create table year (
   epoch_id VARCHAR(36) NOT NULL,
   start_date DATE NOT NULL,
   finish_date DATE NOT NULL,
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -42,6 +48,8 @@ create table theme (
   uuid VARCHAR(36) NOT NULL,
   year_id VARCHAR(36) NOT NULL,
   name VARCHAR(256) NOT NULL,
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -56,6 +64,8 @@ create table goal (
   priority TINYINT(1) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
   graduation VARCHAR(36) NOT NULL check (graduation in ('ABANDONED', 'THREAD', 'WEAVE', 'HOBBY', 'GOAL')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -76,6 +86,9 @@ create table thread (
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -88,6 +101,9 @@ create table weave (
   description VARCHAR(2000) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
   type VARCHAR(36) NOT NULL check (type in ('PRIORITY', 'PDR', 'BAU')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -102,6 +118,9 @@ create table laser_donut (
   `order` INT(20) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
   type VARCHAR(36) NOT NULL check (type in ('PROJECT_FOCUSED', 'SKILL_FOCUSED')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -113,6 +132,9 @@ create table portion (
   summary VARCHAR(256) NOT NULL,
   `order` INT(20) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -124,6 +146,9 @@ create table todo (
   description VARCHAR(2000) NOT NULL,
   `order` INT(20) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -137,6 +162,9 @@ create table hobby (
   frequency VARCHAR(36) NOT NULL check (frequency in ('ONE_OFF', 'CONTINUOUS')),
   status VARCHAR(36) NOT NULL check (status in ('UNKNOWN', 'NOT_REACHED', 'NOT_STARTED', 'INCOMPLETE', 'COMPLETE')),
   type VARCHAR(36) NOT NULL check (type in ('ACTIVE', 'PASSIVE')),
+  created_on TIMESTAMP NOT NULL,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
@@ -145,7 +173,6 @@ create table pyramid_of_importance (
   id BIGINT NOT NULL AUTO_INCREMENT,
   laser_donut_id BIGINT NOT NULL,
   tier INT(20) NOT NULL,
-  current TINYINT(1) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (laser_donut_id),
   CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
