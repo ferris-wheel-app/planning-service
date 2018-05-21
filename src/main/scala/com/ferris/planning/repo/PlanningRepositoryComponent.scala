@@ -76,9 +76,9 @@ trait PlanningRepositoryComponent {
     def getThread(uuid: UUID): Future[Option[Thread]]
     def getWeave(uuid: UUID): Future[Option[Weave]]
     def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]]
-    //def getCurrentLaserDonut: Future[Option[LaserDonut]]
+    def getCurrentLaserDonut: Future[Option[LaserDonut]]
     def getPortion(uuid: UUID): Future[Option[Portion]]
-    //def getCurrentPortion: Future[Option[Portion]]
+    def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
     def getPyramidOfImportance: Future[PyramidOfImportance]
@@ -658,6 +658,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
     }
 
+    override def getCurrentLaserDonut: Future[Option[LaserDonut]] = {
+      val action = (for {
+        currentActivity <- CurrentActivityTable
+        laserDonutRow <- LaserDonutTable if laserDonutRow.id === currentActivity.currentLaserDonut
+      } yield laserDonutRow).result.headOption
+      db.run(action).map(_.map(_.asLaserDonut))
+    }
+
     override def getPortions: Future[Seq[Portion]] = {
       db.run(PortionTable.result.map(_.map(_.asPortion)))
     }
@@ -668,6 +676,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def getPortion(uuid: UUID): Future[Option[Portion]] = {
       db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
+    }
+
+    override def getCurrentPortion: Future[Option[Portion]] = {
+      val action = (for {
+        currentActivity <- CurrentActivityTable
+        portionRow <- PortionTable if portionRow.id === currentActivity.currentPortion
+      } yield portionRow).result.headOption
+      db.run(action).map(_.map(_.asPortion))
     }
 
     override def getTodos: Future[Seq[Todo]] = {
