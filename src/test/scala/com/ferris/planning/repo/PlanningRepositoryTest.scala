@@ -3,6 +3,7 @@ package com.ferris.planning.repo
 import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
+import com.ferris.planning.config.PlanningServiceConfig
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
@@ -20,6 +21,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
   with MockTimerComponent {
 
   implicit val dbTimeout: FiniteDuration = 20.seconds
+
+  override val config: PlanningServiceConfig = PlanningServiceConfig(acceptableProgress = 80)
 
   override def beforeEach(): Unit = {
     RepositoryUtils.createOrResetTables(db, dbTimeout)(repoEc)

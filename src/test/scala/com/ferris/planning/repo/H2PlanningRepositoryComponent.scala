@@ -1,7 +1,8 @@
 package com.ferris.planning.repo
 
+import com.ferris.planning.config.PlanningServiceConfig
 import com.ferris.planning.db.H2TablesComponent
-import com.ferris.planning.utils.{MockTimerComponent, TimerComponent}
+import com.ferris.planning.utils.TimerComponent
 
 import scala.concurrent.ExecutionContext
 import scala.util.Random
@@ -15,5 +16,7 @@ trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with 
   import tables.profile.api._
   override val db: Database = Database.forURL(jdbcUrl, driver = "org.h2.Driver")
 
-  override val repo = new SqlPlanningRepository
+  val config: PlanningServiceConfig
+
+  override val repo = new SqlPlanningRepository(config)
 }

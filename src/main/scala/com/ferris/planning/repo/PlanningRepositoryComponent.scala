@@ -4,6 +4,7 @@ import java.sql.{Date, Timestamp}
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
+import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
@@ -106,10 +107,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   import tableConversions._
 
   implicit val repoEc: ExecutionContext
-  override val repo = new SqlPlanningRepository
+  override val repo = new SqlPlanningRepository(DefaultPlanningServiceConfig.apply)
   val db: tables.profile.api.Database
 
-  class SqlPlanningRepository extends PlanningRepository {
+  class SqlPlanningRepository(config: PlanningServiceConfig) extends PlanningRepository {
 
     // Create endpoints
     override def createMessage(creation: CreateMessage): Future[Message] = {
