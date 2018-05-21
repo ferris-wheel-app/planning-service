@@ -283,7 +283,7 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.NotReached
+      status = Statuses.NotStarted
     )
 
     val hobbyUpdate = UpdateHobby(
@@ -292,7 +292,7 @@ object SampleData {
       description = Some("Table tennis"),
       frequency = Some(HobbyFrequencies.Continuous),
       `type` = Some(HobbyTypes.Active),
-      status = Some(Statuses.NotReached)
+      status = Some(Statuses.NotStarted)
     )
 
     val hobby = Hobby(
@@ -302,7 +302,7 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.NotReached,
+      status = Statuses.NotStarted,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)

@@ -38,8 +38,6 @@ object TypeResolvers {
     import TypeFields.Status._
 
     override def withName(name: String): Status = name match {
-      case `unknown` => Statuses.Unknown
-      case `notReached` => Statuses.NotReached
       case `notStarted` => Statuses.NotStarted
       case `incomplete` => Statuses.Incomplete
       case `complete` => Statuses.Complete
@@ -47,8 +45,6 @@ object TypeResolvers {
     }
 
     override def toString(`type`: Status): String = `type` match {
-      case Statuses.Unknown => unknown
-      case Statuses.NotReached => notReached
       case Statuses.NotStarted => notStarted
       case Statuses.Incomplete => incomplete
       case Statuses.Complete => complete

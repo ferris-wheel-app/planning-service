@@ -166,22 +166,12 @@ object Model {
   object Statuses {
 
     def withName(name: String): Status = name match {
-      case Unknown.dbValue => Unknown
-      case NotReached.dbValue => NotReached
       case NotStarted.dbValue => NotStarted
       case Incomplete.dbValue => Incomplete
       case Complete.dbValue => Complete
     }
 
     sealed trait Status extends TypeEnum
-
-    case object Unknown extends Status {
-      override val dbValue = "UNKNOWN"
-    }
-
-    case object NotReached extends Status {
-      override val dbValue = "NOT_REACHED"
-    }
 
     case object NotStarted extends Status {
       override val dbValue = "NOT_STARTED"

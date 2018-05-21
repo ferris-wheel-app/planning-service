@@ -10,6 +10,8 @@ import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.TimerComponent
+import slick.dbio.DBIOAction
+import slick.dbio.Effect.Read
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -574,11 +576,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def refreshPyramidOfImportance() = {
-      def isStarted(laserDonutIds: Seq[String]): Boolean = {
-        for {
-          portion <- PortionTable if portion.laserDonutId inSet laserDonutIds && portion.status
-        } yield
-      }
+      def workHasStarted(laserDonutIds: Seq[String]): DBIO[Boolean] = (for {
+        portion <- PortionTable if (portion.laserDonutId inSet laserDonutIds) && (portion.status =!= Statuses.NotStarted.dbValue)
+      } yield portion).result.map(_.size > 0)
+      ???
     }
 
     // Get endpoints
