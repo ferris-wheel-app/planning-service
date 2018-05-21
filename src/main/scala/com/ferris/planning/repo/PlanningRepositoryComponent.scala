@@ -46,7 +46,7 @@ trait PlanningRepositoryComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
-    //def refreshPyramidOfImportance(): Future[PyramidOfImportance]
+    def refreshPyramidOfImportance(): Future[PyramidOfImportance]
 
     def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -571,6 +571,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         } getOrElse DBIO.failed(HobbyNotFoundException())
       }.transactionally
       db.run(action).map(row => row.asHobby)
+    }
+
+    override def refreshPyramidOfImportance() = {
+      def isStarted(laserDonutIds: Seq[String]): Boolean = {
+        for {
+          portion <- PortionTable if portion.laserDonutId inSet laserDonutIds && portion.status
+        } yield
+      }
     }
 
     // Get endpoints
