@@ -14,6 +14,7 @@ import slick.dbio.DBIOAction
 import slick.dbio.Effect.Read
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 trait PlanningRepositoryComponent {
 
@@ -576,10 +577,27 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def refreshPyramidOfImportance() = {
-      def workHasStarted(laserDonutIds: Seq[String]): DBIO[Boolean] = (for {
-        portion <- PortionTable if (portion.laserDonutId inSet laserDonutIds) && (portion.status =!= Statuses.NotStarted.dbValue)
-      } yield portion).result.map(_.size > 0)
-      ???
+      def getInactiveDonuts(laserDonutIds: Seq[UUID]) = {
+        for {
+          portion <- PortionTable if portion.status === Statuses.NotStarted.dbValue
+          laserDonut <- LaserDonutTable if (portion.laserDonutId === laserDonut.id)
+        } yield {
+
+        }
+        PortionTable.filter(portion => (portion.laserDonutId inSet laserDonutIds.map(_.toString)) && (portion.status === Statuses.NotStarted.dbValue)).result
+      }
+
+      def chooseRandom[T](list: Seq[T]): Option[T] = {
+        if (list.nonEmpty) Some(list(Random.nextInt(list.length)))
+        else None
+      }
+
+      getPyramidOfImportanceAction.flatMap {
+        case PyramidOfImportance(tier1 :: _ :: Nil, _) => getInactiveDonuts(tier1.laserDonuts) match {
+          case Nil =>
+          case inactiveDonuts => chooseRandom(inactiveDonuts)
+        }
+      }
     }
 
     // Get endpoints
