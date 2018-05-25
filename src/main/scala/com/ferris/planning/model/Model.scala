@@ -141,6 +141,23 @@ object Model {
     currentLaserDonut: Option[UUID]
   )
 
+  case class ScheduledLaserDonut (
+    uuid: UUID,
+    portions: Seq[ScheduledPortion],
+    status: Statuses.Status,
+    lastPerformed: Option[LocalDateTime]
+  )
+
+  case class ScheduledPortion (
+    uuid: UUID,
+    todos: Seq[ScheduledTodo]
+  )
+
+  case class ScheduledTodo (
+    uuid: UUID,
+    status: Statuses.Status
+  )
+
   trait TypeEnum {
     def dbValue: String
   }

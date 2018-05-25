@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, PyramidOfImportanceTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -65,18 +65,19 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param currentLaserDonut Database column CURRENT_LASER_DONUT SqlType(BIGINT)
    *  @param currentPortion Database column CURRENT_PORTION SqlType(BIGINT)
-   *  @param lastUpdated Database column LAST_UPDATED SqlType(TIMESTAMP) */
-  case class CurrentActivityRow(id: Long, currentLaserDonut: Long, currentPortion: Long, lastUpdated: java.sql.Timestamp)
+   *  @param lastDailyUpdate Database column LAST_DAILY_UPDATE SqlType(TIMESTAMP)
+   *  @param lastWeeklyUpdate Database column LAST_WEEKLY_UPDATE SqlType(TIMESTAMP) */
+  case class CurrentActivityRow(id: Long, currentLaserDonut: Long, currentPortion: Long, lastDailyUpdate: java.sql.Timestamp, lastWeeklyUpdate: java.sql.Timestamp)
   /** GetResult implicit for fetching CurrentActivityRow objects using plain SQL queries */
   implicit def GetResultCurrentActivityRow(implicit e0: GR[Long], e1: GR[java.sql.Timestamp]): GR[CurrentActivityRow] = GR{
     prs => import prs._
-    CurrentActivityRow.tupled((<<[Long], <<[Long], <<[Long], <<[java.sql.Timestamp]))
+    CurrentActivityRow.tupled((<<[Long], <<[Long], <<[Long], <<[java.sql.Timestamp], <<[java.sql.Timestamp]))
   }
   /** Table description of table CURRENT_ACTIVITY. Objects of this class serve as prototypes for rows in queries. */
   class CurrentActivityTable(_tableTag: Tag) extends profile.api.Table[CurrentActivityRow](_tableTag, "CURRENT_ACTIVITY") {
-    def * = (id, currentLaserDonut, currentPortion, lastUpdated) <> (CurrentActivityRow.tupled, CurrentActivityRow.unapply)
+    def * = (id, currentLaserDonut, currentPortion, lastDailyUpdate, lastWeeklyUpdate) <> (CurrentActivityRow.tupled, CurrentActivityRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(currentLaserDonut), Rep.Some(currentPortion), Rep.Some(lastUpdated)).shaped.<>({r=>import r._; _1.map(_=> CurrentActivityRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(currentLaserDonut), Rep.Some(currentPortion), Rep.Some(lastDailyUpdate), Rep.Some(lastWeeklyUpdate)).shaped.<>({r=>import r._; _1.map(_=> CurrentActivityRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -84,16 +85,18 @@ trait Tables {
     val currentLaserDonut: Rep[Long] = column[Long]("CURRENT_LASER_DONUT")
     /** Database column CURRENT_PORTION SqlType(BIGINT) */
     val currentPortion: Rep[Long] = column[Long]("CURRENT_PORTION")
-    /** Database column LAST_UPDATED SqlType(TIMESTAMP) */
-    val lastUpdated: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("LAST_UPDATED")
+    /** Database column LAST_DAILY_UPDATE SqlType(TIMESTAMP) */
+    val lastDailyUpdate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("LAST_DAILY_UPDATE")
+    /** Database column LAST_WEEKLY_UPDATE SqlType(TIMESTAMP) */
+    val lastWeeklyUpdate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("LAST_WEEKLY_UPDATE")
 
     /** Foreign key referencing LaserDonutTable (database name CURRENT_LASER_DONUT_FK) */
     lazy val laserDonutTableFk = foreignKey("CURRENT_LASER_DONUT_FK", currentLaserDonut, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
     /** Foreign key referencing PortionTable (database name CURRENT_PORTION_FK) */
     lazy val portionTableFk = foreignKey("CURRENT_PORTION_FK", currentPortion, PortionTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
-    /** Uniqueness Index over (currentLaserDonut,currentPortion) (database name CONSTRAINT_INDEX_8) */
-    val index1 = index("CONSTRAINT_INDEX_8", (currentLaserDonut, currentPortion), unique=true)
+    /** Uniqueness Index over (currentLaserDonut,currentPortion) (database name CONSTRAINT_INDEX_80) */
+    val index1 = index("CONSTRAINT_INDEX_80", (currentLaserDonut, currentPortion), unique=true)
   }
   /** Collection-like TableQuery object for table CurrentActivityTable */
   lazy val CurrentActivityTable = new TableQuery(tag => new CurrentActivityTable(tag))
@@ -415,22 +418,22 @@ trait Tables {
   /** Collection-like TableQuery object for table PortionTable */
   lazy val PortionTable = new TableQuery(tag => new PortionTable(tag))
 
-  /** Entity class storing rows of table PyramidOfImportanceTable
+  /** Entity class storing rows of table ScheduledLaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
    *  @param tier Database column TIER SqlType(INTEGER)
    *  @param current Database column CURRENT SqlType(TINYINT) */
-  case class PyramidOfImportanceRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
-  /** GetResult implicit for fetching PyramidOfImportanceRow objects using plain SQL queries */
-  implicit def GetResultPyramidOfImportanceRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[PyramidOfImportanceRow] = GR{
+  case class ScheduledLaserDonutRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
+  /** GetResult implicit for fetching ScheduledLaserDonutRow objects using plain SQL queries */
+  implicit def GetResultScheduledLaserDonutRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[ScheduledLaserDonutRow] = GR{
     prs => import prs._
-    PyramidOfImportanceRow.tupled((<<[Long], <<[Long], <<[Int], <<[Byte]))
+    ScheduledLaserDonutRow.tupled((<<[Long], <<[Long], <<[Int], <<[Byte]))
   }
-  /** Table description of table PYRAMID_OF_IMPORTANCE. Objects of this class serve as prototypes for rows in queries. */
-  class PyramidOfImportanceTable(_tableTag: Tag) extends profile.api.Table[PyramidOfImportanceRow](_tableTag, "PYRAMID_OF_IMPORTANCE") {
-    def * = (id, laserDonutId, tier, current) <> (PyramidOfImportanceRow.tupled, PyramidOfImportanceRow.unapply)
+  /** Table description of table SCHEDULED_LASER_DONUT. Objects of this class serve as prototypes for rows in queries. */
+  class ScheduledLaserDonutTable(_tableTag: Tag) extends profile.api.Table[ScheduledLaserDonutRow](_tableTag, "SCHEDULED_LASER_DONUT") {
+    def * = (id, laserDonutId, tier, current) <> (ScheduledLaserDonutRow.tupled, ScheduledLaserDonutRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> PyramidOfImportanceRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> ScheduledLaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -444,11 +447,11 @@ trait Tables {
     /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
     lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
-    /** Uniqueness Index over (laserDonutId) (database name CONSTRAINT_INDEX_17) */
-    val index1 = index("CONSTRAINT_INDEX_17", laserDonutId, unique=true)
+    /** Uniqueness Index over (laserDonutId) (database name CONSTRAINT_INDEX_8) */
+    val index1 = index("CONSTRAINT_INDEX_8", laserDonutId, unique=true)
   }
-  /** Collection-like TableQuery object for table PyramidOfImportanceTable */
-  lazy val PyramidOfImportanceTable = new TableQuery(tag => new PyramidOfImportanceTable(tag))
+  /** Collection-like TableQuery object for table ScheduledLaserDonutTable */
+  lazy val ScheduledLaserDonutTable = new TableQuery(tag => new ScheduledLaserDonutTable(tag))
 
   /** Entity class storing rows of table ThemeTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey

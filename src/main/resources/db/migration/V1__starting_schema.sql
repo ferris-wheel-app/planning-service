@@ -169,7 +169,7 @@ create table hobby (
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
 
-create table pyramid_of_importance (
+create table scheduled_laser_donut (
   id BIGINT NOT NULL AUTO_INCREMENT,
   laser_donut_id BIGINT NOT NULL,
   tier INT(20) NOT NULL,
@@ -183,7 +183,8 @@ create table current_activity (
   id BIGINT NOT NULL AUTO_INCREMENT,
   current_laser_donut BIGINT NOT NULL,
   current_portion BIGINT NOT NULL,
-  last_updated TIMESTAMP NOT NULL,
+  last_daily_update TIMESTAMP NOT NULL,
+  last_weekly_update TIMESTAMP NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (current_laser_donut, current_portion),
   CONSTRAINT current_laser_donut_fk FOREIGN KEY (current_laser_donut) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT,

@@ -10,11 +10,8 @@ import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.TimerComponent
-import slick.dbio.DBIOAction
-import slick.dbio.Effect.Read
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Random
 
 trait PlanningRepositoryComponent {
 
@@ -49,7 +46,7 @@ trait PlanningRepositoryComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
-    def refreshPyramidOfImportance(): Future[PyramidOfImportance]
+//    def refreshPyramidOfImportance(): Future[PyramidOfImportance]
 
     def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -321,13 +318,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield {
         getLaserDonutAction(laserDonutUuid).flatMap {
           case Some(laserDonut) =>
-            val row = PyramidOfImportanceRow(
+            val row = ScheduledLaserDonutRow(
               id = 0L,
               laserDonutId = laserDonut.id,
               tier = tierNumber,
               current = false
             )
-            ((PyramidOfImportanceTable returning PyramidOfImportanceTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
+            ((ScheduledLaserDonutTable returning ScheduledLaserDonutTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
           case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
         }
       }
@@ -576,29 +573,29 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(row => row.asHobby)
     }
 
-    override def refreshPyramidOfImportance() = {
-      def getInactiveDonuts(laserDonutIds: Seq[UUID]) = {
-        for {
-          portion <- PortionTable if portion.status === Statuses.NotStarted.dbValue
-          laserDonut <- LaserDonutTable if (portion.laserDonutId === laserDonut.id)
-        } yield {
-
-        }
-        PortionTable.filter(portion => (portion.laserDonutId inSet laserDonutIds.map(_.toString)) && (portion.status === Statuses.NotStarted.dbValue)).result
-      }
-
-      def chooseRandom[T](list: Seq[T]): Option[T] = {
-        if (list.nonEmpty) Some(list(Random.nextInt(list.length)))
-        else None
-      }
-
-      getPyramidOfImportanceAction.flatMap {
-        case PyramidOfImportance(tier1 :: _ :: Nil, _) => getInactiveDonuts(tier1.laserDonuts) match {
-          case Nil =>
-          case inactiveDonuts => chooseRandom(inactiveDonuts)
-        }
-      }
-    }
+//    override def refreshPyramidOfImportance() = {
+//      def getInactiveDonuts(laserDonutIds: Seq[UUID]) = {
+//        for {
+//          portion <- PortionTable if portion.status === Statuses.NotStarted.dbValue
+//          laserDonut <- LaserDonutTable if (portion.laserDonutId === laserDonut.id)
+//        } yield {
+//
+//        }
+//        PortionTable.filter(portion => (portion.laserDonutId inSet laserDonutIds.map(_.toString)) && (portion.status === Statuses.NotStarted.dbValue)).result
+//      }
+//
+//      def chooseRandom[T](list: Seq[T]): Option[T] = {
+//        if (list.nonEmpty) Some(list(Random.nextInt(list.length)))
+//        else None
+//      }
+//
+//      getPyramidOfImportanceAction.flatMap {
+//        case PyramidOfImportance(tier1 :: _ :: Nil, _) => getInactiveDonuts(tier1.laserDonuts) match {
+//          case Nil =>
+//          case inactiveDonuts => chooseRandom(inactiveDonuts)
+//        }
+//      }
+//    }
 
     // Get endpoints
     override def getMessages: Future[Seq[Message]] = {
@@ -879,7 +876,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getPyramidOfImportanceAction = {
       (for {
-        pyramidRow <- PyramidOfImportanceTable
+        pyramidRow <- ScheduledLaserDonutTable
         laserDonutRow <- LaserDonutTable if laserDonutRow.id === pyramidRow.laserDonutId
       } yield (pyramidRow, laserDonutRow)).result.map(_.asPyramid)
     }

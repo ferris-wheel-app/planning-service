@@ -165,7 +165,7 @@ class TableConversions(val tables: Tables) {
     )
   }
 
-  implicit class PyramidBuilder(val rows: Seq[(tables.PyramidOfImportanceRow, tables.LaserDonutRow)]) {
+  implicit class PyramidBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow)]) {
     def asPyramid: PyramidOfImportance = {
       val currentLaserDonut = rows.find(_._1.current).map(row => UUID.fromString(row._2.uuid))
       val tiers = rows.filterNot(_._1.current).groupBy(_._1.tier).map { case (tierNumber, laserDonutRows) =>
