@@ -150,14 +150,14 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      status = Statuses.NotStarted
+      status = Statuses.Planned
     )
 
     val threadUpdate = UpdateThread(
       goalId = Some(UUID.randomUUID),
       summary = Some("Sleep"),
       description = Some("Sleep for 8 hours"),
-      status = Some(Statuses.Incomplete)
+      status = Some(Statuses.InProgress)
     )
 
     val thread = Thread(
@@ -165,7 +165,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      status = Statuses.NotStarted,
+      status = Statuses.Planned,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -176,7 +176,7 @@ object SampleData {
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
       `type` = WeaveTypes.PDR,
-      status = Statuses.NotStarted
+      status = Statuses.Planned
     )
 
     val weaveUpdate = UpdateWeave(
@@ -193,7 +193,7 @@ object SampleData {
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
       `type` = WeaveTypes.PDR,
-      status = Statuses.NotStarted,
+      status = Statuses.Planned,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -205,7 +205,7 @@ object SampleData {
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
       milestone = "A deployed backend service",
       `type` = DonutTypes.ProjectFocused,
-      status = Statuses.Incomplete
+      status = Statuses.InProgress
     )
 
     val laserDonutUpdate = UpdateLaserDonut(
@@ -214,7 +214,7 @@ object SampleData {
       description = Some("Use React"),
       milestone = Some("A basic working prototype"),
       `type` = Some(DonutTypes.ProjectFocused),
-      status = Some(Statuses.Incomplete)
+      status = Some(Statuses.InProgress)
     )
 
     val laserDonut = LaserDonut(
@@ -225,7 +225,7 @@ object SampleData {
       milestone = "A basic working prototype",
       order = 1,
       `type` = DonutTypes.SkillFocused,
-      status = Statuses.NotStarted,
+      status = Statuses.Planned,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -234,13 +234,13 @@ object SampleData {
     val portionCreation = CreatePortion(
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
-      status = Statuses.Incomplete
+      status = Statuses.InProgress
     )
 
     val portionUpdate = UpdatePortion(
       laserDonutId = Some(UUID.randomUUID),
       summary = Some("Split into sub-projects"),
-      status = Some(Statuses.Incomplete)
+      status = Some(Statuses.InProgress)
     )
 
     val portion = Portion(
@@ -248,7 +248,7 @@ object SampleData {
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
       order = 13,
-      status = Statuses.Incomplete,
+      status = Statuses.InProgress,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -283,7 +283,7 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.NotStarted
+      status = Statuses.Planned
     )
 
     val hobbyUpdate = UpdateHobby(
@@ -292,7 +292,7 @@ object SampleData {
       description = Some("Table tennis"),
       frequency = Some(HobbyFrequencies.Continuous),
       `type` = Some(HobbyTypes.Active),
-      status = Some(Statuses.NotStarted)
+      status = Some(Statuses.Planned)
     )
 
     val hobby = Hobby(
@@ -302,7 +302,7 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.NotStarted,
+      status = Statuses.Planned,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)

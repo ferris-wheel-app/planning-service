@@ -144,6 +144,7 @@ object Model {
   case class ScheduledLaserDonut (
     uuid: UUID,
     portions: Seq[ScheduledPortion],
+    tier: Int,
     status: Statuses.Status,
     lastPerformed: Option[LocalDateTime]
   )
@@ -183,19 +184,19 @@ object Model {
   object Statuses {
 
     def withName(name: String): Status = name match {
-      case NotStarted.dbValue => NotStarted
-      case Incomplete.dbValue => Incomplete
+      case Planned.dbValue => Planned
+      case InProgress.dbValue => InProgress
       case Complete.dbValue => Complete
     }
 
     sealed trait Status extends TypeEnum
 
-    case object NotStarted extends Status {
-      override val dbValue = "NOT_STARTED"
+    case object Planned extends Status {
+      override val dbValue = "PLANNED"
     }
 
-    case object Incomplete extends Status {
-      override val dbValue = "INCOMPLETE"
+    case object InProgress extends Status {
+      override val dbValue = "IN_PROGRESS"
     }
 
     case object Complete extends Status {

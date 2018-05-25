@@ -38,15 +38,15 @@ object TypeResolvers {
     import TypeFields.Status._
 
     override def withName(name: String): Status = name match {
-      case `notStarted` => Statuses.NotStarted
-      case `incomplete` => Statuses.Incomplete
+      case `planned` => Statuses.Planned
+      case `inProgress` => Statuses.InProgress
       case `complete` => Statuses.Complete
       case o => throw new IllegalArgumentException(s"Invalid status: $o")
     }
 
     override def toString(`type`: Status): String = `type` match {
-      case Statuses.NotStarted => notStarted
-      case Statuses.Incomplete => incomplete
+      case Statuses.Planned => planned
+      case Statuses.InProgress => inProgress
       case Statuses.Complete => complete
       case o => throw new IllegalArgumentException(s"Invalid status: $o")
     }

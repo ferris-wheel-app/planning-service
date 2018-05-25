@@ -9,12 +9,10 @@ object TypeFields {
   }
 
   object Status {
-    val unknown = "unknown"
-    val notReached = "not_reached"
-    val notStarted = "not_started"
-    val incomplete = "incomplete"
+    val planned = "planned"
+    val inProgress = "in_progress"
     val complete = "complete"
-    val values = Set(unknown, notReached, notStarted, incomplete, complete)
+    val values = Set(planned, inProgress, complete)
   }
 
   object GoalStatus {

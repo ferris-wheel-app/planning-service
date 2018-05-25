@@ -146,14 +146,14 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    status = "not_started"
+    status = "planned"
   )
 
   val threadUpdate = ThreadUpdate(
     goalId = Some(UUID.randomUUID),
     summary = Some("Sleep"),
     description = Some("Sleep for 8 hours"),
-    status = Some("incomplete")
+    status = Some("in_progress")
   )
 
   val thread = ThreadView(
@@ -161,7 +161,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    status = "not_Started",
+    status = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
@@ -172,7 +172,7 @@ object SampleData {
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
     `type` = "pdr",
-    status = "not_started"
+    status = "planned"
   )
 
   val weaveUpdate = WeaveUpdate(
@@ -189,7 +189,7 @@ object SampleData {
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
     `type` = "pdr",
-    status = "not_started",
+    status = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
@@ -201,7 +201,7 @@ object SampleData {
     description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
     milestone = "A deployed backend service",
     `type` = "project_focused",
-    status = "incomplete"
+    status = "in_progress"
   )
 
   val laserDonutUpdate = LaserDonutUpdate(
@@ -210,7 +210,7 @@ object SampleData {
     description = Some("Use React"),
     milestone = Some("A basic working prototype"),
     `type` = Some("project_focused"),
-    status = Some("incomplete")
+    status = Some("in_progress")
   )
 
   val laserDonut = LaserDonutView(
@@ -221,7 +221,7 @@ object SampleData {
     milestone = "A basic working prototype",
     order = 1,
     `type` = "skill_focused",
-    status = "not_started",
+    status = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
@@ -230,13 +230,13 @@ object SampleData {
   val portionCreation = PortionCreation(
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
-    status = "incomplete"
+    status = "in_progress"
   )
 
   val portionUpdate = PortionUpdate(
     laserDonutId = Some(UUID.randomUUID),
     summary = Some("Split into sub-projects"),
-    status = Some("incomplete")
+    status = Some("in_progress")
   )
 
   val portion = PortionView(
@@ -244,7 +244,7 @@ object SampleData {
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
     order = 13,
-    status = "incomplete",
+    status = "in_progress",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
@@ -279,7 +279,7 @@ object SampleData {
     description = "Train in Acro-Yoga",
     frequency = "continuous",
     `type` = "active",
-    status = "not_reached"
+    status = "complete"
   )
 
   val hobbyUpdate = HobbyUpdate(
@@ -288,7 +288,7 @@ object SampleData {
     description = Some("Table tennis"),
     frequency = Some("continuous"),
     `type` = Some("active"),
-    status = Some("not_reached")
+    status = Some("complete")
   )
 
   val hobby = HobbyView(
@@ -298,7 +298,7 @@ object SampleData {
     description = "Train in Acro-Yoga",
     frequency = "continuous",
     `type` = "active",
-    status = "not_reached",
+    status = "complete",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
