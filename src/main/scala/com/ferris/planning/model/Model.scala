@@ -141,6 +141,12 @@ object Model {
     currentLaserDonut: Option[UUID]
   )
 
+  case class ScheduledPyramid (
+    laserDonuts: Seq[ScheduledLaserDonut],
+    currentLaserDonut: Option[ScheduledLaserDonut],
+    currentPortion: Option[ScheduledPortion]
+  )
+
   case class ScheduledLaserDonut (
     uuid: UUID,
     portions: Seq[ScheduledPortion],
