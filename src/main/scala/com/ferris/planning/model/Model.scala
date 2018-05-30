@@ -157,11 +157,14 @@ object Model {
 
   case class ScheduledPortion (
     uuid: UUID,
-    todos: Seq[ScheduledTodo]
+    todos: Seq[ScheduledTodo],
+    order: Int,
+    status: Statuses.Status
   )
 
   case class ScheduledTodo (
     uuid: UUID,
+    order: Int,
     status: Statuses.Status
   )
 
