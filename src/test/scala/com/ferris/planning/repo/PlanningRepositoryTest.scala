@@ -8,6 +8,7 @@ import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
 import com.ferris.planning.sample.SampleData.{domain => SD}
+import com.ferris.planning.scheduler.MockLifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.MockTimerComponent
 
@@ -18,7 +19,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
   with ScalaFutures
   with BeforeAndAfterEach
   with H2PlanningRepositoryComponent
-  with MockTimerComponent {
+  with MockTimerComponent
+  with MockLifeSchedulerComponent {
 
   implicit val dbTimeout: FiniteDuration = 20.seconds
 

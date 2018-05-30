@@ -8,6 +8,7 @@ import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningService
 import com.ferris.planning.db.conversions.TableConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
+import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.TimerComponent
 
@@ -99,7 +100,7 @@ trait PlanningRepositoryComponent {
 }
 
 trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
-  this: TablesComponent with TimerComponent =>
+  this: TablesComponent with TimerComponent with LifeSchedulerComponent =>
 
   lazy val tableConversions = new TableConversions(tables)
   import tableConversions.tables._

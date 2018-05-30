@@ -6,6 +6,7 @@ import akka.stream.ActorMaterializer
 import com.ferris.microservice.service.MicroServiceConfig
 import com.ferris.planning.db.MySQLTablesComponent
 import com.ferris.planning.repo.SqlPlanningRepositoryComponent
+import com.ferris.planning.scheduler.DefaultLifeSchedulerComponent
 import com.ferris.planning.service.DefaultPlanningServiceComponent
 import com.ferris.planning.utils.DefaultTimerComponent
 
@@ -14,6 +15,7 @@ object PlanningMicroService extends PlanningServer
   with SqlPlanningRepositoryComponent
   with MySQLTablesComponent
   with DefaultTimerComponent
+  with DefaultLifeSchedulerComponent
   with App {
   override implicit lazy val system = ActorSystem()
   override implicit lazy val executor = system.dispatcher

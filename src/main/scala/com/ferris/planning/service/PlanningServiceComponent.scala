@@ -84,7 +84,6 @@ trait PlanningServiceComponent {
     def deletePortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
-
   }
 }
 

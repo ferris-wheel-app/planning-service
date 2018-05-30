@@ -2,12 +2,13 @@ package com.ferris.planning.repo
 
 import com.ferris.planning.config.PlanningServiceConfig
 import com.ferris.planning.db.H2TablesComponent
+import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.utils.TimerComponent
 
 import scala.concurrent.ExecutionContext
 import scala.util.Random
 
-trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with H2TablesComponent with TimerComponent {
+trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with H2TablesComponent with TimerComponent with LifeSchedulerComponent {
 
   override implicit val repoEc: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 

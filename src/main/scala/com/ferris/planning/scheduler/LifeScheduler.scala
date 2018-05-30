@@ -2,7 +2,7 @@ package com.ferris.planning.scheduler
 
 import java.time.{LocalDateTime, ZoneId}
 
-import com.ferris.planning.config.PlanningServiceConfig
+import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
 
@@ -18,6 +18,8 @@ trait LifeSchedulerComponent {
 }
 
 trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
+
+  override def lifeScheduler = new DefaultLifeScheduler(DefaultPlanningServiceConfig.apply)
 
   class DefaultLifeScheduler(config: PlanningServiceConfig) extends LifeScheduler {
 
