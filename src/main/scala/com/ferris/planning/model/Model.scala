@@ -148,6 +148,7 @@ object Model {
   )
 
   case class ScheduledLaserDonut (
+    id: Long,
     uuid: UUID,
     portions: Seq[ScheduledPortion],
     tier: Int,
@@ -156,6 +157,7 @@ object Model {
   )
 
   case class ScheduledPortion (
+    id: Long,
     uuid: UUID,
     todos: Seq[ScheduledTodo],
     order: Int,

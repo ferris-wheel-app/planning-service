@@ -574,29 +574,42 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(row => row.asHobby)
     }
 
-//    override def refreshPyramidOfImportance() = {
-//      def getInactiveDonuts(laserDonutIds: Seq[UUID]) = {
-//        for {
-//          portion <- PortionTable if portion.status === Statuses.NotStarted.dbValue
-//          laserDonut <- LaserDonutTable if (portion.laserDonutId === laserDonut.id)
-//        } yield {
-//
-//        }
-//        PortionTable.filter(portion => (portion.laserDonutId inSet laserDonutIds.map(_.toString)) && (portion.status === Statuses.NotStarted.dbValue)).result
-//      }
-//
-//      def chooseRandom[T](list: Seq[T]): Option[T] = {
-//        if (list.nonEmpty) Some(list(Random.nextInt(list.length)))
-//        else None
-//      }
-//
-//      getPyramidOfImportanceAction.flatMap {
-//        case PyramidOfImportance(tier1 :: _ :: Nil, _) => getInactiveDonuts(tier1.laserDonuts) match {
-//          case Nil =>
-//          case inactiveDonuts => chooseRandom(inactiveDonuts)
-//        }
-//      }
-//    }
+    override def refreshPyramidOfImportance() = {
+      def getScheduledLaserDonuts = (for {
+        scheduledLaserDonut <- ScheduledLaserDonutTable
+        laserDonut <- LaserDonutTable if laserDonut.id === scheduledLaserDonut.laserDonutId
+        portion <- PortionTable if portion.laserDonutId === laserDonut.uuid
+        todo <- TodoTable if todo.portionId === portion.uuid
+      } yield {
+        (scheduledLaserDonut, laserDonut, portion, todo)
+      }).result.map(_.asScheduledLaserDonuts)
+
+      def scheduledLaserDonutRow(scheduledLaserDonut: ScheduledLaserDonut, isCurrent: Boolean): ScheduledLaserDonutRow = {
+        ScheduledLaserDonutRow(
+          id = 0L,
+          laserDonutId = scheduledLaserDonut.id,
+          tier = scheduledLaserDonut.tier,
+          current = isCurrent
+        )
+      }
+
+      for {
+        originalSchedule <- getScheduledLaserDonuts
+        _ <- ScheduledLaserDonutTable.delete
+        scheduledPyramid = lifeScheduler.refresh(originalSchedule)
+        scheduledLaserDonutRows = scheduledPyramid.laserDonuts.map
+      } yield {}
+
+      /*
+      val row = ScheduledLaserDonutRow(
+        id = 0L,
+        laserDonutId = laserDonut.id,
+        tier = tierNumber,
+        current = false
+      )
+      ((ScheduledLaserDonutTable returning ScheduledLaserDonutTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
+       */
+    }
 
     // Get endpoints
     override def getMessages: Future[Seq[Message]] = {

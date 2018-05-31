@@ -8,6 +8,7 @@ import akka.http.scaladsl.model.DateTime
 import com.ferris.planning.table.Tables
 import com.ferris.planning.model.Model._
 
+import scala.collection.immutable.Iterable
 import scala.language.implicitConversions
 
 class TableConversions(val tables: Tables) {
@@ -172,6 +173,38 @@ class TableConversions(val tables: Tables) {
         (tierNumber, Tier(laserDonutRows.map(row => UUID.fromString(row._2.uuid))))
       }.toSeq.sortBy(_._1).map(_._2)
       PyramidOfImportance(tiers = tiers, currentLaserDonut = currentLaserDonut)
+    }
+  }
+
+  implicit class ScheduledLaserDonutsBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow, tables.PortionRow, tables.TodoRow)]) {
+    def asScheduledLaserDonuts: Seq[ScheduledLaserDonut] = {
+      rows.groupBy(row => (row._1, row._2)).map { case ((scheduledLaserDonutRow, laserDonutRow), groupedRows1) =>
+        val scheduledPortions: Seq[ScheduledPortion] = groupedRows1.groupBy(_._3).map { case (portionRow, groupedRows2) =>
+          val scheduledTodos = groupedRows2.map { case (_, _, _, todoRow) =>
+            ScheduledTodo(
+              uuid = UUID.fromString(todoRow.uuid),
+              order = todoRow.order,
+              status = Statuses.withName(todoRow.status)
+            )
+          }
+          ScheduledPortion(
+            id = portionRow.id,
+            uuid = UUID.fromString(portionRow.uuid),
+            todos = scheduledTodos,
+            order = portionRow.order,
+            status = Statuses.withName(portionRow.status)
+          )
+        }(scala.collection.breakOut)
+
+        ScheduledLaserDonut(
+          id = laserDonutRow.id,
+          uuid = UUID.fromString(laserDonutRow.uuid),
+          portions = scheduledPortions,
+          tier = scheduledLaserDonutRow.tier,
+          status = Statuses.withName(laserDonutRow.status),
+          lastPerformed = laserDonutRow.lastPerformed.map(_.toLocalDateTime)
+        )
+      }(scala.collection.breakOut)
     }
   }
 

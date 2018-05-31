@@ -28,29 +28,42 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
     private type Criteria = Seq[ScheduledLaserDonut] => Seq[ScheduledLaserDonut]
 
     override def refresh(laserDonuts: Seq[ScheduledLaserDonut]): ScheduledPyramid = {
+      def getPortions(laserDonut: Option[ScheduledLaserDonut]): Seq[ScheduledPortion] = {
+        laserDonut.map(_.portions.sortBy(_.order)).getOrElse(Nil)
+      }
+
+      def getCurrentLaserDonut(laserDonuts: Seq[ScheduledLaserDonut]): Option[ScheduledLaserDonut] = {
+        laserDonuts.partition(_.status == Planned) match {
+          case (Nil, Nil) => None
+          case (Nil, inProgress) => chooseRandom(applyCriteria(inProgress, Seq(timeRule, progressRule)))
+          case (planned, _) => chooseRandom(planned)
+        }
+      }
+
+      def getCurrentPortion(portions: Seq[ScheduledPortion]): Option[ScheduledPortion] = {
+        val plannedPortions = portions.filter(_.status == Planned)
+        val portionsInProgress = portions.filter(_.status == InProgress)
+        (plannedPortions, portionsInProgress) match {
+          case (Nil, Nil) => None
+          case (_, Nil) => plannedPortions.headOption
+          case (_, _) => portionsInProgress.headOption
+        }
+      }
+
       laserDonuts match {
         case Nil => ScheduledPyramid(Nil, None, None)
         case _ =>
           val (topTier, bottomTiers) = laserDonuts.partition(_.tier == 1)
           val (completed, leftOvers) = topTier.partition(_.status == Complete)
-          val currentLaserDonut = leftOvers.partition(_.status == Planned) match {
-            case (Nil, Nil) => None
-            case (Nil, inProgress) => chooseRandom(applyCriteria(inProgress, Seq(timeRule, progressRule)))
-            case (planned, _) => chooseRandom(planned)
-          }
-          val portions = currentLaserDonut.map(_.portions.sortBy(_.order)).getOrElse(Nil)
-          val plannedPortions = portions.filter(_.status == Planned)
-          val portionsInProgress = portions.filter(_.status == InProgress)
-          val currentPortion = (plannedPortions, portionsInProgress) match {
-            case (Nil, Nil) => None
-            case (_, Nil) => plannedPortions.headOption
-            case (_, _) => portionsInProgress.headOption
-          }
           val shiftSize = completed match {
             case Nil if acceptableProgress(topTier) => 1
             case _ => completed.size
           }
-          ScheduledPyramid(leftOvers ++ shift(bottomTiers, shiftSize), currentLaserDonut, currentPortion)
+          val shifted = leftOvers ++ shift(bottomTiers, shiftSize)
+          val (newTopTier, newBottomTiers) = shifted.partition(_.tier == 1)
+          val currentLaserDonut = getCurrentLaserDonut(newTopTier)
+          val currentPortion = getCurrentPortion(getPortions(currentLaserDonut))
+          ScheduledPyramid(newTopTier ++ newBottomTiers, currentLaserDonut, currentPortion)
       }
     }
 
