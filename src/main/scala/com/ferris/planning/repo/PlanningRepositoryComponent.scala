@@ -47,7 +47,7 @@ trait PlanningRepositoryComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
-//    def refreshPyramidOfImportance(): Future[PyramidOfImportance]
+    def refreshPyramidOfImportance(): Future[Boolean]
 
     def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -424,7 +424,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status,
         thread.lastModified, thread.lastPerformed))
@@ -442,7 +442,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: update.`type` :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`,
         weave.lastModified, weave.lastPerformed))
@@ -460,7 +460,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[LaserDonut] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: update.milestone :: update.`type` :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = laserDonutByUuid(uuid).map(laserDonut => (laserDonut.goalId, laserDonut.summary, laserDonut.description,
         laserDonut.milestone, laserDonut.status, laserDonut.`type`, laserDonut.lastModified, laserDonut.lastPerformed))
@@ -479,7 +479,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.laserDonutId :: update.summary :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status,
         portion.lastModified, portion.lastPerformed))
@@ -519,7 +519,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.portionId :: update.description :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status, todo.lastModified, todo.lastPerformed))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
@@ -558,7 +558,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: update.frequency :: update.`type` :: Nil,
-        performanceUpdate = update.status :: Nil
+        statusUpdate = update.status :: Nil
       )
       val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status,
         hobby.`type`, hobby.lastModified, hobby.lastPerformed))
@@ -574,7 +574,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(row => row.asHobby)
     }
 
-    override def refreshPyramidOfImportance() = {
+    override def refreshPyramidOfImportance(): Future[Boolean] = {
       def getScheduledLaserDonuts = (for {
         scheduledLaserDonut <- ScheduledLaserDonutTable
         laserDonut <- LaserDonutTable if laserDonut.id === scheduledLaserDonut.laserDonutId
@@ -593,22 +593,32 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         )
       }
 
-      for {
+      def currentActivityUpdate(currentLaserDonutId: Option[Long], currentPortionId: Option[Long]): DBIO[Int] = {
+        (currentLaserDonutId, currentPortionId) match {
+          case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
+            .insertOrUpdate((laserDonutId, portionId, timer.now))
+          case _ => DBIO.successful(0)
+        }
+      }
+
+      def insertScheduledLaserDonuts(scheduledLaserDonutsRows: Seq[ScheduledLaserDonutRow]): DBIO[Int] = {
+        (ScheduledLaserDonutTable ++= scheduledLaserDonutsRows).map(_.getOrElse(0))
+      }
+
+      val action: DBIO[Boolean] = (for {
         originalSchedule <- getScheduledLaserDonuts
         _ <- ScheduledLaserDonutTable.delete
         scheduledPyramid = lifeScheduler.refresh(originalSchedule)
-        scheduledLaserDonutRows = scheduledPyramid.laserDonuts.map
-      } yield {}
+        currentLaserDonutId = scheduledPyramid.currentLaserDonut.map(_.id)
+        currentPortionId = scheduledPyramid.currentPortion.map(_.id)
+        scheduledLaserDonutRows = scheduledPyramid.laserDonuts.map(donut => scheduledLaserDonutRow(donut, currentLaserDonutId.contains(donut.id)))
+        laserDonutsInsertion <- insertScheduledLaserDonuts(scheduledLaserDonutRows)
+        currentActivityUpdate <- currentActivityUpdate(currentLaserDonutId, currentPortionId)
+      } yield {
+        (laserDonutsInsertion :: currentActivityUpdate :: Nil).forall(_ > 0)
+      }).transactionally
 
-      /*
-      val row = ScheduledLaserDonutRow(
-        id = 0L,
-        laserDonutId = laserDonut.id,
-        tier = tierNumber,
-        current = false
-      )
-      ((ScheduledLaserDonutTable returning ScheduledLaserDonutTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
-       */
+      db.run(action)
     }
 
     // Get endpoints
@@ -989,10 +999,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       HobbyTable.filter(_.goalId === goalId.toString)
     }
 
-    private def getUpdateTimes(contentUpdate: Seq[Option[Any]], performanceUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {
+    private def getUpdateTimes(contentUpdate: Seq[Option[Any]], statusUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {
       val now = timer.now
       val lastModified = if (contentUpdate.exists(_.nonEmpty)) Some(now) else None
-      val lastPerformed = if (performanceUpdate.exists(_.nonEmpty)) Some(now) else None
+      val lastPerformed = if (statusUpdate.exists(_.nonEmpty)) Some(now) else None
       (lastModified, lastPerformed)
     }
   }
