@@ -73,6 +73,11 @@ trait ResponseMappings {
     case None => throw HobbyNotFoundException()
   }
 
+  def mapPyramid(response: Option[PyramidOfImportance]): (Success, PyramidOfImportanceView) = response match {
+    case Some(pyramid) => (StatusCodes.OK, pyramid.toView)
+    case None => throw PyramidNotFoundException()
+  }
+
   def mapDeletion(deleted: Boolean): (Success, DeletionResult) =
     if (deleted) (StatusCodes.OK, DeletionResult.successful)
     else (StatusCodes.OK, DeletionResult.unsuccessful)

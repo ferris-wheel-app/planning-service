@@ -31,6 +31,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
   private val todosPathSegment = "todos"
   private val hobbiesPathSegment = "hobbies"
   private val pyramidPathSegment = "pyramid"
+  private val currentPathSegment = "current"
+  private val refreshPathSegment = "refresh"
 
   private val createMessageRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
@@ -356,6 +358,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val refreshPyramidRoute = pathPrefix(pyramidPathSegment / refreshPathSegment) {
+    pathEndOrSingleSlash {
+      put {
+        onSuccess(planningService.refreshPyramidOfImportance())(outcome => complete(mapUpdate(outcome)))
+      }
+    }
+  }
+
+  private val refreshCurrentPortionRoute = pathPrefix(portionsPathSegment / currentPathSegment / refreshPathSegment) {
+    pathEndOrSingleSlash {
+      put {
+        onSuccess(planningService.refreshPortion())(outcome => complete(mapUpdate(outcome)))
+      }
+    }
+  }
+
   private val getMessagesRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
       get {
@@ -608,10 +626,26 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     }
   }
 
+  private val getCurrentLaserDonutRoute = pathPrefix(laserDonutsPathSegment / currentPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getCurrentLaserDonut)(outcome => complete(mapLaserDonut(outcome)))
+      }
+    }
+  }
+
   private val getPortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
         onSuccess(planningService.getPortion(id))(outcome => complete(mapPortion(outcome)))
+      }
+    }
+  }
+
+  private val getCurrentPortionRoute = pathPrefix(portionsPathSegment / currentPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getCurrentPortion)(outcome => complete(mapPortion(outcome)))
       }
     }
   }
@@ -628,6 +662,16 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     pathEndOrSingleSlash {
       get {
         onSuccess(planningService.getHobby(id))(outcome => complete(mapHobby(outcome)))
+      }
+    }
+  }
+
+  private val getPyramidRoute = pathPrefix(pyramidPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getPyramidOfImportance) { response =>
+          complete(StatusCodes.OK, response.toView)
+        }
       }
     }
   }
@@ -741,6 +785,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     createPortionRoute ~
     createTodoRoute ~
     createHobbyRoute ~
+    createPyramidRoute ~
     updateMessageRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
@@ -755,6 +800,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     updateTodoRoute ~
     updateTodosRoute ~
     updateHobbyRoute ~
+    refreshPyramidRoute ~
+    refreshCurrentPortionRoute ~
     getMessagesRoute ~
     getBacklogItemsRoute ~
     getEpochsRoute ~
@@ -782,9 +829,12 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
     getThreadRoute ~
     getWeaveRoute ~
     getLaserDonutRoute ~
+    getCurrentLaserDonutRoute ~
     getPortionRoute ~
+    getCurrentPortionRoute ~
     getTodoRoute ~
     getHobbyRoute ~
+    getPyramidRoute ~
     deleteMessageRoute ~
     deleteBacklogItemRoute ~
     deleteEpochRoute ~
