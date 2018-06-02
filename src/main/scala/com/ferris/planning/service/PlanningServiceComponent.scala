@@ -24,6 +24,7 @@ trait PlanningServiceComponent {
     def createPortion(creation: CreatePortion)(implicit ex: ExecutionContext): Future[Portion]
     def createTodo(creation: CreateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby]
+    def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
     def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
@@ -39,6 +40,8 @@ trait PlanningServiceComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def updateTodos(portionId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby]
+    def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
+    def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
 
     def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]]
     def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]]
@@ -68,9 +71,12 @@ trait PlanningServiceComponent {
     def getThread(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Thread]]
     def getWeave(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Weave]]
     def getLaserDonut(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[LaserDonut]]
+    def getCurrentLaserDonut(implicit ex: ExecutionContext): Future[Option[LaserDonut]]
     def getPortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Portion]]
+    def getCurrentPortion(implicit ex: ExecutionContext): Future[Option[Portion]]
     def getTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Todo]]
     def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]]
+    def getPyramidOfImportance(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
     def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
@@ -142,6 +148,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.createHobby(creation)
     }
 
+    override def createPyramidOfImportance(creation: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
+      repo.createPyramidOfImportance(creation)
+    }
+
     override def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message] = {
       repo.updateMessage(uuid, update)
     }
@@ -196,6 +206,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
       repo.updateHobby(uuid, update)
+    }
+
+    override def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.refreshPyramidOfImportance()
+    }
+
+    override def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.refreshPortion()
     }
 
     override def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]] = {
@@ -306,8 +324,16 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getLaserDonut(uuid)
     }
 
+    override def getCurrentLaserDonut(implicit ex: ExecutionContext): Future[Option[LaserDonut]] = {
+      repo.getCurrentLaserDonut
+    }
+
     override def getPortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Portion]] = {
       repo.getPortion(uuid)
+    }
+
+    override def getCurrentPortion(implicit ex: ExecutionContext): Future[Option[Portion]] = {
+      repo.getCurrentPortion
     }
 
     override def getTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Todo]] = {
@@ -316,6 +342,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]] = {
       repo.getHobby(uuid)
+    }
+
+    override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
+      repo.getPyramidOfImportance
     }
 
     override def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {

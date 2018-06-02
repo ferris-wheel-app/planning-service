@@ -179,4 +179,12 @@ object ModelToView {
       )
     }
   }
+
+  implicit class PyramidOfImportanceConversion(pyramid: PyramidOfImportance) {
+    def toView: PyramidOfImportanceView = {
+      PyramidOfImportanceView(
+        tiers = pyramid.tiers.map(tier => TierView(tier.laserDonuts))
+      )
+    }
+  }
 }

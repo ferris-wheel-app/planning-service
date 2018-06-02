@@ -178,24 +178,8 @@ class TableConversions(val tables: Tables) {
 
   implicit class ScheduledLaserDonutsBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow, tables.PortionRow, tables.TodoRow)]) {
     def asScheduledLaserDonuts: Seq[ScheduledLaserDonut] = {
-      rows.groupBy(row => (row._1, row._2)).map { case ((scheduledLaserDonutRow, laserDonutRow), groupedRows1) =>
-        val scheduledPortions: Seq[ScheduledPortion] = groupedRows1.groupBy(_._3).map { case (portionRow, groupedRows2) =>
-          val scheduledTodos = groupedRows2.map { case (_, _, _, todoRow) =>
-            ScheduledTodo(
-              uuid = UUID.fromString(todoRow.uuid),
-              order = todoRow.order,
-              status = Statuses.withName(todoRow.status)
-            )
-          }
-          ScheduledPortion(
-            id = portionRow.id,
-            uuid = UUID.fromString(portionRow.uuid),
-            todos = scheduledTodos,
-            order = portionRow.order,
-            status = Statuses.withName(portionRow.status)
-          )
-        }(scala.collection.breakOut)
-
+      rows.groupBy(row => (row._1, row._2)).map { case ((scheduledLaserDonutRow, laserDonutRow), groupedRows) =>
+        val scheduledPortions: Seq[ScheduledPortion] = groupedRows.map(row => (row._3, row._4)).asScheduledPortions
         ScheduledLaserDonut(
           id = laserDonutRow.id,
           uuid = UUID.fromString(laserDonutRow.uuid),
@@ -203,6 +187,27 @@ class TableConversions(val tables: Tables) {
           tier = scheduledLaserDonutRow.tier,
           status = Statuses.withName(laserDonutRow.status),
           lastPerformed = laserDonutRow.lastPerformed.map(_.toLocalDateTime)
+        )
+      }(scala.collection.breakOut)
+    }
+  }
+
+  implicit class ScheduledPortionsBuilder(val rows: Seq[(tables.PortionRow, tables.TodoRow)]) {
+    def asScheduledPortions: Seq[ScheduledPortion] = {
+      rows.groupBy(_._1).map { case (portionRow, groupedRows) =>
+        val scheduledTodos = groupedRows.map { case (_, todoRow) =>
+          ScheduledTodo(
+            uuid = UUID.fromString(todoRow.uuid),
+            order = todoRow.order,
+            status = Statuses.withName(todoRow.status)
+          )
+        }
+        ScheduledPortion(
+          id = portionRow.id,
+          uuid = UUID.fromString(portionRow.uuid),
+          todos = scheduledTodos,
+          order = portionRow.order,
+          status = Statuses.withName(portionRow.status)
         )
       }(scala.collection.breakOut)
     }

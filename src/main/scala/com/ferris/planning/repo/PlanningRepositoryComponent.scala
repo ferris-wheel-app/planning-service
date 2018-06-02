@@ -48,6 +48,7 @@ trait PlanningRepositoryComponent {
     def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
     def refreshPyramidOfImportance(): Future[Boolean]
+    def refreshPortion(): Future[Boolean]
 
     def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -487,6 +488,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+            .andThen(updateLaserDonutStatus(update.laserDonutId.get))
             .andThen(getPortionAction(uuid).map(_.head))
         } getOrElse DBIO.failed(PortionNotFoundException())
       }.transactionally
@@ -526,6 +528,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+            .andThen(updatePortionStatus(update.portionId.get))
             .andThen(getTodoAction(uuid).map(_.head))
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
@@ -593,14 +596,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         )
       }
 
-      def currentActivityUpdate(currentLaserDonutId: Option[Long], currentPortionId: Option[Long]): DBIO[Int] = {
-        (currentLaserDonutId, currentPortionId) match {
-          case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
-            .insertOrUpdate((laserDonutId, portionId, timer.now))
-          case _ => DBIO.successful(0)
-        }
-      }
-
       def insertScheduledLaserDonuts(scheduledLaserDonutsRows: Seq[ScheduledLaserDonutRow]): DBIO[Int] = {
         (ScheduledLaserDonutTable ++= scheduledLaserDonutsRows).map(_.getOrElse(0))
       }
@@ -608,7 +603,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action: DBIO[Boolean] = (for {
         originalSchedule <- getScheduledLaserDonuts
         _ <- ScheduledLaserDonutTable.delete
-        scheduledPyramid = lifeScheduler.refresh(originalSchedule)
+        scheduledPyramid = lifeScheduler.refreshPyramid(originalSchedule)
         currentLaserDonutId = scheduledPyramid.currentLaserDonut.map(_.id)
         currentPortionId = scheduledPyramid.currentPortion.map(_.id)
         scheduledLaserDonutRows = scheduledPyramid.laserDonuts.map(donut => scheduledLaserDonutRow(donut, currentLaserDonutId.contains(donut.id)))
@@ -619,6 +614,37 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }).transactionally
 
       db.run(action)
+    }
+
+    override def refreshPortion(): Future[Boolean] = {
+      def getScheduledPortions = (for {
+        currentActivity <- CurrentActivityTable
+        currentLaserDonut <- LaserDonutTable if currentLaserDonut.id === currentActivity.currentLaserDonut
+        portion <- PortionTable if portion.laserDonutId === currentLaserDonut.uuid
+        todo <- TodoTable if todo.portionId === portion.uuid
+      } yield {
+        (portion, todo)
+      }).result.map(_.asScheduledPortions)
+
+      val action: DBIO[Boolean] = (for {
+        scheduledPortions <- getScheduledPortions
+        currentPortion = lifeScheduler.decideNextPortion(scheduledPortions)
+        update <- currentActivityUpdate(currentLaserDonutId = None, currentPortionId = currentPortion.map(_.id))
+      } yield update > 0).transactionally
+
+      db.run(action)
+    }
+
+    private def currentActivityUpdate(currentLaserDonutId: Option[Long], currentPortionId: Option[Long]): DBIO[Int] = {
+      (currentLaserDonutId, currentPortionId) match {
+        case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
+          .insertOrUpdate((laserDonutId, portionId, timer.now))
+        case (Some(laserDonutId), None) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.lastWeeklyUpdate))
+          .insertOrUpdate((laserDonutId, timer.now))
+        case (None, Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentPortion, activity.lastWeeklyUpdate))
+          .insertOrUpdate((portionId, timer.now))
+        case _ => DBIO.successful(0)
+      }
     }
 
     // Get endpoints
@@ -905,6 +931,22 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield (pyramidRow, laserDonutRow)).result.map(_.asPyramid)
     }
 
+    private def updateLaserDonutStatus(uuid: UUID) = {
+      for {
+        portions <- portionsByParentId(uuid).result
+        update <- LaserDonutTable.filter(_.uuid === uuid.toString).map(_.status)
+          .update(getStatusSummary(portions.map(portion => Statuses.withName(portion.status))).dbValue).map(_ > 0)
+      } yield update
+    }
+
+    private def updatePortionStatus(uuid: UUID) = {
+      for {
+        todos <- todosByParentId(uuid).result
+        update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
+          .update(getStatusSummary(todos.map(todo => Statuses.withName(todo.status))).dbValue).map(_ > 0)
+      } yield update
+    }
+
     // Queries
     private def messageByUuid(uuid: UUID) = {
       MessageTable.filter(_.uuid === uuid.toString)
@@ -1004,6 +1046,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val lastModified = if (contentUpdate.exists(_.nonEmpty)) Some(now) else None
       val lastPerformed = if (statusUpdate.exists(_.nonEmpty)) Some(now) else None
       (lastModified, lastPerformed)
+    }
+
+    private def getStatusSummary(statuses: Seq[Statuses.Status]): Statuses.Status = {
+      if (statuses.forall(_ == Statuses.Complete)) Statuses.Complete
+      else if (statuses.contains(Statuses.InProgress)) Statuses.InProgress
+      else Statuses.Planned
     }
   }
 }

@@ -228,4 +228,10 @@ object ExternalToCommand {
       reordered = list.reordered
     )
   }
+
+  implicit class PyramidOfImportanceUpsertConversion(pyramid: PyramidOfImportanceUpsert) extends CommandConversion[UpsertPyramidOfImportance] {
+    override def toCommand = UpsertPyramidOfImportance(
+      tiers = pyramid.tiers.map(tier => UpsertTier(tier.laserDonuts))
+    )
+  }
 }

@@ -1,6 +1,6 @@
 package com.ferris.planning.route
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCode, StatusCodes}
 import akka.http.scaladsl.model.StatusCodes.Success
 import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.model.Model._
@@ -76,4 +76,8 @@ trait ResponseMappings {
   def mapDeletion(deleted: Boolean): (Success, DeletionResult) =
     if (deleted) (StatusCodes.OK, DeletionResult.successful)
     else (StatusCodes.OK, DeletionResult.unsuccessful)
+
+  def mapUpdate(updated: Boolean): (StatusCode, String) =
+    if (updated) (StatusCodes.OK, "updated")
+    else (StatusCodes.NotModified, "not updated")
 }

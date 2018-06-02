@@ -30,6 +30,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
   private val portionsPathSegment = "portions"
   private val todosPathSegment = "todos"
   private val hobbiesPathSegment = "hobbies"
+  private val pyramidPathSegment = "pyramid"
 
   private val createMessageRoute = pathPrefix(messagesPathSegment) {
     pathEndOrSingleSlash {
@@ -168,6 +169,18 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Respo
       post {
         entity(as[HobbyCreation]) { creation =>
           onSuccess(planningService.createHobby(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val createPyramidRoute = pathPrefix(pyramidPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[PyramidOfImportanceUpsert]) { creation =>
+          onSuccess(planningService.createPyramidOfImportance(creation.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }

@@ -363,7 +363,7 @@ object Resources {
     )
 
     case class TierView (
-      laserDonuts: Seq[SlimLaserDonutView]
+      laserDonuts: Seq[UUID]
     )
 
     case class PyramidOfImportanceView (
