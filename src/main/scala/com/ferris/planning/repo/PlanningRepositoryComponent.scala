@@ -578,14 +578,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def refreshPyramidOfImportance(): Future[Boolean] = {
-      def getScheduledLaserDonuts = (for {
-        scheduledLaserDonut <- ScheduledLaserDonutTable
-        laserDonut <- LaserDonutTable if laserDonut.id === scheduledLaserDonut.laserDonutId
-        portion <- PortionTable if portion.laserDonutId === laserDonut.uuid
-        todo <- TodoTable if todo.portionId === portion.uuid
-      } yield {
-        (scheduledLaserDonut, laserDonut, portion, todo)
-      }).result.map(_.asScheduledLaserDonuts)
+      def getScheduledLaserDonuts = {
+        (for {
+          scheduledLaserDonut <- ScheduledLaserDonutTable
+          laserDonut <- LaserDonutTable if laserDonut.id === scheduledLaserDonut.laserDonutId
+          portion <- PortionTable if portion.laserDonutId === laserDonut.uuid
+          todo <- TodoTable if todo.portionId === portion.uuid
+        } yield {
+          (scheduledLaserDonut, laserDonut, portion, todo)
+        }).result.map(_.asScheduledLaserDonuts)
+      }
 
       def scheduledLaserDonutRow(scheduledLaserDonut: ScheduledLaserDonut, isCurrent: Boolean): ScheduledLaserDonutRow = {
         ScheduledLaserDonutRow(
@@ -596,19 +598,29 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         )
       }
 
+      def scheduledPyramid(laserDonuts: Seq[ScheduledLaserDonut], currentActivity: Option[CurrentActivityRow]) = {
+        ScheduledPyramid(laserDonuts,
+          currentActivity.map(_.currentLaserDonut),
+          currentActivity.map(_.currentPortion),
+          currentActivity.map(_.lastWeeklyUpdate.toLocalDateTime)
+        )
+      }
+
       def insertScheduledLaserDonuts(scheduledLaserDonutsRows: Seq[ScheduledLaserDonutRow]): DBIO[Int] = {
         (ScheduledLaserDonutTable ++= scheduledLaserDonutsRows).map(_.getOrElse(0))
       }
 
       val action: DBIO[Boolean] = (for {
+        currentActivity <- CurrentActivityTable.result.headOption
         originalSchedule <- getScheduledLaserDonuts
         _ <- ScheduledLaserDonutTable.delete
-        scheduledPyramid = lifeScheduler.refreshPyramid(originalSchedule)
-        currentLaserDonutId = scheduledPyramid.currentLaserDonut.map(_.id)
-        currentPortionId = scheduledPyramid.currentPortion.map(_.id)
-        scheduledLaserDonutRows = scheduledPyramid.laserDonuts.map(donut => scheduledLaserDonutRow(donut, currentLaserDonutId.contains(donut.id)))
+        currentPyramid = scheduledPyramid(originalSchedule, currentActivity)
+        refreshedPyramid = lifeScheduler.refreshPyramid(currentPyramid)
+        nextLaserDonutId = refreshedPyramid.currentLaserDonut
+        nextPortionId = refreshedPyramid.currentPortion
+        scheduledLaserDonutRows = refreshedPyramid.laserDonuts.map(donut => scheduledLaserDonutRow(donut, nextLaserDonutId.contains(donut.id)))
         laserDonutsInsertion <- insertScheduledLaserDonuts(scheduledLaserDonutRows)
-        currentActivityUpdate <- currentActivityUpdate(currentLaserDonutId, currentPortionId)
+        currentActivityUpdate <- currentActivityUpdate(nextLaserDonutId, nextPortionId)
       } yield {
         (laserDonutsInsertion :: currentActivityUpdate :: Nil).forall(_ > 0)
       }).transactionally
@@ -626,10 +638,20 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         (portion, todo)
       }).result.map(_.asScheduledPortions)
 
+      def getCurrentScheduledPortion = (for {
+        currentActivity <- CurrentActivityTable
+        currentPortion <- PortionTable if currentPortion.id === currentActivity.currentPortion
+        todo <- TodoTable if todo.portionId === currentPortion.uuid
+      } yield {
+        (currentPortion, todo)
+      }).result.map(_.asScheduledPortions.headOption)
+
       val action: DBIO[Boolean] = (for {
         scheduledPortions <- getScheduledPortions
-        currentPortion = lifeScheduler.decideNextPortion(scheduledPortions)
-        update <- currentActivityUpdate(currentLaserDonutId = None, currentPortionId = currentPortion.map(_.id))
+        currentActivity <- CurrentActivityTable.result.headOption
+        currentPortion <- getCurrentScheduledPortion
+        nextPortion = lifeScheduler.decideNextPortion(scheduledPortions, currentPortion, currentActivity.map(_.lastDailyUpdate.toLocalDateTime))
+        update <- currentActivityUpdate(currentLaserDonutId = None, currentPortionId = nextPortion.map(_.id))
       } yield update > 0).transactionally
 
       db.run(action)

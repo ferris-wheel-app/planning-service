@@ -143,8 +143,9 @@ object Model {
 
   case class ScheduledPyramid (
     laserDonuts: Seq[ScheduledLaserDonut],
-    currentLaserDonut: Option[ScheduledLaserDonut],
-    currentPortion: Option[ScheduledPortion]
+    currentLaserDonut: Option[Long],
+    currentPortion: Option[Long],
+    lastUpdate: Option[LocalDateTime]
   )
 
   case class ScheduledLaserDonut (
