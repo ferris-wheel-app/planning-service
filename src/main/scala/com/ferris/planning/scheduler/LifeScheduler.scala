@@ -5,6 +5,7 @@ import java.time.{LocalDateTime, ZoneId}
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
+import com.ferris.planning.utils.TimerComponent
 
 import scala.util.Random
 
@@ -19,6 +20,7 @@ trait LifeSchedulerComponent {
 }
 
 trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
+  this: TimerComponent =>
 
   override def lifeScheduler = new DefaultLifeScheduler(DefaultPlanningServiceConfig.apply)
 
@@ -36,7 +38,7 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
         laserDonut.map(_.portions.sortBy(_.order)).getOrElse(Nil)
       }
 
-      def getCurrentLaserDonut(laserDonuts: Seq[ScheduledLaserDonut]): Option[ScheduledLaserDonut] = {
+      def decideNextLaserDonut(laserDonuts: Seq[ScheduledLaserDonut]): Option[ScheduledLaserDonut] = {
         laserDonuts.partition(_.status == Planned) match {
           case (Nil, Nil) => None
           case (Nil, inProgress) => chooseRandom(applyCriteria(inProgress, Seq(timeRule, progressRule)))
@@ -45,12 +47,12 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
       }
 
       def aWeekHasPassed(lastUpdate: LocalDateTime): Boolean = {
-        (now - lastUpdate.toLong) >= ONE_WEEK
+        (timer.now - lastUpdate.toLong) >= ONE_WEEK
       }
 
       pyramid.laserDonuts match {
         case _ if pyramid.lastUpdate.nonEmpty && !aWeekHasPassed(pyramid.lastUpdate.get) => pyramid
-        case Nil => ScheduledPyramid(Nil, None, None, None)
+        case Nil => pyramid
         case _ =>
           val (topTier, bottomTiers) = pyramid.laserDonuts.partition(_.tier == 1)
           val (completed, leftOvers) = topTier.partition(_.status == Complete)
@@ -60,7 +62,7 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
           }
           val shifted = leftOvers ++ shift(bottomTiers, shiftSize)
           val (newTopTier, newBottomTiers) = shifted.partition(_.tier == 1)
-          val currentLaserDonut = getCurrentLaserDonut(newTopTier)
+          val currentLaserDonut = decideNextLaserDonut(newTopTier)
           val currentPortion = decideNextPortion(getPortions(currentLaserDonut), None, None)
           ScheduledPyramid(newTopTier ++ newBottomTiers, currentLaserDonut.map(_.id), currentPortion.map(_.id), None)
       }
@@ -68,24 +70,24 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
 
     override def decideNextPortion(portions: Seq[ScheduledPortion], defaultChoice: Option[ScheduledPortion], lastDailyUpdate: Option[LocalDateTime]): Option[ScheduledPortion] = {
       def aDayHasPassed(lastUpdate: LocalDateTime): Boolean = {
-        (now - lastUpdate.toLong) >= ONE_DAY
+        (timer.now - lastUpdate.toLong) >= ONE_DAY
       }
 
       if (lastDailyUpdate.nonEmpty && !aDayHasPassed(lastDailyUpdate.get))
         defaultChoice
       else {
-        val plannedPortions = portions.filter(_.status == Planned)
-        val portionsInProgress = portions.filter(_.status == InProgress)
-        (plannedPortions, portionsInProgress) match {
+        val planned = portions.filter(_.status == Planned)
+        val inProgress = portions.filter(_.status == InProgress)
+        (planned, inProgress) match {
           case (Nil, Nil) => None
-          case (_, Nil) => plannedPortions.headOption
-          case (_, _) => portionsInProgress.headOption
+          case (_, Nil) => planned.headOption
+          case (_, _) => inProgress.headOption
         }
       }
     }
 
     private def timeRule(laserDonuts: Seq[ScheduledLaserDonut]): Seq[ScheduledLaserDonut] = {
-      laserDonuts.groupBy(donut => now - donut.lastPerformed.head.toLong)
+      laserDonuts.groupBy(donut => timer.now - donut.lastPerformed.head.toLong)
         .toSeq.sortBy(_._1).reverse.map(_._2).headOption.getOrElse(Nil)
     }
 
@@ -118,15 +120,20 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
         list.map(donut => donut.copy(tier = donut.tier - 1))
       }
 
-      steps match {
-        case 0 => laserDonuts
-        case _ => laserDonuts match {
-          case smallList if smallList.size <= steps => shiftByOne(smallList)
-          case bigList =>
-            val (before, after) = bigList.splitAt(steps)
-            shiftByOne(before) ++ shift(after, steps)
+      def shift(laserDonuts: Seq[ScheduledLaserDonut], steps: Int, startingTier: Int): Seq[ScheduledLaserDonut] = {
+        steps match {
+          case 0 => laserDonuts
+          case _ => laserDonuts match {
+            case smallList if smallList.size <= steps => shiftByOne(smallList)
+            case bigList =>
+              val (currentTier, tiersBelow) = bigList.partition(_.tier == startingTier)
+              val (toBeShifted, toBeIgnored) = currentTier.splitAt(steps)
+              shiftByOne(toBeShifted) ++ toBeIgnored ++ shift(tiersBelow, steps, startingTier + 1)
+          }
         }
       }
+
+      shift(laserDonuts, steps, 1)
     }
 
     private def acceptableProgress(laserDonuts: Seq[ScheduledLaserDonut]): Boolean = {
@@ -138,10 +145,6 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
       val total = all.size
       val completed = all.count(_.status == Statuses.Complete)
       (completed / total) * 100
-    }
-
-    private def now: Long = {
-      System.currentTimeMillis()
     }
   }
 

@@ -133,7 +133,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         summary = creation.summary,
         description = creation.description,
         `type` = creation.`type`.dbValue,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None
       )
       val action = (BacklogItemTable returning BacklogItemTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
@@ -147,7 +147,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         name = creation.name,
         totem = creation.totem,
         question = creation.question,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None
       )
       val action = (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
@@ -161,7 +161,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         epochId = creation.epochId,
         startDate = Date.valueOf(creation.startDate),
         finishDate = Date.valueOf(creation.startDate.plusYears(1)),
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None
       )
       val action = (YearTable returning YearTable.map(_.id) into ((year, id) => year.copy(id = id))) += row
@@ -174,7 +174,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         uuid = UUID.randomUUID,
         yearId = creation.yearId,
         name = creation.name,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None
       )
       val action = (ThemeTable returning ThemeTable.map(_.id) into ((theme, id) => theme.copy(id = id))) += row
@@ -193,7 +193,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           priority = creation.priority,
           status = creation.status.dbValue,
           graduation = creation.graduation.dbValue,
-          createdOn = timer.now,
+          createdOn = timer.timestampOfNow,
           lastModified = None
         )
         (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
@@ -213,7 +213,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         summary = creation.summary,
         description = creation.description,
         status = creation.status.dbValue,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None,
         lastPerformed = None
       )
@@ -230,7 +230,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         description = creation.description,
         status = creation.status.dbValue,
         `type` = creation.`type`.dbValue,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None,
         lastPerformed = None
       )
@@ -250,7 +250,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           order = existingLaserDonuts.lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue,
           `type` = creation.`type`.dbValue,
-          createdOn = timer.now,
+          createdOn = timer.timestampOfNow,
           lastModified = None,
           lastPerformed = None
         )
@@ -268,7 +268,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           summary = creation.summary,
           order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue,
-          createdOn = timer.now,
+          createdOn = timer.timestampOfNow,
           lastModified = None,
           lastPerformed = None
         )
@@ -286,7 +286,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           description = creation.description,
           order = existingTodos.lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue,
-          createdOn = timer.now,
+          createdOn = timer.timestampOfNow,
           lastModified = None,
           lastPerformed = None
         )
@@ -305,7 +305,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         frequency = creation.frequency.dbValue,
         status = creation.status.dbValue,
         `type` = creation.`type`.dbValue,
-        createdOn = timer.now,
+        createdOn = timer.timestampOfNow,
         lastModified = None,
         lastPerformed = None
       )
@@ -351,7 +351,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = getBacklogItemAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.summary.getOrElse(old.summary), update.description.getOrElse(old.description),
-            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), Some(timer.now))
+            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), Some(timer.timestampOfNow))
             .andThen(getBacklogItemAction(uuid).map(_.head))
         } getOrElse DBIO.failed(BacklogItemNotFoundException())
       }.transactionally
@@ -363,7 +363,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = getEpochAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
-            Some(timer.now))
+            Some(timer.timestampOfNow))
             .andThen(getEpochAction(uuid).map(_.head))
         } getOrElse DBIO.failed(EpochNotFoundException())
       }.transactionally
@@ -375,7 +375,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = getYearAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateId.keepOrReplace(update.epochId, old.epochId), UpdateDate.keepOrReplace(update.startDate,
-            old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate), Some(timer.now))
+            old.startDate), UpdateDate.keepOrReplace(update.startDate.map(_.plusYears(1)), old.finishDate), Some(timer.timestampOfNow))
             .andThen(getYearAction(uuid).map(_.head))
         } getOrElse DBIO.failed(YearNotFoundException())
       }.transactionally
@@ -386,7 +386,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val query = themeByUuid(uuid).map(theme => (theme.yearId, theme.name, theme.lastModified))
       val action = getThemeAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name), Some(timer.now))
+          query.update(UpdateId.keepOrReplace(update.yearId, old.yearId), update.name.getOrElse(old.name), Some(timer.timestampOfNow))
             .andThen(getThemeAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThemeNotFoundException())
       }.transactionally
@@ -400,7 +400,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), update.level.getOrElse(old.level),
             UpdateBoolean.keepOrReplace(update.priority, old.priority), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.now))
+            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
       }
 
       val action = getGoalAction(uuid).flatMap { maybeObj =>
@@ -660,11 +660,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def currentActivityUpdate(currentLaserDonutId: Option[Long], currentPortionId: Option[Long]): DBIO[Int] = {
       (currentLaserDonutId, currentPortionId) match {
         case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
-          .insertOrUpdate((laserDonutId, portionId, timer.now))
+          .insertOrUpdate((laserDonutId, portionId, timer.timestampOfNow))
         case (Some(laserDonutId), None) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.lastWeeklyUpdate))
-          .insertOrUpdate((laserDonutId, timer.now))
+          .insertOrUpdate((laserDonutId, timer.timestampOfNow))
         case (None, Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentPortion, activity.lastWeeklyUpdate))
-          .insertOrUpdate((portionId, timer.now))
+          .insertOrUpdate((portionId, timer.timestampOfNow))
         case _ => DBIO.successful(0)
       }
     }
@@ -1064,7 +1064,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getUpdateTimes(contentUpdate: Seq[Option[Any]], statusUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {
-      val now = timer.now
+      val now = timer.timestampOfNow
       val lastModified = if (contentUpdate.exists(_.nonEmpty)) Some(now) else None
       val lastPerformed = if (statusUpdate.exists(_.nonEmpty)) Some(now) else None
       (lastModified, lastPerformed)
