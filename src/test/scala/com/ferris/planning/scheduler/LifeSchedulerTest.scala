@@ -1,12 +1,35 @@
 package com.ferris.planning.scheduler
 
+import java.time.LocalDateTime
+
+import com.ferris.planning.config.PlanningServiceConfig
 import org.scalatest.{FunSpec, Matchers}
+import com.ferris.planning.sample.SampleData.domain._
+import com.ferris.planning.utils.MockTimerComponent
+import com.ferris.planning.utils.PlanningImplicits._
+import org.mockito.Mockito._
 
 class LifeSchedulerTest extends FunSpec with Matchers {
 
+  def newContext(acceptableProgress: Int = 100): DefaultLifeSchedulerComponent with MockTimerComponent = {
+    val config = PlanningServiceConfig(acceptableProgress)
+    new DefaultLifeSchedulerComponent with MockTimerComponent {
+      override val lifeScheduler: DefaultLifeScheduler = new DefaultLifeScheduler(config)
+    }
+  }
+
   describe("a life-scheduler") {
     it("should leave a pyramid unchanged, if a week has not passed since it was last updated") {
+      val previousUpdate = LocalDateTime.now
+      val nextUpdate = previousUpdate.plusDays(3)
+      val pyramid = scheduledPyramid.copy(
+        laserDonuts = scheduledLaserDonut :: scheduledLaserDonut :: Nil,
+        lastUpdate = Some(previousUpdate)
+      )
+      val context = newContext()
+      when(context.timer.now).thenReturn(nextUpdate.toLong)
 
+      context.lifeScheduler.refreshPyramid(pyramid) shouldBe pyramid
     }
 
     it("should leave a pyramid unchanged, if there are no scheduled laser-donuts") {

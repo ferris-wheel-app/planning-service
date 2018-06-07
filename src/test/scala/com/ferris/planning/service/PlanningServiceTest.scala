@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.ferris.planning.sample.SampleData.{domain => SD}
 import com.ferris.planning.service.exceptions.Exceptions._
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Matchers.{eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures

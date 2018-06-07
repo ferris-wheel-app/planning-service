@@ -1,10 +1,11 @@
 package com.ferris.planning.scheduler
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.LocalDateTime
 
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
+import com.ferris.planning.utils.PlanningImplicits._
 import com.ferris.planning.utils.TimerComponent
 
 import scala.util.Random
@@ -25,8 +26,6 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
   override def lifeScheduler = new DefaultLifeScheduler(DefaultPlanningServiceConfig.apply)
 
   class DefaultLifeScheduler(config: PlanningServiceConfig) extends LifeScheduler {
-
-    import LifeSchedulerOperations._
 
     private val ONE_DAY: Long = 1000 * 60 * 60 * 24
     private val ONE_WEEK: Long = ONE_DAY * 7
@@ -145,23 +144,6 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
       val total = all.size
       val completed = all.count(_.status == Statuses.Complete)
       (completed / total) * 100
-    }
-  }
-
-  private object LifeSchedulerOperations {
-    implicit class LocalDateTimeOps(time: LocalDateTime) {
-      def toLong: Long = {
-        time.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli
-      }
-    }
-
-  }
-
-  private object StatusOrdering extends Ordering[Status] {
-    override def compare(x: Status, y: Status): Int = (x, y) match {
-      case (Planned, Planned) | (InProgress, InProgress) | (Complete, Complete) => 0
-      case (Planned, InProgress) | (InProgress, Complete) | (Planned, Complete) => -1
-      case (InProgress, Planned) | (Complete, InProgress) | (Complete, Planned) => 1
     }
   }
 }
