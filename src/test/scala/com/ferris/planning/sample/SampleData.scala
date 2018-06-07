@@ -311,6 +311,36 @@ object SampleData {
     val listUpdate = UpdateList(
       reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
     )
+
+    val scheduledTodo = ScheduledTodo(
+      uuid = UUID.randomUUID,
+      order = 1,
+      status = Statuses.Planned
+    )
+
+    val scheduledPortion = ScheduledPortion(
+      id = 1,
+      uuid = UUID.randomUUID,
+      todos = scheduledTodo :: Nil,
+      order = 1,
+      status = Statuses.Planned
+    )
+
+    val scheduledLaserDonut = ScheduledLaserDonut(
+      id = 1,
+      uuid = UUID.randomUUID,
+      portions = scheduledPortion :: Nil,
+      tier = 1,
+      status = Statuses.Planned,
+      lastPerformed = Some(LocalDateTime.now)
+    )
+
+    val scheduledPyramid = ScheduledPyramid(
+      laserDonuts = scheduledLaserDonut :: Nil,
+      currentLaserDonut = Some(2),
+      currentPortion = Some(3),
+      lastUpdate = Some(LocalDateTime.now)
+    )
   }
 
   object rest {
