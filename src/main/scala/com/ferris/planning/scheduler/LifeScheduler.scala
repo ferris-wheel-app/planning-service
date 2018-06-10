@@ -136,14 +136,14 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
     }
 
     private def acceptableProgress(laserDonuts: Seq[ScheduledLaserDonut]): Boolean = {
-      laserDonuts.forall(progressPercentage(_) > config.acceptableProgress)
+      laserDonuts.forall(progressPercentage(_) >= config.acceptableProgress)
     }
 
     private def progressPercentage(laserDonut: ScheduledLaserDonut): Int = {
       val all = laserDonut.portions.flatMap(_.todos)
       val total = all.size
-      val completed = all.count(_.status == Statuses.Complete)
-      (completed / total) * 100
+      val completed: Double = all.count(_.status == Statuses.Complete)
+      ((completed / total) * 100).toInt
     }
   }
 }
