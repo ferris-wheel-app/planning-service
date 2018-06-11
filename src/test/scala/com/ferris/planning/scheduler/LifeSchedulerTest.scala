@@ -3,7 +3,9 @@ package com.ferris.planning.scheduler
 import java.time.LocalDateTime
 
 import com.ferris.planning.config.PlanningServiceConfig
+import com.ferris.planning.model.Model.ScheduledPyramid
 import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.OptionValues._
 import com.ferris.planning.model.Model.Statuses._
 import com.ferris.planning.sample.SampleData.domain._
 import com.ferris.planning.utils.MockTimerComponent
@@ -116,7 +118,7 @@ class LifeSchedulerTest extends FunSpec with Matchers {
         newTier3.size shouldBe 2
       }
 
-      it("should not perform a shift, if there are neither completed laser-donuts nor acceptable progress") {
+      it("should not perform a shift, if there are neither completed laser-donuts nor an acceptable progress") {
         val context = newContext(60)
         val previousUpdate = LocalDateTime.now
         val nextUpdate = previousUpdate.plusDays(7)
@@ -136,47 +138,196 @@ class LifeSchedulerTest extends FunSpec with Matchers {
         )
         when(context.timer.now).thenReturn(nextUpdate.toLong)
 
-        context.lifeScheduler.refreshPyramid(originalPyramid) shouldBe originalPyramid
+        val updatedPyramid = context.lifeScheduler.refreshPyramid(originalPyramid)
+        updatedPyramid.laserDonuts shouldBe originalPyramid.laserDonuts
       }
     }
 
     describe("choosing the next laser-donut") {
-      it("should choose nothing as the next laser-donut, if there are no laser-donuts") {
+      it("should leave the current laser-donut unchanged, if there are no laser-donuts") {
+        val context = newContext()
+        val pyramid = scheduledPyramid.copy(
+          laserDonuts = Nil,
+          lastUpdate = None
+        )
 
+        context.lifeScheduler.refreshPyramid(pyramid).currentLaserDonut shouldBe pyramid.currentLaserDonut
       }
 
       it("should choose a planned laser-donut, if there are some that are present") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusDays(7)
 
+        val d = scheduledLaserDonut
+        val topTier = d.copy(id = 1, tier = 1, status = Planned) :: d.copy(id = 2, tier = 1, status = Planned) :: d.copy(id = 3, tier = 1, status = InProgress) :: Nil
+        val tier2 = d.copy(id = 4, tier = 2, status = Planned) :: d.copy(id = 5, tier = 2, status = Planned) :: d.copy(id = 6, tier = 2, status = Planned) :: Nil
+        val tier3 = d.copy(id = 7, tier = 3, status = Planned) :: d.copy(id = 8, tier = 3, status = Planned) :: d.copy(id = 9, tier = 3, status = Planned) :: Nil
+        val originalPyramid: ScheduledPyramid = scheduledPyramid.copy(
+          laserDonuts = topTier ++ tier2 ++ tier3,
+          lastUpdate = Some(previousUpdate)
+        )
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val updatedPyramid = context.lifeScheduler.refreshPyramid(originalPyramid)
+        val currentLaserDonut = updatedPyramid.currentLaserDonut
+
+        Seq(currentLaserDonut.value) should contain oneElementOf topTier.map(_.id)
       }
 
       it("should choose a laser-donut that was tackled the least recently") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusDays(7)
 
+        val d = scheduledLaserDonut
+        val threeWeeksAgo = d.copy(id = 1, tier = 1, status = InProgress, lastPerformed = Some(LocalDateTime.now.minusWeeks(3)))
+        val twoWeeksAgo = d.copy(id = 1, tier = 1, status = InProgress, lastPerformed = Some(LocalDateTime.now.minusWeeks(2)))
+        val oneWeekAgo = d.copy(id = 1, tier = 1, status = InProgress, lastPerformed = Some(LocalDateTime.now.minusWeeks(1)))
+        val topTier = threeWeeksAgo :: twoWeeksAgo :: oneWeekAgo :: Nil
+        val tier2 = d.copy(id = 4, tier = 2, status = Planned) :: d.copy(id = 5, tier = 2, status = Planned) :: d.copy(id = 6, tier = 2, status = Planned) :: Nil
+        val tier3 = d.copy(id = 7, tier = 3, status = Planned) :: d.copy(id = 8, tier = 3, status = Planned) :: d.copy(id = 9, tier = 3, status = Planned) :: Nil
+        val originalPyramid: ScheduledPyramid = scheduledPyramid.copy(
+          laserDonuts = topTier ++ tier2 ++ tier3,
+          lastUpdate = Some(previousUpdate)
+        )
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val updatedPyramid = context.lifeScheduler.refreshPyramid(originalPyramid)
+        val currentLaserDonut = updatedPyramid.currentLaserDonut
+
+        currentLaserDonut.value shouldBe threeWeeksAgo.id
       }
 
-      it("should choose a laser-donut that has the least percentage of its portion tackled") {
+      it("should choose a laser-donut that has the least percentage of its portions tackled") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusDays(7)
 
+        val lowestPerformedTodos = (1 to 6).map(_ => scheduledTodo.copy(status = Complete)) ++
+          (1 to 2).map(_ => scheduledTodo.copy(status = InProgress)) ++
+          (1 to 2).map(_ => scheduledTodo.copy(status = Planned))
+        val mediumPerformedTodos = (1 to 7).map(_ => scheduledTodo.copy(status = Complete)) ++
+          (1 to 3).map(_ => scheduledTodo.copy(status = InProgress))
+        val highestPerformedTodos = (1 to 8).map(_ => scheduledTodo.copy(status = Complete)) ++
+          (1 to 2).map(_ => scheduledTodo.copy(status = Planned))
+
+        val lowestPerformedPortions = (1 to 12).map(_ => scheduledPortion.copy(todos = lowestPerformedTodos))
+        val mediumPerformedPortions = (1 to 12).map(_ => scheduledPortion.copy(todos = mediumPerformedTodos))
+        val highestPerformedPortions = (1 to 12).map(_ => scheduledPortion.copy(todos = highestPerformedTodos))
+
+        val lowestPerformedLaserDonut = scheduledLaserDonut.copy(id = 1, tier = 1, status = InProgress, portions = lowestPerformedPortions)
+        val mediumPerformedLaserDonut = scheduledLaserDonut.copy(id = 2, tier = 1, status = InProgress, portions = mediumPerformedPortions)
+        val highestPerformedLaserDonut = scheduledLaserDonut.copy(id = 3, tier = 1, status = InProgress, portions = highestPerformedPortions)
+        val d = scheduledLaserDonut
+
+        val topTier = lowestPerformedLaserDonut :: mediumPerformedLaserDonut :: highestPerformedLaserDonut :: Nil
+        val tier2 = d.copy(id = 4, tier = 2) :: d.copy(id = 5, tier = 2) :: d.copy(id = 6, tier = 2) :: Nil
+        val tier3 = d.copy(id = 7, tier = 3) :: d.copy(id = 8, tier = 3) :: d.copy(id = 9, tier = 3) :: Nil
+        val originalPyramid: ScheduledPyramid = scheduledPyramid.copy(
+          laserDonuts = topTier ++ tier2 ++ tier3,
+          lastUpdate = Some(previousUpdate)
+        )
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val updatedPyramid = context.lifeScheduler.refreshPyramid(originalPyramid)
+        val currentLaserDonut = updatedPyramid.currentLaserDonut
+
+        currentLaserDonut.value shouldBe lowestPerformedLaserDonut.id
       }
     }
 
     describe("choosing the next portion") {
-      it("should leave the current portion unchanged, if a day has not passed since it was last updated") {
+      it("should return the default portion, if a day has not passed since the current portion was last chosen") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(12)
 
+        val firstPortion = scheduledPortion.copy(id = 1)
+        val secondPortion = scheduledPortion.copy(id = 2)
+        val thirdPortion = scheduledPortion.copy(id = 3)
+        val defaultPortion = scheduledPortion.copy(id = 4)
+        val portions = firstPortion :: secondPortion :: thirdPortion :: Nil
+
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(portions, Some(defaultPortion), Some(previousUpdate))
+
+        nextPortion.value shouldBe defaultPortion
       }
 
-      it("should choose nothing as the next portion, if there are no portions") {
+      it("should choose nothing as the next portion, if there are no portions and the default portion is completed") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(24)
 
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(Nil, None, Some(previousUpdate))
+
+        nextPortion shouldBe None
       }
 
-      it("should choose nothing as the next portion, if all portions are complete") {
+      it("should choose the default portion as the next portion, if there are no portions") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(24)
+        val defaultPortion = scheduledPortion.copy(id = 4)
 
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(Nil, Some(defaultPortion), Some(previousUpdate))
+
+        nextPortion.value shouldBe defaultPortion
+      }
+
+      it("should choose the default portion as the next portion, if all portions are complete") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(24)
+
+        val defaultPortion = scheduledPortion.copy(id = 4)
+        val portions = (1 to 5).map(_ => scheduledPortion.copy(status = Complete))
+
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(portions, Some(defaultPortion), Some(previousUpdate))
+
+        nextPortion.value shouldBe defaultPortion
       }
 
       it("should choose the first portion, if all the portions are planned") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(24)
 
+        val defaultPortion = scheduledPortion.copy(id = 4)
+        val portions = (1 to 5).map(_ => scheduledPortion.copy(status = Planned))
+
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(portions, Some(defaultPortion), Some(previousUpdate))
+
+        nextPortion.value shouldBe portions.head
       }
 
       it("should choose the first portion that is in progress, if there are some that are present") {
+        val context = newContext()
+        val previousUpdate = LocalDateTime.now
+        val nextUpdate = previousUpdate.plusHours(24)
 
+        val firstPortion = scheduledPortion.copy(id = 1, status = Complete)
+        val secondPortion = scheduledPortion.copy(id = 2, status = InProgress)
+        val thirdPortion = scheduledPortion.copy(id = 3, status = Planned)
+        val fourthPortion = scheduledPortion.copy(id = 4, status = InProgress)
+        val defaultPortion = scheduledPortion.copy(id = 5)
+        val portions = firstPortion :: secondPortion :: thirdPortion :: fourthPortion :: Nil
+
+        when(context.timer.now).thenReturn(nextUpdate.toLong)
+
+        val nextPortion = context.lifeScheduler.decideNextPortion(portions, Some(defaultPortion), Some(previousUpdate))
+
+        nextPortion.value shouldBe secondPortion
       }
     }
   }

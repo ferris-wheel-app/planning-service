@@ -72,13 +72,15 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
         (timer.now - lastUpdate.toLong) >= ONE_DAY
       }
 
+      def defaultOrBust = if (defaultChoice.exists(_.status == Complete)) None else defaultChoice
+
       if (lastDailyUpdate.nonEmpty && !aDayHasPassed(lastDailyUpdate.get))
         defaultChoice
       else {
         val planned = portions.filter(_.status == Planned)
         val inProgress = portions.filter(_.status == InProgress)
         (planned, inProgress) match {
-          case (Nil, Nil) => None
+          case (Nil, Nil) => defaultOrBust
           case (_, Nil) => planned.headOption
           case (_, _) => inProgress.headOption
         }
