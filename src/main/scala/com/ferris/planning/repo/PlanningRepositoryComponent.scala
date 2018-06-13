@@ -478,6 +478,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion] = {
+      def updateLaserDonutStatus(uuid: UUID) = {
+        for {
+          portions <- portionsByParentId(uuid).result
+          update <- LaserDonutTable.filter(_.uuid === uuid.toString).map(_.status)
+            .update(getStatusSummary(portions.map(portion => Statuses.withName(portion.status))).dbValue).map(_ > 0)
+        } yield update
+      }
+
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.laserDonutId :: update.summary :: Nil,
         statusUpdate = update.status :: Nil
@@ -486,10 +494,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         portion.lastModified, portion.lastPerformed))
       val action = getPortionAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
-            .andThen(updateLaserDonutStatus(update.laserDonutId.get))
-            .andThen(getPortionAction(uuid).map(_.head))
+          for {
+            _ <- query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
+              UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+            updatedPortion <- getPortionAction(uuid).map(_.head)
+            _ <- updateLaserDonutStatus(UUID.fromString(updatedPortion.laserDonutId))
+          } yield updatedPortion
         } getOrElse DBIO.failed(PortionNotFoundException())
       }.transactionally
       db.run(action).map(row => row.asPortion)
@@ -519,6 +529,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
+      def updatePortionStatus(uuid: UUID) = {
+        for {
+          todos <- todosByParentId(uuid).result
+          update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
+            .update(getStatusSummary(todos.map(todo => Statuses.withName(todo.status))).dbValue).map(_ > 0)
+        } yield update
+      }
+
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.portionId :: update.description :: Nil,
         statusUpdate = update.status :: Nil
@@ -526,10 +544,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status, todo.lastModified, todo.lastPerformed))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
-          query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
-            .andThen(updatePortionStatus(update.portionId.get))
-            .andThen(getTodoAction(uuid).map(_.head))
+          for {
+            _ <- query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
+              UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+            updatedTodo <- getTodoAction(uuid).map(_.head)
+            _ <- updatePortionStatus(UUID.fromString(updatedTodo.portionId))
+          } yield updatedTodo
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
       db.run(action).map(row => row.asTodo)
@@ -953,22 +973,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield (pyramidRow, laserDonutRow)).result.map(_.asPyramid)
     }
 
-    private def updateLaserDonutStatus(uuid: UUID) = {
-      for {
-        portions <- portionsByParentId(uuid).result
-        update <- LaserDonutTable.filter(_.uuid === uuid.toString).map(_.status)
-          .update(getStatusSummary(portions.map(portion => Statuses.withName(portion.status))).dbValue).map(_ > 0)
-      } yield update
-    }
-
-    private def updatePortionStatus(uuid: UUID) = {
-      for {
-        todos <- todosByParentId(uuid).result
-        update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
-          .update(getStatusSummary(todos.map(todo => Statuses.withName(todo.status))).dbValue).map(_ > 0)
-      } yield update
-    }
-
     // Queries
     private def messageByUuid(uuid: UUID) = {
       MessageTable.filter(_.uuid === uuid.toString)
@@ -1072,7 +1076,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getStatusSummary(statuses: Seq[Statuses.Status]): Statuses.Status = {
       if (statuses.forall(_ == Statuses.Complete)) Statuses.Complete
-      else if (statuses.contains(Statuses.InProgress)) Statuses.InProgress
+      else if (statuses.contains(Statuses.InProgress) || statuses.contains(Statuses.Complete)) Statuses.InProgress
       else Statuses.Planned
     }
   }

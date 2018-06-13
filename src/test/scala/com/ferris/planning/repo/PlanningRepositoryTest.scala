@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
 import com.ferris.planning.config.PlanningServiceConfig
+import com.ferris.planning.model.Model.Statuses._
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
@@ -12,6 +13,7 @@ import com.ferris.planning.scheduler.MockLifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.MockTimerComponent
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class PlanningRepositoryTest extends AsyncFunSpec
@@ -25,6 +27,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
   implicit val dbTimeout: FiniteDuration = 20.seconds
 
   override val config: PlanningServiceConfig = PlanningServiceConfig(acceptableProgress = 80)
+
+  override val executionContext: ExecutionContext = repoEc
 
   override def beforeEach(): Unit = {
     RepositoryUtils.createOrResetTables(db, dbTimeout)(repoEc)
@@ -661,6 +665,76 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
+  describe("updating the status of a parent laser-donut") {
+    it("should modify the status to Complete, if all of it's portions are complete") {
+      for {
+        laserDonut <- repo.createLaserDonut(SD.laserDonutCreation.copy(status = Planned))
+        firstPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        secondPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        thirdPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+
+        _ <- repo.updatePortion(firstPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Complete)))
+        _ <- repo.updatePortion(secondPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Complete)))
+        _ <- repo.updatePortion(thirdPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Complete)))
+
+        updatedLaserDonut <- repo.getLaserDonut(laserDonut.uuid)
+      } yield {
+        updatedLaserDonut.value.status shouldBe Complete
+      }
+    }
+
+    it("should modify the status to InProgress, if some of it's portions are in-progress") {
+      for {
+        laserDonut <- repo.createLaserDonut(SD.laserDonutCreation.copy(status = Planned))
+        firstPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        secondPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        thirdPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+
+        _ <- repo.updatePortion(firstPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+        _ <- repo.updatePortion(secondPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(InProgress)))
+        _ <- repo.updatePortion(thirdPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+
+        updatedLaserDonut <- repo.getLaserDonut(laserDonut.uuid)
+      } yield {
+        updatedLaserDonut.value.status shouldBe InProgress
+      }
+    }
+
+    it("should modify the status to InProgress, if some of it's portions are complete") {
+      for {
+        laserDonut <- repo.createLaserDonut(SD.laserDonutCreation.copy(status = Planned))
+        firstPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        secondPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        thirdPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+
+        _ <- repo.updatePortion(firstPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+        _ <- repo.updatePortion(secondPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Complete)))
+        _ <- repo.updatePortion(thirdPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(InProgress)))
+
+        updatedLaserDonut <- repo.getLaserDonut(laserDonut.uuid)
+      } yield {
+        updatedLaserDonut.value.status shouldBe InProgress
+      }
+    }
+
+    it("should leave the status as Planned, if all of it's portions are planned") {
+      for {
+        laserDonut <- repo.createLaserDonut(SD.laserDonutCreation.copy(status = InProgress))
+        firstPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        secondPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+        thirdPortion <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+
+        _ <- repo.updatePortion(firstPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+        _ <- repo.updatePortion(secondPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+        _ <- repo.updatePortion(thirdPortion.uuid, SD.portionUpdate.copy(laserDonutId = None, status = Some(Planned)))
+
+        updatedLaserDonut <- repo.getLaserDonut(laserDonut.uuid)
+      } yield {
+        updatedLaserDonut.value.status shouldBe Planned
+      }
+    }
+  }
+
   describe("portion") {
     describe("creating") {
       it("should create a portion") {
@@ -766,6 +840,76 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val retrieved = repo.getPortion(created.uuid).futureValue
         deletion shouldBe true
         retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("updating the status of a parent portion") {
+    it("should modify the status to Complete, if all of it's todos are complete") {
+      for {
+        portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
+
+        updatedPortion <- repo.getPortion(portion.uuid)
+      } yield {
+        updatedPortion.value.status shouldBe Complete
+      }
+    }
+
+    it("should modify the status to InProgress, if some of it's todos are in-progress") {
+      for {
+        portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(InProgress)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+
+        updatedPortion <- repo.getPortion(portion.uuid)
+      } yield {
+        updatedPortion.value.status shouldBe InProgress
+      }
+    }
+
+    it("should modify the status to Progress, if some of it's todos are complete") {
+      for {
+        portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+
+        updatedPortion <- repo.getPortion(portion.uuid)
+      } yield {
+        updatedPortion.value.status shouldBe InProgress
+      }
+    }
+
+    it("should leave the status as InPlanned, if all of it's todos are planned") {
+      for {
+        portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+
+        updatedPortion <- repo.getPortion(portion.uuid)
+      } yield {
+        updatedPortion.value.status shouldBe Planned
       }
     }
   }
