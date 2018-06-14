@@ -312,6 +312,23 @@ object SampleData {
       reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
     )
 
+    val tierUpsert = UpsertTier(
+      laserDonuts = UUID.randomUUID :: UUID.randomUUID :: Nil
+    )
+
+    val tier = Tier(
+      laserDonuts = UUID.randomUUID :: UUID.randomUUID :: Nil
+    )
+
+    val pyramidUpsert = UpsertPyramidOfImportance(
+      tiers = tierUpsert :: Nil
+    )
+
+    val pyramid = PyramidOfImportance(
+      tiers = tier :: Nil,
+      currentLaserDonut = Some(UUID.randomUUID)
+    )
+
     val scheduledTodo = ScheduledTodo(
       uuid = UUID.randomUUID,
       order = 1,
@@ -639,6 +656,22 @@ object SampleData {
 
     val listUpdate = ListUpdate(
       reordered = domain.listUpdate.reordered
+    )
+
+    val tierUpsert = TierUpsert(
+      laserDonuts = domain.tierUpsert.laserDonuts
+    )
+
+    val tier = TierView(
+      laserDonuts = domain.tier.laserDonuts
+    )
+
+    val pyramidUpsert = PyramidOfImportanceUpsert(
+      tiers = tierUpsert :: Nil
+    )
+
+    val pyramid = PyramidOfImportanceView(
+      tiers = tier :: Nil
     )
   }
 }

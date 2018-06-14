@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
 import com.ferris.planning.config.PlanningServiceConfig
+import com.ferris.planning.model.Model.{PyramidOfImportance, Tier}
 import com.ferris.planning.model.Model.Statuses._
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
@@ -1097,6 +1098,48 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val retrieved = repo.getHobby(created.uuid).futureValue
         deletion shouldBe true
         retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("pyramid") {
+    describe("creating") {
+      it("should create a pyramid") {
+        for {
+          laserDonut1 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut2 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut3 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut4 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut5 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut6 <- repo.createLaserDonut(SD.laserDonutCreation)
+          pyramid <- repo.createPyramidOfImportance(SD.pyramidUpsert.copy(
+            tiers = SD.tierUpsert.copy(laserDonuts = (laserDonut1 :: laserDonut2 :: Nil).map(_.uuid)) ::
+              SD.tierUpsert.copy(laserDonuts = (laserDonut3 :: laserDonut4 :: Nil).map(_.uuid)) ::
+              SD.tierUpsert.copy(laserDonuts = (laserDonut5 :: laserDonut6 :: Nil).map(_.uuid)) :: Nil
+          ))
+        } yield {
+          val expected = PyramidOfImportance(
+            tiers = Tier(
+              laserDonuts = laserDonut1.uuid :: laserDonut2.uuid :: Nil
+            ) :: Tier(
+              laserDonuts = laserDonut3.uuid :: laserDonut4.uuid :: Nil
+            ) :: Tier(
+              laserDonuts = laserDonut5.uuid :: laserDonut6.uuid :: Nil
+            ) :: Nil,
+            currentLaserDonut = None
+          )
+
+          pyramid shouldBe expected
+        }
+      }
+
+      it("should throw an exception if a laser-donut is not found") {
+        val laserDonutUuid = UUID.randomUUID
+        whenReady(repo.createPyramidOfImportance(SD.pyramidUpsert.copy(
+          tiers = SD.tierUpsert.copy(laserDonuts = laserDonutUuid :: Nil) :: Nil
+        )).failed) { exception =>
+          exception shouldBe LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists")
+        }
       }
     }
   }
