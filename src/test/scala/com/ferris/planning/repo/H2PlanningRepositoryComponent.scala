@@ -5,7 +5,7 @@ import com.ferris.planning.db.H2TablesComponent
 import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.utils.TimerComponent
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with H2TablesComponent with TimerComponent with LifeSchedulerComponent {
@@ -19,5 +19,13 @@ trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with 
 
   val config: PlanningServiceConfig
 
-  override val repo = new SqlPlanningRepository(config)
+  override val repo = new H2PlanningRepository
+
+  class H2PlanningRepository extends SqlPlanningRepository(config) {
+    def getScheduledLaserDonuts: Future[Seq[tables.ScheduledLaserDonutRow]] = {
+      db.run(tables.ScheduledLaserDonutTable.result)
+    }
+
+    def insertCurrentActivity()
+  }
 }

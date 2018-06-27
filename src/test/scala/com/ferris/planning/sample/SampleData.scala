@@ -313,7 +313,7 @@ object SampleData {
     )
 
     val tierUpsert = UpsertTier(
-      laserDonuts = UUID.randomUUID :: UUID.randomUUID :: Nil
+      laserDonuts = (1 to 5).map(_ => UUID.randomUUID)
     )
 
     val tier = Tier(
@@ -321,7 +321,7 @@ object SampleData {
     )
 
     val pyramidUpsert = UpsertPyramidOfImportance(
-      tiers = tierUpsert :: Nil
+      tiers = (1 to 5).map(_ => tierUpsert)
     )
 
     val pyramid = PyramidOfImportance(
@@ -667,11 +667,11 @@ object SampleData {
     )
 
     val pyramidUpsert = PyramidOfImportanceUpsert(
-      tiers = tierUpsert :: Nil
+      tiers = domain.pyramidUpsert.tiers.map(tier => TierUpsert(tier.laserDonuts))
     )
 
     val pyramid = PyramidOfImportanceView(
-      tiers = tier :: Nil
+      tiers = domain.pyramid.tiers.map(tier => TierView(tier.laserDonuts))
     )
   }
 }

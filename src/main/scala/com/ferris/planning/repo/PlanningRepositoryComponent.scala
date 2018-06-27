@@ -323,7 +323,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
             val row = ScheduledLaserDonutRow(
               id = 0L,
               laserDonutId = laserDonut.id,
-              tier = tierNumber,
+              tier = tierNumber + 1,
               current = false
             )
             ((ScheduledLaserDonutTable returning ScheduledLaserDonutTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))

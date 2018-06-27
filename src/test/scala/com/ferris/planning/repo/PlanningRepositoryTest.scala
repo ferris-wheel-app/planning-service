@@ -1,10 +1,11 @@
 package com.ferris.planning.repo
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
 import com.ferris.planning.config.PlanningServiceConfig
-import com.ferris.planning.model.Model.{PyramidOfImportance, Tier}
+import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
 import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
 import org.scalatest.concurrent.ScalaFutures
@@ -13,8 +14,10 @@ import com.ferris.planning.sample.SampleData.{domain => SD}
 import com.ferris.planning.scheduler.MockLifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.MockTimerComponent
+import org.mockito.Matchers.eq
+import org.mockito.Mockito.when
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 class PlanningRepositoryTest extends AsyncFunSpec
@@ -1117,8 +1120,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
               SD.tierUpsert.copy(laserDonuts = (laserDonut3 :: laserDonut4 :: Nil).map(_.uuid)) ::
               SD.tierUpsert.copy(laserDonuts = (laserDonut5 :: laserDonut6 :: Nil).map(_.uuid)) :: Nil
           ))
+          scheduledLaserDonuts <- repo.getScheduledLaserDonuts
         } yield {
-          val expected = PyramidOfImportance(
+          val expectedPyramid = PyramidOfImportance(
             tiers = Tier(
               laserDonuts = laserDonut1.uuid :: laserDonut2.uuid :: Nil
             ) :: Tier(
@@ -1128,8 +1132,17 @@ class PlanningRepositoryTest extends AsyncFunSpec
             ) :: Nil,
             currentLaserDonut = None
           )
+          val expectedScheduledLaserDonuts = Seq(
+            tables.ScheduledLaserDonutRow(1L, 1L, 1, 0),
+            tables.ScheduledLaserDonutRow(2L, 2L, 1, 0),
+            tables.ScheduledLaserDonutRow(3L, 3L, 2, 0),
+            tables.ScheduledLaserDonutRow(4L, 4L, 2, 0),
+            tables.ScheduledLaserDonutRow(5L, 5L, 3, 0),
+            tables.ScheduledLaserDonutRow(6L, 6L, 3, 0)
+          )
 
-          pyramid shouldBe expected
+          pyramid shouldBe expectedPyramid
+          scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
         }
       }
 
@@ -1142,5 +1155,199 @@ class PlanningRepositoryTest extends AsyncFunSpec
         }
       }
     }
+
+    describe("refreshing") {
+      it("should update scheduled laser-donuts and update the current activity") {
+        val lastWeeklyUpdate = LocalDateTime.now
+        //when(lifeScheduler.refreshPyramid()).thenReturn(Future.successful(updated))
+        for {
+          laserDonut1 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut2 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut3 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut4 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut5 <- repo.createLaserDonut(SD.laserDonutCreation)
+          laserDonut6 <- repo.createLaserDonut(SD.laserDonutCreation)
+          portion1 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut1.uuid))
+          portion2 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut2.uuid))
+          portion3 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut3.uuid))
+          portion4 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut4.uuid))
+          portion5 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut5.uuid))
+          portion6 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut6.uuid))
+          todo1 <- repo.createTodo(SD.todoCreation.copy(portionId = portion1.uuid))
+          todo2 <- repo.createTodo(SD.todoCreation.copy(portionId = portion2.uuid))
+          todo3 <- repo.createTodo(SD.todoCreation.copy(portionId = portion3.uuid))
+          todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
+          todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
+          todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
+
+          expectedDonuts = Seq(
+            ScheduledLaserDonut(
+              id = 1L,
+              uuid = laserDonut1.uuid,
+              portions = ScheduledPortion(
+                id = 1L,
+                uuid = portion1.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo1.uuid,
+                  order = todo1.order,
+                  status = todo1.status
+                ) :: Nil,
+                order = portion1.order,
+                status = portion1.status
+              ) :: Nil,
+              tier = 1,
+              status = laserDonut1.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            ),
+            ScheduledLaserDonut(
+              id = 2L,
+              uuid = laserDonut2.uuid,
+              portions = ScheduledPortion(
+                id = 2L,
+                uuid = portion2.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo2.uuid,
+                  order = todo2.order,
+                  status = todo2.status
+                ) :: Nil,
+                order = portion2.order,
+                status = portion2.status
+              ) :: Nil,
+              tier = 1,
+              status = laserDonut2.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            ),
+            ScheduledLaserDonut(
+              id = 3L,
+              uuid = laserDonut3.uuid,
+              portions = ScheduledPortion(
+                id = 3L,
+                uuid = portion3.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo3.uuid,
+                  order = todo3.order,
+                  status = todo3.status
+                ) :: Nil,
+                order = portion3.order,
+                status = portion3.status
+              ) :: Nil,
+              tier = 2,
+              status = laserDonut3.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            ),
+            ScheduledLaserDonut(
+              id = 4L,
+              uuid = laserDonut4.uuid,
+              portions = ScheduledPortion(
+                id = 4L,
+                uuid = portion4.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo4.uuid,
+                  order = todo4.order,
+                  status = todo4.status
+                ) :: Nil,
+                order = portion4.order,
+                status = portion4.status
+              ) :: Nil,
+              tier = 2,
+              status = laserDonut4.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            ),
+            ScheduledLaserDonut(
+              id = 5L,
+              uuid = laserDonut5.uuid,
+              portions = ScheduledPortion(
+                id = 5L,
+                uuid = portion5.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo5.uuid,
+                  order = todo5.order,
+                  status = todo5.status
+                ) :: Nil,
+                order = portion5.order,
+                status = portion5.status
+              ) :: Nil,
+              tier = 3,
+              status = laserDonut5.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            ),
+            ScheduledLaserDonut(
+              id = 6L,
+              uuid = laserDonut6.uuid,
+              portions = ScheduledPortion(
+                id = 6L,
+                uuid = portion6.uuid,
+                todos = ScheduledTodo(
+                  uuid = todo6.uuid,
+                  order = todo6.order,
+                  status = todo6.status
+                ) :: Nil,
+                order = portion6.order,
+                status = portion6.status
+              ) :: Nil,
+              tier = 3,
+              status = laserDonut6.status,
+              lastPerformed = Some(lastWeeklyUpdate)
+            )
+          )
+        } yield ()
+      }
+    }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
