@@ -1,5 +1,7 @@
 package com.ferris.planning.repo
 
+import java.sql.Timestamp
+
 import com.ferris.planning.config.PlanningServiceConfig
 import com.ferris.planning.db.H2TablesComponent
 import com.ferris.planning.scheduler.LifeSchedulerComponent
@@ -26,6 +28,21 @@ trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with 
       db.run(tables.ScheduledLaserDonutTable.result)
     }
 
-    def insertCurrentActivity()
+    def insertCurrentActivity(currentLaserDonutId: Long, currentPortionId: Long, lastWeeklyUpdate: Timestamp, lastDailyUpdate: Timestamp): Future[Int] = {
+      val row = tables.CurrentActivityRow(
+        id = 0L,
+        currentLaserDonut = currentLaserDonutId,
+        currentPortion = currentPortionId,
+        lastWeeklyUpdate = lastWeeklyUpdate,
+        lastDailyUpdate = lastDailyUpdate
+      )
+      val action = tables.CurrentActivityTable += row
+      db.run(action)
+    }
+
+    def getCurrentActivity: Future[Option[tables.CurrentActivityRow]] = {
+      val action = tables.CurrentActivityTable.result.headOption
+      db.run(action)
+    }
   }
 }

@@ -14,7 +14,8 @@ import com.ferris.planning.sample.SampleData.{domain => SD}
 import com.ferris.planning.scheduler.MockLifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
 import com.ferris.planning.utils.MockTimerComponent
-import org.mockito.Matchers.eq
+import com.ferris.planning.utils.PlanningImplicits._
+import org.mockito.Matchers.{eq => eqTo}
 import org.mockito.Mockito.when
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -1158,8 +1159,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
     describe("refreshing") {
       it("should update scheduled laser-donuts and update the current activity") {
-        val lastWeeklyUpdate = LocalDateTime.now
-        //when(lifeScheduler.refreshPyramid()).thenReturn(Future.successful(updated))
+        val lastWeeklyUpdate = LocalDateTime.now.minusWeeks(3)
+        val lastDailyUpdate = LocalDateTime.now.minusDays(2)
+        val nextWeeklyUpdate = LocalDateTime.now
+        val originalLaserDonutId = 2L
+        val originalPortionId = 2L
+
         for {
           laserDonut1 <- repo.createLaserDonut(SD.laserDonutCreation)
           laserDonut2 <- repo.createLaserDonut(SD.laserDonutCreation)
@@ -1179,8 +1184,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
           todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
           todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
           todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
+          _ <- repo.insertCurrentActivity(originalLaserDonutId, originalPortionId, lastWeeklyUpdate.toTimestamp, lastDailyUpdate.toTimestamp)
 
-          expectedDonuts = Seq(
+          originalDonuts = Seq(
             ScheduledLaserDonut(
               id = 1L,
               uuid = laserDonut1.uuid,
@@ -1290,7 +1296,36 @@ class PlanningRepositoryTest extends AsyncFunSpec
               lastPerformed = Some(lastWeeklyUpdate)
             )
           )
-        } yield ()
+          refreshedDonuts = originalDonuts.tail
+          originalPyramid = ScheduledPyramid(
+            originalDonuts, Some(originalLaserDonutId), Some(originalPortionId), Some(lastWeeklyUpdate)
+          )
+          refreshedPyramid = ScheduledPyramid(
+            refreshedDonuts, Some(6L), Some(6L), Some(nextWeeklyUpdate)
+          )
+          _ = when(lifeScheduler.refreshPyramid(eqTo(originalPyramid))).thenReturn(refreshedPyramid)
+          _ <- repo.refreshPyramidOfImportance()
+          scheduledLaserDonuts <- repo.getScheduledLaserDonuts
+          currentActivity <- repo.getCurrentActivity
+        } yield {
+          val expectedScheduledLaserDonuts = Seq(
+            tables.ScheduledLaserDonutRow(2L, 2L, 1, 0),
+            tables.ScheduledLaserDonutRow(3L, 3L, 2, 0),
+            tables.ScheduledLaserDonutRow(4L, 4L, 2, 0),
+            tables.ScheduledLaserDonutRow(5L, 5L, 3, 0),
+            tables.ScheduledLaserDonutRow(6L, 6L, 3, 1)
+          )
+          val expectedCurrentActivity = tables.CurrentActivityRow(
+            id = 0L,
+            currentLaserDonut = 6L,
+            currentPortion = 6L,
+            lastWeeklyUpdate = nextWeeklyUpdate.toTimestamp,
+            lastDailyUpdate = lastDailyUpdate.toTimestamp
+          )
+
+          scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
+          currentActivity.value shouldBe expectedCurrentActivity
+        }
       }
     }
   }
