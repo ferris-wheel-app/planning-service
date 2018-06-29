@@ -1292,5 +1292,25 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
     }
+
+    describe("handling pyramids") {
+      describe("creating a pyramid") {
+        it("should respond with the created pyramid") {
+
+        }
+      }
+
+      describe("refreshing a pyramid") {
+        it("should return OK if the refresh is successful") {
+
+        }
+
+        it("should return NotModified if the refresh is unsuccessful") {
+
+        }
+      }
+
+      describe()
+    }
   }
 }
