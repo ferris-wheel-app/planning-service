@@ -656,7 +656,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         todo <- TodoTable if todo.portionId === portion.uuid
       } yield {
         (portion, todo)
-      }).result.map(_.asScheduledPortions)
+      }).result.map(_.asScheduledPortions.sortBy(_.id))
 
       def getCurrentScheduledPortion = (for {
         currentActivity <- CurrentActivityTable
@@ -683,7 +683,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           .update((laserDonutId, portionId, timer.timestampOfNow))
         case (Some(laserDonutId), None) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentLaserDonut, activity.lastWeeklyUpdate))
           .update((laserDonutId, timer.timestampOfNow))
-        case (None, Some(portionId)) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentPortion, activity.lastWeeklyUpdate))
+        case (None, Some(portionId)) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentPortion, activity.lastDailyUpdate))
           .update((portionId, timer.timestampOfNow))
         case _ => DBIO.successful(0)
       }

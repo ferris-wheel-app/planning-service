@@ -805,6 +805,120 @@ class PlanningRepositoryTest extends AsyncFunSpec
       }
     }
 
+    describe("refreshing") {
+      it("should pick the next portion and update the current activity") {
+        val lastWeeklyUpdate = LocalDateTime.now.minusWeeks(3).toTimestamp
+        val lastDailyUpdate = LocalDateTime.now.minusDays(2).toTimestamp
+        val nextDailyUpdate = LocalDateTime.now.toTimestamp
+        val originalLaserDonutId = 1L
+        val originalPortionId = 3L
+
+        for {
+          laserDonut <- repo.createLaserDonut(SD.laserDonutCreation)
+          portion1 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          portion2 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          portion3 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          portion4 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          portion5 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          portion6 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
+          todo1 <- repo.createTodo(SD.todoCreation.copy(portionId = portion1.uuid))
+          todo2 <- repo.createTodo(SD.todoCreation.copy(portionId = portion2.uuid))
+          todo3 <- repo.createTodo(SD.todoCreation.copy(portionId = portion3.uuid))
+          todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
+          todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
+          todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
+          _ <- repo.insertCurrentActivity(originalLaserDonutId, originalPortionId, lastWeeklyUpdate, lastDailyUpdate)
+
+          scheduledPortions = Seq(
+            ScheduledPortion(
+              id = 1L,
+              uuid = portion1.uuid,
+              todos = ScheduledTodo(
+                uuid = todo1.uuid,
+                order = todo1.order,
+                status = todo1.status
+              ) :: Nil,
+              order = portion1.order,
+              status = portion1.status
+            ),
+            ScheduledPortion(
+              id = 2L,
+              uuid = portion2.uuid,
+              todos = ScheduledTodo(
+                uuid = todo2.uuid,
+                order = todo2.order,
+                status = todo2.status
+              ) :: Nil,
+              order = portion2.order,
+              status = portion2.status
+            ),
+            ScheduledPortion(
+              id = 3L,
+              uuid = portion3.uuid,
+              todos = ScheduledTodo(
+                uuid = todo3.uuid,
+                order = todo3.order,
+                status = todo3.status
+              ) :: Nil,
+              order = portion3.order,
+              status = portion3.status
+            ),
+            ScheduledPortion(
+              id = 4L,
+              uuid = portion4.uuid,
+              todos = ScheduledTodo(
+                uuid = todo4.uuid,
+                order = todo4.order,
+                status = todo4.status
+              ) :: Nil,
+              order = portion4.order,
+              status = portion4.status
+            ),
+            ScheduledPortion(
+              id = 5L,
+              uuid = portion5.uuid,
+              todos = ScheduledTodo(
+                uuid = todo5.uuid,
+                order = todo5.order,
+                status = todo5.status
+              ) :: Nil,
+              order = portion5.order,
+              status = portion5.status
+            ),
+            ScheduledPortion(
+              id = 6L,
+              uuid = portion6.uuid,
+              todos = ScheduledTodo(
+                uuid = todo6.uuid,
+                order = todo6.order,
+                status = todo6.status
+              ) :: Nil,
+              order = portion6.order,
+              status = portion6.status
+            )
+          )
+          originalPortion = scheduledPortions(2)
+          nextPortion = scheduledPortions(5)
+          _ = when(lifeScheduler.decideNextPortion(eqTo(scheduledPortions), eqTo(Some(originalPortion)),
+            eqTo(Some(lastDailyUpdate.toLocalDateTime)))).thenReturn(Some(nextPortion))
+          _ = when(timer.timestampOfNow).thenReturn(nextDailyUpdate)
+          _ <- repo.refreshPortion()
+          currentActivity <- repo.getCurrentActivity
+          currentPortion <- repo.getCurrentPortion
+        } yield {
+          val expectedCurrentActivity = tables.CurrentActivityRow(
+            id = 1L,
+            currentLaserDonut = originalLaserDonutId,
+            currentPortion = nextPortion.id,
+            lastDailyUpdate = nextDailyUpdate,
+            lastWeeklyUpdate = lastWeeklyUpdate
+          )
+          currentActivity.value shouldBe expectedCurrentActivity
+          currentPortion.value shouldBe portion6
+        }
+      }
+    }
+
     describe("retrieving") {
       it("should retrieve a portion") {
         val created = repo.createPortion(SD.portionCreation).futureValue
@@ -1121,7 +1235,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
               SD.tierUpsert.copy(laserDonuts = (laserDonut3 :: laserDonut4 :: Nil).map(_.uuid)) ::
               SD.tierUpsert.copy(laserDonuts = (laserDonut5 :: laserDonut6 :: Nil).map(_.uuid)) :: Nil
           ))
+          retrievedPyramid <- repo.getPyramidOfImportance
           scheduledLaserDonuts <- repo.getScheduledLaserDonuts
+          currentLaserDonut <- repo.getCurrentLaserDonut
+          currentPortion <- repo.getCurrentPortion
         } yield {
           val expectedPyramid = PyramidOfImportance(
             tiers = Tier(
@@ -1143,7 +1260,10 @@ class PlanningRepositoryTest extends AsyncFunSpec
           )
 
           pyramid shouldBe expectedPyramid
+          retrievedPyramid shouldBe pyramid
           scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
+          currentLaserDonut shouldBe empty
+          currentPortion shouldBe empty
         }
       }
 
@@ -1313,6 +1433,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
           _ <- repo.refreshPyramidOfImportance()
           scheduledLaserDonuts <- repo.getScheduledLaserDonuts
           currentActivity <- repo.getCurrentActivity
+          currentLaserDonut <- repo.getCurrentLaserDonut
+          currentPortion <- repo.getCurrentPortion
         } yield {
           val expectedScheduledLaserDonuts = Seq(
             tables.ScheduledLaserDonutRow(7L, 2L, 1, 0),
@@ -1331,6 +1453,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
           scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
           currentActivity.value shouldBe expectedCurrentActivity
+          currentLaserDonut.value shouldBe laserDonut6
+          currentPortion.value shouldBe portion6
         }
       }
     }
