@@ -33,8 +33,8 @@ trait H2PlanningRepositoryComponent extends SqlPlanningRepositoryComponent with 
         id = 0L,
         currentLaserDonut = currentLaserDonutId,
         currentPortion = currentPortionId,
-        lastWeeklyUpdate = lastWeeklyUpdate,
-        lastDailyUpdate = lastDailyUpdate
+        lastDailyUpdate = lastDailyUpdate,
+        lastWeeklyUpdate = lastWeeklyUpdate
       )
       val action = tables.CurrentActivityTable += row
       db.run(action)

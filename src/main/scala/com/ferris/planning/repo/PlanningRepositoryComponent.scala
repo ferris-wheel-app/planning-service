@@ -606,7 +606,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           todo <- TodoTable if todo.portionId === portion.uuid
         } yield {
           (scheduledLaserDonut, laserDonut, portion, todo)
-        }).result.map(_.asScheduledLaserDonuts)
+        }).result.map(_.asScheduledLaserDonuts.sortBy(_.id))
       }
 
       def scheduledLaserDonutRow(scheduledLaserDonut: ScheduledLaserDonut, isCurrent: Boolean): ScheduledLaserDonutRow = {
@@ -679,12 +679,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def currentActivityUpdate(currentLaserDonutId: Option[Long], currentPortionId: Option[Long]): DBIO[Int] = {
       (currentLaserDonutId, currentPortionId) match {
-        case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
-          .insertOrUpdate((laserDonutId, portionId, timer.timestampOfNow))
-        case (Some(laserDonutId), None) => CurrentActivityTable.map(activity => (activity.currentLaserDonut, activity.lastWeeklyUpdate))
-          .insertOrUpdate((laserDonutId, timer.timestampOfNow))
-        case (None, Some(portionId)) => CurrentActivityTable.map(activity => (activity.currentPortion, activity.lastWeeklyUpdate))
-          .insertOrUpdate((portionId, timer.timestampOfNow))
+        case (Some(laserDonutId), Some(portionId)) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentLaserDonut, activity.currentPortion, activity.lastWeeklyUpdate))
+          .update((laserDonutId, portionId, timer.timestampOfNow))
+        case (Some(laserDonutId), None) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentLaserDonut, activity.lastWeeklyUpdate))
+          .update((laserDonutId, timer.timestampOfNow))
+        case (None, Some(portionId)) => CurrentActivityTable.filter(_.id === 1L).map(activity => (activity.currentPortion, activity.lastWeeklyUpdate))
+          .update((portionId, timer.timestampOfNow))
         case _ => DBIO.successful(0)
       }
     }

@@ -1159,9 +1159,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
     describe("refreshing") {
       it("should update scheduled laser-donuts and update the current activity") {
-        val lastWeeklyUpdate = LocalDateTime.now.minusWeeks(3)
-        val lastDailyUpdate = LocalDateTime.now.minusDays(2)
-        val nextWeeklyUpdate = LocalDateTime.now
+        val lastWeeklyUpdate = LocalDateTime.now.minusWeeks(3).toTimestamp
+        val lastDailyUpdate = LocalDateTime.now.minusDays(2).toTimestamp
+        val nextWeeklyUpdate = LocalDateTime.now.toTimestamp
         val originalLaserDonutId = 2L
         val originalPortionId = 2L
 
@@ -1184,7 +1184,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
           todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
           todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
           todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
-          _ <- repo.insertCurrentActivity(originalLaserDonutId, originalPortionId, lastWeeklyUpdate.toTimestamp, lastDailyUpdate.toTimestamp)
+          _ <- repo.createPyramidOfImportance(SD.pyramidUpsert.copy(
+            tiers = SD.tierUpsert.copy(laserDonuts = (laserDonut1 :: laserDonut2 :: Nil).map(_.uuid)) ::
+              SD.tierUpsert.copy(laserDonuts = (laserDonut3 :: laserDonut4 :: Nil).map(_.uuid)) ::
+              SD.tierUpsert.copy(laserDonuts = (laserDonut5 :: laserDonut6 :: Nil).map(_.uuid)) :: Nil
+          ))
+          _ <- repo.insertCurrentActivity(originalLaserDonutId, originalPortionId, lastWeeklyUpdate, lastDailyUpdate)
 
           originalDonuts = Seq(
             ScheduledLaserDonut(
@@ -1203,7 +1208,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 1,
               status = laserDonut1.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             ),
             ScheduledLaserDonut(
               id = 2L,
@@ -1221,7 +1226,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 1,
               status = laserDonut2.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             ),
             ScheduledLaserDonut(
               id = 3L,
@@ -1239,7 +1244,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 2,
               status = laserDonut3.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             ),
             ScheduledLaserDonut(
               id = 4L,
@@ -1257,7 +1262,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 2,
               status = laserDonut4.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             ),
             ScheduledLaserDonut(
               id = 5L,
@@ -1275,7 +1280,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 3,
               status = laserDonut5.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             ),
             ScheduledLaserDonut(
               id = 6L,
@@ -1293,34 +1298,35 @@ class PlanningRepositoryTest extends AsyncFunSpec
               ) :: Nil,
               tier = 3,
               status = laserDonut6.status,
-              lastPerformed = Some(lastWeeklyUpdate)
+              lastPerformed = None
             )
           )
           refreshedDonuts = originalDonuts.tail
           originalPyramid = ScheduledPyramid(
-            originalDonuts, Some(originalLaserDonutId), Some(originalPortionId), Some(lastWeeklyUpdate)
+            originalDonuts, Some(originalLaserDonutId), Some(originalPortionId), Some(lastWeeklyUpdate.toLocalDateTime)
           )
           refreshedPyramid = ScheduledPyramid(
-            refreshedDonuts, Some(6L), Some(6L), Some(nextWeeklyUpdate)
+            refreshedDonuts, Some(6L), Some(6L), Some(nextWeeklyUpdate.toLocalDateTime)
           )
           _ = when(lifeScheduler.refreshPyramid(eqTo(originalPyramid))).thenReturn(refreshedPyramid)
+          _ = when(timer.timestampOfNow).thenReturn(nextWeeklyUpdate)
           _ <- repo.refreshPyramidOfImportance()
           scheduledLaserDonuts <- repo.getScheduledLaserDonuts
           currentActivity <- repo.getCurrentActivity
         } yield {
           val expectedScheduledLaserDonuts = Seq(
-            tables.ScheduledLaserDonutRow(2L, 2L, 1, 0),
-            tables.ScheduledLaserDonutRow(3L, 3L, 2, 0),
-            tables.ScheduledLaserDonutRow(4L, 4L, 2, 0),
-            tables.ScheduledLaserDonutRow(5L, 5L, 3, 0),
-            tables.ScheduledLaserDonutRow(6L, 6L, 3, 1)
+            tables.ScheduledLaserDonutRow(7L, 2L, 1, 0),
+            tables.ScheduledLaserDonutRow(8L, 3L, 2, 0),
+            tables.ScheduledLaserDonutRow(9L, 4L, 2, 0),
+            tables.ScheduledLaserDonutRow(10, 5L, 3, 0),
+            tables.ScheduledLaserDonutRow(11L, 6L, 3, 1)
           )
           val expectedCurrentActivity = tables.CurrentActivityRow(
-            id = 0L,
+            id = 1L,
             currentLaserDonut = 6L,
             currentPortion = 6L,
-            lastWeeklyUpdate = nextWeeklyUpdate.toTimestamp,
-            lastDailyUpdate = lastDailyUpdate.toTimestamp
+            lastDailyUpdate = lastDailyUpdate,
+            lastWeeklyUpdate = nextWeeklyUpdate
           )
 
           scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
