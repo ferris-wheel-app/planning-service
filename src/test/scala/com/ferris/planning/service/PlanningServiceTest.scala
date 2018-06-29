@@ -644,6 +644,16 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to retrieve the current laser-donut") {
+        val server = newServer
+        when(server.repo.getCurrentLaserDonut).thenReturn(Future.successful(Some(SD.laserDonut)))
+        whenReady(server.planningService.getCurrentLaserDonut) { result =>
+          result shouldBe Some(SD.laserDonut)
+          verify(server.repo, times(1)).getCurrentLaserDonut
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to retrieve all laser-donuts") {
         val server = newServer
         val laserDonuts = Seq(SD.laserDonut, SD.laserDonut.copy(uuid = UUID.randomUUID))
@@ -702,6 +712,16 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to refresh a portion") {
+        val server = newServer
+        when(server.repo.refreshPortion()).thenReturn(Future.successful(true))
+        whenReady(server.planningService.refreshPortion()) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).refreshPortion()
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should return an error thrown by the repository when a portion is being updated") {
         val server = newServer
         val id = UUID.randomUUID
@@ -745,6 +765,16 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.getPortion(id)) { result =>
           result shouldBe Some(SD.portion)
           verify(server.repo, times(1)).getPortion(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve the current portion") {
+        val server = newServer
+        when(server.repo.getCurrentPortion).thenReturn(Future.successful(Some(SD.portion)))
+        whenReady(server.planningService.getCurrentPortion) { result =>
+          result shouldBe Some(SD.portion)
+          verify(server.repo, times(1)).getCurrentPortion
           verifyNoMoreInteractions(server.repo)
         }
       }
@@ -969,5 +999,95 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
     }
+
+    describe("handling a pyramid of importance") {
+      it("should be able to create a pyramid") {
+        val server = newServer
+        when(server.repo.createPyramidOfImportance(SD.pyramidUpsert)).thenReturn(Future.successful(SD.pyramid))
+        whenReady(server.planningService.createPyramidOfImportance(SD.pyramidUpsert)) { result =>
+          result shouldBe SD.pyramid
+          verify(server.repo, times(1)).createPyramidOfImportance(SD.pyramidUpsert)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to refresh a pyramid") {
+        val server = newServer
+        when(server.repo.refreshPyramidOfImportance()).thenReturn(Future.successful(true))
+        whenReady(server.planningService.refreshPyramidOfImportance()) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).refreshPyramidOfImportance()
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a pyramid") {
+        val server = newServer
+        when(server.repo.getPyramidOfImportance).thenReturn(Future.successful(SD.pyramid))
+        whenReady(server.planningService.getPyramidOfImportance) { result =>
+          result shouldBe SD.pyramid
+          verify(server.repo, times(1)).getPyramidOfImportance
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
