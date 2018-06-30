@@ -712,7 +712,7 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
-      it("should be able to refresh a portion") {
+      it("should be able to refresh the current portion") {
         val server = newServer
         when(server.repo.refreshPortion()).thenReturn(Future.successful(true))
         whenReady(server.planningService.refreshPortion()) { result =>

@@ -857,6 +857,27 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
+      describe("getting the current laser-donut") {
+        it("should respond with the requested laser-donut") {
+          when(testServer.planningService.getCurrentLaserDonut(any())).thenReturn(Future.successful(Some(domain.laserDonut)))
+          Get("/api/laser-donuts/current") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[LaserDonutView]].data shouldBe rest.laserDonut
+            verify(testServer.planningService, times(1)).getCurrentLaserDonut(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the laser-donut is not found") {
+          when(testServer.planningService.getCurrentLaserDonut(any())).thenReturn(Future.successful(None))
+          Get("/api/laser-donuts/current") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getCurrentLaserDonut(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
       describe("getting laser-donuts") {
         it("should retrieve a list of all laser-donuts") {
           val laserDonuts = Seq(domain.laserDonut, domain.laserDonut.copy(uuid = UUID.randomUUID))
@@ -940,6 +961,26 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
+      describe("refreshing the current portion") {
+        it("should return OK if the refresh is successful") {
+          when(testServer.planningService.refreshPortion()(any())).thenReturn(Future.successful(true))
+          Put("/api/portions/current/refresh") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            verify(testServer.planningService, times(1)).refreshPortion()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should return NotModified if the refresh is unsuccessful") {
+          when(testServer.planningService.refreshPortion()(any())).thenReturn(Future.successful(false))
+          Put("/api/portions/current/refresh") ~> route ~> check {
+            status shouldBe StatusCodes.NotModified
+            verify(testServer.planningService, times(1)).refreshPortion()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
       describe("updating a list of portions") {
         it("should respond with the updated list of portions") {
           val laserDonutId = UUID.randomUUID
@@ -989,6 +1030,27 @@ class PlanningRouteTest extends RouteTestFramework {
           Get(s"/api/portions/$id") ~> route ~> check {
             status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).getPortion(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting the current portion") {
+        it("should respond with the requested portion") {
+          when(testServer.planningService.getCurrentPortion(any())).thenReturn(Future.successful(Some(domain.portion)))
+          Get("/api/portions/current") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[PortionView]].data shouldBe rest.portion
+            verify(testServer.planningService, times(1)).getCurrentPortion(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the portion is not found") {
+          when(testServer.planningService.getCurrentPortion(any())).thenReturn(Future.successful(None))
+          Get("/api/portions/current") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getCurrentPortion(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -1296,21 +1358,47 @@ class PlanningRouteTest extends RouteTestFramework {
     describe("handling pyramids") {
       describe("creating a pyramid") {
         it("should respond with the created pyramid") {
-
+          when(testServer.planningService.createPyramidOfImportance(eqTo(domain.pyramidUpsert))(any())).thenReturn(Future.successful(domain.pyramid))
+          Post("/api/pyramid", rest.pyramidUpsert) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[PyramidOfImportanceView]].data shouldBe rest.pyramid
+            verify(testServer.planningService, times(1)).createPyramidOfImportance(eqTo(domain.pyramidUpsert))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
         }
       }
 
       describe("refreshing a pyramid") {
         it("should return OK if the refresh is successful") {
-
+          when(testServer.planningService.refreshPyramidOfImportance()(any())).thenReturn(Future.successful(true))
+          Put("/api/pyramid/refresh") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            verify(testServer.planningService, times(1)).refreshPyramidOfImportance()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
         }
 
         it("should return NotModified if the refresh is unsuccessful") {
-
+          when(testServer.planningService.refreshPyramidOfImportance()(any())).thenReturn(Future.successful(false))
+          Put("/api/pyramid/refresh") ~> route ~> check {
+            status shouldBe StatusCodes.NotModified
+            verify(testServer.planningService, times(1)).refreshPyramidOfImportance()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
         }
       }
 
-      describe()
+      describe("getting a pyramid") {
+        it("should respond with the pyramid") {
+          when(testServer.planningService.getPyramidOfImportance(any())).thenReturn(Future.successful(domain.pyramid))
+          Get("/api/pyramid") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[PyramidOfImportanceView]].data shouldBe rest.pyramid
+            verify(testServer.planningService, times(1)).getPyramidOfImportance(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
     }
   }
 }
