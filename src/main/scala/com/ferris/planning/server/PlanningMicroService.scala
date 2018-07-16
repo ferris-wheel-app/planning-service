@@ -8,7 +8,7 @@ import com.ferris.planning.db.MySQLTablesComponent
 import com.ferris.planning.repo.SqlPlanningRepositoryComponent
 import com.ferris.planning.scheduler.DefaultLifeSchedulerComponent
 import com.ferris.planning.service.DefaultPlanningServiceComponent
-import com.ferris.planning.utils.DefaultTimerComponent
+import com.ferris.utils.DefaultTimerComponent
 
 object PlanningMicroService extends PlanningServer
   with DefaultPlanningServiceComponent

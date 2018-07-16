@@ -8,8 +8,8 @@ import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.OptionValues._
 import com.ferris.planning.model.Model.Statuses._
 import com.ferris.planning.sample.SampleData.domain._
-import com.ferris.planning.utils.MockTimerComponent
-import com.ferris.planning.utils.PlanningImplicits._
+import com.ferris.utils.FerrisImplicits._
+import com.ferris.utils.MockTimerComponent
 import org.mockito.Mockito._
 
 class LifeSchedulerTest extends FunSpec with Matchers {

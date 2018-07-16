@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
-import com.ferris.planning.utils.PlanningImplicits._
-import com.ferris.planning.utils.TimerComponent
+import com.ferris.utils.FerrisImplicits._
+import com.ferris.utils.TimerComponent
 
 import scala.util.Random
 

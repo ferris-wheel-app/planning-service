@@ -10,7 +10,7 @@ import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
-import com.ferris.planning.utils.TimerComponent
+import com.ferris.utils.TimerComponent
 
 import scala.concurrent.{ExecutionContext, Future}
 

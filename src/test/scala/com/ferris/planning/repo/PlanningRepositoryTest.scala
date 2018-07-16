@@ -13,8 +13,8 @@ import org.scalatest.OptionValues._
 import com.ferris.planning.sample.SampleData.{domain => SD}
 import com.ferris.planning.scheduler.MockLifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
-import com.ferris.planning.utils.MockTimerComponent
-import com.ferris.planning.utils.PlanningImplicits._
+import com.ferris.utils.FerrisImplicits._
+import com.ferris.utils.MockTimerComponent
 import org.mockito.Matchers.{eq => eqTo}
 import org.mockito.Mockito.when
 

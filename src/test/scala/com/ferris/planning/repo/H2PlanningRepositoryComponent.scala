@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import com.ferris.planning.config.PlanningServiceConfig
 import com.ferris.planning.db.H2TablesComponent
 import com.ferris.planning.scheduler.LifeSchedulerComponent
-import com.ferris.planning.utils.TimerComponent
+import com.ferris.utils.TimerComponent
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
