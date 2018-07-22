@@ -7,9 +7,9 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{HttpResponse, RequestEntity, ResponseEntity}
 import akka.stream.ActorMaterializer
+import com.ferris.microservice.resource.DeletionResult
 import com.ferris.planning.contract.format.PlanningRestFormats
-import com.ferris.planning.contract.sample.{ SampleData => SD }
-import com.ferris.planning.contract.resource.Resources.Out.DeletionResult
+import com.ferris.planning.contract.sample.{SampleData => SD}
 import com.ferris.planning.server.PlanningServer
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures

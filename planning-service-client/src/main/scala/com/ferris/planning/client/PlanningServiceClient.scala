@@ -5,6 +5,7 @@ import java.util.UUID
 import akka.http.scaladsl.model.Uri
 import Uri.Path._
 import akka.stream.ActorMaterializer
+import com.ferris.microservice.resource.DeletionResult
 import com.ferris.planning.contract.format.PlanningRestFormats
 import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.contract.resource.Resources.Out._

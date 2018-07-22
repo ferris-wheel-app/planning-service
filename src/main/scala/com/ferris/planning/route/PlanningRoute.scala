@@ -12,7 +12,7 @@ import com.ferris.planning.contract.resource.Resources.In._
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with ResponseMappings {
+trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with PlanningResponseMappings {
   this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
