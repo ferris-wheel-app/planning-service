@@ -5,11 +5,12 @@ import java.util.UUID
 
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
-import com.ferris.planning.db.conversions.TableConversions
+import com.ferris.planning.db.conversions.DomainConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions._
+import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -103,7 +104,7 @@ trait PlanningRepositoryComponent {
 trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   this: TablesComponent with TimerComponent with LifeSchedulerComponent =>
 
-  lazy val tableConversions = new TableConversions(tables)
+  lazy val tableConversions = new DomainConversions(tables)
   import tableConversions.tables._
   import tableConversions.tables.profile.api._
   import tableConversions._
