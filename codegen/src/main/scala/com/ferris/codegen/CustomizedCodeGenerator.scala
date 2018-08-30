@@ -20,7 +20,7 @@ object CustomizedCodeGenerator{
       codegen.map(_.writeToFile(
         "slick.jdbc.MySQLProfile",
         args(0),
-        "com.ferris.planning.table",
+        "com.ferris.planning.model",
         "Tables",
         "Tables.scala"
       )).recover { case e: Exception =>

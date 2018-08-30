@@ -1,6 +1,6 @@
 package com.ferris.planning.db
 
-import com.ferris.planning.table.Tables
+import com.ferris.planning.model.Tables
 
 import slick.jdbc.MySQLProfile
 

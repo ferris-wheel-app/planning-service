@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
-import com.ferris.planning.table.Tables
+import com.ferris.planning.model.Tables
 import com.ferris.planning.model.Model._
 import com.ferris.utils.FerrisImplicits._
 
