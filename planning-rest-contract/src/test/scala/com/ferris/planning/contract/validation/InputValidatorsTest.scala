@@ -4,8 +4,8 @@ import java.util.UUID
 
 import com.ferris.microservice.exceptions.ApiExceptions.{InvalidFieldException, InvalidFieldPayload}
 import com.ferris.planning.contract.resource.Resources.In.{PyramidOfImportanceUpsert, TierUpsert}
-import org.scalatest.{Assertions, FunSpec, Matchers}
 import com.ferris.planning.contract.sample.{SampleData => SD}
+import org.scalatest.{Assertions, FunSpec, Matchers}
 
 class InputValidatorsTest extends FunSpec with Matchers with Assertions {
 

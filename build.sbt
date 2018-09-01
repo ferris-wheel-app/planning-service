@@ -2,31 +2,28 @@ name := "planning-service"
 
 organization := "com.ferris"
 
-version := "0.0.5"
+version := "multi-project-publishing-SNAPSHOT"
 
 scalaVersion in ThisBuild := "2.12.1"
 
 /** main project containing main source code depending on slick and codegen project */
 lazy val root = (project in file("."))
   .settings(rootSettings)
-  .settings(sharedSettings)
-  //.settings(slick := slickCodeGenTask.value) // register manual sbt command)
+  .settings(databaseSettings)
+  .settings(slick := slickCodeGenTask.value) // register manual sbt command)
   //.settings(sourceGenerators in Compile += slickCodeGenTask.taskValue) // register automatic code generation on every compile, remove for only manual use)
   .settings(sourceManaged in Compile <<= baseDirectory { _ / generatedSourcesFolder })
-  //.dependsOn(codegen)
+  .dependsOn(codegen)
   .dependsOn(contract)
 
 /** codegen project containing the customized code generator */
 lazy val codegen = project
-  .settings(sharedSettings)
+  .settings(databaseSettings)
   .settings(libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % dependencies.slickV)
 
-lazy val contract = (project in file("planning-rest-contract"))
-  .settings(rootSettings)
+lazy val contract = project in file("planning-rest-contract")
 
 lazy val client = (project in file("planning-service-client"))
-  .settings(rootSettings)
-  .settings(libraryDependencies += "com.ferris" %% "ferris-http-service-client" % dependencies.ferrisClientV)
   .dependsOn(contract)
 
 
@@ -56,7 +53,7 @@ lazy val rootSettings = {
 }
 
 // shared sbt config between main project and codegen project
-lazy val sharedSettings = Seq(
+lazy val databaseSettings = Seq(
   scalacOptions := Seq("-feature", "-unchecked", "-deprecation"),
   libraryDependencies ++= Seq(
     "com.typesafe.slick"  %% "slick"          % dependencies.slickV,

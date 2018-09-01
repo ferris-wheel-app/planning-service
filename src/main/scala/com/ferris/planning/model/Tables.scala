@@ -1,7 +1,7 @@
 package com.ferris.planning.model
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
-object TableDefinitions extends {
+object Tables extends {
   val profile = slick.jdbc.MySQLProfile
 } with Tables
 

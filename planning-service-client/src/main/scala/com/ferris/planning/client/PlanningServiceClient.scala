@@ -3,7 +3,7 @@ package com.ferris.planning.client
 import java.util.UUID
 
 import akka.http.scaladsl.model.Uri
-import Uri.Path._
+import akka.http.scaladsl.model.Uri.Path._
 import akka.stream.ActorMaterializer
 import com.ferris.microservice.resource.DeletionResult
 import com.ferris.planning.contract.format.PlanningRestFormats
