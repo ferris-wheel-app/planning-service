@@ -11,7 +11,7 @@ lazy val root = (project in file("."))
   .settings(rootSettings)
   .settings(databaseSettings)
   .settings(slick := slickCodeGenTask.value) // register manual sbt command)
-  //.settings(sourceGenerators in Compile += slickCodeGenTask.taskValue) // register automatic code generation on every compile, remove for only manual use)
+  .settings(sourceGenerators in Compile += slickCodeGenTask.taskValue) // register automatic code generation on every compile, remove for only manual use)
   .settings(sourceManaged in Compile <<= baseDirectory { _ / generatedSourcesFolder })
   .dependsOn(codegen)
   .dependsOn(contract)
@@ -78,7 +78,7 @@ lazy val dependencies = new {
   val mockitoV                    = "1.10.19"
 }
 
-lazy val generatedSourcesFolder = "src/main/scala"
+lazy val generatedSourcesFolder = "src/generated-sources/scala"
 
 // code generation task that calls the customized code generator
 lazy val slick = taskKey[Seq[File]]("gen-tables")
@@ -89,7 +89,7 @@ lazy val slickCodeGenTask = Def.task {
   val s = streams.value
   val outputDir = dir.getPath // place generated files in sbt's managed sources folder
   toError(r.run("com.ferris.codegen.CustomizedCodeGenerator", cp.files, Array(outputDir), s.log))
-  val fname = outputDir + "/com/ferris/planning/model/Tables.scala"
+  val fname = outputDir + "/com/ferris/planning/db/Tables.scala"
   Seq(file(fname))
 }
 

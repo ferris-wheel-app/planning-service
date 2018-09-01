@@ -7,7 +7,7 @@ import com.ferris.planning.command.Commands.UpdateList
 import com.ferris.planning.config.PlanningServiceConfig
 import com.ferris.planning.model.Model._
 import com.ferris.planning.model.Model.Statuses._
-import org.scalatest.{AsyncFunSpec, BeforeAndAfterEach, Matchers}
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues._
 import com.ferris.planning.sample.SampleData.{domain => SD}
@@ -25,6 +25,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
   with Matchers
   with ScalaFutures
   with BeforeAndAfterEach
+  with OneInstancePerTest
   with H2PlanningRepositoryComponent
   with MockTimerComponent
   with MockLifeSchedulerComponent {
