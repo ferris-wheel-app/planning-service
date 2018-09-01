@@ -2,7 +2,7 @@ name := "planning-service-client"
 
 organization := "com.ferris"
 
-version := "multi-project-publishing-SNAPSHOT"
+version := "0.0.1"
 
 scalaVersion in ThisBuild := "2.12.1"
 
@@ -26,7 +26,7 @@ lazy val dependencies = new {
   val akkaV                       = "2.4.16"
   val akkaHttpV                   = "10.0.1"
   val ferrisClientV               = "0.0.1"
-  val planningRestV               = "multi-project-publishing-SNAPSHOT"
+  val planningRestV               = "0.0.1"
   val scalaTestV                  = "3.0.1"
   val mockitoV                    = "1.10.19"
 }
