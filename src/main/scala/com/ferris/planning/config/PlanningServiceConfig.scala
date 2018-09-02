@@ -8,7 +8,7 @@ case class PlanningServiceConfig(acceptableProgress: Int) {
 
 object PlanningServiceConfig {
   def apply(config: Config): PlanningServiceConfig = {
-    PlanningServiceConfig(config.getInt("planning-service.acceptable-progress"))
+    PlanningServiceConfig(config.getInt("planning-service.env.pyramid-config.acceptable-progress"))
   }
 }
 
