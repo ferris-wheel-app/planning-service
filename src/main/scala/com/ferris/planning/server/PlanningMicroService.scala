@@ -26,7 +26,7 @@ object PlanningMicroService extends PlanningServer
   override val logger = Logging(system, getClass)
   override val config = MicroServiceConfig
 
-  val db = tables.profile.api.Database.forConfig("db")
+  val db = tables.profile.api.Database.forConfig("planning-service.env.db")
 
   startUp()
 }
