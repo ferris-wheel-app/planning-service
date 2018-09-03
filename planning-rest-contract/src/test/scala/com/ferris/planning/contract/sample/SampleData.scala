@@ -303,4 +303,24 @@ object SampleData {
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)
   )
+
+  val listUpdate = ListUpdate(
+    reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
+  )
+
+  val tierUpsert = TierUpsert(
+    laserDonuts = (1 to 5).map(_ => UUID.randomUUID)
+  )
+
+  val tier = TierView(
+    laserDonuts = UUID.randomUUID :: UUID.randomUUID :: Nil
+  )
+
+  val pyramidUpsert = PyramidOfImportanceUpsert(
+    tiers = (1 to 5).map(_ => tierUpsert)
+  )
+
+  val pyramid = PyramidOfImportanceView(
+    tiers = tier :: Nil
+  )
 }

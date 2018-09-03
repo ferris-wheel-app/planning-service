@@ -31,6 +31,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   private val portionsPath = "portions"
   private val todosPath = "todos"
   private val hobbiesPath = "hobbies"
+  private val pyramidPath = "pyramid"
+  private val currentPath = "current"
 
   def createMessage(creation: MessageCreation): Future[MessageView] =
     makePostRequest[MessageCreation, MessageView](Uri(path = apiPath / messagesPath), creation)
@@ -67,6 +69,9 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def createHobby(creation: HobbyCreation): Future[HobbyView] =
     makePostRequest[HobbyCreation, HobbyView](Uri(path = apiPath / hobbiesPath), creation)
+
+  def createPyramidOfImportance(creation: PyramidOfImportanceUpsert): Future[PyramidOfImportanceView] =
+    makePostRequest[PyramidOfImportanceUpsert, PyramidOfImportanceView](Uri(path = apiPath / pyramidPath), creation)
 
 
   def updateMessage(id: UUID, update: MessageUpdate): Future[MessageView] =
@@ -133,14 +138,23 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def laserDonut(id: UUID): Future[Option[LaserDonutView]] =
     makeGetRequest[Option[LaserDonutView]](Uri(path = apiPath / laserDonutsPath / id.toString))
 
+  def currentLaserDonut: Future[Option[LaserDonutView]] =
+    makeGetRequest[Option[LaserDonutView]](Uri(path = apiPath / laserDonutsPath / currentPath))
+
   def portion(id: UUID): Future[Option[PortionView]] =
     makeGetRequest[Option[PortionView]](Uri(path = apiPath / portionsPath / id.toString))
+
+  def currentPortion: Future[Option[PortionView]] =
+    makeGetRequest[Option[PortionView]](Uri(path = apiPath / portionsPath / currentPath))
 
   def todo(id: UUID): Future[Option[TodoView]] =
     makeGetRequest[Option[TodoView]](Uri(path = apiPath / todosPath / id.toString))
 
   def hobby(id: UUID): Future[Option[HobbyView]] =
     makeGetRequest[Option[HobbyView]](Uri(path = apiPath / hobbiesPath / id.toString))
+
+  def pyramidOfImportance: Future[PyramidOfImportanceView] =
+    makeGetRequest[PyramidOfImportanceView](Uri(path = apiPath / pyramidPath))
 
 
   def messages: Future[List[MessageView]] =

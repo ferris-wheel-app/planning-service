@@ -2,7 +2,7 @@ name := "planning-service"
 
 organization := "com.ferris"
 
-version := "0.0.1"
+version := "0.0.2"
 
 scalaVersion in ThisBuild := "2.12.1"
 
@@ -68,7 +68,7 @@ lazy val dependencies = new {
   val akkaHttpV                   = "10.0.1"
   val ferrisMicroserviceV         = "0.0.1"
   val ferrisJsonUtilsV            = "0.0.2"
-  val ferrisClientV               = "0.0.1"
+  val ferrisClientV               = "0.0.2"
   val ferrisCommonV               = "0.0.5"
   val slickV                      = "3.2.0-M2"
   val mysqlConnectorV             = "5.1.40"

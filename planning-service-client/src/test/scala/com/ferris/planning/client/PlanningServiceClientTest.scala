@@ -141,6 +141,15 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
           response shouldBe SD.hobby
         }
       }
+
+      it("should be able to create a pyramid of importance") {
+        val creationRequest = Marshal(SD.pyramidUpsert.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/pyramid", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createPyramidOfImportance(SD.pyramidUpsert)) { response =>
+          response shouldBe SD.pyramid
+        }
+      }
     }
 
     describe("handling updates") {
@@ -419,6 +428,14 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
+      it("should be able to retrieve the current laser-donut") {
+        val response = Marshal(Envelope("OK", SD.laserDonut)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/laser-donuts/current")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.currentLaserDonut) { response =>
+          response.get shouldBe SD.laserDonut
+        }
+      }
+
       it("should be able to retrieve a list of laser-donuts") {
         val list = SD.laserDonut :: SD.laserDonut :: Nil
         val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
@@ -433,6 +450,14 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.portion)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/portions/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.portion(id)) { response =>
+          response.get shouldBe SD.portion
+        }
+      }
+
+      it("should be able to retrieve the current portion") {
+        val response = Marshal(Envelope("OK", SD.portion)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/portions/current")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.currentPortion) { response =>
           response.get shouldBe SD.portion
         }
       }
@@ -479,6 +504,15 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         when(mockServer.sendGetRequest("/api/hobbies")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.hobbies) { response =>
           response shouldBe list
+        }
+      }
+
+      it("should be able to retrieve a pyramid") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/pyramid")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.pyramidOfImportance) { response =>
+          response shouldBe SD.pyramid
         }
       }
     }
