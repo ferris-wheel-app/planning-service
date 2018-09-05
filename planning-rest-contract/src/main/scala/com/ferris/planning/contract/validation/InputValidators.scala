@@ -1,24 +1,23 @@
 package com.ferris.planning.contract.validation
 
-import com.ferris.microservice.exceptions.ApiExceptions.{InvalidFieldException, InvalidFieldPayload}
+import com.ferris.microservice.validation.InputValidation
 import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.contract.resource.TypeFields._
 
-object InputValidators {
+object InputValidators extends InputValidation {
 
-  val TypeField = "type"
-  val BacklogItemsField = "backlogItems"
-  val GraduationField = "graduation"
-  val StatusField = "status"
-  val FrequencyField = "frequency"
-  val LaserDonutsField = "laserDonuts"
-  val TiersField = "tiers"
+  private val TypeField = "type"
+  private val BacklogItemsField = "backlogItems"
+  private val GraduationField = "graduation"
+  private val StatusField = "status"
+  private val FrequencyField = "frequency"
+  private val LaserDonutsField = "laserDonuts"
+  private val TiersField = "tiers"
 
-  val MaxGoalBacklogItemsSize = 10
-  val MaxTierSize = 10
-  val MinTierSize = 5
-  val MinTopTierSize = 5
-  val MinPyramidSize = 5
+  private val MaxGoalBacklogItemsSize = 10
+  private val MaxTierSize = 10
+  private val MinTierSize = 5
+  private val MinPyramidSize = 5
 
   def checkValidity(backlogItemCreation: BacklogItemCreation): Unit = {
     checkField(BacklogItemType.values.contains(backlogItemCreation.`type`), TypeField)
@@ -106,35 +105,5 @@ object InputValidators {
 
   def checkValidity(pyramidCreation: PyramidOfImportanceUpsert): Unit = {
     checkMinSize(pyramidCreation.tiers, TiersField, MinPyramidSize)
-  }
-
-  private def checkMaxSize[T](list: Seq[T], name: String, max: Int): Unit = {
-    checkField(list.size <= max, name, s"${camelCaseToSpaced(name)} must be a maximum of $max items")
-  }
-
-  private def checkMinSize[T](list: Seq[T], name: String, min: Int): Unit = {
-    checkField(list.size >= min, name, s"${camelCaseToSpaced(name)} must be a minimum of $min items")
-  }
-
-  private def checkForDuplication[A](ls: Seq[A], name: String): Unit = {
-    checkField(ls.toSet.size == ls.size, name, s"${camelCaseToSpaced(name)} cannot contain duplicate entries")
-  }
-
-  private def checkField(cond: Boolean, name: String): Unit = {
-    val displayedName: String = camelCaseToSpaced(name)
-    if (!cond) throw InvalidFieldException("InvalidField", s"Invalid $displayedName", Some(InvalidFieldPayload(name)))
-  }
-
-  private def checkField(cond: Boolean, name: String, msg: String): Unit = {
-    if (!cond) throw InvalidFieldException("InvalidField", msg, Some(InvalidFieldPayload(name)))
-  }
-
-  private def camelCaseToSpaced(s: String): String = {
-    require(s.length > 0)
-    val tail = s.substring(1).foldRight(List.empty[Char]){ (char, arr) =>
-      if (char.isUpper) ' ' :: char :: arr
-      else char :: arr
-    }
-    s.charAt(0).toUpper :: tail mkString ""
   }
 }

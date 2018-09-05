@@ -15,6 +15,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-core"             % dependencies.akkaHttpV,
     "com.typesafe.akka" %% "akka-http"                  % dependencies.akkaHttpV,
     "com.typesafe.akka" %% "akka-http-spray-json"       % dependencies.akkaHttpV,
+    "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroServiceV,
     "com.ferris"        %% "ferris-http-service-client" % dependencies.ferrisClientV,
     "com.ferris"        %% "planning-rest-contract"     % dependencies.planningRestV,
     "org.scalatest"     %% "scalatest"                  % dependencies.scalaTestV       % Test,
@@ -25,6 +26,7 @@ libraryDependencies ++= {
 lazy val dependencies = new {
   val akkaV                       = "2.4.16"
   val akkaHttpV                   = "10.0.1"
+  val ferrisMicroServiceV         = "0.0.2"
   val ferrisClientV               = "0.0.2"
   val planningRestV               = "0.0.1"
   val scalaTestV                  = "3.0.1"

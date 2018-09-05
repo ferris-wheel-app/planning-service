@@ -10,7 +10,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 libraryDependencies ++= {
   Seq(
-    "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroserviceV,
+    "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroServiceV,
     "com.ferris"        %% "ferris-json-utils"          % dependencies.ferrisJsonUtilsV,
     "com.github.fommil" %% "spray-json-shapeless"       % dependencies.fommilV,
     "org.scalatest"     %% "scalatest"                  % dependencies.scalaTestV       % Test
@@ -18,7 +18,7 @@ libraryDependencies ++= {
 }
 
 lazy val dependencies = new {
-  val ferrisMicroserviceV         = "0.0.1"
+  val ferrisMicroServiceV         = "0.0.2"
   val ferrisJsonUtilsV            = "0.0.2"
   val ferrisClientV               = "0.0.1"
   val ferrisCommonV               = "0.0.5"
