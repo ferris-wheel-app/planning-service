@@ -190,8 +190,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           themeId = creation.themeId,
           summary = creation.summary,
           description = creation.description,
-          level = creation.level,
-          priority = creation.priority,
           status = creation.status.dbValue,
           graduation = creation.graduation.dbValue,
           createdOn = timer.timestampOfNow,
@@ -396,11 +394,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal] = {
       def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow) = {
-        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.level, goal.priority, goal.status,
+        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.status,
           goal.graduation, goal.lastModified))
           .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), update.level.getOrElse(old.level),
-            UpdateBoolean.keepOrReplace(update.priority, old.priority), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
             UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
       }
 

@@ -111,8 +111,6 @@ object SampleData {
     backlogItems = Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
-    level = 1,
-    priority = false,
     graduation = "hobby",
     status = "not_achieved"
   )
@@ -122,8 +120,6 @@ object SampleData {
     backlogItems = Some(Nil),
     summary = Some("Learn to play an instrument"),
     description = Some("Learn to play the piano, the guitar, and the saxophone"),
-    level = Some(2),
-    priority = Some(false),
     graduation = Some("abandoned"),
     status = Some("employed")
   )
@@ -134,8 +130,6 @@ object SampleData {
     backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
-    level = 1,
-    priority = false,
     graduation = "hobby",
     status = "not_achieved",
     createdOn = LocalDateTime.now,

@@ -72,8 +72,6 @@ class DomainConversions(val tables: Tables) {
         backlogItems = backlogItems.map(item => UUID.fromString(item.uuid)),
         summary = goal.summary,
         description = goal.description,
-        level = goal.level,
-        priority = goal.priority,
         status = GoalStatuses.withName(goal.status),
         graduation = GraduationTypes.withName(goal.graduation),
         createdOn = goal.createdOn.toLocalDateTime,

@@ -72,8 +72,6 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
-      level: Int,
-      priority: Boolean,
       graduation: String,
       status: String
     ) {
@@ -85,8 +83,6 @@ object Resources {
       backlogItems: Option[Seq[UUID]],
       summary: Option[String],
       description: Option[String],
-      level: Option[Int],
-      priority: Option[Boolean],
       graduation: Option[String],
       status: Option[String]
     ) {
@@ -273,8 +269,6 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
-      level: Int,
-      priority: Boolean,
       graduation: String,
       status: String,
       createdOn: LocalDateTime,

@@ -60,8 +60,6 @@ create table goal (
   theme_id VARCHAR(36) NOT NULL,
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  level INT(20) NOT NULL,
-  priority TINYINT(1) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
   graduation VARCHAR(36) NOT NULL check (graduation in ('ABANDONED', 'THREAD', 'WEAVE', 'HOBBY', 'GOAL')),
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

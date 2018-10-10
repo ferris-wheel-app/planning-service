@@ -18,7 +18,7 @@ libraryDependencies ++= {
 }
 
 lazy val dependencies = new {
-  val ferrisMicroServiceV         = "0.0.2"
+  val ferrisMicroServiceV         = "0.0.3"
   val ferrisJsonUtilsV            = "0.0.2"
   val ferrisClientV               = "0.0.1"
   val ferrisCommonV               = "0.0.5"

@@ -52,8 +52,6 @@ object Model {
     backlogItems: Seq[UUID],
     summary: String,
     description: String,
-    level: Int,
-    priority: Boolean,
     graduation: GraduationTypes.GraduationType,
     status: GoalStatuses.GoalStatus,
     createdOn: LocalDateTime,

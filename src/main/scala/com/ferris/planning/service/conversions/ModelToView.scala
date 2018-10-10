@@ -74,8 +74,6 @@ object ModelToView {
         backlogItems = goal.backlogItems,
         summary = goal.summary,
         description = goal.description,
-        level = goal.level,
-        priority = goal.priority,
         status = TypeResolvers.GoalStatus.toString(goal.status),
         graduation = TypeResolvers.GraduationType.toString(goal.graduation),
         createdOn = goal.createdOn,

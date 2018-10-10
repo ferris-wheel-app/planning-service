@@ -351,8 +351,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         created.backlogItems should contain theSameElementsAs backlogItems
         created.summary shouldBe SD.goalCreation.summary
         created.description shouldBe SD.goalCreation.description
-        created.level shouldBe SD.goalCreation.level
-        created.priority shouldBe SD.goalCreation.priority
         created.graduation shouldBe SD.goalCreation.graduation
         created.status shouldBe SD.goalCreation.status
       }
@@ -373,8 +371,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.backlogItems should contain theSameElementsAs newBacklogItems
         updated.summary shouldBe SD.goalUpdate.summary.value
         updated.description shouldBe SD.goalUpdate.description.value
-        updated.level shouldBe SD.goalUpdate.level.value
-        updated.priority shouldBe SD.goalUpdate.priority.value
         updated.graduation shouldBe SD.goalUpdate.graduation.value
         updated.status shouldBe SD.goalUpdate.status.value
       }

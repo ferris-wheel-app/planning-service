@@ -179,23 +179,21 @@ trait Tables {
    *  @param themeId Database column THEME_ID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
-   *  @param level Database column LEVEL SqlType(INTEGER)
-   *  @param priority Database column PRIORITY SqlType(TINYINT)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
    *  @param graduation Database column GRADUATION SqlType(VARCHAR), Length(36,true)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP) */
-  case class GoalRow(id: Long, uuid: String, themeId: String, summary: String, description: String, level: Int, priority: Byte, status: String, graduation: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
+  case class GoalRow(id: Long, uuid: String, themeId: String, summary: String, description: String, status: String, graduation: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching GoalRow objects using plain SQL queries */
-  implicit def GetResultGoalRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[Byte], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[GoalRow] = GR{
+  implicit def GetResultGoalRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[GoalRow] = GR{
     prs => import prs._
-    GoalRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[Byte], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+    GoalRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table GOAL. Objects of this class serve as prototypes for rows in queries. */
   class GoalTable(_tableTag: Tag) extends profile.api.Table[GoalRow](_tableTag, "GOAL") {
-    def * = (id, uuid, themeId, summary, description, level, priority, status, graduation, createdOn, lastModified) <> (GoalRow.tupled, GoalRow.unapply)
+    def * = (id, uuid, themeId, summary, description, status, graduation, createdOn, lastModified) <> (GoalRow.tupled, GoalRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(themeId), Rep.Some(summary), Rep.Some(description), Rep.Some(level), Rep.Some(priority), Rep.Some(status), Rep.Some(graduation), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> GoalRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(themeId), Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(graduation), Rep.Some(createdOn), lastModified).shaped.<>({r=>import r._; _1.map(_=> GoalRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -207,10 +205,6 @@ trait Tables {
     val summary: Rep[String] = column[String]("SUMMARY", O.Length(256,varying=true))
     /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
-    /** Database column LEVEL SqlType(INTEGER) */
-    val level: Rep[Int] = column[Int]("LEVEL")
-    /** Database column PRIORITY SqlType(TINYINT) */
-    val priority: Rep[Byte] = column[Byte]("PRIORITY")
     /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
     /** Database column GRADUATION SqlType(VARCHAR), Length(36,true) */

@@ -89,8 +89,6 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
-      level = goal.level,
-      priority = goal.priority,
       status = TypeResolvers.GoalStatus.withName(goal.status),
       graduation = TypeResolvers.GraduationType.withName(goal.graduation)
     )
@@ -102,8 +100,6 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
-      level = goal.level,
-      priority = goal.priority,
       status = goal.status.map(TypeResolvers.GoalStatus.withName),
       graduation = goal.graduation.map(TypeResolvers.GraduationType.withName)
     )

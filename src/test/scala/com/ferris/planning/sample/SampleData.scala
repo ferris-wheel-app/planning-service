@@ -115,8 +115,6 @@ object SampleData {
       backlogItems = Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
-      level = 1,
-      priority = false,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved
     )
@@ -126,8 +124,6 @@ object SampleData {
       backlogItems = Some(Nil),
       summary = Some("Learn to play an instrument"),
       description = Some("Learn to play the piano, the guitar, and the saxophone"),
-      level = Some(2),
-      priority = Some(false),
       graduation = Some(GraduationTypes.Abandoned),
       status = Some(GoalStatuses.Employed)
     )
@@ -138,8 +134,6 @@ object SampleData {
       backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
-      level = 1,
-      priority = false,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved,
       createdOn = LocalDateTime.now,
@@ -461,8 +455,6 @@ object SampleData {
       backlogItems = domain.goalCreation.backlogItems,
       summary = domain.goalCreation.summary,
       description = domain.goalCreation.description,
-      level = domain.goalCreation.level,
-      priority = domain.goalCreation.priority,
       graduation = GraduationType.toString(domain.goalCreation.graduation),
       status = GoalStatus.toString(domain.goalCreation.status)
     )
@@ -472,8 +464,6 @@ object SampleData {
       backlogItems = domain.goalUpdate.backlogItems,
       summary = domain.goalUpdate.summary,
       description = domain.goalUpdate.description,
-      level = domain.goalUpdate.level,
-      priority = domain.goalUpdate.priority,
       graduation = domain.goalUpdate.graduation.map(GraduationType.toString),
       status = domain.goalUpdate.status.map(GoalStatus.toString)
     )
@@ -484,8 +474,6 @@ object SampleData {
       backlogItems = domain.goal.backlogItems,
       summary = domain.goal.summary,
       description = domain.goal.description,
-      level = domain.goal.level,
-      priority = domain.goal.priority,
       graduation = GraduationType.toString(domain.goal.graduation),
       status = GoalStatus.toString(domain.goal.status),
       createdOn = domain.goal.createdOn,
