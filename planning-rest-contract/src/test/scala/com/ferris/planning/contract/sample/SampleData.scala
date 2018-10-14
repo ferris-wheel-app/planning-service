@@ -271,8 +271,7 @@ object SampleData {
     summary = "Yoga",
     description = "Train in Acro-Yoga",
     frequency = "continuous",
-    `type` = "active",
-    status = "complete"
+    `type` = "active"
   )
 
   val hobbyUpdate = HobbyUpdate(
@@ -280,8 +279,7 @@ object SampleData {
     summary = Some("Play ping-pong"),
     description = Some("Table tennis"),
     frequency = Some("continuous"),
-    `type` = Some("active"),
-    status = Some("complete")
+    `type` = Some("active")
   )
 
   val hobby = HobbyView(
@@ -291,7 +289,6 @@ object SampleData {
     description = "Train in Acro-Yoga",
     frequency = "continuous",
     `type` = "active",
-    status = "complete",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)

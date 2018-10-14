@@ -158,7 +158,6 @@ create table hobby (
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   frequency VARCHAR(36) NOT NULL check (frequency in ('ONE_OFF', 'CONTINUOUS')),
-  status VARCHAR(36) NOT NULL check (status in ('PLANNED', 'IN_PROGRESS', 'COMPLETE')),
   type VARCHAR(36) NOT NULL check (type in ('ACTIVE', 'PASSIVE')),
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP,

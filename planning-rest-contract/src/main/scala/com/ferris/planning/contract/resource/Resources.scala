@@ -181,8 +181,7 @@ object Resources {
       summary: String,
       description: String,
       frequency: String,
-      `type`: String,
-      status: String
+      `type`: String
     ) {
       checkValidity(this)
     }
@@ -192,8 +191,7 @@ object Resources {
       summary: Option[String],
       description: Option[String],
       frequency: Option[String],
-      `type`: Option[String],
-      status: Option[String]
+      `type`: Option[String]
     ) {
       checkValidity(this)
     }
@@ -345,7 +343,6 @@ object Resources {
       description: String,
       frequency: String,
       `type`: String,
-      status: String,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]

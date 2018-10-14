@@ -124,7 +124,6 @@ object Model {
     description: String,
     frequency: HobbyFrequencies.HobbyFrequency,
     `type`: HobbyTypes.HobbyType,
-    status: Statuses.Status,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],
     lastPerformed: Option[LocalDateTime]

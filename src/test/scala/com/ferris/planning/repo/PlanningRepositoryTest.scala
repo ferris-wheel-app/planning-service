@@ -1147,7 +1147,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         created.description shouldBe SD.hobbyCreation.description
         created.frequency shouldBe SD.hobbyCreation.frequency
         created.`type` shouldBe SD.hobbyCreation.`type`
-        created.status shouldBe SD.hobbyCreation.status
       }
     }
 
@@ -1162,7 +1161,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.description shouldBe SD.hobbyUpdate.description.value
         updated.frequency shouldBe SD.hobbyUpdate.frequency.value
         updated.`type` shouldBe SD.hobbyUpdate.`type`.value
-        updated.status shouldBe SD.hobbyUpdate.status.value
       }
 
       it("should throw an exception if a hobby is not found") {

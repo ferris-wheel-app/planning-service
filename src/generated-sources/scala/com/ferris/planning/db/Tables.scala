@@ -227,23 +227,22 @@ trait Tables {
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param frequency Database column FREQUENCY SqlType(VARCHAR), Length(36,true)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
    *  @param `type` Database column TYPE SqlType(VARCHAR), Length(36,true)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class HobbyRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, frequency: String, status: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class HobbyRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, frequency: String, `type`: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching HobbyRow objects using plain SQL queries */
   implicit def GetResultHobbyRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[HobbyRow] = GR{
     prs => import prs._
-    HobbyRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+    HobbyRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table HOBBY. Objects of this class serve as prototypes for rows in queries.
    *  NOTE: The following names collided with Scala keywords and were escaped: type */
   class HobbyTable(_tableTag: Tag) extends profile.api.Table[HobbyRow](_tableTag, "HOBBY") {
-    def * = (id, uuid, goalId, summary, description, frequency, status, `type`, createdOn, lastModified, lastPerformed) <> (HobbyRow.tupled, HobbyRow.unapply)
+    def * = (id, uuid, goalId, summary, description, frequency, `type`, createdOn, lastModified, lastPerformed) <> (HobbyRow.tupled, HobbyRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(frequency), Rep.Some(status), Rep.Some(`type`), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> HobbyRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(frequency), Rep.Some(`type`), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> HobbyRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -257,8 +256,6 @@ trait Tables {
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
     /** Database column FREQUENCY SqlType(VARCHAR), Length(36,true) */
     val frequency: Rep[String] = column[String]("FREQUENCY", O.Length(36,varying=true))
-    /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
-    val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
     /** Database column TYPE SqlType(VARCHAR), Length(36,true)
      *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `type`: Rep[String] = column[String]("TYPE", O.Length(36,varying=true))

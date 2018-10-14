@@ -156,7 +156,6 @@ class DomainConversions(val tables: Tables) {
       summary = row.summary,
       description = row.description,
       frequency = HobbyFrequencies.withName(row.frequency),
-      status = Statuses.withName(row.status),
       `type` = HobbyTypes.withName(row.`type`),
       createdOn = row.createdOn.toLocalDateTime,
       lastModified = row.lastModified.map(_.toLocalDateTime),

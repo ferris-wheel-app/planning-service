@@ -202,7 +202,6 @@ object ExternalToCommand {
       summary = hobby.summary,
       description = hobby.description,
       frequency = TypeResolvers.HobbyFrequency.withName(hobby.frequency),
-      status = TypeResolvers.Status.withName(hobby.status),
       `type` = TypeResolvers.HobbyType.withName(hobby.`type`)
     )
   }
@@ -213,7 +212,6 @@ object ExternalToCommand {
       summary = hobby.summary,
       description = hobby.description,
       frequency = hobby.frequency.map(TypeResolvers.HobbyFrequency.withName),
-      status = hobby.status.map(TypeResolvers.Status.withName),
       `type` = hobby.`type`.map(TypeResolvers.HobbyType.withName)
     )
   }

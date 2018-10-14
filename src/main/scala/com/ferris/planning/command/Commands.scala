@@ -149,8 +149,7 @@ object Commands {
     summary: String,
     description: String,
     frequency: HobbyFrequencies.HobbyFrequency,
-    `type`: HobbyTypes.HobbyType,
-    status: Statuses.Status
+    `type`: HobbyTypes.HobbyType
   )
 
   case class UpdateHobby (
@@ -158,8 +157,7 @@ object Commands {
     summary: Option[String],
     description: Option[String],
     frequency: Option[HobbyFrequencies.HobbyFrequency],
-    `type`: Option[HobbyTypes.HobbyType],
-    status: Option[Statuses.Status]
+    `type`: Option[HobbyTypes.HobbyType]
   )
 
   case class UpdateList (

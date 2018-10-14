@@ -169,7 +169,6 @@ object ModelToView {
         summary = hobby.summary,
         description = hobby.description,
         frequency = TypeResolvers.HobbyFrequency.toString(hobby.frequency),
-        status = TypeResolvers.Status.toString(hobby.status),
         `type` = TypeResolvers.HobbyType.toString(hobby.`type`),
         createdOn = hobby.createdOn,
         lastModified = hobby.lastModified,

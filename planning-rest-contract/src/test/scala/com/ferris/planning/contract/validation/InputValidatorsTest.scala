@@ -339,8 +339,7 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
     it("should allow the creation of a valid object") {
       SD.hobbyCreation.copy(
         frequency = SD.hobbyCreation.frequency,
-        `type` = SD.hobbyCreation.`type`,
-        status = SD.hobbyCreation.status
+        `type` = SD.hobbyCreation.`type`
       )
     }
 
@@ -363,24 +362,13 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
       val expected = InvalidFieldException("InvalidField", "Invalid Type", Some(InvalidFieldPayload("type")))
       caught shouldBe expected
     }
-
-    it("should throw an exception if the status is invalid") {
-      val caught = intercept[InvalidFieldException] {
-        SD.hobbyCreation.copy(
-          status = "dead"
-        )
-      }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
-      caught shouldBe expected
-    }
   }
 
   describe("validating a hobby update") {
     it("should allow the creation of a valid object") {
       SD.hobbyUpdate.copy(
         frequency = SD.hobbyUpdate.frequency,
-        `type` = SD.hobbyUpdate.`type`,
-        status = SD.hobbyUpdate.status
+        `type` = SD.hobbyUpdate.`type`
       )
     }
 
@@ -401,16 +389,6 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
         )
       }
       val expected = InvalidFieldException("InvalidField", "Invalid Type", Some(InvalidFieldPayload("type")))
-      caught shouldBe expected
-    }
-
-    it("should throw an exception if the status is invalid") {
-      val caught = intercept[InvalidFieldException] {
-        SD.hobbyUpdate.copy(
-          status = Some("dead")
-        )
-      }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
       caught shouldBe expected
     }
   }

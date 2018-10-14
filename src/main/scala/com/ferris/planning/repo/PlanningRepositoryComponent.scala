@@ -302,7 +302,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         summary = creation.summary,
         description = creation.description,
         frequency = creation.frequency.dbValue,
-        status = creation.status.dbValue,
         `type` = creation.`type`.dbValue,
         createdOn = timer.timestampOfNow,
         lastModified = None,
@@ -579,16 +578,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: update.frequency :: update.`type` :: Nil,
-        statusUpdate = update.status :: Nil
+        statusUpdate = Nil
       )
-      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency, hobby.status,
+      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency,
         hobby.`type`, hobby.lastModified, hobby.lastPerformed))
       val action = getHobbyAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
             update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.frequency, old.frequency),
-            UpdateTypeEnum.keepOrReplace(update.status, old.status), UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`),
-            lastModified, lastPerformed)
+            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
             .andThen(getHobbyAction(uuid).map(_.head))
         } getOrElse DBIO.failed(HobbyNotFoundException())
       }.transactionally

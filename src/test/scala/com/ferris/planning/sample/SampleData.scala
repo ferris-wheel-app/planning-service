@@ -275,8 +275,7 @@ object SampleData {
       summary = "Yoga",
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
-      `type` = HobbyTypes.Active,
-      status = Statuses.Planned
+      `type` = HobbyTypes.Active
     )
 
     val hobbyUpdate = UpdateHobby(
@@ -284,8 +283,7 @@ object SampleData {
       summary = Some("Play ping-pong"),
       description = Some("Table tennis"),
       frequency = Some(HobbyFrequencies.Continuous),
-      `type` = Some(HobbyTypes.Active),
-      status = Some(Statuses.Planned)
+      `type` = Some(HobbyTypes.Active)
     )
 
     val hobby = Hobby(
@@ -295,7 +293,6 @@ object SampleData {
       description = "Train in Acro-Yoga",
       frequency = HobbyFrequencies.Continuous,
       `type` = HobbyTypes.Active,
-      status = Statuses.Planned,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -614,8 +611,7 @@ object SampleData {
       summary = domain.hobbyCreation.summary,
       description = domain.hobbyCreation.description,
       frequency = HobbyFrequency.toString(domain.hobbyCreation.frequency),
-      `type` = HobbyType.toString(domain.hobbyCreation.`type`),
-      status = Status.toString(domain.hobbyCreation.status)
+      `type` = HobbyType.toString(domain.hobbyCreation.`type`)
     )
 
     val hobbyUpdate = HobbyUpdate(
@@ -623,8 +619,7 @@ object SampleData {
       summary = domain.hobbyUpdate.summary,
       description = domain.hobbyUpdate.description,
       frequency = domain.hobbyUpdate.frequency.map(HobbyFrequency.toString),
-      `type` = domain.hobbyUpdate.`type`.map(HobbyType.toString),
-      status = domain.hobbyUpdate.status.map(Status.toString)
+      `type` = domain.hobbyUpdate.`type`.map(HobbyType.toString)
     )
 
     val hobby = HobbyView(
@@ -634,7 +629,6 @@ object SampleData {
       description = domain.hobby.description,
       frequency = HobbyFrequency.toString(domain.hobby.frequency),
       `type` = HobbyType.toString(domain.hobby.`type`),
-      status = Status.toString(domain.hobby.status),
       createdOn = domain.hobby.createdOn,
       lastModified = domain.hobby.lastModified,
       lastPerformed = domain.hobby.lastPerformed

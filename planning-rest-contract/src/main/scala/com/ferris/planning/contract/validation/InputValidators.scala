@@ -81,13 +81,11 @@ object InputValidators extends InputValidation {
   def checkValidity(hobbyCreation: HobbyCreation): Unit = {
     checkField(HobbyFrequency.values.contains(hobbyCreation.frequency), FrequencyField)
     checkField(HobbyType.values.contains(hobbyCreation.`type`), TypeField)
-    checkField(Status.values.contains(hobbyCreation.status), StatusField)
   }
 
   def checkValidity(hobbyUpdate: HobbyUpdate): Unit = {
     hobbyUpdate.frequency.foreach(frequency => checkField(HobbyFrequency.values.contains(frequency), FrequencyField))
     hobbyUpdate.`type`.foreach(`type` => checkField(HobbyType.values.contains(`type`), TypeField))
-    hobbyUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
   }
 
   def checkValidity(tierCreation: TierUpsert): Unit = {
