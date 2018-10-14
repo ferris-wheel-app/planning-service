@@ -335,42 +335,6 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
     }
   }
 
-  describe("validating a todo creation") {
-    it("should allow the creation of a valid object") {
-      SD.todoCreation.copy(
-        status = SD.todoCreation.status
-      )
-    }
-
-    it("should throw an exception if the status is invalid") {
-      val caught = intercept[InvalidFieldException] {
-        SD.todoCreation.copy(
-          status = "dead"
-        )
-      }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
-      caught shouldBe expected
-    }
-  }
-
-  describe("validating a todo update") {
-    it("should allow the creation of a valid object") {
-      SD.todoUpdate.copy(
-        status = SD.todoUpdate.status
-      )
-    }
-
-    it("should throw an exception if the status is invalid") {
-      val caught = intercept[InvalidFieldException] {
-        SD.todoUpdate.copy(
-          status = Some("dead")
-        )
-      }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
-      caught shouldBe expected
-    }
-  }
-
   describe("validating a hobby creation") {
     it("should allow the creation of a valid object") {
       SD.hobbyCreation.copy(

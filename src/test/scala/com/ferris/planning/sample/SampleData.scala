@@ -250,14 +250,13 @@ object SampleData {
 
     val todoCreation = CreateTodo(
       portionId = UUID.randomUUID,
-      description = "Create sample data for tests",
-      status = Statuses.Complete
+      description = "Create sample data for tests"
     )
 
     val todoUpdate = UpdateTodo(
       portionId = Some(UUID.randomUUID),
       description = Some("Create repository tests"),
-      status = Some(Statuses.Complete)
+      isDone = Some(true)
     )
 
     val todo = Todo(
@@ -265,7 +264,7 @@ object SampleData {
       portionId = UUID.randomUUID,
       description = "Create sample data for tests",
       order = 4,
-      status = Statuses.Complete,
+      isDone = true,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -326,7 +325,7 @@ object SampleData {
     val scheduledTodo = ScheduledTodo(
       uuid = UUID.randomUUID,
       order = 1,
-      status = Statuses.Planned
+      isDone = false
     )
 
     val scheduledPortion = ScheduledPortion(
@@ -590,14 +589,13 @@ object SampleData {
 
     val todoCreation = TodoCreation(
       portionId = domain.todoCreation.portionId,
-      description = domain.todoCreation.description,
-      status = Status.toString(domain.todoCreation.status)
+      description = domain.todoCreation.description
     )
 
     val todoUpdate = TodoUpdate(
       portionId = domain.todoUpdate.portionId,
       description = domain.todoUpdate.description,
-      status = domain.todoUpdate.status.map(Status.toString)
+      isDone = domain.todoUpdate.isDone
     )
 
     val todo = TodoView(
@@ -605,7 +603,7 @@ object SampleData {
       portionId = domain.todo.portionId,
       description = domain.todo.description,
       order = domain.todo.order,
-      status = Status.toString(domain.todo.status),
+      isDone = domain.todo.isDone,
       createdOn = domain.todo.createdOn,
       lastModified = domain.todo.lastModified,
       lastPerformed = domain.todo.lastPerformed

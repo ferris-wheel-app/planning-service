@@ -153,7 +153,7 @@ object ModelToView {
         portionId = todo.portionId,
         description = todo.description,
         order = todo.order,
-        status = TypeResolvers.Status.toString(todo.status),
+        isDone = todo.isDone,
         createdOn = todo.createdOn,
         lastModified = todo.lastModified,
         lastPerformed = todo.lastPerformed

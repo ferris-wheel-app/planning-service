@@ -144,7 +144,7 @@ trait DefaultLifeSchedulerComponent extends LifeSchedulerComponent {
     private def progressPercentage(laserDonut: ScheduledLaserDonut): Int = {
       val all = laserDonut.portions.flatMap(_.todos)
       val total = all.size
-      val completed: Double = all.count(_.status == Statuses.Complete)
+      val completed: Double = all.count(_.isDone)
       ((completed / total) * 100).toInt
     }
   }

@@ -167,19 +167,14 @@ object Resources {
 
     case class TodoCreation (
       portionId: UUID,
-      description: String,
-      status: String
-    ) {
-      checkValidity(this)
-    }
+      description: String
+    )
 
     case class TodoUpdate (
       portionId: Option[UUID],
       description: Option[String],
-      status: Option[String]
-    ) {
-      checkValidity(this)
-    }
+      isDone: Option[Boolean]
+    )
 
     case class HobbyCreation (
       goalId: Option[UUID],
@@ -337,7 +332,7 @@ object Resources {
       portionId: UUID,
       description: String,
       order: Int,
-      status: String,
+      isDone: Boolean,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]

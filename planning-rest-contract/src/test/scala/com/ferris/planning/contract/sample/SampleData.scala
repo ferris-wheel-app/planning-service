@@ -246,14 +246,13 @@ object SampleData {
 
   val todoCreation = TodoCreation(
     portionId = UUID.randomUUID,
-    description = "Create sample data for tests",
-    status = "complete"
+    description = "Create sample data for tests"
   )
 
   val todoUpdate = TodoUpdate(
     portionId = Some(UUID.randomUUID),
     description = Some("Create repository tests"),
-    status = Some("complete")
+    isDone = Some(true)
   )
 
   val todo = TodoView(
@@ -261,7 +260,7 @@ object SampleData {
     portionId = UUID.randomUUID,
     description = "Create sample data for tests",
     order = 4,
-    status = "complete",
+    isDone = true,
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)

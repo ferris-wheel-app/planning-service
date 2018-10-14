@@ -85,9 +85,8 @@ class LifeSchedulerTest extends FunSpec with Matchers {
         val previousUpdate = LocalDateTime.now
         val nextUpdate = previousUpdate.plusDays(7)
 
-        val todos = (1 to 6).map(_ => scheduledTodo.copy(status = Complete)) ++
-          (1 to 2).map(_ => scheduledTodo.copy(status = InProgress)) ++
-          (1 to 2).map(_ => scheduledTodo.copy(status = Planned))
+        val todos = (1 to 6).map(_ => scheduledTodo.copy(isDone = true)) ++
+          (1 to 4).map(_ => scheduledTodo.copy(isDone = false))
         val portions = (1 to 12).map(_ => scheduledPortion.copy(todos = todos))
         val d = scheduledLaserDonut.copy(status = Planned, portions = portions)
 
@@ -123,9 +122,8 @@ class LifeSchedulerTest extends FunSpec with Matchers {
         val previousUpdate = LocalDateTime.now
         val nextUpdate = previousUpdate.plusDays(7)
 
-        val todos = (1 to 4).map(_ => scheduledTodo.copy(status = Complete)) ++
-          (1 to 3).map(_ => scheduledTodo.copy(status = InProgress)) ++
-          (1 to 3).map(_ => scheduledTodo.copy(status = Planned))
+        val todos = (1 to 4).map(_ => scheduledTodo.copy(isDone = true)) ++
+          (1 to 6).map(_ => scheduledTodo.copy(isDone = false))
         val portions = (1 to 12).map(_ => scheduledPortion.copy(todos = todos))
         val d = scheduledLaserDonut.copy(status = Planned, portions = portions)
 
@@ -204,13 +202,12 @@ class LifeSchedulerTest extends FunSpec with Matchers {
         val previousUpdate = LocalDateTime.now
         val nextUpdate = previousUpdate.plusDays(7)
 
-        val lowestPerformedTodos = (1 to 6).map(_ => scheduledTodo.copy(status = Complete)) ++
-          (1 to 2).map(_ => scheduledTodo.copy(status = InProgress)) ++
-          (1 to 2).map(_ => scheduledTodo.copy(status = Planned))
-        val mediumPerformedTodos = (1 to 7).map(_ => scheduledTodo.copy(status = Complete)) ++
-          (1 to 3).map(_ => scheduledTodo.copy(status = InProgress))
-        val highestPerformedTodos = (1 to 8).map(_ => scheduledTodo.copy(status = Complete)) ++
-          (1 to 2).map(_ => scheduledTodo.copy(status = Planned))
+        val lowestPerformedTodos = (1 to 6).map(_ => scheduledTodo.copy(isDone = true)) ++
+          (1 to 4).map(_ => scheduledTodo.copy(isDone = false))
+        val mediumPerformedTodos = (1 to 7).map(_ => scheduledTodo.copy(isDone = true)) ++
+          (1 to 3).map(_ => scheduledTodo.copy(isDone = false))
+        val highestPerformedTodos = (1 to 8).map(_ => scheduledTodo.copy(isDone = true)) ++
+          (1 to 2).map(_ => scheduledTodo.copy(isDone = false))
 
         val lowestPerformedPortions = (1 to 12).map(_ => scheduledPortion.copy(todos = lowestPerformedTodos))
         val mediumPerformedPortions = (1 to 12).map(_ => scheduledPortion.copy(todos = mediumPerformedTodos))

@@ -416,8 +416,8 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
    *  @param tier Database column TIER SqlType(INTEGER)
-   *  @param current Database column CURRENT SqlType(TINYINT) */
-  case class ScheduledLaserDonutRow(id: Long, laserDonutId: Long, tier: Int, current: Byte)
+   *  @param isCurrent Database column IS_CURRENT SqlType(TINYINT) */
+  case class ScheduledLaserDonutRow(id: Long, laserDonutId: Long, tier: Int, isCurrent: Byte)
   /** GetResult implicit for fetching ScheduledLaserDonutRow objects using plain SQL queries */
   implicit def GetResultScheduledLaserDonutRow(implicit e0: GR[Long], e1: GR[Int], e2: GR[Byte]): GR[ScheduledLaserDonutRow] = GR{
     prs => import prs._
@@ -425,9 +425,9 @@ trait Tables {
   }
   /** Table description of table SCHEDULED_LASER_DONUT. Objects of this class serve as prototypes for rows in queries. */
   class ScheduledLaserDonutTable(_tableTag: Tag) extends profile.api.Table[ScheduledLaserDonutRow](_tableTag, "SCHEDULED_LASER_DONUT") {
-    def * = (id, laserDonutId, tier, current) <> (ScheduledLaserDonutRow.tupled, ScheduledLaserDonutRow.unapply)
+    def * = (id, laserDonutId, tier, isCurrent) <> (ScheduledLaserDonutRow.tupled, ScheduledLaserDonutRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(current)).shaped.<>({r=>import r._; _1.map(_=> ScheduledLaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(laserDonutId), Rep.Some(tier), Rep.Some(isCurrent)).shaped.<>({r=>import r._; _1.map(_=> ScheduledLaserDonutRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -435,8 +435,8 @@ trait Tables {
     val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
     /** Database column TIER SqlType(INTEGER) */
     val tier: Rep[Int] = column[Int]("TIER")
-    /** Database column CURRENT SqlType(TINYINT) */
-    val current: Rep[Byte] = column[Byte]("CURRENT")
+    /** Database column IS_CURRENT SqlType(TINYINT) */
+    val isCurrent: Rep[Byte] = column[Byte]("IS_CURRENT")
 
     /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
     lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
@@ -538,21 +538,21 @@ trait Tables {
    *  @param portionId Database column PORTION_ID SqlType(VARCHAR), Length(36,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param order Database column ORDER SqlType(INTEGER)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param isDone Database column IS_DONE SqlType(TINYINT)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class TodoRow(id: Long, uuid: String, portionId: String, description: String, order: Int, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class TodoRow(id: Long, uuid: String, portionId: String, description: String, order: Int, isDone: Byte, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching TodoRow objects using plain SQL queries */
-  implicit def GetResultTodoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[TodoRow] = GR{
+  implicit def GetResultTodoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[Byte], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[TodoRow] = GR{
     prs => import prs._
-    TodoRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+    TodoRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Int], <<[Byte], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table TODO. Objects of this class serve as prototypes for rows in queries. */
   class TodoTable(_tableTag: Tag) extends profile.api.Table[TodoRow](_tableTag, "TODO") {
-    def * = (id, uuid, portionId, description, order, status, createdOn, lastModified, lastPerformed) <> (TodoRow.tupled, TodoRow.unapply)
+    def * = (id, uuid, portionId, description, order, isDone, createdOn, lastModified, lastPerformed) <> (TodoRow.tupled, TodoRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(isDone), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -564,8 +564,8 @@ trait Tables {
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
     /** Database column ORDER SqlType(INTEGER) */
     val order: Rep[Int] = column[Int]("ORDER")
-    /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
-    val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column IS_DONE SqlType(TINYINT) */
+    val isDone: Rep[Byte] = column[Byte]("IS_DONE")
     /** Database column CREATED_ON SqlType(TIMESTAMP) */
     val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
     /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */

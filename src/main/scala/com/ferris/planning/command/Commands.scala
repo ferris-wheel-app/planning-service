@@ -135,14 +135,13 @@ object Commands {
 
   case class CreateTodo (
     portionId: UUID,
-    description: String,
-    status: Statuses.Status
+    description: String
   )
 
   case class UpdateTodo (
     portionId: Option[UUID],
     description: Option[String],
-    status: Option[Statuses.Status]
+    isDone: Option[Boolean]
   )
 
   case class CreateHobby (

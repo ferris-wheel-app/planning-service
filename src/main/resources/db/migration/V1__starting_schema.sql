@@ -143,7 +143,7 @@ create table todo (
   portion_id VARCHAR(36) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   `order` INT(20) NOT NULL,
-  status VARCHAR(36) NOT NULL check (status in ('PLANNED', 'IN_PROGRESS', 'COMPLETE')),
+  is_done TINYINT(1) NOT NULL,
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP,
   last_performed TIMESTAMP,
@@ -171,7 +171,7 @@ create table scheduled_laser_donut (
   id BIGINT NOT NULL AUTO_INCREMENT,
   laser_donut_id BIGINT NOT NULL,
   tier INT(20) NOT NULL,
-  current TINYINT(1) NOT NULL,
+  is_current TINYINT(1) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (laser_donut_id),
   CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT

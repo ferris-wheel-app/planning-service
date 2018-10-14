@@ -184,8 +184,7 @@ object ExternalToCommand {
   implicit class TodoCreationConversion(todo: TodoCreation) extends CommandConversion[CreateTodo] {
     override def toCommand = CreateTodo(
       portionId = todo.portionId,
-      description = todo.description,
-      status = TypeResolvers.Status.withName(todo.status)
+      description = todo.description
     )
   }
 
@@ -193,7 +192,7 @@ object ExternalToCommand {
     override def toCommand = UpdateTodo(
       portionId = todo.portionId,
       description = todo.description,
-      status = todo.status.map(TypeResolvers.Status.withName)
+      isDone = todo.isDone
     )
   }
 

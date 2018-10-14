@@ -78,14 +78,6 @@ object InputValidators extends InputValidation {
     portionUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
   }
 
-  def checkValidity(todoCreation: TodoCreation): Unit = {
-    checkField(Status.values.contains(todoCreation.status), StatusField)
-  }
-
-  def checkValidity(todoUpdate: TodoUpdate): Unit = {
-    todoUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
-  }
-
   def checkValidity(hobbyCreation: HobbyCreation): Unit = {
     checkField(HobbyFrequency.values.contains(hobbyCreation.frequency), FrequencyField)
     checkField(HobbyType.values.contains(hobbyCreation.`type`), TypeField)

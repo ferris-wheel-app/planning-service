@@ -833,7 +833,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo1.uuid,
                 order = todo1.order,
-                status = todo1.status
+                isDone = todo1.isDone
               ) :: Nil,
               order = portion1.order,
               status = portion1.status
@@ -844,7 +844,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo2.uuid,
                 order = todo2.order,
-                status = todo2.status
+                isDone = todo2.isDone
               ) :: Nil,
               order = portion2.order,
               status = portion2.status
@@ -855,7 +855,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo3.uuid,
                 order = todo3.order,
-                status = todo3.status
+                isDone = todo3.isDone
               ) :: Nil,
               order = portion3.order,
               status = portion3.status
@@ -866,7 +866,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo4.uuid,
                 order = todo4.order,
-                status = todo4.status
+                isDone = todo4.isDone
               ) :: Nil,
               order = portion4.order,
               status = portion4.status
@@ -877,7 +877,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo5.uuid,
                 order = todo5.order,
-                status = todo5.status
+                isDone = todo5.isDone
               ) :: Nil,
               order = portion5.order,
               status = portion5.status
@@ -888,7 +888,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
               todos = ScheduledTodo(
                 uuid = todo6.uuid,
                 order = todo6.order,
-                status = todo6.status
+                isDone = todo6.isDone
               ) :: Nil,
               order = portion6.order,
               status = portion6.status
@@ -961,16 +961,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
   }
 
   describe("updating the status of a parent portion") {
-    it("should modify the status to Complete, if all of it's todos are complete") {
+    it("should modify the status to Complete, if all of it's todos are done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
         firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -978,16 +978,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
       }
     }
 
-    it("should modify the status to InProgress, if some of it's todos are in-progress") {
+    it("should modify the status to InProgress, if some of it's todos are not done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
         firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(InProgress)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -995,16 +995,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
       }
     }
 
-    it("should modify the status to Progress, if some of it's todos are complete") {
+    it("should modify the status to Progress, if some of it's todos are done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
         firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Complete)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -1012,16 +1012,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
       }
     }
 
-    it("should leave the status as InPlanned, if all of it's todos are planned") {
+    it("should leave the status as InPlanned, if all of it's todos are not done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
         firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
         thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, status = Some(Planned)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -1036,7 +1036,6 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created = repo.createTodo(SD.todoCreation).futureValue
         created.portionId shouldBe SD.todoCreation.portionId
         created.description shouldBe SD.todoCreation.description
-        created.status shouldBe SD.todoCreation.status
       }
     }
 
@@ -1048,7 +1047,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.uuid shouldBe original.uuid
         updated.portionId shouldBe SD.todoUpdate.portionId.value
         updated.description shouldBe SD.todoUpdate.description.value
-        updated.status shouldBe SD.todoUpdate.status.value
+        updated.isDone shouldBe SD.todoUpdate.isDone.value
       }
 
       it("should reorder a list of todos that belong to a specific portion") {
@@ -1318,7 +1317,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo1.uuid,
                   order = todo1.order,
-                  status = todo1.status
+                  isDone = todo1.isDone
                 ) :: Nil,
                 order = portion1.order,
                 status = portion1.status
@@ -1336,7 +1335,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo2.uuid,
                   order = todo2.order,
-                  status = todo2.status
+                  isDone = todo2.isDone
                 ) :: Nil,
                 order = portion2.order,
                 status = portion2.status
@@ -1354,7 +1353,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo3.uuid,
                   order = todo3.order,
-                  status = todo3.status
+                  isDone = todo3.isDone
                 ) :: Nil,
                 order = portion3.order,
                 status = portion3.status
@@ -1372,7 +1371,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo4.uuid,
                   order = todo4.order,
-                  status = todo4.status
+                  isDone = todo4.isDone
                 ) :: Nil,
                 order = portion4.order,
                 status = portion4.status
@@ -1390,7 +1389,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo5.uuid,
                   order = todo5.order,
-                  status = todo5.status
+                  isDone = todo5.isDone
                 ) :: Nil,
                 order = portion5.order,
                 status = portion5.status
@@ -1408,7 +1407,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
                 todos = ScheduledTodo(
                   uuid = todo6.uuid,
                   order = todo6.order,
-                  status = todo6.status
+                  isDone = todo6.isDone
                 ) :: Nil,
                 order = portion6.order,
                 status = portion6.status

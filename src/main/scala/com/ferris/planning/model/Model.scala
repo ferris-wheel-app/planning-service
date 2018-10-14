@@ -111,7 +111,7 @@ object Model {
     portionId: UUID,
     description: String,
     order: Int,
-    status: Statuses.Status,
+    isDone: Boolean,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],
     lastPerformed: Option[LocalDateTime]
@@ -166,7 +166,7 @@ object Model {
   case class ScheduledTodo (
     uuid: UUID,
     order: Int,
-    status: Statuses.Status
+    isDone: Boolean
   )
 
   trait TypeEnum {

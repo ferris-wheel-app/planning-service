@@ -284,7 +284,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           portionId = creation.portionId,
           description = creation.description,
           order = existingTodos.lastOption.map(_.order + 1).getOrElse(1),
-          status = creation.status.dbValue,
+          isDone = false,
           createdOn = timer.timestampOfNow,
           lastModified = None,
           lastPerformed = None
@@ -323,7 +323,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
               id = 0L,
               laserDonutId = laserDonut.id,
               tier = tierNumber + 1,
-              current = false
+              isCurrent = false
             )
             ((ScheduledLaserDonutTable returning ScheduledLaserDonutTable.map(_.id) into ((row, id) => row.copy(id = id))) += row).map((_, laserDonut))
           case None => DBIO.failed(LaserDonutNotFoundException(s"no laser-donut with the UUID $laserDonutUuid exists"))
@@ -531,20 +531,20 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         for {
           todos <- todosByParentId(uuid).result
           update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
-            .update(getStatusSummary(todos.map(todo => Statuses.withName(todo.status))).dbValue).map(_ > 0)
+            .update(getOutcomeSummary(todos.map(_.isDone: Boolean)).dbValue).map(_ > 0)
         } yield update
       }
 
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.portionId :: update.description :: Nil,
-        statusUpdate = update.status :: Nil
+        statusUpdate = update.isDone :: Nil
       )
-      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.status, todo.lastModified, todo.lastPerformed))
+      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           for {
             _ <- query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
-              UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+              UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
             updatedTodo <- getTodoAction(uuid).map(_.head)
             _ <- updatePortionStatus(UUID.fromString(updatedTodo.portionId))
           } yield updatedTodo
@@ -612,7 +612,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           id = 0L,
           laserDonutId = scheduledLaserDonut.id,
           tier = scheduledLaserDonut.tier,
-          current = isCurrent
+          isCurrent = isCurrent
         )
       }
 
@@ -1076,6 +1076,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       if (statuses.forall(_ == Statuses.Complete)) Statuses.Complete
       else if (statuses.contains(Statuses.InProgress) || statuses.contains(Statuses.Complete)) Statuses.InProgress
       else Statuses.Planned
+    }
+
+    private def getOutcomeSummary(outcomes: Seq[Boolean]): Statuses.Status = {
+      if (outcomes.forall(_ == true)) Statuses.Complete
+      else if (outcomes.forall(_ == false)) Statuses.Planned
+      else Statuses.InProgress
     }
   }
 }
