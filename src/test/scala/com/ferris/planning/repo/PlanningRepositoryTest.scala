@@ -446,7 +446,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         created.goalId shouldBe SD.threadCreation.goalId
         created.summary shouldBe SD.threadCreation.summary
         created.description shouldBe SD.threadCreation.description
-        created.status shouldBe SD.threadCreation.status
+        created.performance shouldBe SD.threadCreation.performance
       }
     }
 
@@ -459,7 +459,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.goalId.value shouldBe SD.threadUpdate.goalId.value
         updated.summary shouldBe SD.threadUpdate.summary.value
         updated.description shouldBe SD.threadUpdate.description.value
-        updated.status shouldBe SD.threadUpdate.status.value
+        updated.performance shouldBe SD.threadUpdate.performance.value
       }
 
       it("should throw an exception if a thread is not found") {

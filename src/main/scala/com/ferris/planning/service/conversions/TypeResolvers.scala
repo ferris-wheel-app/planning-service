@@ -8,6 +8,7 @@ import com.ferris.planning.model.Model.GraduationTypes.GraduationType
 import com.ferris.planning.model.Model.HobbyFrequencies.HobbyFrequency
 import com.ferris.planning.model.Model.HobbyTypes.HobbyType
 import com.ferris.planning.model.Model.Statuses.Status
+import com.ferris.planning.model.Model.ThreadPerformances.ThreadPerformance
 import com.ferris.planning.model.Model.WeaveTypes.WeaveType
 import com.ferris.planning.model.Model._
 
@@ -66,6 +67,26 @@ object TypeResolvers {
       case GoalStatuses.NotAchieved => notAchieved
       case GoalStatuses.Employed => employed
       case GoalStatuses.Unemployed => unemployed
+      case o => throw new IllegalArgumentException(s"Invalid goal status: $o")
+    }
+  }
+
+  object ThreadPerformance extends TypeResolver[ThreadPerformances.ThreadPerformance] {
+    import TypeFields.ThreadPerformance._
+
+    override def withName(name: String): ThreadPerformance = name match {
+      case `poor` => ThreadPerformances.Poor
+      case `slipping` => ThreadPerformances.Slipping
+      case `improving` => ThreadPerformances.Improving
+      case `onTrack` => ThreadPerformances.OnTrack
+      case o => throw new IllegalArgumentException(s"Invalid thread performance: $o")
+    }
+
+    override def toString(`type`: ThreadPerformance): String = `type` match {
+      case ThreadPerformances.Poor => poor
+      case ThreadPerformances.Slipping => slipping
+      case ThreadPerformances.Improving => improving
+      case ThreadPerformances.OnTrack => onTrack
       case o => throw new IllegalArgumentException(s"Invalid goal status: $o")
     }
   }

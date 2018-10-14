@@ -22,6 +22,14 @@ object TypeFields {
     val values = Set(notAchieved, employed, unemployed)
   }
 
+  object ThreadPerformance {
+    val poor = "poor"
+    val slipping = "slipping"
+    val improving = "improving"
+    val onTrack = "on_track"
+    val values = Set(poor, slipping, improving, onTrack)
+  }
+
   object GraduationType {
     val abandoned = "abandoned"
     val thread = "thread"

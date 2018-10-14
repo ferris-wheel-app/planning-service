@@ -77,14 +77,14 @@ object Commands {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    status: Statuses.Status
+    performance: ThreadPerformances.ThreadPerformance
   )
 
   case class UpdateThread (
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    status: Option[Statuses.Status]
+    performance: Option[ThreadPerformances.ThreadPerformance]
   )
 
   case class CreateWeave (

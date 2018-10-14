@@ -86,7 +86,7 @@ class DomainConversions(val tables: Tables) {
       goalId = row.goalId.map(UUID.fromString),
       summary = row.summary,
       description = row.description,
-      status = Statuses.withName(row.status),
+      performance = ThreadPerformances.withName(row.performance),
       createdOn = row.createdOn.toLocalDateTime,
       lastModified = row.lastModified.map(_.toLocalDateTime),
       lastPerformed = row.lastPerformed.map(_.toLocalDateTime)

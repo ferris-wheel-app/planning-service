@@ -10,6 +10,7 @@ object InputValidators extends InputValidation {
   private val BacklogItemsField = "backlogItems"
   private val GraduationField = "graduation"
   private val StatusField = "status"
+  private val PerformanceField = "performance"
   private val FrequencyField = "frequency"
   private val LaserDonutsField = "laserDonuts"
   private val TiersField = "tiers"
@@ -42,11 +43,11 @@ object InputValidators extends InputValidation {
   }
 
   def checkValidity(threadCreation: ThreadCreation): Unit = {
-    checkField(Status.values.contains(threadCreation.status), StatusField)
+    checkField(ThreadPerformance.values.contains(threadCreation.performance), PerformanceField)
   }
 
   def checkValidity(threadUpdate: ThreadUpdate): Unit = {
-    threadUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
+    threadUpdate.performance.foreach(performance => checkField(ThreadPerformance.values.contains(performance), PerformanceField))
   }
 
   def checkValidity(weaveCreation: WeaveCreation): Unit = {

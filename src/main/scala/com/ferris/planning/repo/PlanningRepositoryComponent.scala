@@ -211,7 +211,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         goalId = creation.goalId,
         summary = creation.summary,
         description = creation.description,
-        status = creation.status.dbValue,
+        performance = creation.performance.dbValue,
         createdOn = timer.timestampOfNow,
         lastModified = None,
         lastPerformed = None
@@ -423,14 +423,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
       val (lastModified, lastPerformed) = getUpdateTimes(
         contentUpdate = update.goalId :: update.summary :: update.description :: Nil,
-        statusUpdate = update.status :: Nil
+        statusUpdate = update.performance :: Nil
       )
-      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.status,
+      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.performance,
         thread.lastModified, thread.lastPerformed))
       val action = getThreadAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.performance, old.performance),
             lastModified, lastPerformed)
             .andThen(getThreadAction(uuid).map(_.head))
         } getOrElse DBIO.failed(ThreadNotFoundException())

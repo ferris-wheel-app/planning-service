@@ -83,7 +83,7 @@ create table thread (
   goal_id VARCHAR(36),
   summary VARCHAR(256) NOT NULL,
   description VARCHAR(2000) NOT NULL,
-  status VARCHAR(36) NOT NULL check (status in ('NOT_ACHIEVED', 'EMPLOYED', 'UNEMPLOYED')),
+  performance VARCHAR(36) NOT NULL check (performance in ('POOR', 'SLIPPING', 'IMPROVING', 'ON_TRACK')),
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP,
   last_performed TIMESTAMP,

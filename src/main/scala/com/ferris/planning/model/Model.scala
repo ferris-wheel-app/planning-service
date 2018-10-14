@@ -63,7 +63,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    status: Statuses.Status,
+    performance: ThreadPerformances.ThreadPerformance,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],
     lastPerformed: Option[LocalDateTime]
@@ -234,6 +234,34 @@ object Model {
 
     case object Unemployed extends GoalStatus {
       override val dbValue = "UNEMPLOYED"
+    }
+  }
+
+  object ThreadPerformances {
+
+    def withName(name: String): ThreadPerformance = name match {
+      case Poor.dbValue => Poor
+      case Slipping.dbValue => Slipping
+      case Improving.dbValue => Improving
+      case OnTrack.dbValue => OnTrack
+    }
+
+    sealed trait ThreadPerformance extends TypeEnum
+
+    case object Poor extends ThreadPerformance {
+      override val dbValue = "POOR"
+    }
+
+    case object Slipping extends ThreadPerformance {
+      override val dbValue = "SLIPPING"
+    }
+
+    case object Improving extends ThreadPerformance {
+      override val dbValue = "IMPROVING"
+    }
+
+    case object OnTrack extends ThreadPerformance {
+      override val dbValue = "ON_TRACK"
     }
   }
 

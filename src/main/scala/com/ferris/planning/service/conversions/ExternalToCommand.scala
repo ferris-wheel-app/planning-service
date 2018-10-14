@@ -110,7 +110,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      status = TypeResolvers.Status.withName(thread.status)
+      performance = TypeResolvers.ThreadPerformance.withName(thread.performance)
     )
   }
 
@@ -119,7 +119,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      status = thread.status.map(TypeResolvers.Status.withName)
+      performance = thread.performance.map(TypeResolvers.ThreadPerformance.withName)
     )
   }
 

@@ -140,14 +140,14 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    status = "planned"
+    performance = "poor"
   )
 
   val threadUpdate = ThreadUpdate(
     goalId = Some(UUID.randomUUID),
     summary = Some("Sleep"),
     description = Some("Sleep for 8 hours"),
-    status = Some("in_progress")
+    performance = Some("improving")
   )
 
   val thread = ThreadView(
@@ -155,7 +155,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    status = "planned",
+    performance = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
     lastPerformed = Some(LocalDateTime.now)

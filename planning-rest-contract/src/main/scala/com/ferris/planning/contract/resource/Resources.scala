@@ -93,7 +93,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      status: String
+      performance: String
     ) {
       checkValidity(this)
     }
@@ -102,7 +102,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
-      status: Option[String]
+      performance: Option[String]
     ) {
       checkValidity(this)
     }
@@ -280,7 +280,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      status: String,
+      performance: String,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]

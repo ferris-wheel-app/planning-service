@@ -144,14 +144,14 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      status = Statuses.Planned
+      performance = ThreadPerformances.Improving
     )
 
     val threadUpdate = UpdateThread(
       goalId = Some(UUID.randomUUID),
       summary = Some("Sleep"),
       description = Some("Sleep for 8 hours"),
-      status = Some(Statuses.InProgress)
+      performance = Some(ThreadPerformances.OnTrack)
     )
 
     val thread = Thread(
@@ -159,7 +159,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      status = Statuses.Planned,
+      performance = ThreadPerformances.OnTrack,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -484,14 +484,14 @@ object SampleData {
       goalId = domain.threadCreation.goalId,
       summary = domain.threadCreation.summary,
       description = domain.threadCreation.description,
-      status = Status.toString(domain.threadCreation.status)
+      performance = ThreadPerformance.toString(domain.threadCreation.performance)
     )
 
     val threadUpdate = ThreadUpdate(
       goalId = domain.threadUpdate.goalId,
       summary = domain.threadUpdate.summary,
       description = domain.threadUpdate.description,
-      status = domain.threadUpdate.status.map(Status.toString)
+      performance = domain.threadUpdate.performance.map(ThreadPerformance.toString)
     )
 
     val thread = ThreadView(
@@ -499,7 +499,7 @@ object SampleData {
       goalId = domain.thread.goalId,
       summary = domain.thread.summary,
       description = domain.thread.description,
-      status = Status.toString(domain.thread.status),
+      performance = ThreadPerformance.toString(domain.thread.performance),
       createdOn = domain.thread.createdOn,
       lastModified = domain.thread.lastModified,
       lastPerformed = domain.thread.lastPerformed

@@ -150,17 +150,17 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
   describe("validating a thread creation") {
     it("should allow the creation of a valid object") {
       SD.threadCreation.copy(
-        status = SD.threadCreation.status
+        performance = SD.threadCreation.performance
       )
     }
 
     it("should throw an exception if the status is invalid") {
       val caught = intercept[InvalidFieldException] {
         SD.threadCreation.copy(
-          status = "dead"
+          performance = "dead"
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      val expected = InvalidFieldException("InvalidField", "Invalid Performance", Some(InvalidFieldPayload("performance")))
       caught shouldBe expected
     }
   }
@@ -168,17 +168,17 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
   describe("validating a thread update") {
     it("should allow the creation of a valid object") {
       SD.threadUpdate.copy(
-        status = SD.threadUpdate.status
+        performance = SD.threadUpdate.performance
       )
     }
 
     it("should throw an exception if the status is invalid") {
       val caught = intercept[InvalidFieldException] {
         SD.threadUpdate.copy(
-          status = Some("dead")
+          performance = Some("dead")
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      val expected = InvalidFieldException("InvalidField", "Invalid Performance", Some(InvalidFieldPayload("performance")))
       caught shouldBe expected
     }
   }

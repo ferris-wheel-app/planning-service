@@ -491,11 +491,11 @@ trait Tables {
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
    *  @param summary Database column SUMMARY SqlType(VARCHAR), Length(256,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
-   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param performance Database column PERFORMANCE SqlType(VARCHAR), Length(36,true)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class ThreadRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class ThreadRow(id: Long, uuid: String, goalId: Option[String], summary: String, description: String, performance: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching ThreadRow objects using plain SQL queries */
   implicit def GetResultThreadRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[ThreadRow] = GR{
     prs => import prs._
@@ -503,9 +503,9 @@ trait Tables {
   }
   /** Table description of table THREAD. Objects of this class serve as prototypes for rows in queries. */
   class ThreadTable(_tableTag: Tag) extends profile.api.Table[ThreadRow](_tableTag, "THREAD") {
-    def * = (id, uuid, goalId, summary, description, status, createdOn, lastModified, lastPerformed) <> (ThreadRow.tupled, ThreadRow.unapply)
+    def * = (id, uuid, goalId, summary, description, performance, createdOn, lastModified, lastPerformed) <> (ThreadRow.tupled, ThreadRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> ThreadRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(summary), Rep.Some(description), Rep.Some(performance), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> ThreadRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -517,8 +517,8 @@ trait Tables {
     val summary: Rep[String] = column[String]("SUMMARY", O.Length(256,varying=true))
     /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
-    /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
-    val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column PERFORMANCE SqlType(VARCHAR), Length(36,true) */
+    val performance: Rep[String] = column[String]("PERFORMANCE", O.Length(36,varying=true))
     /** Database column CREATED_ON SqlType(TIMESTAMP) */
     val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
     /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */

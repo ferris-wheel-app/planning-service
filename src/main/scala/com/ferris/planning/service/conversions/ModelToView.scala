@@ -89,7 +89,7 @@ object ModelToView {
         goalId = thread.goalId,
         summary = thread.summary,
         description = thread.description,
-        status = TypeResolvers.Status.toString(thread.status),
+        performance = TypeResolvers.ThreadPerformance.toString(thread.performance),
         createdOn = thread.createdOn,
         lastModified = thread.lastModified,
         lastPerformed = thread.lastPerformed
