@@ -151,6 +151,26 @@ create table todo (
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
 
+create table portion_todo (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  portion_id BIGINT NOT NULL,
+  todo_id BIGINT NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (portion_id, todo_id),
+  CONSTRAINT portion_fk FOREIGN KEY (portion_id) REFERENCES portion (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT todo_fk_1 FOREIGN KEY (todo_id) REFERENCES todo (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;
+
+create table weave_todo (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  weave_id BIGINT NOT NULL,
+  todo_id BIGINT NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (weave_id, todo_id),
+  CONSTRAINT weave_fk FOREIGN KEY (weave_id) REFERENCES weave (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT todo_fk_2 FOREIGN KEY (todo_id) REFERENCES todo (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;
+
 create table hobby (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
