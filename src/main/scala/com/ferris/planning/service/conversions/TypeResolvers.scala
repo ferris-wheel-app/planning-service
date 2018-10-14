@@ -167,14 +167,18 @@ object TypeResolvers {
     import TypeFields.HobbyFrequency._
 
     override def withName(name: String): HobbyFrequency = name match {
-      case `oneOff` => HobbyFrequencies.OneOff
-      case `continuous` => HobbyFrequencies.Continuous
+      case `frequent` => HobbyFrequencies.Frequent
+      case `scattered` => HobbyFrequencies.Scattered
+      case `rare` => HobbyFrequencies.Rare
+      case `unexplored` => HobbyFrequencies.Unexplored
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")
     }
 
     override def toString(`type`: HobbyFrequency): String = `type` match {
-      case HobbyFrequencies.OneOff => oneOff
-      case HobbyFrequencies.Continuous => continuous
+      case HobbyFrequencies.Frequent => frequent
+      case HobbyFrequencies.Scattered => scattered
+      case HobbyFrequencies.Rare => rare
+      case HobbyFrequencies.Unexplored => unexplored
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")
     }
   }

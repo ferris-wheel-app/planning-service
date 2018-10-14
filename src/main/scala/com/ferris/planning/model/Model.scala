@@ -359,18 +359,28 @@ object Model {
   object HobbyFrequencies {
 
     def withName(name: String): HobbyFrequency = name match {
-      case OneOff.dbValue => OneOff
-      case Continuous.dbValue => Continuous
+      case Frequent.dbValue => Frequent
+      case Scattered.dbValue => Scattered
+      case Rare.dbValue => Rare
+      case Unexplored.dbValue => Unexplored
     }
 
     sealed trait HobbyFrequency extends TypeEnum
 
-    case object OneOff extends HobbyFrequency {
-      override val dbValue = "ONE_OFF"
+    case object Frequent extends HobbyFrequency {
+      override val dbValue = "FREQUENT"
     }
 
-    case object Continuous extends HobbyFrequency {
-      override val dbValue = "CONTINUOUS"
+    case object Scattered extends HobbyFrequency {
+      override val dbValue = "SCATTERED"
+    }
+
+    case object Rare extends HobbyFrequency {
+      override val dbValue = "RARE"
+    }
+
+    case object Unexplored extends HobbyFrequency {
+      override val dbValue = "UNEXPLORED"
     }
   }
 }

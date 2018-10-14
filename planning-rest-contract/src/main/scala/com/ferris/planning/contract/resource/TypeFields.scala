@@ -59,8 +59,10 @@ object TypeFields {
   }
 
   object HobbyFrequency {
-    val oneOff = "one_off"
-    val continuous = "continuous"
-    val values = Set(oneOff, continuous)
+    val frequent = "frequent"
+    val scattered = "scattered"
+    val rare = "rare"
+    val unexplored = "unexplored"
+    val values = Set(frequent, scattered, rare, unexplored)
   }
 }

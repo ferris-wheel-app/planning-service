@@ -270,7 +270,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
-    frequency = "continuous",
+    frequency = "unexplored",
     `type` = "active"
   )
 
@@ -278,7 +278,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Play ping-pong"),
     description = Some("Table tennis"),
-    frequency = Some("continuous"),
+    frequency = Some("scattered"),
     `type` = Some("active")
   )
 
@@ -287,7 +287,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
-    frequency = "continuous",
+    frequency = "frequent",
     `type` = "active",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),

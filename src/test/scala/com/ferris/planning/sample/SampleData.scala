@@ -274,7 +274,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
-      frequency = HobbyFrequencies.Continuous,
+      frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active
     )
 
@@ -282,7 +282,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Play ping-pong"),
       description = Some("Table tennis"),
-      frequency = Some(HobbyFrequencies.Continuous),
+      frequency = Some(HobbyFrequencies.Frequent),
       `type` = Some(HobbyTypes.Active)
     )
 
@@ -291,7 +291,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
-      frequency = HobbyFrequencies.Continuous,
+      frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
