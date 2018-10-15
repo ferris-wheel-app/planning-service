@@ -108,7 +108,7 @@ object Model {
 
   case class Todo (
     uuid: UUID,
-    portionId: UUID,
+    parentId: UUID,
     description: String,
     order: Int,
     isDone: Boolean,

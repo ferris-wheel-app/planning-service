@@ -38,7 +38,7 @@ trait PlanningServiceComponent {
     def updatePortion(uuid: UUID, update: UpdatePortion)(implicit ex: ExecutionContext): Future[Portion]
     def updatePortions(laserDonutId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Portion]]
     def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Todo]
-    def updateTodos(portionId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
+    def updateTodos(parentId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby]
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
@@ -58,7 +58,7 @@ trait PlanningServiceComponent {
     def getPortions()(implicit ex: ExecutionContext): Future[Seq[Portion]]
     def getPortions(laserDonutId: UUID)(implicit ex: ExecutionContext): Future[Seq[Portion]]
     def getTodos()(implicit ex: ExecutionContext): Future[Seq[Todo]]
-    def getTodos(portionId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]]
+    def getTodos(parentId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getHobbies(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Hobby]]
 
@@ -200,8 +200,8 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updateTodo(uuid, update)
     }
 
-    override def updateTodos(portionId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
-      repo.updateTodos(portionId, update)
+    override def updateTodos(parentId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
+      repo.updateTodos(parentId, update)
     }
 
     override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
@@ -276,8 +276,8 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getTodos
     }
 
-    override def getTodos(portionId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
-      repo.getTodos(portionId)
+    override def getTodos(parentId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]] = {
+      repo.getTodos(parentId)
     }
 
     override def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]] = {

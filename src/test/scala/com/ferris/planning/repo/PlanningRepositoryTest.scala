@@ -818,12 +818,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
           portion4 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
           portion5 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
           portion6 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut.uuid))
-          todo1 <- repo.createTodo(SD.todoCreation.copy(portionId = portion1.uuid))
-          todo2 <- repo.createTodo(SD.todoCreation.copy(portionId = portion2.uuid))
-          todo3 <- repo.createTodo(SD.todoCreation.copy(portionId = portion3.uuid))
-          todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
-          todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
-          todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
+          todo1 <- repo.createTodo(SD.todoCreation.copy(parentId = portion1.uuid))
+          todo2 <- repo.createTodo(SD.todoCreation.copy(parentId = portion2.uuid))
+          todo3 <- repo.createTodo(SD.todoCreation.copy(parentId = portion3.uuid))
+          todo4 <- repo.createTodo(SD.todoCreation.copy(parentId = portion4.uuid))
+          todo5 <- repo.createTodo(SD.todoCreation.copy(parentId = portion5.uuid))
+          todo6 <- repo.createTodo(SD.todoCreation.copy(parentId = portion6.uuid))
           _ <- repo.insertCurrentActivity(originalLaserDonutId, originalPortionId, lastWeeklyUpdate, lastDailyUpdate)
 
           scheduledPortions = Seq(
@@ -964,13 +964,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
     it("should modify the status to Complete, if all of it's todos are done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
-        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(true)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -981,13 +981,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
     it("should modify the status to InProgress, if some of it's todos are not done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
-        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -998,13 +998,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
     it("should modify the status to Progress, if some of it's todos are done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
-        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(true)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(true)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -1015,13 +1015,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
     it("should leave the status as InPlanned, if all of it's todos are not done") {
       for {
         portion <- repo.createPortion(SD.portionCreation.copy(status = Planned))
-        firstTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        secondTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
-        thirdTodo <- repo.createTodo(SD.todoCreation.copy(portionId = portion.uuid))
+        firstTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        secondTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
+        thirdTodo <- repo.createTodo(SD.todoCreation.copy(parentId = portion.uuid))
 
-        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
-        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
-        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(portionId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(firstTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(secondTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
+        _ <- repo.updateTodo(thirdTodo.uuid, SD.todoUpdate.copy(parentId = None, isDone = Some(false)))
 
         updatedPortion <- repo.getPortion(portion.uuid)
       } yield {
@@ -1034,7 +1034,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
     describe("creating") {
       it("should create a todo") {
         val created = repo.createTodo(SD.todoCreation).futureValue
-        created.portionId shouldBe SD.todoCreation.portionId
+        created.parentId shouldBe SD.todoCreation.parentId
         created.description shouldBe SD.todoCreation.description
       }
     }
@@ -1045,16 +1045,16 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val updated = repo.updateTodo(original.uuid, SD.todoUpdate).futureValue
         updated should not be original
         updated.uuid shouldBe original.uuid
-        updated.portionId shouldBe SD.todoUpdate.portionId.value
+        updated.parentId shouldBe SD.todoUpdate.parentId.value
         updated.description shouldBe SD.todoUpdate.description.value
         updated.isDone shouldBe SD.todoUpdate.isDone.value
       }
 
       it("should reorder a list of todos that belong to a specific portion") {
         val portionId = UUID.randomUUID
-        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        val second = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        val third = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val first = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        val third = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
         val beforeUpdate = repo.getTodos(portionId).futureValue
         val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
 
@@ -1067,9 +1067,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
       it("should throw an exception if an invalid todo id is given in the update list") {
         val portionId = UUID.randomUUID
-        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        val second = repo.createTodo(SD.todoCreation.copy(portionId = UUID.randomUUID)).futureValue
-        val third = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val first = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(parentId = UUID.randomUUID)).futureValue
+        val third = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
         val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
         whenReady(repo.updateTodos(portionId, update).failed) { exception =>
           exception shouldBe InvalidTodosUpdateException(s"the todos (${second.uuid}) do not belong to the portion $portionId")
@@ -1078,9 +1078,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
       it("should throw an exception the update list is not the same as the number of todos for a portion") {
         val portionId = UUID.randomUUID
-        val first = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        val second = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
+        val first = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        val second = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
         val update = UpdateList(second.uuid :: first.uuid :: Nil)
         whenReady(repo.updateTodos(portionId, update).failed) { exception =>
           exception shouldBe InvalidTodosUpdateException("the length of the update list should be the same as the number of todos for the portion")
@@ -1118,9 +1118,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
       it("should retrieve a list of todos based on the portion they belong to") {
         val portionId = UUID.randomUUID
         val otherPortionId = UUID.randomUUID
-        val created1 = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        val created2 = repo.createTodo(SD.todoCreation.copy(portionId = portionId)).futureValue
-        repo.createTodo(SD.todoCreation.copy(portionId = otherPortionId)).futureValue
+        val created1 = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        val created2 = repo.createTodo(SD.todoCreation.copy(parentId = portionId)).futureValue
+        repo.createTodo(SD.todoCreation.copy(parentId = otherPortionId)).futureValue
         val retrieved = repo.getTodos(portionId).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
@@ -1292,12 +1292,12 @@ class PlanningRepositoryTest extends AsyncFunSpec
           portion4 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut4.uuid))
           portion5 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut5.uuid))
           portion6 <- repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonut6.uuid))
-          todo1 <- repo.createTodo(SD.todoCreation.copy(portionId = portion1.uuid))
-          todo2 <- repo.createTodo(SD.todoCreation.copy(portionId = portion2.uuid))
-          todo3 <- repo.createTodo(SD.todoCreation.copy(portionId = portion3.uuid))
-          todo4 <- repo.createTodo(SD.todoCreation.copy(portionId = portion4.uuid))
-          todo5 <- repo.createTodo(SD.todoCreation.copy(portionId = portion5.uuid))
-          todo6 <- repo.createTodo(SD.todoCreation.copy(portionId = portion6.uuid))
+          todo1 <- repo.createTodo(SD.todoCreation.copy(parentId = portion1.uuid))
+          todo2 <- repo.createTodo(SD.todoCreation.copy(parentId = portion2.uuid))
+          todo3 <- repo.createTodo(SD.todoCreation.copy(parentId = portion3.uuid))
+          todo4 <- repo.createTodo(SD.todoCreation.copy(parentId = portion4.uuid))
+          todo5 <- repo.createTodo(SD.todoCreation.copy(parentId = portion5.uuid))
+          todo6 <- repo.createTodo(SD.todoCreation.copy(parentId = portion6.uuid))
           _ <- repo.createPyramidOfImportance(SD.pyramidUpsert.copy(
             tiers = SD.tierUpsert.copy(laserDonuts = (laserDonut1 :: laserDonut2 :: Nil).map(_.uuid)) ::
               SD.tierUpsert.copy(laserDonuts = (laserDonut3 :: laserDonut4 :: Nil).map(_.uuid)) ::

@@ -245,19 +245,19 @@ object SampleData {
   )
 
   val todoCreation = TodoCreation(
-    portionId = UUID.randomUUID,
+    parentId = UUID.randomUUID,
     description = "Create sample data for tests"
   )
 
   val todoUpdate = TodoUpdate(
-    portionId = Some(UUID.randomUUID),
+    parentId = Some(UUID.randomUUID),
     description = Some("Create repository tests"),
     isDone = Some(true)
   )
 
   val todo = TodoView(
     uuid = UUID.randomUUID,
-    portionId = UUID.randomUUID,
+    parentId = UUID.randomUUID,
     description = "Create sample data for tests",
     order = 4,
     isDone = true,

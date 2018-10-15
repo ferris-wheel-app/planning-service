@@ -249,19 +249,19 @@ object SampleData {
     )
 
     val todoCreation = CreateTodo(
-      portionId = UUID.randomUUID,
+      parentId = UUID.randomUUID,
       description = "Create sample data for tests"
     )
 
     val todoUpdate = UpdateTodo(
-      portionId = Some(UUID.randomUUID),
+      parentId = Some(UUID.randomUUID),
       description = Some("Create repository tests"),
       isDone = Some(true)
     )
 
     val todo = Todo(
       uuid = UUID.randomUUID,
-      portionId = UUID.randomUUID,
+      parentId = UUID.randomUUID,
       description = "Create sample data for tests",
       order = 4,
       isDone = true,
@@ -585,19 +585,19 @@ object SampleData {
     )
 
     val todoCreation = TodoCreation(
-      portionId = domain.todoCreation.portionId,
+      parentId = domain.todoCreation.parentId,
       description = domain.todoCreation.description
     )
 
     val todoUpdate = TodoUpdate(
-      portionId = domain.todoUpdate.portionId,
+      parentId = domain.todoUpdate.parentId,
       description = domain.todoUpdate.description,
       isDone = domain.todoUpdate.isDone
     )
 
     val todo = TodoView(
       uuid = domain.todo.uuid,
-      portionId = domain.todo.portionId,
+      parentId = domain.todo.parentId,
       description = domain.todo.description,
       order = domain.todo.order,
       isDone = domain.todo.isDone,

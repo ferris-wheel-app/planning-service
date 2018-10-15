@@ -166,12 +166,12 @@ object Resources {
     }
 
     case class TodoCreation (
-      portionId: UUID,
+      parentId: UUID,
       description: String
     )
 
     case class TodoUpdate (
-      portionId: Option[UUID],
+      parentId: Option[UUID],
       description: Option[String],
       isDone: Option[Boolean]
     )
@@ -327,7 +327,7 @@ object Resources {
 
     case class TodoView (
       uuid: UUID,
-      portionId: UUID,
+      parentId: UUID,
       description: String,
       order: Int,
       isDone: Boolean,

@@ -46,7 +46,7 @@ trait PlanningRepositoryComponent {
     def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion]
     def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]]
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
-    def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]]
+    def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
@@ -66,7 +66,7 @@ trait PlanningRepositoryComponent {
     def getPortions: Future[Seq[Portion]]
     def getPortions(laserDonutId: UUID): Future[Seq[Portion]]
     def getTodos: Future[Seq[Todo]]
-    def getTodos(portionId: UUID): Future[Seq[Todo]]
+    def getTodos(parentId: UUID): Future[Seq[Todo]]
     def getHobbies: Future[Seq[Hobby]]
     def getHobbies(goalId: UUID): Future[Seq[Hobby]]
 
@@ -277,11 +277,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createTodo(creation: CreateTodo): Future[Todo] = {
-      val action = todosByParentId(creation.portionId).result.flatMap { existingTodos =>
+      val action = todosByParentId(creation.parentId).result.flatMap { existingTodos =>
         val row = TodoRow(
           id = 0L,
           uuid = UUID.randomUUID,
-          portionId = creation.portionId,
+          parentId = creation.parentId,
           description = creation.description,
           order = existingTodos.lastOption.map(_.order + 1).getOrElse(1),
           isDone = false,
@@ -535,28 +535,28 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
 
       val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.portionId :: update.description :: Nil,
+        contentUpdate = update.parentId :: update.description :: Nil,
         statusUpdate = update.isDone :: Nil
       )
-      val query = todoByUuid(uuid).map(todo => (todo.portionId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
+      val query = todoByUuid(uuid).map(todo => (todo.parentId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
       val action = getTodoAction(uuid).flatMap { maybeObj =>
         maybeObj map { old =>
           for {
-            _ <- query.update(UpdateId.keepOrReplace(update.portionId, old.portionId), update.description.getOrElse(old.description),
+            _ <- query.update(UpdateId.keepOrReplace(update.parentId, old.parentId), update.description.getOrElse(old.description),
               UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
             updatedTodo <- getTodoAction(uuid).map(_.head)
-            _ <- updatePortionStatus(UUID.fromString(updatedTodo.portionId))
+            _ <- updatePortionStatus(UUID.fromString(updatedTodo.parentId))
           } yield updatedTodo
         } getOrElse DBIO.failed(TodoNotFoundException())
       }.transactionally
       db.run(action).map(row => row.asTodo)
     }
 
-    override def updateTodos(portionId: UUID, update: UpdateList): Future[Seq[Todo]] = {
+    override def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]] = {
       def getTodosAction(uuids: Seq[String]) = {
         TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
-      val action = todosByParentId(portionId).result.flatMap { todos =>
+      val action = todosByParentId(parentId).result.flatMap { todos =>
         if (todos.size <= update.reordered.size) {
           val todoIds = todos.map(_.uuid)
           update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
@@ -564,7 +564,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
               todoByUuid(uuid).map(_.order).update(index + 1)
             }).andThen(getTodosAction(todoIds))
             case outliers => DBIO.failed(
-              InvalidTodosUpdateException(s"the todos (${outliers.mkString(", ")}) do not belong to the portion $portionId")
+              InvalidTodosUpdateException(s"the todos (${outliers.mkString(", ")}) do not belong to the portion $parentId")
             )
           }
         }
@@ -599,7 +599,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           scheduledLaserDonut <- ScheduledLaserDonutTable
           laserDonut <- LaserDonutTable if laserDonut.id === scheduledLaserDonut.laserDonutId
           portion <- PortionTable if portion.laserDonutId === laserDonut.uuid
-          todo <- TodoTable if todo.portionId === portion.uuid
+          todo <- TodoTable if todo.parentId === portion.uuid
         } yield {
           (scheduledLaserDonut, laserDonut, portion, todo)
         }).result.map(_.asScheduledLaserDonuts.sortBy(_.id))
@@ -649,7 +649,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         currentActivity <- CurrentActivityTable
         currentLaserDonut <- LaserDonutTable if currentLaserDonut.id === currentActivity.currentLaserDonut
         portion <- PortionTable if portion.laserDonutId === currentLaserDonut.uuid
-        todo <- TodoTable if todo.portionId === portion.uuid
+        todo <- TodoTable if todo.parentId === portion.uuid
       } yield {
         (portion, todo)
       }).result.map(_.asScheduledPortions.sortBy(_.id))
@@ -657,7 +657,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       def getCurrentScheduledPortion = (for {
         currentActivity <- CurrentActivityTable
         currentPortion <- PortionTable if currentPortion.id === currentActivity.currentPortion
-        todo <- TodoTable if todo.portionId === currentPortion.uuid
+        todo <- TodoTable if todo.parentId === currentPortion.uuid
       } yield {
         (currentPortion, todo)
       }).result.map(_.asScheduledPortions.headOption)
@@ -802,8 +802,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(TodoTable.result.map(_.map(_.asTodo)))
     }
 
-    override def getTodos(portionId: UUID): Future[Seq[Todo]] = {
-      db.run(todosByParentId(portionId).result.map(_.map(_.asTodo)))
+    override def getTodos(parentId: UUID): Future[Seq[Todo]] = {
+      db.run(todosByParentId(parentId).result.map(_.map(_.asTodo)))
     }
 
     override def getTodo(uuid: UUID): Future[Option[Todo]] = {
@@ -1051,8 +1051,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       TodoTable.filter(_.uuid === uuid.toString)
     }
 
-    private def todosByParentId(portionId: UUID) = {
-      TodoTable.filter(_.portionId === portionId.toString).sortBy(_.order)
+    private def todosByParentId(parentId: UUID) = {
+      TodoTable.filter(_.parentId === parentId.toString).sortBy(_.order)
     }
 
     private def hobbyByUuid(uuid: UUID) = {

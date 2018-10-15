@@ -139,7 +139,7 @@ class DomainConversions(val tables: Tables) {
   implicit class TodoBuilder(val row: tables.TodoRow) {
     def asTodo: Todo = Todo(
       uuid = UUID.fromString(row.uuid),
-      portionId = UUID.fromString(row.portionId),
+      parentId = UUID.fromString(row.parentId),
       description = row.description,
       order = row.order,
       isDone = row.isDone,

@@ -150,7 +150,7 @@ object ModelToView {
     def toView: TodoView = {
       TodoView(
         uuid = todo.uuid,
-        portionId = todo.portionId,
+        parentId = todo.parentId,
         description = todo.description,
         order = todo.order,
         isDone = todo.isDone,

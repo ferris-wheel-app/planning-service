@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, PortionTodoTable.schema, ScheduledLaserDonutTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, WeaveTodoTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, MessageTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -409,40 +409,6 @@ trait Tables {
   /** Collection-like TableQuery object for table PortionTable */
   lazy val PortionTable = new TableQuery(tag => new PortionTable(tag))
 
-  /** Entity class storing rows of table PortionTodoTable
-   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param portionId Database column PORTION_ID SqlType(BIGINT)
-   *  @param todoId Database column TODO_ID SqlType(BIGINT) */
-  case class PortionTodoRow(id: Long, portionId: Long, todoId: Long)
-  /** GetResult implicit for fetching PortionTodoRow objects using plain SQL queries */
-  implicit def GetResultPortionTodoRow(implicit e0: GR[Long]): GR[PortionTodoRow] = GR{
-    prs => import prs._
-    PortionTodoRow.tupled((<<[Long], <<[Long], <<[Long]))
-  }
-  /** Table description of table PORTION_TODO. Objects of this class serve as prototypes for rows in queries. */
-  class PortionTodoTable(_tableTag: Tag) extends profile.api.Table[PortionTodoRow](_tableTag, "PORTION_TODO") {
-    def * = (id, portionId, todoId) <> (PortionTodoRow.tupled, PortionTodoRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(portionId), Rep.Some(todoId)).shaped.<>({r=>import r._; _1.map(_=> PortionTodoRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-
-    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
-    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
-    /** Database column PORTION_ID SqlType(BIGINT) */
-    val portionId: Rep[Long] = column[Long]("PORTION_ID")
-    /** Database column TODO_ID SqlType(BIGINT) */
-    val todoId: Rep[Long] = column[Long]("TODO_ID")
-
-    /** Foreign key referencing PortionTable (database name PORTION_FK) */
-    lazy val portionTableFk = foreignKey("PORTION_FK", portionId, PortionTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing TodoTable (database name TODO_FK_1) */
-    lazy val todoTableFk = foreignKey("TODO_FK_1", todoId, TodoTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-
-    /** Uniqueness Index over (portionId,todoId) (database name CONSTRAINT_INDEX_B) */
-    val index1 = index("CONSTRAINT_INDEX_B", (portionId, todoId), unique=true)
-  }
-  /** Collection-like TableQuery object for table PortionTodoTable */
-  lazy val PortionTodoTable = new TableQuery(tag => new PortionTodoTable(tag))
-
   /** Entity class storing rows of table ScheduledLaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
@@ -566,14 +532,14 @@ trait Tables {
   /** Entity class storing rows of table TodoTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
-   *  @param portionId Database column PORTION_ID SqlType(VARCHAR), Length(36,true)
+   *  @param parentId Database column PARENT_ID SqlType(VARCHAR), Length(36,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param order Database column ORDER SqlType(INTEGER)
    *  @param isDone Database column IS_DONE SqlType(TINYINT)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class TodoRow(id: Long, uuid: String, portionId: String, description: String, order: Int, isDone: Byte, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class TodoRow(id: Long, uuid: String, parentId: String, description: String, order: Int, isDone: Byte, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching TodoRow objects using plain SQL queries */
   implicit def GetResultTodoRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Int], e3: GR[Byte], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[TodoRow] = GR{
     prs => import prs._
@@ -581,16 +547,16 @@ trait Tables {
   }
   /** Table description of table TODO. Objects of this class serve as prototypes for rows in queries. */
   class TodoTable(_tableTag: Tag) extends profile.api.Table[TodoRow](_tableTag, "TODO") {
-    def * = (id, uuid, portionId, description, order, isDone, createdOn, lastModified, lastPerformed) <> (TodoRow.tupled, TodoRow.unapply)
+    def * = (id, uuid, parentId, description, order, isDone, createdOn, lastModified, lastPerformed) <> (TodoRow.tupled, TodoRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(portionId), Rep.Some(description), Rep.Some(order), Rep.Some(isDone), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(parentId), Rep.Some(description), Rep.Some(order), Rep.Some(isDone), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> TodoRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
     /** Database column UUID SqlType(VARCHAR), Length(36,true) */
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
-    /** Database column PORTION_ID SqlType(VARCHAR), Length(36,true) */
-    val portionId: Rep[String] = column[String]("PORTION_ID", O.Length(36,varying=true))
+    /** Database column PARENT_ID SqlType(VARCHAR), Length(36,true) */
+    val parentId: Rep[String] = column[String]("PARENT_ID", O.Length(36,varying=true))
     /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
     /** Database column ORDER SqlType(INTEGER) */
@@ -661,40 +627,6 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table WeaveTable */
   lazy val WeaveTable = new TableQuery(tag => new WeaveTable(tag))
-
-  /** Entity class storing rows of table WeaveTodoTable
-   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
-   *  @param weaveId Database column WEAVE_ID SqlType(BIGINT)
-   *  @param todoId Database column TODO_ID SqlType(BIGINT) */
-  case class WeaveTodoRow(id: Long, weaveId: Long, todoId: Long)
-  /** GetResult implicit for fetching WeaveTodoRow objects using plain SQL queries */
-  implicit def GetResultWeaveTodoRow(implicit e0: GR[Long]): GR[WeaveTodoRow] = GR{
-    prs => import prs._
-    WeaveTodoRow.tupled((<<[Long], <<[Long], <<[Long]))
-  }
-  /** Table description of table WEAVE_TODO. Objects of this class serve as prototypes for rows in queries. */
-  class WeaveTodoTable(_tableTag: Tag) extends profile.api.Table[WeaveTodoRow](_tableTag, "WEAVE_TODO") {
-    def * = (id, weaveId, todoId) <> (WeaveTodoRow.tupled, WeaveTodoRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(weaveId), Rep.Some(todoId)).shaped.<>({r=>import r._; _1.map(_=> WeaveTodoRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-
-    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
-    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
-    /** Database column WEAVE_ID SqlType(BIGINT) */
-    val weaveId: Rep[Long] = column[Long]("WEAVE_ID")
-    /** Database column TODO_ID SqlType(BIGINT) */
-    val todoId: Rep[Long] = column[Long]("TODO_ID")
-
-    /** Foreign key referencing TodoTable (database name TODO_FK_2) */
-    lazy val todoTableFk = foreignKey("TODO_FK_2", todoId, TodoTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing WeaveTable (database name WEAVE_FK) */
-    lazy val weaveTableFk = foreignKey("WEAVE_FK", weaveId, WeaveTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-
-    /** Uniqueness Index over (weaveId,todoId) (database name CONSTRAINT_INDEX_9C) */
-    val index1 = index("CONSTRAINT_INDEX_9C", (weaveId, todoId), unique=true)
-  }
-  /** Collection-like TableQuery object for table WeaveTodoTable */
-  lazy val WeaveTodoTable = new TableQuery(tag => new WeaveTodoTable(tag))
 
   /** Entity class storing rows of table YearTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey

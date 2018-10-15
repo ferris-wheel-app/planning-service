@@ -322,7 +322,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val updateTodosRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
+  private val updatePortionTodosRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
     pathEndOrSingleSlash {
       put {
         entity(as[ListUpdate]) { update =>
@@ -798,7 +798,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updatePortionRoute ~
     updatePortionsRoute ~
     updateTodoRoute ~
-    updateTodosRoute ~
+    updatePortionTodosRoute ~
     updateHobbyRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~

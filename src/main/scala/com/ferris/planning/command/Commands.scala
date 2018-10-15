@@ -134,12 +134,12 @@ object Commands {
   )
 
   case class CreateTodo (
-    portionId: UUID,
+    parentId: UUID,
     description: String
   )
 
   case class UpdateTodo (
-    portionId: Option[UUID],
+    parentId: Option[UUID],
     description: Option[String],
     isDone: Option[Boolean]
   )
