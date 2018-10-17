@@ -19,6 +19,7 @@ object PlanningExceptionHandler {
     case e: PortionNotFoundException => throw ApiExceptions.NotFoundException("PortionNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
     case e: TodoNotFoundException => throw ApiExceptions.NotFoundException("TodoNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
     case e: HobbyNotFoundException => throw ApiExceptions.NotFoundException("HobbyNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
+    case e: PyramidNotFoundException => throw ApiExceptions.NotFoundException("PyramidNotFound", e.message, None)
     case e: InvalidPortionsUpdateException => throw ApiExceptions.InvalidInputException("InvalidPortionsUpdate", e.getMessage)
     case e: InvalidTodosUpdateException => throw ApiExceptions.InvalidInputException("InvalidTodosUpdate", e.getMessage)
   }

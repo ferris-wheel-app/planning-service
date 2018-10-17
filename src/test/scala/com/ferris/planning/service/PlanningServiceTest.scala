@@ -8,6 +8,7 @@ import org.mockito.Matchers.{eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.OptionValues._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -1023,9 +1024,9 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
 
       it("should be able to retrieve a pyramid") {
         val server = newServer
-        when(server.repo.getPyramidOfImportance).thenReturn(Future.successful(SD.pyramid))
+        when(server.repo.getPyramidOfImportance).thenReturn(Future.successful(Some(SD.pyramid)))
         whenReady(server.planningService.getPyramidOfImportance) { result =>
-          result shouldBe SD.pyramid
+          result.value shouldBe SD.pyramid
           verify(server.repo, times(1)).getPyramidOfImportance
           verifyNoMoreInteractions(server.repo)
         }

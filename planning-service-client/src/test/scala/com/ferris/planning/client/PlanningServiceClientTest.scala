@@ -14,6 +14,7 @@ import com.ferris.planning.server.PlanningServer
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.OptionValues._
 import org.mockito.Mockito._
 import spray.json._
 
@@ -280,7 +281,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/messages/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.message(id)) { response =>
-          response.get shouldBe SD.message
+          response.value shouldBe SD.message
         }
       }
 
@@ -298,7 +299,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/backlog-items/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.backlogItem(id)) { response =>
-          response.get shouldBe SD.backlogItem
+          response.value shouldBe SD.backlogItem
         }
       }
 
@@ -316,7 +317,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.epoch)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/epochs/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.epoch(id)) { response =>
-          response.get shouldBe SD.epoch
+          response.value shouldBe SD.epoch
         }
       }
 
@@ -334,7 +335,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.year)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/years/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.year(id)) { response =>
-          response.get shouldBe SD.year
+          response.value shouldBe SD.year
         }
       }
 
@@ -352,7 +353,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.theme)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/themes/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.theme(id)) { response =>
-          response.get shouldBe SD.theme
+          response.value shouldBe SD.theme
         }
       }
 
@@ -370,7 +371,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.goal)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/goals/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.goal(id)) { response =>
-          response.get shouldBe SD.goal
+          response.value shouldBe SD.goal
         }
       }
 
@@ -388,7 +389,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.thread)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/threads/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.thread(id)) { response =>
-          response.get shouldBe SD.thread
+          response.value shouldBe SD.thread
         }
       }
 
@@ -406,7 +407,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.weave)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/weaves/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.weave(id)) { response =>
-          response.get shouldBe SD.weave
+          response.value shouldBe SD.weave
         }
       }
 
@@ -424,7 +425,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.laserDonut)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/laser-donuts/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.laserDonut(id)) { response =>
-          response.get shouldBe SD.laserDonut
+          response.value shouldBe SD.laserDonut
         }
       }
 
@@ -432,7 +433,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.laserDonut)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/laser-donuts/current")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.currentLaserDonut) { response =>
-          response.get shouldBe SD.laserDonut
+          response.value shouldBe SD.laserDonut
         }
       }
 
@@ -450,7 +451,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.portion)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/portions/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.portion(id)) { response =>
-          response.get shouldBe SD.portion
+          response.value shouldBe SD.portion
         }
       }
 
@@ -458,7 +459,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.portion)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/portions/current")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.currentPortion) { response =>
-          response.get shouldBe SD.portion
+          response.value shouldBe SD.portion
         }
       }
 
@@ -476,7 +477,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.todo)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/todos/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.todo(id)) { response =>
-          response.get shouldBe SD.todo
+          response.value shouldBe SD.todo
         }
       }
 
@@ -494,7 +495,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.hobby)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/hobbies/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.hobby(id)) { response =>
-          response.get shouldBe SD.hobby
+          response.value shouldBe SD.hobby
         }
       }
 
@@ -512,7 +513,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/pyramid")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.pyramidOfImportance) { response =>
-          response shouldBe SD.pyramid
+          response.value shouldBe SD.pyramid
         }
       }
     }

@@ -76,7 +76,7 @@ trait PlanningServiceComponent {
     def getCurrentPortion(implicit ex: ExecutionContext): Future[Option[Portion]]
     def getTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Todo]]
     def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]]
-    def getPyramidOfImportance(implicit ex: ExecutionContext): Future[PyramidOfImportance]
+    def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]]
 
     def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
@@ -344,7 +344,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getHobby(uuid)
     }
 
-    override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
+    override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]] = {
       repo.getPyramidOfImportance
     }
 

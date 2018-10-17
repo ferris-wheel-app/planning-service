@@ -669,9 +669,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val getPyramidRoute = pathPrefix(pyramidPathSegment) {
     pathEndOrSingleSlash {
       get {
-        onSuccess(planningService.getPyramidOfImportance) { response =>
-          complete(StatusCodes.OK, response.toView)
-        }
+        onSuccess(planningService.getPyramidOfImportance)(outcome => complete(mapPyramid(outcome)))
       }
     }
   }

@@ -1433,10 +1433,19 @@ class PlanningRouteTest extends RouteTestFramework {
 
       describe("getting a pyramid") {
         it("should respond with the pyramid") {
-          when(testServer.planningService.getPyramidOfImportance(any())).thenReturn(Future.successful(domain.pyramid))
+          when(testServer.planningService.getPyramidOfImportance(any())).thenReturn(Future.successful(Some(domain.pyramid)))
           Get("/api/pyramid") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[PyramidOfImportanceView]].data shouldBe rest.pyramid
+            verify(testServer.planningService, times(1)).getPyramidOfImportance(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the pyramid is not found") {
+          when(testServer.planningService.getPyramidOfImportance(any())).thenReturn(Future.successful(None))
+          Get("/api/pyramid") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
             verify(testServer.planningService, times(1)).getPyramidOfImportance(any())
             verifyNoMoreInteractions(testServer.planningService)
           }

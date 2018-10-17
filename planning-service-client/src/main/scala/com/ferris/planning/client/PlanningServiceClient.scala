@@ -153,8 +153,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def hobby(id: UUID): Future[Option[HobbyView]] =
     makeGetRequest[Option[HobbyView]](Uri(path = apiPath / hobbiesPath / id.toString))
 
-  def pyramidOfImportance: Future[PyramidOfImportanceView] =
-    makeGetRequest[PyramidOfImportanceView](Uri(path = apiPath / pyramidPath))
+  def pyramidOfImportance: Future[Option[PyramidOfImportanceView]] =
+    makeGetRequest[Option[PyramidOfImportanceView]](Uri(path = apiPath / pyramidPath))
 
 
   def messages: Future[List[MessageView]] =

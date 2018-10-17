@@ -84,7 +84,7 @@ trait PlanningRepositoryComponent {
     def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
-    def getPyramidOfImportance: Future[PyramidOfImportance]
+    def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
     def deleteMessage(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
@@ -98,6 +98,7 @@ trait PlanningRepositoryComponent {
     def deletePortion(uuid: UUID): Future[Boolean]
     def deleteTodo(uuid: UUID): Future[Boolean]
     def deleteHobby(uuid: UUID): Future[Boolean]
+    def deletePyramidOfImportance(): Future[Boolean]
   }
 }
 
@@ -822,7 +823,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
     }
 
-    override def getPyramidOfImportance: Future[PyramidOfImportance] = {
+    override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {
       db.run(getPyramidOfImportanceAction)
     }
 
@@ -891,6 +892,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def deleteHobby(uuid: UUID): Future[Boolean] = {
       val action = hobbyByUuid(uuid).delete
+      db.run(action).map(_ > 0)
+    }
+
+    override def deletePyramidOfImportance(): Future[Boolean] = {
+      val action = ScheduledLaserDonutTable.delete
       db.run(action).map(_ > 0)
     }
 
@@ -966,7 +972,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       (for {
         pyramidRow <- ScheduledLaserDonutTable
         laserDonutRow <- LaserDonutTable if laserDonutRow.id === pyramidRow.laserDonutId
-      } yield (pyramidRow, laserDonutRow)).result.map(_.asPyramid)
+      } yield (pyramidRow, laserDonutRow)).result.map(rows => if (rows.nonEmpty) Some(rows.asPyramid) else None)
     }
 
     // Queries

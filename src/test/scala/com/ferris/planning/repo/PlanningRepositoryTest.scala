@@ -1215,8 +1215,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
   }
 
   describe("pyramid") {
-    describe("creating") {
-      it("should create a pyramid") {
+    describe("creating, retrieving, and deleting") {
+      it("should work accordingly") {
         for {
           laserDonut1 <- repo.createLaserDonut(SD.laserDonutCreation)
           laserDonut2 <- repo.createLaserDonut(SD.laserDonutCreation)
@@ -1233,6 +1233,9 @@ class PlanningRepositoryTest extends AsyncFunSpec
           scheduledLaserDonuts <- repo.getScheduledLaserDonuts
           currentLaserDonut <- repo.getCurrentLaserDonut
           currentPortion <- repo.getCurrentPortion
+          deletionResult <- repo.deletePyramidOfImportance()
+          deletedSchedule <- repo.getScheduledLaserDonuts
+          deletedPyramid <- repo.getPyramidOfImportance
         } yield {
           val expectedPyramid = PyramidOfImportance(
             tiers = Tier(
@@ -1254,10 +1257,13 @@ class PlanningRepositoryTest extends AsyncFunSpec
           )
 
           pyramid shouldBe expectedPyramid
-          retrievedPyramid shouldBe pyramid
+          retrievedPyramid.value shouldBe pyramid
           scheduledLaserDonuts should contain theSameElementsInOrderAs expectedScheduledLaserDonuts
           currentLaserDonut shouldBe empty
           currentPortion shouldBe empty
+          deletionResult shouldBe true
+          deletedSchedule shouldBe empty
+          deletedPyramid shouldBe empty
         }
       }
 
