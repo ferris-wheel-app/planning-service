@@ -322,7 +322,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val updatePortionTodosRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
+  private val updateTodosRoute = pathPrefix((portionsPathSegment | weavesPathSegment) / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
     pathEndOrSingleSlash {
       put {
         entity(as[ListUpdate]) { update =>
@@ -524,10 +524,10 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val getTodosByPortionRoute = pathPrefix(portionsPathSegment / PathMatchers.JavaUUID / todosPathSegment) { portionId =>
+  private val getTodosByParentRoute = pathPrefix((portionsPathSegment | weavesPathSegment) / PathMatchers.JavaUUID / todosPathSegment) { parentId =>
     pathEndOrSingleSlash {
       get {
-        onSuccess(planningService.getTodos(portionId)) { response =>
+        onSuccess(planningService.getTodos(parentId)) { response =>
           complete(StatusCodes.OK, response.map(_.toView))
         }
       }
@@ -798,7 +798,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updatePortionRoute ~
     updatePortionsRoute ~
     updateTodoRoute ~
-    updatePortionTodosRoute ~
+    updateTodosRoute ~
     updateHobbyRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~
@@ -817,7 +817,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getPortionsRoute ~
     getPortionsByLaserDonutRoute ~
     getTodosRoute ~
-    getTodosByPortionRoute ~
+    getTodosByParentRoute ~
     getHobbiesRoute ~
     getHobbiesByGoalRoute ~
     getMessageRoute ~

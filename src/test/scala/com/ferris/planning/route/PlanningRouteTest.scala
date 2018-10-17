@@ -1140,7 +1140,7 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
-      describe("updating a list of todos") {
+      describe("updating a list of todos that belong to portions") {
         it("should respond with the updated list of todos") {
           val portionId = UUID.randomUUID
           val update = rest.listUpdate
@@ -1164,6 +1164,35 @@ class PlanningRouteTest extends RouteTestFramework {
           Put(s"/api/portions/$portionId/todos", update) ~> route ~> check {
             status shouldBe StatusCodes.BadRequest
             verify(testServer.planningService, times(1)).updateTodos(eqTo(portionId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a list of todos that belong to weaves") {
+        it("should respond with the updated list of todos") {
+          val weaveId = UUID.randomUUID
+          val update = rest.listUpdate
+          val updated = domain.todo :: domain.todo :: Nil
+
+          when(testServer.planningService.updateTodos(eqTo(weaveId), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/weaves/$weaveId/todos", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[TodoView]]].data shouldBe updated.map(_.toView)
+            verify(testServer.planningService, times(1)).updateTodos(eqTo(weaveId), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the update is invalid") {
+          val weaveId = UUID.randomUUID
+          val update = rest.listUpdate
+          val exception = InvalidTodosUpdateException("Wrong!")
+
+          when(testServer.planningService.updateTodos(eqTo(weaveId), eqTo(update.toCommand))(any())).thenReturn(Future.failed(exception))
+          Put(s"/api/weaves/$weaveId/todos", update) ~> route ~> check {
+            status shouldBe StatusCodes.BadRequest
+            verify(testServer.planningService, times(1)).updateTodos(eqTo(weaveId), eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
@@ -1216,6 +1245,19 @@ class PlanningRouteTest extends RouteTestFramework {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[TodoView]]].data shouldBe todos.map(_.toView)
             verify(testServer.planningService, times(1)).getTodos(eqTo(portionId))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of todos that belong to a specific weave") {
+          val weaveId = UUID.randomUUID
+          val todos = Seq(domain.todo, domain.todo.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getTodos(eqTo(weaveId))(any())).thenReturn(Future.successful(todos))
+          Get(s"/api/weaves/$weaveId/todos") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[TodoView]]].data shouldBe todos.map(_.toView)
+            verify(testServer.planningService, times(1)).getTodos(eqTo(weaveId))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
