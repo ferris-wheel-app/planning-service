@@ -2,7 +2,7 @@ name := "planning-rest-contract"
 
 organization := "com.ferris"
 
-version := "0.0.2"
+version := "0.0.3"
 
 scalaVersion in ThisBuild := "2.12.1"
 
