@@ -12,7 +12,6 @@ trait PlanningServiceComponent {
   val planningService: PlanningService
 
   trait PlanningService {
-    def createMessage(creation: CreateMessage)(implicit ex: ExecutionContext): Future[Message]
     def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
     def createEpoch(creation: CreateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
     def createYear(creation: CreateYear)(implicit ex: ExecutionContext): Future[Year]
@@ -26,7 +25,6 @@ trait PlanningServiceComponent {
     def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
-    def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
     def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
     def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Year]
@@ -43,7 +41,6 @@ trait PlanningServiceComponent {
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
 
-    def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]]
     def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]]
     def getEpochs(implicit ex: ExecutionContext): Future[Seq[Epoch]]
     def getYears(implicit ex: ExecutionContext): Future[Seq[Year]]
@@ -62,7 +59,6 @@ trait PlanningServiceComponent {
     def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getHobbies(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Hobby]]
 
-    def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Message]]
     def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Epoch]]
     def getYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Year]]
@@ -78,7 +74,6 @@ trait PlanningServiceComponent {
     def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]]
     def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]]
 
-    def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
@@ -99,10 +94,6 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
   override val planningService = new DefaultPlanningService
 
   class DefaultPlanningService extends PlanningService {
-
-    override def createMessage(creation: CreateMessage)(implicit ex: ExecutionContext): Future[Message] = {
-      repo.createMessage(creation)
-    }
 
     override def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
       repo.createBacklogItem(creation)
@@ -150,10 +141,6 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def createPyramidOfImportance(creation: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
       repo.createPyramidOfImportance(creation)
-    }
-
-    override def updateMessage(uuid: UUID, update: UpdateMessage)(implicit ex: ExecutionContext): Future[Message] = {
-      repo.updateMessage(uuid, update)
     }
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
@@ -214,10 +201,6 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.refreshPortion()
-    }
-
-    override def getMessages(implicit ex: ExecutionContext): Future[Seq[Message]] = {
-      repo.getMessages
     }
 
     override def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]] = {
@@ -288,10 +271,6 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getHobbies(goalId)
     }
 
-    override def getMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Message]] = {
-      repo.getMessage(uuid)
-    }
-
     override def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
       repo.getBacklogItem(uuid)
     }
@@ -346,10 +325,6 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]] = {
       repo.getPyramidOfImportance
-    }
-
-    override def deleteMessage(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
-      repo.deleteMessage(uuid)
     }
 
     override def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {

@@ -9,16 +9,6 @@ object Resources {
 
   object In {
 
-    case class MessageCreation (
-      sender: String,
-      content: String
-    )
-
-    case class MessageUpdate (
-      sender: Option[String],
-      content: Option[String]
-    )
-
     case class BacklogItemCreation (
       summary: String,
       description: String,
@@ -214,12 +204,6 @@ object Resources {
   }
 
   object Out {
-
-    case class MessageView (
-      uuid: UUID,
-      sender: String,
-      content: String
-    )
 
     case class BacklogItemView (
       uuid: UUID,

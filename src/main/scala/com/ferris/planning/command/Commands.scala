@@ -7,10 +7,6 @@ import com.ferris.planning.model.Model._
 
 object Commands {
 
-  case class CreateMessage(sender: String, content: String)
-
-  case class UpdateMessage(sender: Option[String], content: Option[String])
-
   case class CreateBacklogItem (
     summary: String,
     description: String,

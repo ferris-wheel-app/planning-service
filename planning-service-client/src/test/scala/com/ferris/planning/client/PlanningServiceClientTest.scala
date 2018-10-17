@@ -35,15 +35,6 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
 
   describe("a planning service client") {
     describe("handling creations") {
-      it("should be able to create a message") {
-        val creationRequest = Marshal(SD.messageCreation.toJson).to[RequestEntity].futureValue
-        val creationResponse = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
-        when(mockServer.sendPostRequest("/api/messages", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
-        whenReady(client.createMessage(SD.messageCreation)) { response =>
-          response shouldBe SD.message
-        }
-      }
-
       it("should be able to create a backlog-item") {
         val creationRequest = Marshal(SD.backlogItemCreation.toJson).to[RequestEntity].futureValue
         val creationResponse = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
@@ -154,16 +145,6 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling updates") {
-      it("should be able to update a message") {
-        val id = UUID.randomUUID
-        val updateRequest = Marshal(SD.messageUpdate.toJson).to[RequestEntity].futureValue
-        val updateResponse = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
-        when(mockServer.sendPutRequest(s"/api/messages/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
-        whenReady(client.updateMessage(id, SD.messageUpdate)) { response =>
-          response shouldBe SD.message
-        }
-      }
-
       it("should be able to update a backlog-item") {
         val id = UUID.randomUUID
         val updateRequest = Marshal(SD.backlogItemUpdate.toJson).to[RequestEntity].futureValue
@@ -276,24 +257,6 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling retrievals") {
-      it("should be able to retrieve a message") {
-        val id = UUID.randomUUID
-        val response = Marshal(Envelope("OK", SD.message)).to[ResponseEntity].futureValue
-        when(mockServer.sendGetRequest(s"/api/messages/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
-        whenReady(client.message(id)) { response =>
-          response.value shouldBe SD.message
-        }
-      }
-
-      it("should be able to retrieve a list of messages") {
-        val list = SD.message :: SD.message :: Nil
-        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
-        when(mockServer.sendGetRequest("/api/messages")).thenReturn(Future.successful(HttpResponse(entity = response)))
-        whenReady(client.messages) { response =>
-          response shouldBe list
-        }
-      }
-
       it("should be able to retrieve a backlog-item") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
@@ -519,15 +482,6 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling deletions") {
-      it("should be able to delete a message") {
-        val id = UUID.randomUUID
-        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
-        when(mockServer.sendDeleteRequest(s"/api/messages/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
-        whenReady(client.deleteMessage(id)) { response =>
-          response shouldBe DeletionResult.successful
-        }
-      }
-
       it("should be able to delete a backlog-item") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue

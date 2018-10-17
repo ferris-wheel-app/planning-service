@@ -11,22 +11,6 @@ object SampleData {
   private val currentYear = LocalDate.now
   private val nextYear = currentYear.plusYears(1)
 
-  val messageCreation = MessageCreation(
-    sender = "Dave",
-    content = "Open the pod bay doors, HAL."
-  )
-
-  val messageUpdate = MessageUpdate(
-    sender = Some("HAL"),
-    content = Some("Sorry Dave. I'm afraid I cannot do that.")
-  )
-
-  val message = MessageView(
-    uuid = UUID.randomUUID(),
-    sender = "Dave",
-    content = "Open the pod bay doors, HAL."
-  )
-
   val backlogItemCreation = BacklogItemCreation(
     summary = "I need to get my shit together",
     description = "I need to get my shit together",

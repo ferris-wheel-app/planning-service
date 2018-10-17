@@ -34,9 +34,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   private val pyramidPath = "pyramid"
   private val currentPath = "current"
 
-  def createMessage(creation: MessageCreation): Future[MessageView] =
-    makePostRequest[MessageCreation, MessageView](Uri(path = apiPath / messagesPath), creation)
-
   def createBacklogItem(creation: BacklogItemCreation): Future[BacklogItemView] =
     makePostRequest[BacklogItemCreation, BacklogItemView](Uri(path = apiPath / backlogItemsPath), creation)
 
@@ -73,10 +70,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def createPyramidOfImportance(creation: PyramidOfImportanceUpsert): Future[PyramidOfImportanceView] =
     makePostRequest[PyramidOfImportanceUpsert, PyramidOfImportanceView](Uri(path = apiPath / pyramidPath), creation)
 
-
-  def updateMessage(id: UUID, update: MessageUpdate): Future[MessageView] =
-    makePutRequest[MessageUpdate, MessageView](Uri(path = apiPath / messagesPath / id.toString), update)
-
   def updateBacklogItem(id: UUID, update: BacklogItemUpdate): Future[BacklogItemView] =
     makePutRequest[BacklogItemUpdate, BacklogItemView](Uri(path = apiPath / backlogItemsPath / id.toString), update)
 
@@ -109,10 +102,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def updateHobby(id: UUID, update: HobbyUpdate): Future[HobbyView] =
     makePutRequest[HobbyUpdate, HobbyView](Uri(path = apiPath / hobbiesPath / id.toString), update)
-
-
-  def message(id: UUID): Future[Option[MessageView]] =
-    makeGetRequest[Option[MessageView]](Uri(path = apiPath / messagesPath / id.toString))
 
   def backlogItem(id: UUID): Future[Option[BacklogItemView]] =
     makeGetRequest[Option[BacklogItemView]](Uri(path = apiPath / backlogItemsPath / id.toString))
@@ -156,10 +145,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def pyramidOfImportance: Future[Option[PyramidOfImportanceView]] =
     makeGetRequest[Option[PyramidOfImportanceView]](Uri(path = apiPath / pyramidPath))
 
-
-  def messages: Future[List[MessageView]] =
-    makeGetRequest[List[MessageView]](Uri(path = apiPath / messagesPath))
-
   def backlogItems: Future[List[BacklogItemView]] =
     makeGetRequest[List[BacklogItemView]](Uri(path = apiPath / backlogItemsPath))
 
@@ -192,10 +177,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def hobbies: Future[List[HobbyView]] =
     makeGetRequest[List[HobbyView]](Uri(path = apiPath / hobbiesPath))
-
-
-  def deleteMessage(id: UUID): Future[DeletionResult] =
-    makeDeleteRequest[DeletionResult](Uri(path = apiPath / messagesPath / id.toString))
 
   def deleteBacklogItem(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / backlogItemsPath / id.toString))

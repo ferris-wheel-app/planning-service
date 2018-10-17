@@ -10,11 +10,6 @@ import com.ferris.planning.service.exceptions.Exceptions._
 
 trait PlanningResponseMappings extends FerrisResponseMappings {
 
-  def mapMessage(response: Option[Message]): (Success, MessageView) = response match {
-    case Some(message) => (StatusCodes.OK, message.toView)
-    case None => throw MessageNotFoundException()
-  }
-
   def mapBacklogItem(response: Option[BacklogItem]): (Success, BacklogItemView) = response match {
     case Some(backlogItem) => (StatusCodes.OK, backlogItem.toView)
     case None => throw BacklogItemNotFoundException()

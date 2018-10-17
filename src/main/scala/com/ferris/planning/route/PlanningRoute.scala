@@ -34,18 +34,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val currentPathSegment = "current"
   private val refreshPathSegment = "refresh"
 
-  private val createMessageRoute = pathPrefix(messagesPathSegment) {
-    pathEndOrSingleSlash {
-      post {
-        entity(as[MessageCreation]) { creation =>
-          onSuccess(planningService.createMessage(creation.toCommand)) { response =>
-            complete(StatusCodes.OK, response.toView)
-          }
-        }
-      }
-    }
-  }
-
   private val createBacklogItemRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       post {
@@ -183,18 +171,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       post {
         entity(as[PyramidOfImportanceUpsert]) { creation =>
           onSuccess(planningService.createPyramidOfImportance(creation.toCommand)) { response =>
-            complete(StatusCodes.OK, response.toView)
-          }
-        }
-      }
-    }
-  }
-
-  private val updateMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { id =>
-    pathEndOrSingleSlash {
-      put {
-        entity(as[MessageUpdate]) { update =>
-          onSuccess(planningService.updateMessage(id, update.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
@@ -374,16 +350,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val getMessagesRoute = pathPrefix(messagesPathSegment) {
-    pathEndOrSingleSlash {
-      get {
-        onSuccess(planningService.getMessages) { response =>
-          complete(StatusCodes.OK, response.map(_.toView))
-        }
-      }
-    }
-  }
-
   private val getBacklogItemsRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       get {
@@ -554,14 +520,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val getMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { id =>
-    pathEndOrSingleSlash {
-      get {
-        onSuccess(planningService.getMessage(id))(outcome => complete(mapMessage(outcome)))
-      }
-    }
-  }
-
   private val getBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
@@ -674,14 +632,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val deleteMessageRoute = pathPrefix(messagesPathSegment / PathMatchers.JavaUUID) { id =>
-    pathEndOrSingleSlash {
-      delete {
-        onSuccess(planningService.deleteMessage(id))(outcome => complete(mapDeletion(outcome)))
-      }
-    }
-  }
-
   private val deleteBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
@@ -771,7 +721,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   }
 
   val planningRoute: Route = {
-    createMessageRoute ~
     createBacklogItemRoute ~
     createEpochRoute ~
     createYearRoute ~
@@ -784,7 +733,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     createTodoRoute ~
     createHobbyRoute ~
     createPyramidRoute ~
-    updateMessageRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
     updateYearRoute ~
@@ -800,7 +748,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updateHobbyRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~
-    getMessagesRoute ~
     getBacklogItemsRoute ~
     getEpochsRoute ~
     getYearsRoute ~
@@ -818,7 +765,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getTodosByParentRoute ~
     getHobbiesRoute ~
     getHobbiesByGoalRoute ~
-    getMessageRoute ~
     getBacklogItemRoute ~
     getEpochRoute ~
     getYearRoute ~
@@ -833,7 +779,6 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getTodoRoute ~
     getHobbyRoute ~
     getPyramidRoute ~
-    deleteMessageRoute ~
     deleteBacklogItemRoute ~
     deleteEpochRoute ~
     deleteYearRoute ~

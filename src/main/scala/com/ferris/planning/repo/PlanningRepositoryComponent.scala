@@ -20,7 +20,6 @@ trait PlanningRepositoryComponent {
   val repo: PlanningRepository
 
   trait PlanningRepository {
-    def createMessage(creation: CreateMessage): Future[Message]
     def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem]
     def createEpoch(creation: CreateEpoch): Future[Epoch]
     def createYear(creation: CreateYear): Future[Year]
@@ -34,7 +33,6 @@ trait PlanningRepositoryComponent {
     def createHobby(creation: CreateHobby): Future[Hobby]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
 
-    def updateMessage(uuid: UUID, update: UpdateMessage): Future[Message]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
     def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch]
     def updateYear(uuid: UUID, update: UpdateYear): Future[Year]
@@ -51,7 +49,6 @@ trait PlanningRepositoryComponent {
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
-    def getMessages: Future[Seq[Message]]
     def getBacklogItems: Future[Seq[BacklogItem]]
     def getEpochs: Future[Seq[Epoch]]
     def getYears: Future[Seq[Year]]
@@ -70,7 +67,6 @@ trait PlanningRepositoryComponent {
     def getHobbies: Future[Seq[Hobby]]
     def getHobbies(goalId: UUID): Future[Seq[Hobby]]
 
-    def getMessage(uuid: UUID): Future[Option[Message]]
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID): Future[Option[Epoch]]
     def getYear(uuid: UUID): Future[Option[Year]]
@@ -86,7 +82,6 @@ trait PlanningRepositoryComponent {
     def getHobby(uuid: UUID): Future[Option[Hobby]]
     def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
-    def deleteMessage(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
     def deleteEpoch(uuid: UUID): Future[Boolean]
     def deleteYear(uuid: UUID): Future[Boolean]
@@ -117,17 +112,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   class SqlPlanningRepository(config: PlanningServiceConfig) extends PlanningRepository {
 
     // Create endpoints
-    override def createMessage(creation: CreateMessage): Future[Message] = {
-      val row = MessageRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        sender = creation.sender,
-        content = creation.content
-      )
-      val action = (MessageTable returning MessageTable.map(_.id) into ((message, id) => message.copy(id = id))) += row
-      db.run(action) map (row => row.asMessage)
-    }
-
     override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
       val row = BacklogItemRow(
         id = 0L,
@@ -334,17 +318,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Update endpoints
-    override def updateMessage(uuid: UUID, update: UpdateMessage): Future[Message] = {
-      val query = messageByUuid(uuid).map(message => (message.sender, message.content))
-      val action = getMessageAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(update.sender.getOrElse(old.sender), update.content.getOrElse(old.content))
-            .andThen(getMessageAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(MessageNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asMessage)
-    }
-
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`, item.lastModified))
       val action = getBacklogItemAction(uuid).flatMap { maybeObj =>
@@ -687,14 +660,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Get endpoints
-    override def getMessages: Future[Seq[Message]] = {
-      db.run(MessageTable.result.map(_.map(_.asMessage)))
-    }
-
-    override def getMessage(uuid: UUID): Future[Option[Message]] = {
-      db.run(getMessageAction(uuid).map(_.map(_.asMessage)))
-    }
-
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
       db.run(BacklogItemTable.result.map(_.map(_.asBacklogItem)))
     }
@@ -828,11 +793,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Delete endpoints
-    override def deleteMessage(uuid: UUID): Future[Boolean] = {
-      val action = messageByUuid(uuid).delete
-      db.run(action).map(_ > 0)
-    }
-
     override def deleteBacklogItem(uuid: UUID): Future[Boolean] = {
       val action = backlogItemByUuid(uuid).delete
       db.run(action).map(_ > 0)
@@ -912,10 +872,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       (GoalBacklogItemTable returning GoalBacklogItemTable.map(_.id) into ((goalAndItem, id) => goalAndItem.copy(id = id))) ++= rows
     }
 
-    private def getMessageAction(uuid: UUID) = {
-      messageByUuid(uuid).result.headOption
-    }
-
     private def getBacklogItemsAction(uuids: Seq[UUID]) = {
       backlogItemsByUuid(uuids).result
     }
@@ -976,10 +932,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Queries
-    private def messageByUuid(uuid: UUID) = {
-      MessageTable.filter(_.uuid === uuid.toString)
-    }
-
     private def backlogItemsByUuid(uuids: Seq[UUID]) = {
       BacklogItemTable.filter(_.uuid inSet uuids.map(_.toString))
     }
