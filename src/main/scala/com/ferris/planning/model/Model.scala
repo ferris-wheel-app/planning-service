@@ -123,6 +123,17 @@ object Model {
     lastPerformed: Option[LocalDateTime]
   )
 
+  case class OneOff (
+    uuid: UUID,
+    goalId: Option[UUID],
+    summary: String,
+    estimate: Long,
+    status: Statuses.Status,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastPerformed: Option[LocalDateTime]
+  )
+
   case class Tier (
     laserDonuts: Seq[UUID]
   )
