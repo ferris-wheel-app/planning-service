@@ -158,7 +158,7 @@ object Commands {
 
   case class CreateOneOff (
     goalId: Option[UUID],
-    summary: String,
+    description: String,
     estimate: Long,
     status: Statuses.Status
   )
@@ -166,7 +166,7 @@ object Commands {
   case class UpdateOneOff (
     uuid: Option[UUID],
     goalId: Option[UUID],
-    summary: Option[String],
+    description: Option[String],
     estimate: Option[Long],
     status: Option[Statuses.Status]
   )
@@ -174,7 +174,7 @@ object Commands {
   case class CreateScheduledOneOff (
     occursOn: LocalDateTime,
     goalId: Option[UUID],
-    summary: String,
+    description: String,
     estimate: Long,
     status: Statuses.Status
   )
@@ -183,7 +183,7 @@ object Commands {
     uuid: Option[UUID],
     occursOn: Option[LocalDateTime],
     goalId: Option[UUID],
-    summary: Option[String],
+    description: Option[String],
     estimate: Option[Long],
     status: Option[Statuses.Status]
   )

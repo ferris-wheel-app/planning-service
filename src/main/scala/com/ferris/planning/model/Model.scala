@@ -126,7 +126,7 @@ object Model {
   case class OneOff (
     uuid: UUID,
     goalId: Option[UUID],
-    summary: String,
+    description: String,
     estimate: Long,
     status: Statuses.Status,
     createdOn: LocalDateTime,
@@ -138,7 +138,7 @@ object Model {
     uuid: UUID,
     occursOn: LocalDateTime,
     goalId: Option[UUID],
-    summary: String,
+    description: String,
     estimate: Long,
     status: Statuses.Status,
     createdOn: LocalDateTime,

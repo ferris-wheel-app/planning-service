@@ -307,11 +307,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createOneOff(creation: CreateOneOff): Future[OneOff] = {
-      ???
+      val row = OneOffRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        goalId = creation.goalId,
+        description = creation.description,
+        estimate = creation.estimate,
+        status = creation.status.dbValue,
+        createdOn = timer.timestampOfNow,
+        lastModified = None,
+        lastPerformed = None
+      )
+      val action = (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      db.run(action) map (row => row.asOneOff)
     }
 
     override def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff] = {
-      ???
+      val row = ScheduledOneOffRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        occursOn = creation.occursOn.toTimestamp,
+        goalId = creation.goalId,
+        description = creation.description,
+        estimate = creation.estimate,
+        status = creation.status.dbValue,
+        createdOn = timer.timestampOfNow,
+        lastModified = None,
+        lastPerformed = None
+      )
+      val action = (ScheduledOneOffTable returning ScheduledOneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      db.run(action) map (row => row.asScheduledOneOff)
     }
 
     override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance] = {

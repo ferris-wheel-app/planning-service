@@ -155,6 +155,33 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
+  implicit class OneOffBuilder(val row: tables.OneOffRow) {
+    def asOneOff: OneOff = OneOff(
+      uuid = UUID.fromString(row.uuid),
+      goalId = row.goalId.map(UUID.fromString),
+      description = row.description,
+      estimate = row.estimate,
+      status = Statuses.withName(row.status),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
+    )
+  }
+
+  implicit class ScheduledOneOffBuilder(val row: tables.ScheduledOneOffRow) {
+    def asScheduledOneOff: ScheduledOneOff = ScheduledOneOff(
+      uuid = UUID.fromString(row.uuid),
+      occursOn = row.occursOn.toLocalDateTime,
+      goalId = row.goalId.map(UUID.fromString),
+      description = row.description,
+      estimate = row.estimate,
+      status = Statuses.withName(row.status),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
+    )
+  }
+
   implicit class PyramidBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow)]) {
     def asPyramid: PyramidOfImportance = {
       val currentLaserDonut = rows.find(_._1.isCurrent).map(row => UUID.fromString(row._2.uuid))

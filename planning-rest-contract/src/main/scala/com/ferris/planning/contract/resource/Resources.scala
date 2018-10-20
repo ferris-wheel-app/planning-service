@@ -189,7 +189,7 @@ object Resources {
     case class OneOffCreation (
       uuid: UUID,
       goalId: Option[UUID],
-      summary: String,
+      description: String,
       estimate: Long,
       status: String
     )
@@ -197,7 +197,7 @@ object Resources {
     case class OneOffUpdate (
       uuid: Option[UUID],
       goalId: Option[UUID],
-      summary: Option[String],
+      description: Option[String],
       estimate: Option[Long],
       status: Option[String]
     )
@@ -206,7 +206,7 @@ object Resources {
       uuid: UUID,
       occursOn: LocalDateTime,
       goalId: Option[UUID],
-      summary: String,
+      description: String,
       estimate: Long,
       status: String
     )
@@ -215,7 +215,7 @@ object Resources {
       uuid: Option[UUID],
       occursOn: Option[LocalDateTime],
       goalId: Option[UUID],
-      summary: Option[String],
+      description: Option[String],
       estimate: Option[Long],
       status: Option[String]
     )
@@ -369,7 +369,7 @@ object Resources {
     case class OneOffView (
       uuid: UUID,
       goalId: Option[UUID],
-      summary: String,
+      description: String,
       estimate: Long,
       status: String
     )
@@ -378,7 +378,7 @@ object Resources {
       uuid: UUID,
       occursOn: LocalDateTime,
       goalId: Option[UUID],
-      summary: String,
+      description: String,
       estimate: Long,
       status: String
     )
