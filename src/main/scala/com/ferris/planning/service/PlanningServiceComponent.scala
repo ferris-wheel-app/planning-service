@@ -23,6 +23,8 @@ trait PlanningServiceComponent {
     def createPortion(creation: CreatePortion)(implicit ex: ExecutionContext): Future[Portion]
     def createTodo(creation: CreateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby]
+    def createOneOff(creation: CreateOneOff)(implicit ex: ExecutionContext): Future[OneOff]
+    def createScheduledOneOff(creation: CreateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
@@ -38,6 +40,8 @@ trait PlanningServiceComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo)(implicit ex: ExecutionContext): Future[Todo]
     def updateTodos(parentId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby]
+    def updateOneOff(uuid: UUID, update: UpdateOneOff)(implicit ex: ExecutionContext): Future[OneOff]
+    def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff]
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
 
@@ -58,6 +62,8 @@ trait PlanningServiceComponent {
     def getTodos(parentId: UUID)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getHobbies(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Hobby]]
+    def getOneOffs()(implicit ex: ExecutionContext): Future[Seq[OneOff]]
+    def getScheduledOneOffs()(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
 
     def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Epoch]]
@@ -72,6 +78,8 @@ trait PlanningServiceComponent {
     def getCurrentPortion(implicit ex: ExecutionContext): Future[Option[Portion]]
     def getTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Todo]]
     def getHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Hobby]]
+    def getOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[OneOff]]
+    def getScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[ScheduledOneOff]]
     def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]]
 
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
@@ -85,6 +93,8 @@ trait PlanningServiceComponent {
     def deletePortion(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteTodo(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
+    def deleteOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
+    def deleteScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
   }
 }
 
@@ -137,6 +147,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def createHobby(creation: CreateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
       repo.createHobby(creation)
+    }
+
+    override def createOneOff(creation: CreateOneOff)(implicit ex: ExecutionContext): Future[OneOff] = {
+      repo.createOneOff(creation)
+    }
+
+    override def createScheduledOneOff(creation: CreateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff] = {
+      repo.createScheduledOneOff(creation)
     }
 
     override def createPyramidOfImportance(creation: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
@@ -193,6 +211,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby] = {
       repo.updateHobby(uuid, update)
+    }
+
+    override def updateOneOff(uuid: UUID, update: UpdateOneOff)(implicit ex: ExecutionContext): Future[OneOff] = {
+      repo.updateOneOff(uuid, update)
+    }
+
+    override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff] = {
+      repo.updateScheduledOneOff(uuid, update)
     }
 
     override def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean] = {
@@ -271,6 +297,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getHobbies(goalId)
     }
 
+    override def getOneOffs()(implicit ex: ExecutionContext): Future[Seq[OneOff]] = {
+      repo.getOneOffs
+    }
+
+    override def getScheduledOneOffs()(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]] = {
+      repo.getScheduledOneOffs
+    }
+
     override def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
       repo.getBacklogItem(uuid)
     }
@@ -323,6 +357,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getHobby(uuid)
     }
 
+    override def getOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[OneOff]] = {
+      getOneOff(uuid)
+    }
+
+    override def getScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[ScheduledOneOff]] = {
+      repo.getScheduledOneOff(uuid)
+    }
+
     override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]] = {
       repo.getPyramidOfImportance
     }
@@ -369,6 +411,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def deleteHobby(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.deleteHobby(uuid)
+    }
+
+    override def deleteOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteOneOff(uuid)
+    }
+
+    override def deleteScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteScheduledOneOff(uuid)
     }
   }
 }
