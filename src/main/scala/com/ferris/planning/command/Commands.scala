@@ -1,6 +1,6 @@
 package com.ferris.planning.command
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.model.Model._
@@ -154,6 +154,38 @@ object Commands {
     description: Option[String],
     frequency: Option[HobbyFrequencies.HobbyFrequency],
     `type`: Option[HobbyTypes.HobbyType]
+  )
+
+  case class CreateOneOff (
+    goalId: Option[UUID],
+    summary: String,
+    estimate: Long,
+    status: Statuses.Status
+  )
+
+  case class UpdateOneOff (
+    uuid: Option[UUID],
+    goalId: Option[UUID],
+    summary: Option[String],
+    estimate: Option[Long],
+    status: Option[Statuses.Status]
+  )
+
+  case class CreateScheduledOneOff (
+    occursOn: LocalDateTime,
+    goalId: Option[UUID],
+    summary: String,
+    estimate: Long,
+    status: Statuses.Status
+  )
+
+  case class UpdateScheduledOneOff (
+    uuid: Option[UUID],
+    occursOn: Option[LocalDateTime],
+    goalId: Option[UUID],
+    summary: Option[String],
+    estimate: Option[Long],
+    status: Option[Statuses.Status]
   )
 
   case class UpdateList (

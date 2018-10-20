@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, OneOffTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, OneOffTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -458,6 +458,56 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table ScheduledLaserDonutTable */
   lazy val ScheduledLaserDonutTable = new TableQuery(tag => new ScheduledLaserDonutTable(tag))
+
+  /** Entity class storing rows of table ScheduledOneOffTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
+   *  @param occursOn Database column OCCURS_ON SqlType(TIMESTAMP)
+   *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
+   *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
+   *  @param estimate Database column ESTIMATE SqlType(BIGINT)
+   *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+  case class ScheduledOneOffRow(id: Long, uuid: String, occursOn: java.sql.Timestamp, goalId: Option[String], description: String, estimate: Long, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  /** GetResult implicit for fetching ScheduledOneOffRow objects using plain SQL queries */
+  implicit def GetResultScheduledOneOffRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[String]], e4: GR[Option[java.sql.Timestamp]]): GR[ScheduledOneOffRow] = GR{
+    prs => import prs._
+    ScheduledOneOffRow.tupled((<<[Long], <<[String], <<[java.sql.Timestamp], <<?[String], <<[String], <<[Long], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+  }
+  /** Table description of table SCHEDULED_ONE_OFF. Objects of this class serve as prototypes for rows in queries. */
+  class ScheduledOneOffTable(_tableTag: Tag) extends profile.api.Table[ScheduledOneOffRow](_tableTag, "SCHEDULED_ONE_OFF") {
+    def * = (id, uuid, occursOn, goalId, description, estimate, status, createdOn, lastModified, lastPerformed) <> (ScheduledOneOffRow.tupled, ScheduledOneOffRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(occursOn), goalId, Rep.Some(description), Rep.Some(estimate), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> ScheduledOneOffRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get, _7.get, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column UUID SqlType(VARCHAR), Length(36,true) */
+    val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
+    /** Database column OCCURS_ON SqlType(TIMESTAMP) */
+    val occursOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("OCCURS_ON")
+    /** Database column GOAL_ID SqlType(VARCHAR), Length(36,true) */
+    val goalId: Rep[Option[String]] = column[Option[String]]("GOAL_ID", O.Length(36,varying=true))
+    /** Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true) */
+    val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
+    /** Database column ESTIMATE SqlType(BIGINT) */
+    val estimate: Rep[Long] = column[Long]("ESTIMATE")
+    /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
+    val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_PERFORMED SqlType(TIMESTAMP) */
+    val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
+
+    /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_16) */
+    val index1 = index("CONSTRAINT_INDEX_16", uuid, unique=true)
+  }
+  /** Collection-like TableQuery object for table ScheduledOneOffTable */
+  lazy val ScheduledOneOffTable = new TableQuery(tag => new ScheduledOneOffTable(tag))
 
   /** Entity class storing rows of table ThemeTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey

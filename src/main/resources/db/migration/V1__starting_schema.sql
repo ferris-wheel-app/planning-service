@@ -171,6 +171,21 @@ create table one_off (
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;
 
+create table scheduled_one_off (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  uuid VARCHAR(36) NOT NULL,
+  occurs_on TIMESTAMP NOT NULL,
+  goal_id VARCHAR(36),
+  description VARCHAR(2000) NOT NULL,
+  estimate BIGINT NOT NULL,
+  status VARCHAR(36) NOT NULL check (status in ('PLANNED', 'IN_PROGRESS', 'COMPLETE')),
+  created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY (uuid)
+) ENGINE=InnoDB;
+
 create table scheduled_laser_donut (
   id BIGINT NOT NULL AUTO_INCREMENT,
   laser_donut_id BIGINT NOT NULL,

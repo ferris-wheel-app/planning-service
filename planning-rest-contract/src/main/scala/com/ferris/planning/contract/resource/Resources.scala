@@ -186,6 +186,40 @@ object Resources {
       checkValidity(this)
     }
 
+    case class OneOffCreation (
+      uuid: UUID,
+      goalId: Option[UUID],
+      summary: String,
+      estimate: Long,
+      status: String
+    )
+
+    case class OneOffUpdate (
+      uuid: Option[UUID],
+      goalId: Option[UUID],
+      summary: Option[String],
+      estimate: Option[Long],
+      status: Option[String]
+    )
+
+    case class ScheduledOneOffCreation (
+      uuid: UUID,
+      occursOn: LocalDateTime,
+      goalId: Option[UUID],
+      summary: String,
+      estimate: Long,
+      status: String
+    )
+
+    case class ScheduledOneOffUpdate (
+      uuid: Option[UUID],
+      occursOn: Option[LocalDateTime],
+      goalId: Option[UUID],
+      summary: Option[String],
+      estimate: Option[Long],
+      status: Option[String]
+    )
+
     case class ListUpdate (
       reordered: Seq[UUID]
     )
@@ -330,6 +364,23 @@ object Resources {
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]
+    )
+
+    case class OneOffView (
+      uuid: UUID,
+      goalId: Option[UUID],
+      summary: String,
+      estimate: Long,
+      status: String
+    )
+
+    case class ScheduledOneOffView (
+      uuid: UUID,
+      occursOn: LocalDateTime,
+      goalId: Option[UUID],
+      summary: String,
+      estimate: Long,
+      status: String
     )
 
     case class TierView (
