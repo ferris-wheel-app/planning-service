@@ -31,6 +31,8 @@ trait PlanningRepositoryComponent {
     def createPortion(creation: CreatePortion): Future[Portion]
     def createTodo(creation: CreateTodo): Future[Todo]
     def createHobby(creation: CreateHobby): Future[Hobby]
+    def createOneOff(creation: CreateOneOff): Future[OneOff]
+    def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
 
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
@@ -46,6 +48,8 @@ trait PlanningRepositoryComponent {
     def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo]
     def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
+    def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff]
+    def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff]
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
@@ -66,6 +70,8 @@ trait PlanningRepositoryComponent {
     def getTodos(parentId: UUID): Future[Seq[Todo]]
     def getHobbies: Future[Seq[Hobby]]
     def getHobbies(goalId: UUID): Future[Seq[Hobby]]
+    def getOneOffs: Future[Seq[OneOff]]
+    def getScheduledOneOffs: Future[Seq[ScheduledOneOff]]
 
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID): Future[Option[Epoch]]
@@ -80,6 +86,8 @@ trait PlanningRepositoryComponent {
     def getCurrentPortion: Future[Option[Portion]]
     def getTodo(uuid: UUID): Future[Option[Todo]]
     def getHobby(uuid: UUID): Future[Option[Hobby]]
+    def getOneOff(uuid: UUID): Future[Option[OneOff]]
+    def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]]
     def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
@@ -93,6 +101,8 @@ trait PlanningRepositoryComponent {
     def deletePortion(uuid: UUID): Future[Boolean]
     def deleteTodo(uuid: UUID): Future[Boolean]
     def deleteHobby(uuid: UUID): Future[Boolean]
+    def deleteOneOff(uuid: UUID): Future[Boolean]
+    def deleteScheduledOneOff(uuid: UUID): Future[Boolean]
     def deletePyramidOfImportance(): Future[Boolean]
   }
 }
@@ -294,6 +304,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       )
       val action = (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
       db.run(action) map (row => row.asHobby)
+    }
+
+    override def createOneOff(creation: CreateOneOff): Future[OneOff] = {
+      ???
+    }
+
+    override def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff] = {
+      ???
     }
 
     override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance] = {
@@ -567,6 +585,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(row => row.asHobby)
     }
 
+    override def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff] = {
+      ???
+    }
+
+    override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff] = {
+      ???
+    }
+
     override def refreshPyramidOfImportance(): Future[Boolean] = {
       def getScheduledLaserDonuts = {
         (for {
@@ -788,6 +814,22 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
     }
 
+    override def getOneOffs: Future[Seq[OneOff]] = {
+      ???
+    }
+
+    override def getOneOff(uuid: UUID): Future[Option[OneOff]] = {
+      ???
+    }
+
+    override def getScheduledOneOffs: Future[Seq[ScheduledOneOff]] = {
+      ???
+    }
+
+    override def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]] = {
+      ???
+    }
+
     override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {
       db.run(getPyramidOfImportanceAction)
     }
@@ -853,6 +895,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteHobby(uuid: UUID): Future[Boolean] = {
       val action = hobbyByUuid(uuid).delete
       db.run(action).map(_ > 0)
+    }
+
+    override def deleteOneOff(uuid: UUID): Future[Boolean] = {
+      ???
+    }
+
+    override def deleteScheduledOneOff(uuid: UUID): Future[Boolean] = {
+      ???
     }
 
     override def deletePyramidOfImportance(): Future[Boolean] = {
