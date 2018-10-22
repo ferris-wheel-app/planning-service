@@ -1,7 +1,7 @@
 package com.ferris.planning.db.conversions
 
 import java.sql.{Date, Timestamp}
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import akka.http.scaladsl.model.DateTime
@@ -248,6 +248,12 @@ class DomainConversions(val tables: Tables) {
   object UpdateDate extends Update[LocalDate, Date] {
     override def keepOrReplace(newVersion: Option[LocalDate], oldVersion: Date): Date = {
       newVersion.map(localDate2SqlDate).getOrElse(oldVersion)
+    }
+  }
+
+  object UpdateDateTime extends Update[LocalDateTime, Timestamp] {
+    override def keepOrReplace(newVersion: Option[LocalDateTime], oldVersion: Timestamp): Timestamp = {
+      newVersion.map(_.toTimestamp).getOrElse(oldVersion)
     }
   }
 

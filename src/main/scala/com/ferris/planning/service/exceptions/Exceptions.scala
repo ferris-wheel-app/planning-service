@@ -26,6 +26,10 @@ object Exceptions {
 
   case class HobbyNotFoundException(message: String = "hobby not found") extends PlanningServiceException(message)
 
+  case class OneOffNotFoundException(message: String = "one-off not found") extends PlanningServiceException(message)
+
+  case class ScheduledOneOffNotFoundException(message: String = "scheduled-one-off not found") extends PlanningServiceException(message)
+
   case class PyramidNotFoundException(message: String = "pyramid of importance not found") extends PlanningServiceException(message)
 
   case class InvalidPortionsUpdateException(message: String) extends PlanningServiceException(message)

@@ -611,11 +611,37 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff] = {
-      ???
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.description :: update.estimate :: update.status :: Nil,
+        statusUpdate = Nil
+      )
+      val query = oneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.description, oneOff.estimate, oneOff.status,
+        oneOff.lastModified, oneOff.lastPerformed))
+      val action = getOneOffAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.description.getOrElse(old.description),
+            update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+            .andThen(getOneOffAction(uuid).map(_.head))
+        } getOrElse DBIO.failed(OneOffNotFoundException())
+      }.transactionally
+      db.run(action).map(row => row.asOneOff)
     }
 
     override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff] = {
-      ???
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.goalId :: update.occursOn :: update.description :: update.estimate :: update.status :: Nil,
+        statusUpdate = Nil
+      )
+      val query = scheduledOneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.occursOn, oneOff.description, oneOff.estimate, oneOff.status,
+        oneOff.lastModified, oneOff.lastPerformed))
+      val action = getScheduledOneOffAction(uuid).flatMap { maybeObj =>
+        maybeObj.map { (old: ScheduledOneOffRow) =>
+          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), UpdateDateTime.keepOrReplace(update.occursOn, old.occursOn),
+            update.description.getOrElse(old.description), update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            lastModified, lastPerformed).andThen(getScheduledOneOffAction(uuid).map(_.head))
+        } getOrElse DBIO.failed(ScheduledOneOffNotFoundException())
+      }.transactionally
+      db.run(action).map(row => row.asScheduledOneOff)
     }
 
     override def refreshPyramidOfImportance(): Future[Boolean] = {
@@ -840,19 +866,19 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getOneOffs: Future[Seq[OneOff]] = {
-      ???
+      db.run(OneOffTable.result.map(_.map(_.asOneOff)))
     }
 
     override def getOneOff(uuid: UUID): Future[Option[OneOff]] = {
-      ???
+      db.run(getOneOffAction(uuid).map(_.map(_.asOneOff)))
     }
 
     override def getScheduledOneOffs: Future[Seq[ScheduledOneOff]] = {
-      ???
+      db.run(ScheduledOneOffTable.result.map(_.map(_.asScheduledOneOff)))
     }
 
     override def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]] = {
-      ???
+      db.run(getScheduledOneOffAction(uuid).map(_.map(_.asScheduledOneOff)))
     }
 
     override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {
@@ -923,11 +949,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def deleteOneOff(uuid: UUID): Future[Boolean] = {
-      ???
+      val action = oneOffByUuid(uuid).delete
+      db.run(action).map(_ > 0)
     }
 
     override def deleteScheduledOneOff(uuid: UUID): Future[Boolean] = {
-      ???
+      val action = scheduledOneOffByUuid(uuid).delete
+      db.run(action).map(_ > 0)
     }
 
     override def deletePyramidOfImportance(): Future[Boolean] = {
@@ -997,6 +1025,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getHobbyAction(uuid: UUID) = {
       hobbyByUuid(uuid).result.headOption
+    }
+
+    private def getOneOffAction(uuid: UUID) = {
+      oneOffByUuid(uuid).result.headOption
+    }
+
+    private def getScheduledOneOffAction(uuid: UUID) = {
+      scheduledOneOffByUuid(uuid).result.headOption
     }
 
     private def getPyramidOfImportanceAction = {
@@ -1094,6 +1130,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def hobbiesByParentId(goalId: UUID) = {
       HobbyTable.filter(_.goalId === goalId.toString)
+    }
+
+    private def oneOffByUuid(uuid: UUID) = {
+      OneOffTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def scheduledOneOffByUuid(uuid: UUID) = {
+      ScheduledOneOffTable.filter(_.uuid === uuid.toString)
     }
 
     private def getUpdateTimes(contentUpdate: Seq[Option[Any]], statusUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {
