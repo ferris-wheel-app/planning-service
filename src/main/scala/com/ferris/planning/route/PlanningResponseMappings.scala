@@ -69,6 +69,16 @@ trait PlanningResponseMappings extends FerrisResponseMappings {
     case None => throw HobbyNotFoundException()
   }
 
+  def mapOneOff(response: Option[OneOff]): (Success, OneOffView) = response match {
+    case Some(oneOff) => (StatusCodes.OK, oneOff.toView)
+    case None => throw OneOffNotFoundException()
+  }
+
+  def mapScheduledOneOff(response: Option[ScheduledOneOff]): (Success, ScheduledOneOffView) = response match {
+    case Some(scheduledOneOff) => (StatusCodes.OK, scheduledOneOff.toView)
+    case None => throw ScheduledOneOffNotFoundException()
+  }
+
   def mapPyramid(response: Option[PyramidOfImportance]): (Success, PyramidOfImportanceView) = response match {
     case Some(pyramid) => (StatusCodes.OK, pyramid.toView)
     case None => throw PyramidNotFoundException()

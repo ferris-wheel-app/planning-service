@@ -164,7 +164,6 @@ object Commands {
   )
 
   case class UpdateOneOff (
-    uuid: Option[UUID],
     goalId: Option[UUID],
     description: Option[String],
     estimate: Option[Long],
@@ -180,7 +179,6 @@ object Commands {
   )
 
   case class UpdateScheduledOneOff (
-    uuid: Option[UUID],
     occursOn: Option[LocalDateTime],
     goalId: Option[UUID],
     description: Option[String],

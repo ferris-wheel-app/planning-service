@@ -371,7 +371,10 @@ object Resources {
       goalId: Option[UUID],
       description: String,
       estimate: Long,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class ScheduledOneOffView (
@@ -380,7 +383,10 @@ object Resources {
       goalId: Option[UUID],
       description: String,
       estimate: Long,
-      status: String
+      status: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
+      lastPerformed: Option[LocalDateTime]
     )
 
     case class TierView (

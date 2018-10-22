@@ -167,6 +167,37 @@ object ModelToView {
     }
   }
 
+  implicit class OneOffConversion(oneOff: OneOff) {
+    def toView: OneOffView = {
+      OneOffView(
+        uuid = oneOff.uuid,
+        goalId = oneOff.goalId,
+        description = oneOff.description,
+        estimate = oneOff.estimate,
+        status = TypeResolvers.Status.toString(oneOff.status),
+        createdOn = oneOff.createdOn,
+        lastModified = oneOff.lastModified,
+        lastPerformed = oneOff.lastPerformed
+      )
+    }
+  }
+
+  implicit class ScheduledOneOffConversion(oneOff: ScheduledOneOff) {
+    def toView: ScheduledOneOffView = {
+      ScheduledOneOffView(
+        uuid = oneOff.uuid,
+        occursOn = oneOff.occursOn,
+        goalId = oneOff.goalId,
+        description = oneOff.description,
+        estimate = oneOff.estimate,
+        status = TypeResolvers.Status.toString(oneOff.status),
+        createdOn = oneOff.createdOn,
+        lastModified = oneOff.lastModified,
+        lastPerformed = oneOff.lastPerformed
+      )
+    }
+  }
+
   implicit class PyramidOfImportanceConversion(pyramid: PyramidOfImportance) {
     def toView: PyramidOfImportanceView = {
       PyramidOfImportanceView(

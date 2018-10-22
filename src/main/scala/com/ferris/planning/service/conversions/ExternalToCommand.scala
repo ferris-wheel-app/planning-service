@@ -202,6 +202,44 @@ object ExternalToCommand {
     )
   }
 
+  implicit class OneOffCreationConversion(oneOff: OneOffCreation) extends CommandConversion[CreateOneOff] {
+    override def toCommand = CreateOneOff(
+      goalId = oneOff.goalId,
+      description = oneOff.description,
+      estimate = oneOff.estimate,
+      status = TypeResolvers.Status.withName(oneOff.status)
+    )
+  }
+
+  implicit class OneOffUpdateConversion(oneOff: OneOffUpdate) extends CommandConversion[UpdateOneOff] {
+    override def toCommand = UpdateOneOff(
+      goalId = oneOff.goalId,
+      description = oneOff.description,
+      estimate = oneOff.estimate,
+      status = oneOff.status.map(TypeResolvers.Status.withName)
+    )
+  }
+
+  implicit class ScheduledOneOffCreationConversion(oneOff: ScheduledOneOffCreation) extends CommandConversion[CreateScheduledOneOff] {
+    override def toCommand = CreateScheduledOneOff(
+      occursOn = oneOff.occursOn,
+      goalId = oneOff.goalId,
+      description = oneOff.description,
+      estimate = oneOff.estimate,
+      status = TypeResolvers.Status.withName(oneOff.status)
+    )
+  }
+
+  implicit class ScheduledOneOffUpdateConversion(oneOff: ScheduledOneOffUpdate) extends CommandConversion[UpdateScheduledOneOff] {
+    override def toCommand = UpdateScheduledOneOff(
+      occursOn = oneOff.occursOn,
+      goalId = oneOff.goalId,
+      description = oneOff.description,
+      estimate = oneOff.estimate,
+      status = oneOff.status.map(TypeResolvers.Status.withName)
+    )
+  }
+
   implicit class ListUpdateConversion(list: ListUpdate) extends CommandConversion[UpdateList] {
     override def toCommand = UpdateList(
       reordered = list.reordered

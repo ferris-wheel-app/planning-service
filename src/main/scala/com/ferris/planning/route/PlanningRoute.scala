@@ -30,6 +30,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val portionsPathSegment = "portions"
   private val todosPathSegment = "todos"
   private val hobbiesPathSegment = "hobbies"
+  private val oneOffsPathSegment = "one-offs"
+  private val scheduledOneOffsPathSegment = "scheduled-one-offs"
   private val pyramidPathSegment = "pyramid"
   private val currentPathSegment = "current"
   private val refreshPathSegment = "refresh"
@@ -159,6 +161,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       post {
         entity(as[HobbyCreation]) { creation =>
           onSuccess(planningService.createHobby(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val createOneOffRoute = pathPrefix(oneOffsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[OneOffCreation]) { creation =>
+          onSuccess(planningService.createOneOff(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val createScheduledOneOffRoute = pathPrefix(scheduledOneOffsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[ScheduledOneOffCreation]) { creation =>
+          onSuccess(planningService.createScheduledOneOff(creation.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
@@ -327,6 +353,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       put {
         entity(as[HobbyUpdate]) { update =>
           onSuccess(planningService.updateHobby(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateOneOffRoute = pathPrefix(oneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[OneOffUpdate]) { update =>
+          onSuccess(planningService.updateOneOff(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateScheduledOneOffRoute = pathPrefix(scheduledOneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[ScheduledOneOffUpdate]) { update =>
+          onSuccess(planningService.updateScheduledOneOff(id, update.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
@@ -510,6 +560,26 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getOneOffsRoute = pathPrefix(oneOffsPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getOneOffs) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getScheduledOneOffsRoute = pathPrefix(scheduledOneOffsPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getScheduledOneOffs) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getHobbiesByGoalRoute = pathPrefix(goalsPathSegment / PathMatchers.JavaUUID / hobbiesPathSegment) { goalId =>
     pathEndOrSingleSlash {
       get {
@@ -624,6 +694,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getOneOffRoute = pathPrefix(oneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getOneOff(id))(outcome => complete(mapOneOff(outcome)))
+      }
+    }
+  }
+
+  private val getScheduledOneOffRoute = pathPrefix(scheduledOneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getScheduledOneOff(id))(outcome => complete(mapScheduledOneOff(outcome)))
+      }
+    }
+  }
+
   private val getPyramidRoute = pathPrefix(pyramidPathSegment) {
     pathEndOrSingleSlash {
       get {
@@ -720,6 +806,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val deleteOneOffRoute = pathPrefix(oneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteOneOff(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
+  private val deleteScheduledOneOffRoute = pathPrefix(scheduledOneOffsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteScheduledOneOff(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
   val planningRoute: Route = {
     createBacklogItemRoute ~
     createEpochRoute ~
@@ -732,6 +834,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     createPortionRoute ~
     createTodoRoute ~
     createHobbyRoute ~
+    createOneOffRoute ~
+    createScheduledOneOffRoute ~
     createPyramidRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
@@ -746,6 +850,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updateTodoRoute ~
     updateTodosRoute ~
     updateHobbyRoute ~
+    updateOneOffRoute ~
+    updateScheduledOneOffRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~
     getBacklogItemsRoute ~
@@ -765,6 +871,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getTodosByParentRoute ~
     getHobbiesRoute ~
     getHobbiesByGoalRoute ~
+    getOneOffsRoute ~
+    getScheduledOneOffsRoute ~
     getBacklogItemRoute ~
     getEpochRoute ~
     getYearRoute ~
@@ -778,6 +886,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getCurrentPortionRoute ~
     getTodoRoute ~
     getHobbyRoute ~
+    getOneOffRoute ~
+    getScheduledOneOffRoute ~
     getPyramidRoute ~
     deleteBacklogItemRoute ~
     deleteEpochRoute ~
@@ -789,6 +899,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     deleteLaserDonutRoute ~
     deletePortionRoute ~
     deleteTodoRoute ~
-    deleteHobbyRoute
+    deleteHobbyRoute ~
+    deleteOneOffRoute ~
+    deleteScheduledOneOffRoute
   }
 }
