@@ -19,7 +19,6 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   private val apiPath = /("api")
 
-  private val messagesPath = "messages"
   private val backlogItemsPath = "backlog-items"
   private val epochsPath = "epochs"
   private val yearsPath = "years"
@@ -31,6 +30,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   private val portionsPath = "portions"
   private val todosPath = "todos"
   private val hobbiesPath = "hobbies"
+  private val oneOffsPath = "one-offs"
+  private val scheduledOneOffsPath = "scheduled-one-offs"
   private val pyramidPath = "pyramid"
   private val currentPath = "current"
 
@@ -67,6 +68,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def createHobby(creation: HobbyCreation): Future[HobbyView] =
     makePostRequest[HobbyCreation, HobbyView](Uri(path = apiPath / hobbiesPath), creation)
 
+  def createOneOff(creation: OneOffCreation): Future[OneOffView] =
+    makePostRequest[OneOffCreation, OneOffView](Uri(path = apiPath / oneOffsPath), creation)
+
+  def createScheduledOneOff(creation: ScheduledOneOffCreation): Future[ScheduledOneOffView] =
+    makePostRequest[ScheduledOneOffCreation, ScheduledOneOffView](Uri(path = apiPath / scheduledOneOffsPath), creation)
+
   def createPyramidOfImportance(creation: PyramidOfImportanceUpsert): Future[PyramidOfImportanceView] =
     makePostRequest[PyramidOfImportanceUpsert, PyramidOfImportanceView](Uri(path = apiPath / pyramidPath), creation)
 
@@ -102,6 +109,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def updateHobby(id: UUID, update: HobbyUpdate): Future[HobbyView] =
     makePutRequest[HobbyUpdate, HobbyView](Uri(path = apiPath / hobbiesPath / id.toString), update)
+
+  def updateOneOff(id: UUID, update: OneOffCreation): Future[OneOffView] =
+    makePutRequest[OneOffCreation, OneOffView](Uri(path = apiPath / oneOffsPath / id.toString), update)
+
+  def updateScheduledOneOff(id: UUID, update: ScheduledOneOffCreation): Future[ScheduledOneOffView] =
+    makePutRequest[ScheduledOneOffCreation, ScheduledOneOffView](Uri(path = apiPath / scheduledOneOffsPath / id.toString), update)
 
   def backlogItem(id: UUID): Future[Option[BacklogItemView]] =
     makeGetRequest[Option[BacklogItemView]](Uri(path = apiPath / backlogItemsPath / id.toString))
@@ -142,6 +155,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def hobby(id: UUID): Future[Option[HobbyView]] =
     makeGetRequest[Option[HobbyView]](Uri(path = apiPath / hobbiesPath / id.toString))
 
+  def oneOff(id: UUID): Future[Option[OneOffView]] =
+    makeGetRequest[Option[OneOffView]](Uri(path = apiPath / oneOffsPath / id.toString))
+
+  def scheduledOneOff(id: UUID): Future[Option[ScheduledOneOffView]] =
+    makeGetRequest[Option[ScheduledOneOffView]](Uri(path = apiPath / scheduledOneOffsPath / id.toString))
+
   def pyramidOfImportance: Future[Option[PyramidOfImportanceView]] =
     makeGetRequest[Option[PyramidOfImportanceView]](Uri(path = apiPath / pyramidPath))
 
@@ -178,6 +197,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def hobbies: Future[List[HobbyView]] =
     makeGetRequest[List[HobbyView]](Uri(path = apiPath / hobbiesPath))
 
+  def oneOffs: Future[List[OneOffView]] =
+    makeGetRequest[List[OneOffView]](Uri(path = apiPath / oneOffsPath))
+
+  def scheduledOneOffs: Future[List[ScheduledOneOffView]] =
+    makeGetRequest[List[ScheduledOneOffView]](Uri(path = apiPath / scheduledOneOffsPath))
+
   def deleteBacklogItem(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / backlogItemsPath / id.toString))
 
@@ -210,4 +235,10 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def deleteHobby(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / hobbiesPath / id.toString))
+
+  def deleteOneOff(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / oneOffsPath / id.toString))
+
+  def deleteScheduledOneOff(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / scheduledOneOffsPath / id.toString))
 }
