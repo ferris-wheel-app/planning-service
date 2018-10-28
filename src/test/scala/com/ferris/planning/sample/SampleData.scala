@@ -282,6 +282,59 @@ object SampleData {
       lastPerformed = Some(LocalDateTime.now)
     )
 
+    val oneOffCreation = CreateOneOff(
+      goalId = Some(UUID.randomUUID),
+      description = "Get window fixed",
+      estimate = 14400000L,
+      status = Statuses.Planned
+    )
+
+    val oneOffUpdate = UpdateOneOff(
+      goalId = Some(UUID.randomUUID),
+      description = Some("Get doors fixed"),
+      estimate = Some(14400000L),
+      status = Some(Statuses.Planned)
+    )
+
+    val oneOff = OneOff(
+      uuid = UUID.randomUUID,
+      goalId = Some(UUID.randomUUID),
+      description = "Get window fixed",
+      estimate = 14400000L,
+      status = Statuses.Planned,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
+    )
+
+    val scheduledOneOffCreation = CreateScheduledOneOff(
+      occursOn = LocalDateTime.now,
+      goalId = Some(UUID.randomUUID),
+      description = "Get window fixed",
+      estimate = 14400000L,
+      status = Statuses.Planned
+    )
+
+    val scheduledOneOffUpdate = UpdateScheduledOneOff(
+      occursOn = Some(LocalDateTime.now),
+      goalId = Some(UUID.randomUUID),
+      description = Some("Get window fixed"),
+      estimate = Some(14400000L),
+      status = Some(Statuses.Planned)
+    )
+
+    val scheduledOneOff = ScheduledOneOff(
+      occursOn = LocalDateTime.now,
+      uuid = UUID.randomUUID,
+      goalId = Some(UUID.randomUUID),
+      description = "Get window fixed",
+      estimate = 14400000L,
+      status = Statuses.Planned,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
+      lastPerformed = Some(LocalDateTime.now)
+    )
+
     val listUpdate = UpdateList(
       reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
     )
@@ -600,6 +653,59 @@ object SampleData {
       createdOn = domain.hobby.createdOn,
       lastModified = domain.hobby.lastModified,
       lastPerformed = domain.hobby.lastPerformed
+    )
+
+    val oneOffCreation = OneOffCreation(
+      goalId = domain.oneOffCreation.goalId,
+      description = domain.oneOffCreation.description,
+      estimate = domain.oneOffCreation.estimate,
+      status = Status.toString(domain.oneOffCreation.status)
+    )
+
+    val oneOffUpdate = OneOffUpdate(
+      goalId = domain.oneOffUpdate.goalId,
+      description = domain.oneOffUpdate.description,
+      estimate = domain.oneOffUpdate.estimate,
+      status = domain.oneOffUpdate.status.map(Status.toString)
+    )
+
+    val oneOff = OneOffView(
+      uuid = domain.oneOff.uuid,
+      goalId = domain.oneOff.goalId,
+      description = domain.oneOff.description,
+      estimate = domain.oneOff.estimate,
+      status = Status.toString(domain.oneOff.status),
+      createdOn = domain.oneOff.createdOn,
+      lastModified = domain.oneOff.lastModified,
+      lastPerformed = domain.oneOff.lastPerformed
+    )
+
+    val scheduledOneOffCreation = ScheduledOneOffCreation(
+      occursOn = domain.scheduledOneOffCreation.occursOn,
+      goalId = domain.scheduledOneOffCreation.goalId,
+      description = domain.scheduledOneOffCreation.description,
+      estimate = domain.scheduledOneOffCreation.estimate,
+      status = Status.toString(domain.scheduledOneOffCreation.status)
+    )
+
+    val scheduledOneOffUpdate = ScheduledOneOffUpdate(
+      occursOn = domain.scheduledOneOffUpdate.occursOn,
+      goalId = domain.scheduledOneOffUpdate.goalId,
+      description = domain.scheduledOneOffUpdate.description,
+      estimate = domain.scheduledOneOffUpdate.estimate,
+      status = domain.scheduledOneOffUpdate.status.map(Status.toString)
+    )
+
+    val scheduledOneOff = ScheduledOneOffView(
+      uuid = domain.scheduledOneOff.uuid,
+      occursOn = domain.scheduledOneOff.occursOn,
+      goalId = domain.scheduledOneOff.goalId,
+      description = domain.scheduledOneOff.description,
+      estimate = domain.scheduledOneOff.estimate,
+      status = Status.toString(domain.scheduledOneOff.status),
+      createdOn = domain.scheduledOneOff.createdOn,
+      lastModified = domain.scheduledOneOff.lastModified,
+      lastPerformed = domain.scheduledOneOff.lastPerformed
     )
 
     val listUpdate = ListUpdate(

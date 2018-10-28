@@ -187,7 +187,6 @@ object Resources {
     }
 
     case class OneOffCreation (
-      uuid: UUID,
       goalId: Option[UUID],
       description: String,
       estimate: Long,
@@ -195,7 +194,6 @@ object Resources {
     )
 
     case class OneOffUpdate (
-      uuid: Option[UUID],
       goalId: Option[UUID],
       description: Option[String],
       estimate: Option[Long],
@@ -203,7 +201,6 @@ object Resources {
     )
 
     case class ScheduledOneOffCreation (
-      uuid: UUID,
       occursOn: LocalDateTime,
       goalId: Option[UUID],
       description: String,
@@ -212,7 +209,6 @@ object Resources {
     )
 
     case class ScheduledOneOffUpdate (
-      uuid: Option[UUID],
       occursOn: Option[LocalDateTime],
       goalId: Option[UUID],
       description: Option[String],

@@ -1155,6 +1155,134 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
+  describe("one-off") {
+    describe("creating") {
+      it("should create a one-off") {
+        val created = repo.createOneOff(SD.oneOffCreation).futureValue
+        created.goalId shouldBe SD.oneOffCreation.goalId
+        created.description shouldBe SD.oneOffCreation.description
+        created.estimate shouldBe SD.oneOffCreation.estimate
+        created.status shouldBe SD.oneOffCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a one-off") {
+        val original = repo.createOneOff(SD.oneOffCreation).futureValue
+        val updated = repo.updateOneOff(original.uuid, SD.oneOffUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.goalId.value shouldBe SD.oneOffUpdate.goalId.value
+        updated.description shouldBe SD.oneOffUpdate.description.value
+        updated.estimate shouldBe SD.oneOffUpdate.estimate.value
+        updated.status shouldBe SD.oneOffUpdate.status.value
+      }
+
+      it("should throw an exception if a one-off is not found") {
+        whenReady(repo.updateOneOff(UUID.randomUUID, SD.oneOffUpdate).failed) { exception =>
+          exception shouldBe OneOffNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a one-off") {
+        val created = repo.createOneOff(SD.oneOffCreation).futureValue
+        val retrieved = repo.getOneOff(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a one-off is not found") {
+        val retrieved = repo.getOneOff(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of one-offs") {
+        val created1 = repo.createOneOff(SD.oneOffCreation).futureValue
+        val created2 = repo.createOneOff(SD.oneOffCreation).futureValue
+        val retrieved = repo.getOneOffs.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a one-offs") {
+        val created = repo.createOneOff(SD.oneOffCreation).futureValue
+        val deletion = repo.deleteOneOff(created.uuid).futureValue
+        val retrieved = repo.getOneOff(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("scheduled-one-off") {
+    describe("creating") {
+      it("should create a scheduled-one-off") {
+        val created = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        created.occursOn shouldBe SD.scheduledOneOffCreation.occursOn
+        created.goalId shouldBe SD.scheduledOneOffCreation.goalId
+        created.description shouldBe SD.scheduledOneOffCreation.description
+        created.estimate shouldBe SD.scheduledOneOffCreation.estimate
+        created.status shouldBe SD.scheduledOneOffCreation.status
+      }
+    }
+
+    describe("updating") {
+      it("should update a scheduled-one-off") {
+        val original = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        val updated = repo.updateScheduledOneOff(original.uuid, SD.scheduledOneOffUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.occursOn shouldBe SD.scheduledOneOffUpdate.occursOn.value
+        updated.goalId.value shouldBe SD.scheduledOneOffUpdate.goalId.value
+        updated.description shouldBe SD.scheduledOneOffUpdate.description.value
+        updated.estimate shouldBe SD.scheduledOneOffUpdate.estimate.value
+        updated.status shouldBe SD.scheduledOneOffUpdate.status.value
+      }
+
+      it("should throw an exception if a scheduled-one-off is not found") {
+        whenReady(repo.updateScheduledOneOff(UUID.randomUUID, SD.scheduledOneOffUpdate).failed) { exception =>
+          exception shouldBe ScheduledOneOffNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a scheduled-one-off") {
+        val created = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        val retrieved = repo.getScheduledOneOff(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a scheduled-one-off is not found") {
+        val retrieved = repo.getScheduledOneOff(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of scheduled-one-offs") {
+        val created1 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        val created2 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        val retrieved = repo.getScheduledOneOffs.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a scheduled-one-offs") {
+        val created = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
+        val deletion = repo.deleteScheduledOneOff(created.uuid).futureValue
+        val retrieved = repo.getScheduledOneOff(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
   describe("pyramid") {
     describe("creating, retrieving, and deleting") {
       it("should work accordingly") {
