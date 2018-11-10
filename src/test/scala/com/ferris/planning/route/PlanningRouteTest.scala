@@ -1303,6 +1303,196 @@ class PlanningRouteTest extends RouteTestFramework {
       }
     }
 
+    describe("handling one-offs") {
+      describe("creating a one-off") {
+        it("should respond with the created one-off") {
+          when(testServer.planningService.createOneOff(eqTo(domain.oneOffCreation))(any())).thenReturn(Future.successful(domain.oneOff))
+          Post("/api/one-offs", rest.oneOffCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[OneOffView]].data shouldBe rest.oneOff
+            verify(testServer.planningService, times(1)).createOneOff(eqTo(domain.oneOffCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a one-off") {
+        it("should respond with the updated one-off") {
+          val id = UUID.randomUUID
+          val update = rest.oneOffUpdate
+          val updated = domain.oneOff
+
+          when(testServer.planningService.updateOneOff(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/one-offs/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[OneOffView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateOneOff(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a one-off") {
+        it("should respond with the requested one-off") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getOneOff(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.oneOff)))
+          Get(s"/api/one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[OneOffView]].data shouldBe rest.oneOff
+            verify(testServer.planningService, times(1)).getOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the one-off is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getOneOff(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting one-offs") {
+        it("should retrieve a list of all one-offs") {
+          val oneOffs = Seq(domain.oneOff, domain.oneOff.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getOneOffs()(any())).thenReturn(Future.successful(oneOffs))
+          Get(s"/api/one-offs") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[OneOffView]]].data shouldBe oneOffs.map(_.toView)
+            verify(testServer.planningService, times(1)).getOneOffs()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a one-off") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteOneOff(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteOneOff(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
+    describe("handling scheduled-one-offs") {
+      describe("creating a scheduled-one-off") {
+        it("should respond with the created scheduled-one-off") {
+          when(testServer.planningService.createScheduledOneOff(eqTo(domain.scheduledOneOffCreation))(any())).thenReturn(Future.successful(domain.scheduledOneOff))
+          Post("/api/scheduled-one-offs", rest.scheduledOneOffCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[ScheduledOneOffView]].data shouldBe rest.scheduledOneOff
+            verify(testServer.planningService, times(1)).createScheduledOneOff(eqTo(domain.scheduledOneOffCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a scheduled-one-off") {
+        it("should respond with the updated scheduled-one-off") {
+          val id = UUID.randomUUID
+          val update = rest.scheduledOneOffUpdate
+          val updated = domain.scheduledOneOff
+
+          when(testServer.planningService.updateScheduledOneOff(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/scheduled-one-offs/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[ScheduledOneOffView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateScheduledOneOff(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a scheduled-one-off") {
+        it("should respond with the requested scheduled-one-off") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getScheduledOneOff(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.scheduledOneOff)))
+          Get(s"/api/scheduled-one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[ScheduledOneOffView]].data shouldBe rest.scheduledOneOff
+            verify(testServer.planningService, times(1)).getScheduledOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the scheduled-one-off is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getScheduledOneOff(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/scheduled-one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getScheduledOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting scheduled-one-offs") {
+        it("should retrieve a list of all scheduled-one-offs") {
+          val scheduledOneOffs = Seq(domain.scheduledOneOff, domain.scheduledOneOff.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getScheduledOneOffs()(any())).thenReturn(Future.successful(scheduledOneOffs))
+          Get(s"/api/scheduled-one-offs") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[ScheduledOneOffView]]].data shouldBe scheduledOneOffs.map(_.toView)
+            verify(testServer.planningService, times(1)).getScheduledOneOffs()(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a scheduled-one-off") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteScheduledOneOff(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/scheduled-one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteScheduledOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteScheduledOneOff(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/scheduled-one-offs/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteScheduledOneOff(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
     describe("handling pyramids") {
       describe("creating a pyramid") {
         it("should respond with the created pyramid") {
