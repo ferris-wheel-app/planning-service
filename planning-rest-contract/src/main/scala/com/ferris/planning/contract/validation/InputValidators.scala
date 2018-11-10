@@ -88,6 +88,22 @@ object InputValidators extends InputValidation {
     hobbyUpdate.`type`.foreach(`type` => checkField(HobbyType.values.contains(`type`), TypeField))
   }
 
+  def checkValidity(oneOffCreation: OneOffCreation): Unit = {
+    checkField(Status.values.contains(oneOffCreation.status), StatusField)
+  }
+
+  def checkValidity(oneOffUpdate: OneOffUpdate): Unit = {
+    oneOffUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
+  }
+
+  def checkValidity(scheduledOneOffCreation: ScheduledOneOffCreation): Unit = {
+    checkField(Status.values.contains(scheduledOneOffCreation.status), StatusField)
+  }
+
+  def checkValidity(scheduledOneOffUpdate: ScheduledOneOffUpdate): Unit = {
+    scheduledOneOffUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
+  }
+
   def checkValidity(tierCreation: TierUpsert): Unit = {
     checkMaxSize(tierCreation.laserDonuts, LaserDonutsField, MaxTierSize)
     checkMinSize(tierCreation.laserDonuts, LaserDonutsField, MinTierSize)

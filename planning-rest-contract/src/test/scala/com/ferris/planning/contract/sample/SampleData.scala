@@ -278,6 +278,59 @@ object SampleData {
     lastPerformed = Some(LocalDateTime.now)
   )
 
+  val oneOffCreation = OneOffCreation(
+    goalId = Some(UUID.randomUUID),
+    description = "Get window fixed",
+    estimate = 14400000L,
+    status = "planned"
+  )
+
+  val oneOffUpdate = OneOffUpdate(
+    goalId = Some(UUID.randomUUID),
+    description = Some("Get doors fixed"),
+    estimate = Some(14400000L),
+    status = Some("planned")
+  )
+
+  val oneOff = OneOffView(
+    uuid = UUID.randomUUID,
+    goalId = Some(UUID.randomUUID),
+    description = "Get window fixed",
+    estimate = 14400000L,
+    status = "planned",
+    createdOn = LocalDateTime.now,
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
+  )
+
+  val scheduledOneOffCreation = ScheduledOneOffCreation(
+    occursOn = LocalDateTime.now,
+    goalId = Some(UUID.randomUUID),
+    description = "Get window fixed",
+    estimate = 14400000L,
+    status = "planned"
+  )
+
+  val scheduledOneOffUpdate = ScheduledOneOffUpdate(
+    occursOn = Some(LocalDateTime.now),
+    goalId = Some(UUID.randomUUID),
+    description = Some("Get window fixed"),
+    estimate = Some(14400000L),
+    status = Some("planned")
+  )
+
+  val scheduledOneOff = ScheduledOneOffView(
+    occursOn = LocalDateTime.now,
+    uuid = UUID.randomUUID,
+    goalId = Some(UUID.randomUUID),
+    description = "Get window fixed",
+    estimate = 14400000L,
+    status = "planned",
+    createdOn = LocalDateTime.now,
+    lastModified = Some(LocalDateTime.now),
+    lastPerformed = Some(LocalDateTime.now)
+  )
+
   val listUpdate = ListUpdate(
     reordered = UUID.randomUUID :: UUID.randomUUID :: Nil
   )

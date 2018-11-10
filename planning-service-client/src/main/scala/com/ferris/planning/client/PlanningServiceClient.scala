@@ -110,11 +110,11 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def updateHobby(id: UUID, update: HobbyUpdate): Future[HobbyView] =
     makePutRequest[HobbyUpdate, HobbyView](Uri(path = apiPath / hobbiesPath / id.toString), update)
 
-  def updateOneOff(id: UUID, update: OneOffCreation): Future[OneOffView] =
-    makePutRequest[OneOffCreation, OneOffView](Uri(path = apiPath / oneOffsPath / id.toString), update)
+  def updateOneOff(id: UUID, update: OneOffUpdate): Future[OneOffView] =
+    makePutRequest[OneOffUpdate, OneOffView](Uri(path = apiPath / oneOffsPath / id.toString), update)
 
-  def updateScheduledOneOff(id: UUID, update: ScheduledOneOffCreation): Future[ScheduledOneOffView] =
-    makePutRequest[ScheduledOneOffCreation, ScheduledOneOffView](Uri(path = apiPath / scheduledOneOffsPath / id.toString), update)
+  def updateScheduledOneOff(id: UUID, update: ScheduledOneOffUpdate): Future[ScheduledOneOffView] =
+    makePutRequest[ScheduledOneOffUpdate, ScheduledOneOffView](Uri(path = apiPath / scheduledOneOffsPath / id.toString), update)
 
   def backlogItem(id: UUID): Future[Option[BacklogItemView]] =
     makeGetRequest[Option[BacklogItemView]](Uri(path = apiPath / backlogItemsPath / id.toString))

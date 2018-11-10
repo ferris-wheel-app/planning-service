@@ -134,6 +134,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
+      it("should be able to create a one-off") {
+        val creationRequest = Marshal(SD.oneOffCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.oneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/one-offs", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createOneOff(SD.oneOffCreation)) { response =>
+          response shouldBe SD.oneOff
+        }
+      }
+
+      it("should be able to create a scheduled-one-off") {
+        val creationRequest = Marshal(SD.scheduledOneOffCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.scheduledOneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/scheduled-one-offs", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createScheduledOneOff(SD.scheduledOneOffCreation)) { response =>
+          response shouldBe SD.scheduledOneOff
+        }
+      }
+
       it("should be able to create a pyramid of importance") {
         val creationRequest = Marshal(SD.pyramidUpsert.toJson).to[RequestEntity].futureValue
         val creationResponse = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
@@ -252,6 +270,26 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         when(mockServer.sendPutRequest(s"/api/hobbies/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
         whenReady(client.updateHobby(id, SD.hobbyUpdate)) { response =>
           response shouldBe SD.hobby
+        }
+      }
+
+      it("should be able to update a one-off") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.oneOffUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.oneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/one-offs/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateOneOff(id, SD.oneOffUpdate)) { response =>
+          response shouldBe SD.oneOff
+        }
+      }
+
+      it("should be able to update a scheduled-one-off") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.scheduledOneOffUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.scheduledOneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/scheduled-one-offs/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateScheduledOneOff(id, SD.scheduledOneOffUpdate)) { response =>
+          response shouldBe SD.scheduledOneOff
         }
       }
     }
@@ -471,6 +509,42 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
+      it("should be able to retrieve a one-off") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.oneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/one-offs/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.oneOff(id)) { response =>
+          response.value shouldBe SD.oneOff
+        }
+      }
+
+      it("should be able to retrieve a list of one-offs") {
+        val list = SD.oneOff :: SD.oneOff :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/one-offs")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.oneOffs) { response =>
+          response shouldBe list
+        }
+      }
+
+      it("should be able to retrieve a scheduled-one-off") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.scheduledOneOff)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/scheduled-one-offs/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.scheduledOneOff(id)) { response =>
+          response.value shouldBe SD.scheduledOneOff
+        }
+      }
+
+      it("should be able to retrieve a list of scheduled-one-offs") {
+        val list = SD.scheduledOneOff :: SD.scheduledOneOff :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/scheduled-one-offs")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.scheduledOneOffs) { response =>
+          response shouldBe list
+        }
+      }
+
       it("should be able to retrieve a pyramid") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
@@ -577,6 +651,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
         when(mockServer.sendDeleteRequest(s"/api/hobbies/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.deleteHobby(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
+      it("should be able to delete a one-off") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/one-offs/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteOneOff(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
+      it("should be able to delete a scheduled-one-off") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/scheduled-one-offs/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteScheduledOneOff(id)) { response =>
           response shouldBe DeletionResult.successful
         }
       }

@@ -393,6 +393,78 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
     }
   }
 
+  describe("validating a one-off creation") {
+    it("should allow the creation of a valid object") {
+      SD.oneOffCreation.copy(
+        status = SD.oneOffCreation.status
+      )
+    }
+
+    it("should throw an exception if the status is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.oneOffCreation.copy(
+          status = "dead"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+  }
+
+  describe("validating a one-off update") {
+    it("should allow the creation of a valid object") {
+      SD.oneOffUpdate.copy(
+        status = SD.oneOffUpdate.status
+      )
+    }
+
+    it("should throw an exception if the status is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.oneOffUpdate.copy(
+          status = Some("dead")
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+  }
+
+  describe("validating a scheduled-one-off creation") {
+    it("should allow the creation of a valid object") {
+      SD.scheduledOneOffCreation.copy(
+        status = SD.scheduledOneOffCreation.status
+      )
+    }
+
+    it("should throw an exception if the status is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.scheduledOneOffCreation.copy(
+          status = "dead"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+  }
+
+  describe("validating a scheduled-one-off update") {
+    it("should allow the creation of a valid object") {
+      SD.scheduledOneOffUpdate.copy(
+        status = SD.scheduledOneOffUpdate.status
+      )
+    }
+
+    it("should throw an exception if the status is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.scheduledOneOffUpdate.copy(
+          status = Some("dead")
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+  }
+
   describe("validating a tier upsert") {
     it("should allow the creation of a valid object") {
       TierUpsert(laserDonuts = (1 to 5).map(_ => UUID.randomUUID))

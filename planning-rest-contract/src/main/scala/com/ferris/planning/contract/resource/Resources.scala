@@ -191,14 +191,18 @@ object Resources {
       description: String,
       estimate: Long,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class OneOffUpdate (
       goalId: Option[UUID],
       description: Option[String],
       estimate: Option[Long],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ScheduledOneOffCreation (
       occursOn: LocalDateTime,
@@ -206,7 +210,9 @@ object Resources {
       description: String,
       estimate: Long,
       status: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ScheduledOneOffUpdate (
       occursOn: Option[LocalDateTime],
@@ -214,7 +220,9 @@ object Resources {
       description: Option[String],
       estimate: Option[Long],
       status: Option[String]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ListUpdate (
       reordered: Seq[UUID]
