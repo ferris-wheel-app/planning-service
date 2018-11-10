@@ -932,6 +932,144 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
       }
     }
 
+    describe("handling one-offs") {
+      it("should be able to create a one-off") {
+        val server = newServer
+        when(server.repo.createOneOff(SD.oneOffCreation)).thenReturn(Future.successful(SD.oneOff))
+        whenReady(server.planningService.createOneOff(SD.oneOffCreation)) { result =>
+          result shouldBe SD.oneOff
+          verify(server.repo, times(1)).createOneOff(SD.oneOffCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.oneOff
+        when(server.repo.updateOneOff(eqTo(id), eqTo(SD.oneOffUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateOneOff(id, SD.oneOffUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateOneOff(eqTo(id), eqTo(SD.oneOffUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a one-off is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = OneOffNotFoundException()
+        when(server.repo.updateOneOff(eqTo(id), eqTo(SD.oneOffUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateOneOff(id, SD.oneOffUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateOneOff(eqTo(id), eqTo(SD.oneOffUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getOneOff(id)).thenReturn(Future.successful(Some(SD.oneOff)))
+        whenReady(server.planningService.getOneOff(id)) { result =>
+          result shouldBe Some(SD.oneOff)
+          verify(server.repo, times(1)).getOneOff(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all one-offs") {
+        val server = newServer
+        val oneOffs = Seq(SD.oneOff, SD.oneOff.copy(uuid = UUID.randomUUID))
+        when(server.repo.getOneOffs).thenReturn(Future.successful(oneOffs))
+        whenReady(server.planningService.getOneOffs) { result =>
+          result shouldBe oneOffs
+          verify(server.repo, times(1)).getOneOffs
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteOneOff(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteOneOff(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteOneOff(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
+    describe("handling scheduled-one-offs") {
+      it("should be able to create a scheduled-one-off") {
+        val server = newServer
+        when(server.repo.createScheduledOneOff(SD.scheduledOneOffCreation)).thenReturn(Future.successful(SD.scheduledOneOff))
+        whenReady(server.planningService.createScheduledOneOff(SD.scheduledOneOffCreation)) { result =>
+          result shouldBe SD.scheduledOneOff
+          verify(server.repo, times(1)).createScheduledOneOff(SD.scheduledOneOffCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a scheduled-one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.scheduledOneOff
+        when(server.repo.updateScheduledOneOff(eqTo(id), eqTo(SD.scheduledOneOffUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateScheduledOneOff(id, SD.scheduledOneOffUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateScheduledOneOff(eqTo(id), eqTo(SD.scheduledOneOffUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a scheduled-one-off is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = ScheduledOneOffNotFoundException()
+        when(server.repo.updateScheduledOneOff(eqTo(id), eqTo(SD.scheduledOneOffUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateScheduledOneOff(id, SD.scheduledOneOffUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateScheduledOneOff(eqTo(id), eqTo(SD.scheduledOneOffUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a scheduled-one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getScheduledOneOff(id)).thenReturn(Future.successful(Some(SD.scheduledOneOff)))
+        whenReady(server.planningService.getScheduledOneOff(id)) { result =>
+          result shouldBe Some(SD.scheduledOneOff)
+          verify(server.repo, times(1)).getScheduledOneOff(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all scheduled-one-offs") {
+        val server = newServer
+        val scheduledOneOffs = Seq(SD.scheduledOneOff, SD.scheduledOneOff.copy(uuid = UUID.randomUUID))
+        when(server.repo.getScheduledOneOffs).thenReturn(Future.successful(scheduledOneOffs))
+        whenReady(server.planningService.getScheduledOneOffs) { result =>
+          result shouldBe scheduledOneOffs
+          verify(server.repo, times(1)).getScheduledOneOffs
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a scheduled-one-off") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteScheduledOneOff(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteScheduledOneOff(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteScheduledOneOff(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
     describe("handling a pyramid of importance") {
       it("should be able to create a pyramid") {
         val server = newServer

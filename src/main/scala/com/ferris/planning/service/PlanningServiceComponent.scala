@@ -358,7 +358,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
     }
 
     override def getOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[OneOff]] = {
-      getOneOff(uuid)
+      repo.getOneOff(uuid)
     }
 
     override def getScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[ScheduledOneOff]] = {
