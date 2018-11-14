@@ -35,4 +35,6 @@ object Exceptions {
   case class InvalidPortionsUpdateException(message: String) extends PlanningServiceException(message)
 
   case class InvalidTodosUpdateException(message: String) extends PlanningServiceException(message)
+
+  case class InvalidOneOffsUpdateException(message: String) extends PlanningServiceException(message)
 }

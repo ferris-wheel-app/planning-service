@@ -128,6 +128,7 @@ object Model {
     goalId: Option[UUID],
     description: String,
     estimate: Long,
+    order: Int,
     status: Statuses.Status,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],

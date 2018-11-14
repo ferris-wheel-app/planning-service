@@ -161,6 +161,7 @@ class DomainConversions(val tables: Tables) {
       goalId = row.goalId.map(UUID.fromString),
       description = row.description,
       estimate = row.estimate,
+      order = row.order,
       status = Statuses.withName(row.status),
       createdOn = row.createdOn.toLocalDateTime,
       lastModified = row.lastModified.map(_.toLocalDateTime),

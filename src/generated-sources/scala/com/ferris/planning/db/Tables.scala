@@ -336,21 +336,22 @@ trait Tables {
    *  @param goalId Database column GOAL_ID SqlType(VARCHAR), Length(36,true)
    *  @param description Database column DESCRIPTION SqlType(VARCHAR), Length(2000,true)
    *  @param estimate Database column ESTIMATE SqlType(BIGINT)
+   *  @param order Database column ORDER SqlType(INTEGER)
    *  @param status Database column STATUS SqlType(VARCHAR), Length(36,true)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class OneOffRow(id: Long, uuid: String, goalId: Option[String], description: String, estimate: Long, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class OneOffRow(id: Long, uuid: String, goalId: Option[String], description: String, estimate: Long, order: Int, status: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching OneOffRow objects using plain SQL queries */
-  implicit def GetResultOneOffRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[OneOffRow] = GR{
+  implicit def GetResultOneOffRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[String]], e3: GR[Int], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[OneOffRow] = GR{
     prs => import prs._
-    OneOffRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[Long], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+    OneOffRow.tupled((<<[Long], <<[String], <<?[String], <<[String], <<[Long], <<[Int], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table ONE_OFF. Objects of this class serve as prototypes for rows in queries. */
   class OneOffTable(_tableTag: Tag) extends profile.api.Table[OneOffRow](_tableTag, "ONE_OFF") {
-    def * = (id, uuid, goalId, description, estimate, status, createdOn, lastModified, lastPerformed) <> (OneOffRow.tupled, OneOffRow.unapply)
+    def * = (id, uuid, goalId, description, estimate, order, status, createdOn, lastModified, lastPerformed) <> (OneOffRow.tupled, OneOffRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(description), Rep.Some(estimate), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> OneOffRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), goalId, Rep.Some(description), Rep.Some(estimate), Rep.Some(order), Rep.Some(status), Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> OneOffRow.tupled((_1.get, _2.get, _3, _4.get, _5.get, _6.get, _7.get, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -362,6 +363,8 @@ trait Tables {
     val description: Rep[String] = column[String]("DESCRIPTION", O.Length(2000,varying=true))
     /** Database column ESTIMATE SqlType(BIGINT) */
     val estimate: Rep[Long] = column[Long]("ESTIMATE")
+    /** Database column ORDER SqlType(INTEGER) */
+    val order: Rep[Int] = column[Int]("ORDER")
     /** Database column STATUS SqlType(VARCHAR), Length(36,true) */
     val status: Rep[String] = column[String]("STATUS", O.Length(36,varying=true))
     /** Database column CREATED_ON SqlType(TIMESTAMP) */

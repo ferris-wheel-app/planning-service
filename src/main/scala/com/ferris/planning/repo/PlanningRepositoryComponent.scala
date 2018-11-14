@@ -3,15 +3,18 @@ package com.ferris.planning.repo
 import java.sql.{Date, Timestamp}
 import java.util.UUID
 
+import cats.data.EitherT
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.db.conversions.DomainConversions
 import com.ferris.planning.db.TablesComponent
 import com.ferris.planning.model.Model._
 import com.ferris.planning.scheduler.LifeSchedulerComponent
-import com.ferris.planning.service.exceptions.Exceptions._
+import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
+import slick.dbio.Effect.Read
+import slick.sql.FixedSqlStreamingAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,7 +52,9 @@ trait PlanningRepositoryComponent {
     def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby]
     def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff]
+    def updateOneOffs(update: UpdateList): Future[Seq[OneOff]]
     def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff]
+    def updateScheduledOneOffs(update: UpdateList): Future[Seq[OneOff]]
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
@@ -574,7 +579,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
       val action = todosByParentId(parentId).result.flatMap { todos =>
-        if (todos.size <= update.reordered.size) {
+        if (todos.size == update.reordered.size) {
           val todoIds = todos.map(_.uuid)
           update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
@@ -625,6 +630,28 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         } getOrElse DBIO.failed(OneOffNotFoundException())
       }.transactionally
       db.run(action).map(row => row.asOneOff)
+    }
+
+    override def updateOneOffs(update: UpdateList): Future[Seq[OneOff]] = {
+      def getSortedOneOffs(uuids: Seq[String]): DBIO[Seq[OneOffRow]] =
+        OneOffTable.filter(_.uuid inSet uuids).sortBy(_.order).result
+
+      def updateOrdering(oneOffIds: Seq[String]): DBIO[Seq[OneOffRow]] =
+        update.reordered.filterNot(id => oneOffIds.contains(id.toString)) match {
+          case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
+            oneOffByUuid(uuid).map(_.order).update(index + 1)
+          }).andThen(getSortedOneOffs(oneOffIds))
+          case outliers => DBIO.failed(
+            InvalidOneOffsUpdateException(s"the one-offs (${outliers.mkString(", ")}) do not exist")
+          )
+        }
+
+      val action: DBIO[Seq[OneOffRow]] = (for {
+        oneOffs <- OneOffTable.result
+        _ <- EitherT.cond[DBIO](oneOffs.size != update.reordered.size, (), InvalidOneOffsUpdateException("the length of the update list should be the same as the total number of one-offs"))
+        reorderedOneOffs <- updateOrdering(oneOffs.map(_.uuid))
+      } yield reorderedOneOffs).transactionally
+      db.run(action).map(_.map(_.asOneOff))
     }
 
     override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff] = {

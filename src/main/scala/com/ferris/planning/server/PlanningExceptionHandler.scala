@@ -23,5 +23,6 @@ object PlanningExceptionHandler {
     case e: PyramidNotFoundException => throw ApiExceptions.NotFoundException("PyramidNotFound", e.message, None)
     case e: InvalidPortionsUpdateException => throw ApiExceptions.InvalidInputException("InvalidPortionsUpdate", e.getMessage)
     case e: InvalidTodosUpdateException => throw ApiExceptions.InvalidInputException("InvalidTodosUpdate", e.getMessage)
+    case e: InvalidOneOffsUpdateException => throw ApiExceptions.InvalidInputException("InvalidOneOffsUpdate", e.getMessage)
   }
 }

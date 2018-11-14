@@ -43,6 +43,8 @@ lazy val rootSettings = {
       "com.ferris"        %% "ferris-http-microservice"   % dependencies.ferrisMicroServiceV,
       "com.ferris"        %% "ferris-json-utils"          % dependencies.ferrisJsonUtilsV,
       "com.ferris"        %% "ferris-common-utils"        % dependencies.ferrisCommonV,
+      "org.typelevel"     %% "cats-core"                  % dependencies.catsV,
+      "com.rms.miu"       %% "slick-cats"                 % dependencies.slickCatsV,
       "com.github.fommil" %% "spray-json-shapeless"       % dependencies.fommilV,
       "mysql"             %  "mysql-connector-java"       % dependencies.mysqlConnectorV,
       "org.flywaydb"      %  "flyway-core"                % dependencies.flywayV,
@@ -70,6 +72,8 @@ lazy val dependencies = new {
   val ferrisJsonUtilsV            = "0.0.2"
   val ferrisClientV               = "0.0.2"
   val ferrisCommonV               = "0.0.5"
+  val catsV                       = "1.2.0"
+  val slickCatsV                  = "0.7.1.1"
   val slickV                      = "3.2.0-M2"
   val mysqlConnectorV             = "5.1.40"
   val flywayV                     = "3.2.1"

@@ -163,6 +163,7 @@ create table one_off (
   goal_id VARCHAR(36),
   description VARCHAR(2000) NOT NULL,
   estimate BIGINT NOT NULL,
+  `order` INT(20) NOT NULL,
   status VARCHAR(36) NOT NULL check (status in ('PLANNED', 'IN_PROGRESS', 'COMPLETE')),
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP,
