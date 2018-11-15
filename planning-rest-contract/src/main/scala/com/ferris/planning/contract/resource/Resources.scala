@@ -375,6 +375,7 @@ object Resources {
       goalId: Option[UUID],
       description: String,
       estimate: Long,
+      order: Int,
       status: String,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],

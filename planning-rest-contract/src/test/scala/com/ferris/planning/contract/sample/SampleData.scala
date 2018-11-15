@@ -297,6 +297,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
     estimate = 14400000L,
+    order = 5,
     status = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),

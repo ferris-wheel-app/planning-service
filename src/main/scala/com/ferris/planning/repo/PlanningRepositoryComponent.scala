@@ -13,8 +13,7 @@ import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
-import slick.dbio.Effect.Read
-import slick.sql.FixedSqlStreamingAction
+import com.rms.miu.slickcats.DBIOInstances._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -54,7 +53,6 @@ trait PlanningRepositoryComponent {
     def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff]
     def updateOneOffs(update: UpdateList): Future[Seq[OneOff]]
     def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff]
-    def updateScheduledOneOffs(update: UpdateList): Future[Seq[OneOff]]
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
@@ -312,18 +310,21 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createOneOff(creation: CreateOneOff): Future[OneOff] = {
-      val row = OneOffRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        goalId = creation.goalId,
-        description = creation.description,
-        estimate = creation.estimate,
-        status = creation.status.dbValue,
-        createdOn = timer.timestampOfNow,
-        lastModified = None,
-        lastPerformed = None
-      )
-      val action = (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      val action = OneOffTable.result.flatMap { existingOneOffs =>
+        val row = OneOffRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          description = creation.description,
+          estimate = creation.estimate,
+          order = existingOneOffs.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      }.transactionally
       db.run(action) map (row => row.asOneOff)
     }
 
@@ -647,10 +648,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         }
 
       val action: DBIO[Seq[OneOffRow]] = (for {
-        oneOffs <- OneOffTable.result
+        oneOffs <- EitherT.liftF[DBIO, InvalidOneOffsUpdateException, Seq[OneOffRow]](OneOffTable.result)
         _ <- EitherT.cond[DBIO](oneOffs.size != update.reordered.size, (), InvalidOneOffsUpdateException("the length of the update list should be the same as the total number of one-offs"))
-        reorderedOneOffs <- updateOrdering(oneOffs.map(_.uuid))
-      } yield reorderedOneOffs).transactionally
+        reorderedOneOffs <- EitherT.liftF(updateOrdering(oneOffs.map(_.uuid)))
+      } yield reorderedOneOffs).value.map {
+        case Right(reorderedOneOffs) => reorderedOneOffs
+        case Left(error: Throwable) => throw error
+      }.transactionally
       db.run(action).map(_.map(_.asOneOff))
     }
 

@@ -174,6 +174,7 @@ object ModelToView {
         goalId = oneOff.goalId,
         description = oneOff.description,
         estimate = oneOff.estimate,
+        order = oneOff.order,
         status = TypeResolvers.Status.toString(oneOff.status),
         createdOn = oneOff.createdOn,
         lastModified = oneOff.lastModified,
