@@ -3,7 +3,6 @@ package com.ferris.planning.repo
 import java.sql.{Date, Timestamp}
 import java.util.UUID
 
-import cats.data.EitherT
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.db.conversions.DomainConversions
@@ -13,7 +12,6 @@ import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
-import com.rms.miu.slickcats.DBIOInstances._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -647,14 +645,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           )
         }
 
-      val action: DBIO[Seq[OneOffRow]] = (for {
-        oneOffs <- EitherT.liftF[DBIO, InvalidOneOffsUpdateException, Seq[OneOffRow]](OneOffTable.result)
-        _ <- EitherT.cond[DBIO](oneOffs.size != update.reordered.size, (), InvalidOneOffsUpdateException("the length of the update list should be the same as the total number of one-offs"))
-        reorderedOneOffs <- EitherT.liftF(updateOrdering(oneOffs.map(_.uuid)))
-      } yield reorderedOneOffs).value.map {
-        case Right(reorderedOneOffs) => reorderedOneOffs
-        case Left(error: Throwable) => throw error
-      }.transactionally
+      val action = OneOffTable.result.flatMap { oneOffs =>
+        if (oneOffs.size == update.reordered.size) {
+          updateOrdering(oneOffs.map(_.uuid))
+        }
+        else DBIO.failed(
+          InvalidOneOffsUpdateException("the length of the update list should be the same as the total number of one-offs")
+        )
+      }
+
       db.run(action).map(_.map(_.asOneOff))
     }
 

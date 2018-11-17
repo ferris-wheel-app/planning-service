@@ -360,6 +360,18 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val updateOneOffsRoute = pathPrefix(oneOffsPathSegment) {
+    pathEndOrSingleSlash {
+      put {
+        entity(as[ListUpdate]) { update =>
+          onSuccess(planningService.updateOneOffs(update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.map(_.toView))
+          }
+        }
+      }
+    }
+  }
+
   private val updateOneOffRoute = pathPrefix(oneOffsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       put {
@@ -851,6 +863,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updateTodosRoute ~
     updateHobbyRoute ~
     updateOneOffRoute ~
+    updateOneOffsRoute ~
     updateScheduledOneOffRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~

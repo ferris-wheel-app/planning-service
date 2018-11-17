@@ -41,6 +41,7 @@ trait PlanningServiceComponent {
     def updateTodos(parentId: UUID, update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[Todo]]
     def updateHobby(uuid: UUID, update: UpdateHobby)(implicit ex: ExecutionContext): Future[Hobby]
     def updateOneOff(uuid: UUID, update: UpdateOneOff)(implicit ex: ExecutionContext): Future[OneOff]
+    def updateOneOffs(update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[OneOff]]
     def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff]
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
@@ -215,6 +216,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def updateOneOff(uuid: UUID, update: UpdateOneOff)(implicit ex: ExecutionContext): Future[OneOff] = {
       repo.updateOneOff(uuid, update)
+    }
+
+    override def updateOneOffs(update: UpdateList)(implicit ex: ExecutionContext): Future[Seq[OneOff]] = {
+      repo.updateOneOffs(update)
     }
 
     override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff] = {
