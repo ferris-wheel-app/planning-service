@@ -578,7 +578,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
       val action = todosByParentId(parentId).result.flatMap { todos =>
-        if (todos.size == update.reordered.size) {
+        if (todos.size <= update.reordered.size) {
           val todoIds = todos.map(_.uuid)
           update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
@@ -896,7 +896,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getOneOffs: Future[Seq[OneOff]] = {
-      db.run(OneOffTable.result.map(_.map(_.asOneOff)))
+      db.run(OneOffTable.sortBy(_.order).result.map(_.map(_.asOneOff)))
     }
 
     override def getOneOff(uuid: UUID): Future[Option[OneOff]] = {

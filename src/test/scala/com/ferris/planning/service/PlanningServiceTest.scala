@@ -967,6 +967,28 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         }
       }
 
+      it("should be able to reorder a list of one-offs that belong to a specific portion") {
+        val server = newServer
+        val updated = SD.oneOff :: SD.oneOff :: Nil
+        when(server.repo.updateOneOffs(eqTo(SD.listUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateOneOffs(SD.listUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateOneOffs(eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a list of one-offs is being updated") {
+        val server = newServer
+        val expectedException = InvalidOneOffsUpdateException("Wrong!")
+        when(server.repo.updateOneOffs(eqTo(SD.listUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateOneOffs(SD.listUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateOneOffs(eqTo(SD.listUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
       it("should be able to retrieve a one-off") {
         val server = newServer
         val id = UUID.randomUUID

@@ -9,7 +9,7 @@ import com.ferris.planning.contract.resource.Resources.Out._
 import com.ferris.planning.service.conversions.ExternalToCommand._
 import com.ferris.planning.service.conversions.ModelToView._
 import com.ferris.planning.sample.SampleData.{domain, rest}
-import com.ferris.planning.service.exceptions.Exceptions.{InvalidPortionsUpdateException, InvalidTodosUpdateException}
+import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, InvalidPortionsUpdateException, InvalidTodosUpdateException}
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, verifyNoMoreInteractions, when}
 
@@ -1327,6 +1327,35 @@ class PlanningRouteTest extends RouteTestFramework {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[OneOffView]].data shouldBe updated.toView
             verify(testServer.planningService, times(1)).updateOneOff(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a list of one-offs") {
+        it("should respond with the updated list of one-offs") {
+          val portionId = UUID.randomUUID
+          val update = rest.listUpdate
+          val updated = domain.oneOff :: domain.oneOff :: Nil
+
+          when(testServer.planningService.updateOneOffs(eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/one-offs", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[OneOffView]]].data shouldBe updated.map(_.toView)
+            verify(testServer.planningService, times(1)).updateOneOffs(eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the update is invalid") {
+          val portionId = UUID.randomUUID
+          val update = rest.listUpdate
+          val exception = InvalidOneOffsUpdateException("Wrong!")
+
+          when(testServer.planningService.updateOneOffs(eqTo(update.toCommand))(any())).thenReturn(Future.failed(exception))
+          Put(s"/api/one-offs", update) ~> route ~> check {
+            status shouldBe StatusCodes.BadRequest
+            verify(testServer.planningService, times(1)).updateOneOffs(eqTo(update.toCommand))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }

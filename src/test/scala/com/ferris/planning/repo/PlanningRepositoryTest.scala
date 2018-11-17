@@ -1178,6 +1178,41 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.status shouldBe SD.oneOffUpdate.status.value
       }
 
+      it("should reorder a list of all existing one-offs") {
+        val first = repo.createOneOff(SD.oneOffCreation).futureValue
+        val second = repo.createOneOff(SD.oneOffCreation).futureValue
+        val third = repo.createOneOff(SD.oneOffCreation).futureValue
+        val beforeUpdate = repo.getOneOffs.futureValue
+        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+
+        repo.updateOneOffs(update).futureValue
+        val afterUpdate = repo.getOneOffs.futureValue
+
+        beforeUpdate should contain theSameElementsInOrderAs (first :: second :: third :: Nil)
+        afterUpdate should contain theSameElementsInOrderAs (second.copy(order = 1) :: third.copy(order = 2) :: first.copy(order = 3) :: Nil)
+      }
+
+      it("should throw an exception if an invalid todo id is given in the update list") {
+        val first = repo.createOneOff(SD.oneOffCreation).futureValue
+        val second = repo.createOneOff(SD.oneOffCreation).futureValue
+        repo.createOneOff(SD.oneOffCreation).futureValue
+        val nonExistentId = UUID.randomUUID
+        val update = UpdateList(second.uuid :: nonExistentId :: first.uuid :: Nil)
+        whenReady(repo.updateOneOffs(update).failed) { exception =>
+          exception shouldBe InvalidOneOffsUpdateException(s"the one-offs ($nonExistentId) do not exist")
+        }
+      }
+
+      it("should throw an exception the update list is not the same as the number of todos for a portion") {
+        val first = repo.createOneOff(SD.oneOffCreation).futureValue
+        val second = repo.createOneOff(SD.oneOffCreation).futureValue
+        repo.createOneOff(SD.oneOffCreation).futureValue
+        val update = UpdateList(second.uuid :: first.uuid :: Nil)
+        whenReady(repo.updateOneOffs(update).failed) { exception =>
+          exception shouldBe InvalidOneOffsUpdateException("the length of the update list should be the same as the total number of one-offs")
+        }
+      }
+
       it("should throw an exception if a one-off is not found") {
         whenReady(repo.updateOneOff(UUID.randomUUID, SD.oneOffUpdate).failed) { exception =>
           exception shouldBe OneOffNotFoundException()
