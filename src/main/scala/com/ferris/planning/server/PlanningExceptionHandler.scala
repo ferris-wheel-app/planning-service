@@ -23,3 +23,15 @@ object PlanningExceptionHandler {
     case e: InvalidTodosUpdateException => throw ApiExceptions.InvalidInputException("InvalidTodosUpdate", e.getMessage)
   }
 }
+
+trait AnnoyingLike {
+  case class Tantrum(message: String, code: Int) extends Exception
+
+  private def childishBehaviour(): Unit = {
+    def helperMethod() = {
+      throw Tantrum("Waaaaaaa!!!!", 500)
+    }
+
+    helperMethod()
+  }
+}
