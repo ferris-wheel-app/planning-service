@@ -1,6 +1,7 @@
 package com.ferris.planning.repo
 
 import java.sql.{Date, Timestamp}
+import java.time.LocalDate
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
@@ -73,6 +74,7 @@ trait PlanningRepositoryComponent {
     def getHobbies(goalId: UUID): Future[Seq[Hobby]]
     def getOneOffs: Future[Seq[OneOff]]
     def getScheduledOneOffs: Future[Seq[ScheduledOneOff]]
+    def getScheduledOneOffs(date: LocalDate): Future[Seq[ScheduledOneOff]]
 
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID): Future[Option[Epoch]]
@@ -905,6 +907,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def getScheduledOneOffs: Future[Seq[ScheduledOneOff]] = {
       db.run(ScheduledOneOffTable.result.map(_.map(_.asScheduledOneOff)))
+    }
+
+    override def getScheduledOneOffs(date: LocalDate): Future[Seq[ScheduledOneOff]] = {
+      val action = ScheduledOneOffTable.result
+        .map(_.filter(_.occursOn.toLocalDateTime.toLocalDate == date)
+          .map(_.asScheduledOneOff))
+      db.run(action)
     }
 
     override def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]] = {

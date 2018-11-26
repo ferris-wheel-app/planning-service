@@ -3,6 +3,7 @@ package com.ferris.planning.route
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
+import com.ferris.microservice.conversions.ParameterConversions
 import com.ferris.microservice.directive.FerrisDirectives
 import com.ferris.planning.contract.format.PlanningRestFormats
 import com.ferris.planning.service.conversions.ExternalToCommand._
@@ -12,7 +13,7 @@ import com.ferris.planning.contract.resource.Resources.In._
 
 import scala.concurrent.ExecutionContext
 
-trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with PlanningResponseMappings {
+trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with PlanningResponseMappings with ParameterConversions {
   this: PlanningServiceComponent =>
 
   implicit def routeEc: ExecutionContext
