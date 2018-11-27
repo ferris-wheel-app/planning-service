@@ -1,9 +1,11 @@
 package com.ferris.planning.client
 
+import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.model.Uri.Path._
+import akka.http.scaladsl.model.Uri.Query
 import akka.stream.ActorMaterializer
 import com.ferris.microservice.resource.DeletionResult
 import com.ferris.planning.contract.format.PlanningRestFormats
@@ -200,8 +202,9 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def oneOffs: Future[List[OneOffView]] =
     makeGetRequest[List[OneOffView]](Uri(path = apiPath / oneOffsPath))
 
-  def scheduledOneOffs: Future[List[ScheduledOneOffView]] =
-    makeGetRequest[List[ScheduledOneOffView]](Uri(path = apiPath / scheduledOneOffsPath))
+  def scheduledOneOffs(date: Option[LocalDate]): Future[List[ScheduledOneOffView]] =
+    makeGetRequest[List[ScheduledOneOffView]](Uri(path = apiPath / scheduledOneOffsPath)
+      .withQuery(Query(params = date.map(chosenDate => Map("date" -> chosenDate.toString)).getOrElse(Map.empty[String, String]))))
 
   def deleteBacklogItem(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / backlogItemsPath / id.toString))

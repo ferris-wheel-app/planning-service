@@ -540,7 +540,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val list = SD.scheduledOneOff :: SD.scheduledOneOff :: Nil
         val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest("/api/scheduled-one-offs")).thenReturn(Future.successful(HttpResponse(entity = response)))
-        whenReady(client.scheduledOneOffs) { response =>
+        whenReady(client.scheduledOneOffs(None)) { response =>
           response shouldBe list
         }
       }

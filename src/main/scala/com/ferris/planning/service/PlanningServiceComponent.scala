@@ -65,8 +65,7 @@ trait PlanningServiceComponent {
     def getHobbies()(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getHobbies(goalId: UUID)(implicit ex: ExecutionContext): Future[Seq[Hobby]]
     def getOneOffs()(implicit ex: ExecutionContext): Future[Seq[OneOff]]
-    def getScheduledOneOffs()(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
-    def getScheduledOneOffs(date: LocalDate)(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
+    def getScheduledOneOffs(date: Option[LocalDate])(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
 
     def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Epoch]]
@@ -308,11 +307,7 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getOneOffs
     }
 
-    override def getScheduledOneOffs()(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]] = {
-      repo.getScheduledOneOffs
-    }
-
-    override def getScheduledOneOffs(date: LocalDate)(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]] = {
+    override def getScheduledOneOffs(date: Option[LocalDate])(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]] = {
       repo.getScheduledOneOffs(date)
     }
 

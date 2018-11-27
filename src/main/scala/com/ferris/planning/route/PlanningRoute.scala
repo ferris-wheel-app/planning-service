@@ -1,5 +1,7 @@
 package com.ferris.planning.route
 
+import java.time.LocalDate
+
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{PathMatchers, Route}
 import akka.stream.Materializer
@@ -586,8 +588,10 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val getScheduledOneOffsRoute = pathPrefix(scheduledOneOffsPathSegment) {
     pathEndOrSingleSlash {
       get {
-        onSuccess(planningService.getScheduledOneOffs) { response =>
-          complete(StatusCodes.OK, response.map(_.toView))
+        parameters('date.as[LocalDate].?) { date =>
+          onSuccess(planningService.getScheduledOneOffs(date)) { response =>
+            complete(StatusCodes.OK, response.map(_.toView))
+          }
         }
       }
     }

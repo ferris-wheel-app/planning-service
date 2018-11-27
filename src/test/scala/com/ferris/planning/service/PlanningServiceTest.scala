@@ -1072,10 +1072,10 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
       it("should be able to retrieve all scheduled-one-offs") {
         val server = newServer
         val scheduledOneOffs = Seq(SD.scheduledOneOff, SD.scheduledOneOff.copy(uuid = UUID.randomUUID))
-        when(server.repo.getScheduledOneOffs).thenReturn(Future.successful(scheduledOneOffs))
-        whenReady(server.planningService.getScheduledOneOffs) { result =>
+        when(server.repo.getScheduledOneOffs(None)).thenReturn(Future.successful(scheduledOneOffs))
+        whenReady(server.planningService.getScheduledOneOffs(None)) { result =>
           result shouldBe scheduledOneOffs
-          verify(server.repo, times(1)).getScheduledOneOffs
+          verify(server.repo, times(1)).getScheduledOneOffs(None)
           verifyNoMoreInteractions(server.repo)
         }
       }

@@ -1485,11 +1485,11 @@ class PlanningRouteTest extends RouteTestFramework {
         it("should retrieve a list of all scheduled-one-offs") {
           val scheduledOneOffs = Seq(domain.scheduledOneOff, domain.scheduledOneOff.copy(uuid = UUID.randomUUID))
 
-          when(testServer.planningService.getScheduledOneOffs()(any())).thenReturn(Future.successful(scheduledOneOffs))
+          when(testServer.planningService.getScheduledOneOffs(eqTo(None))(any())).thenReturn(Future.successful(scheduledOneOffs))
           Get(s"/api/scheduled-one-offs") ~> route ~> check {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[ScheduledOneOffView]]].data shouldBe scheduledOneOffs.map(_.toView)
-            verify(testServer.planningService, times(1)).getScheduledOneOffs()(any())
+            verify(testServer.planningService, times(1)).getScheduledOneOffs(eqTo(None))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }
