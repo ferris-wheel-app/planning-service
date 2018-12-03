@@ -1,5 +1,6 @@
 package com.ferris.planning.route
 
+import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.model.StatusCodes
@@ -1490,6 +1491,19 @@ class PlanningRouteTest extends RouteTestFramework {
             status shouldBe StatusCodes.OK
             responseAs[Envelope[Seq[ScheduledOneOffView]]].data shouldBe scheduledOneOffs.map(_.toView)
             verify(testServer.planningService, times(1)).getScheduledOneOffs(eqTo(None))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should retrieve a list of scheduled-one-offs by date") {
+          val date = LocalDate.of(2018, 12, 3)
+          val scheduledOneOffs = Seq(domain.scheduledOneOff, domain.scheduledOneOff.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getScheduledOneOffs(eqTo(Some(date)))(any())).thenReturn(Future.successful(scheduledOneOffs))
+          Get(s"/api/scheduled-one-offs?date=${date.toString}") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[ScheduledOneOffView]]].data shouldBe scheduledOneOffs.map(_.toView)
+            verify(testServer.planningService, times(1)).getScheduledOneOffs(eqTo(Some(date)))(any())
             verifyNoMoreInteractions(testServer.planningService)
           }
         }

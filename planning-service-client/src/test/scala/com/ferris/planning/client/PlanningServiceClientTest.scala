@@ -1,5 +1,6 @@
 package com.ferris.planning.client
 
+import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -536,7 +537,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
-      it("should be able to retrieve a list of scheduled-one-offs") {
+      it("should be able to retrieve a list of all scheduled-one-offs") {
         val list = SD.scheduledOneOff :: SD.scheduledOneOff :: Nil
         val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest("/api/scheduled-one-offs")).thenReturn(Future.successful(HttpResponse(entity = response)))
@@ -545,8 +546,17 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
+      it("should be able to retrieve a list of scheduled-one-offs by date") {
+        val date = LocalDate.of(2018, 12, 3)
+        val list = SD.scheduledOneOff :: SD.scheduledOneOff :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/scheduled-one-offs?date=${date.toString}")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.scheduledOneOffs(Some(date))) { response =>
+          response shouldBe list
+        }
+      }
+
       it("should be able to retrieve a pyramid") {
-        val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", SD.pyramid)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/pyramid")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.pyramidOfImportance) { response =>

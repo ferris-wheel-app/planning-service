@@ -1,6 +1,6 @@
 package com.ferris.planning.repo
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
@@ -1298,12 +1298,22 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved shouldBe empty
       }
 
-      it("should retrieve a list of scheduled-one-offs") {
+      it("should retrieve a list of all cheduled-one-offs") {
         val created1 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
         val created2 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
         val retrieved = repo.getScheduledOneOffs(None).futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
+      }
+
+      it("should retrieve a list of scheduled-one-offs by date") {
+        val time = timer.timestampOfNow.toLocalDateTime
+        val date = LocalDate.of(2018, 12, 3)
+        val scheduledToday = repo.createScheduledOneOff(SD.scheduledOneOffCreation.copy(occursOn = time)).futureValue
+        repo.createScheduledOneOff(SD.scheduledOneOffCreation.copy(occursOn = time.plusMonths(2L))).futureValue
+        val retrieved = repo.getScheduledOneOffs(Some(date)).futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(scheduledToday)
       }
     }
 

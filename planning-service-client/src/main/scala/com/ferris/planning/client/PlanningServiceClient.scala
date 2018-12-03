@@ -202,7 +202,7 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def oneOffs: Future[List[OneOffView]] =
     makeGetRequest[List[OneOffView]](Uri(path = apiPath / oneOffsPath))
 
-  def scheduledOneOffs(date: Option[LocalDate]): Future[List[ScheduledOneOffView]] =
+  def scheduledOneOffs(date: Option[LocalDate] = None): Future[List[ScheduledOneOffView]] =
     makeGetRequest[List[ScheduledOneOffView]](Uri(path = apiPath / scheduledOneOffsPath)
       .withQuery(Query(params = date.map(chosenDate => Map("date" -> chosenDate.toString)).getOrElse(Map.empty[String, String]))))
 
