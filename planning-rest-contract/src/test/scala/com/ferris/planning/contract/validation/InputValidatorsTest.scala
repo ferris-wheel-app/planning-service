@@ -1,5 +1,6 @@
 package com.ferris.planning.contract.validation
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.ferris.microservice.exceptions.ApiExceptions.{InvalidFieldException, InvalidFieldPayload}
@@ -409,6 +410,16 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
       val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
       caught shouldBe expected
     }
+
+    it("should throw an exception if the estimate is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.oneOffCreation.copy(
+          estimate = 25200000L
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "a one-off estimate must be a maximum of 4 hours", Some(InvalidFieldPayload("estimate")))
+      caught shouldBe expected
+    }
   }
 
   describe("validating a one-off update") {
@@ -425,6 +436,16 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
         )
       }
       val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+
+    it("should throw an exception if the estimate is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.oneOffUpdate.copy(
+          estimate = Some(25200000L)
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "a one-off estimate must be a maximum of 4 hours", Some(InvalidFieldPayload("estimate")))
       caught shouldBe expected
     }
   }
@@ -445,6 +466,17 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
       val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
       caught shouldBe expected
     }
+
+    it("should throw an exception if the estimate is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.scheduledOneOffCreation.copy(
+          occursOn = LocalDateTime.of(2018, 12, 3, 21, 10, 17),
+          estimate = 36000000L
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "a scheduled one-off should not span multiple days", Some(InvalidFieldPayload("estimate")))
+      caught shouldBe expected
+    }
   }
 
   describe("validating a scheduled-one-off update") {
@@ -461,6 +493,17 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
         )
       }
       val expected = InvalidFieldException("InvalidField", "Invalid Status", Some(InvalidFieldPayload("status")))
+      caught shouldBe expected
+    }
+
+    it("should throw an exception if the estimate is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.scheduledOneOffUpdate.copy(
+          occursOn = Some(LocalDateTime.of(2018, 12, 3, 21, 10, 17)),
+          estimate = Some(36000000L)
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "a scheduled one-off should not span multiple days", Some(InvalidFieldPayload("estimate")))
       caught shouldBe expected
     }
   }

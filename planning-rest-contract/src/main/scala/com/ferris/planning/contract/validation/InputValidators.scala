@@ -1,10 +1,14 @@
 package com.ferris.planning.contract.validation
 
+import java.time.LocalDateTime
+
 import com.ferris.microservice.validation.InputValidation
 import com.ferris.planning.contract.resource.Resources.In._
 import com.ferris.planning.contract.resource.TypeFields._
+import com.ferris.utils.FerrisImplicits._
 
 object InputValidators extends InputValidation {
+  private val CONVERSION_RATE = 60 * 60 * 1000
 
   private val TypeField = "type"
   private val BacklogItemsField = "backlogItems"
@@ -14,11 +18,14 @@ object InputValidators extends InputValidation {
   private val FrequencyField = "frequency"
   private val LaserDonutsField = "laserDonuts"
   private val TiersField = "tiers"
+  private val EstimateField = "estimate"
 
   private val MaxGoalBacklogItemsSize = 10
   private val MaxTierSize = 10
   private val MinTierSize = 5
   private val MinPyramidSize = 5
+  private val MaxOneOffEstimateInHours = 4
+  private val MaxOneOffEstimate = MaxOneOffEstimateInHours * CONVERSION_RATE
 
   def checkValidity(backlogItemCreation: BacklogItemCreation): Unit = {
     checkField(BacklogItemType.values.contains(backlogItemCreation.`type`), TypeField)
@@ -90,18 +97,25 @@ object InputValidators extends InputValidation {
 
   def checkValidity(oneOffCreation: OneOffCreation): Unit = {
     checkField(Status.values.contains(oneOffCreation.status), StatusField)
+    checkEstimate(oneOffCreation.estimate)
   }
 
   def checkValidity(oneOffUpdate: OneOffUpdate): Unit = {
     oneOffUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
+    oneOffUpdate.estimate.foreach(checkEstimate)
   }
 
   def checkValidity(scheduledOneOffCreation: ScheduledOneOffCreation): Unit = {
     checkField(Status.values.contains(scheduledOneOffCreation.status), StatusField)
+    checkScheduleSpan(scheduledOneOffCreation.occursOn, scheduledOneOffCreation.estimate)
   }
 
   def checkValidity(scheduledOneOffUpdate: ScheduledOneOffUpdate): Unit = {
     scheduledOneOffUpdate.status.foreach(status => checkField(Status.values.contains(status), StatusField))
+    (scheduledOneOffUpdate.occursOn, scheduledOneOffUpdate.estimate) match {
+      case (Some(occursOn), Some(estimate)) => checkScheduleSpan(occursOn, estimate)
+      case _ => //
+    }
   }
 
   def checkValidity(tierCreation: TierUpsert): Unit = {
@@ -112,5 +126,15 @@ object InputValidators extends InputValidation {
 
   def checkValidity(pyramidCreation: PyramidOfImportanceUpsert): Unit = {
     checkMinSize(pyramidCreation.tiers, TiersField, MinPyramidSize)
+  }
+
+  private def checkEstimate(estimate: Long): Unit = {
+    checkField(estimate <= MaxOneOffEstimate, EstimateField, s"a one-off estimate must be a maximum of $MaxOneOffEstimateInHours hours")
+  }
+
+  private def checkScheduleSpan(occursOn: LocalDateTime, estimate: Long): Unit = {
+    val startDay = occursOn.toLocalDate
+    val endDay = occursOn.plusMillis(estimate).toLocalDate
+    checkField(startDay == endDay, EstimateField, "a scheduled one-off should not span multiple days")
   }
 }

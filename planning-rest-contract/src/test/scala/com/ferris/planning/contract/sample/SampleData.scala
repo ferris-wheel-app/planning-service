@@ -305,7 +305,7 @@ object SampleData {
   )
 
   val scheduledOneOffCreation = ScheduledOneOffCreation(
-    occursOn = LocalDateTime.now,
+    occursOn = LocalDateTime.of(2018, 12, 3, 17, 36, 5),
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
     estimate = 14400000L,
@@ -313,7 +313,7 @@ object SampleData {
   )
 
   val scheduledOneOffUpdate = ScheduledOneOffUpdate(
-    occursOn = Some(LocalDateTime.now),
+    occursOn = Some(LocalDateTime.of(2018, 12, 3, 17, 36, 5)),
     goalId = Some(UUID.randomUUID),
     description = Some("Get window fixed"),
     estimate = Some(14400000L),

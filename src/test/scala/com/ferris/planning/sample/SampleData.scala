@@ -13,6 +13,7 @@ object SampleData {
 
   private val currentYear = LocalDate.now
   private val nextYear = currentYear.plusYears(1)
+  private val scheduledDateTime = LocalDateTime.of(2018, 12, 3, 17, 16, 20)
 
   object domain {
     val backlogItemCreation = CreateBacklogItem(
@@ -309,7 +310,7 @@ object SampleData {
     )
 
     val scheduledOneOffCreation = CreateScheduledOneOff(
-      occursOn = LocalDateTime.now,
+      occursOn = scheduledDateTime,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
       estimate = 14400000L,
@@ -317,7 +318,7 @@ object SampleData {
     )
 
     val scheduledOneOffUpdate = UpdateScheduledOneOff(
-      occursOn = Some(LocalDateTime.now),
+      occursOn = Some(scheduledDateTime),
       goalId = Some(UUID.randomUUID),
       description = Some("Get window fixed"),
       estimate = Some(14400000L),
