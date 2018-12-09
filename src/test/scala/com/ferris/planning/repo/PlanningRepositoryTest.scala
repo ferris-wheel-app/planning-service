@@ -1308,7 +1308,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
       it("should retrieve a list of scheduled-one-offs by date") {
         val time = timer.timestampOfNow.toLocalDateTime
-        val date = LocalDate.of(2018, 12, 3)
+        val date = time.toLocalDate
         val scheduledToday = repo.createScheduledOneOff(SD.scheduledOneOffCreation.copy(occursOn = time)).futureValue
         repo.createScheduledOneOff(SD.scheduledOneOffCreation.copy(occursOn = time.plusMonths(2L))).futureValue
         val retrieved = repo.getScheduledOneOffs(Some(date)).futureValue

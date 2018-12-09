@@ -2,7 +2,7 @@ name := "planning-service-client"
 
 organization := "com.ferris"
 
-version := "one-offs-SNAPSHOT"
+version := "0.0.4"
 
 scalaVersion in ThisBuild := "2.12.1"
 
