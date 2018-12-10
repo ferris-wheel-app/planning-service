@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalTable.schema, HobbyTable.schema, LaserDonutTable.schema, OneOffTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffTable.schema, ThemeTable.schema, ThreadTable.schema, TodoTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalSkillTable.schema, GoalTable.schema, HobbySkillTable.schema, HobbyTable.schema, LaserDonutSkillTable.schema, LaserDonutTable.schema, OneOffSkillTable.schema, OneOffTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffSkillTable.schema, ScheduledOneOffTable.schema, SkillTable.schema, ThemeTable.schema, ThreadSkillTable.schema, ThreadTable.schema, TodoTable.schema, WeaveSkillTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -167,11 +167,48 @@ trait Tables {
 
     /** Foreign key referencing BacklogItemTable (database name BACKLOG_ITEM_FK) */
     lazy val backlogItemTableFk = foreignKey("BACKLOG_ITEM_FK", backlogItemId, BacklogItemTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing GoalTable (database name GOAL_FK) */
-    lazy val goalTableFk = foreignKey("GOAL_FK", goalId, GoalTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing GoalTable (database name GOAL_FK1) */
+    lazy val goalTableFk = foreignKey("GOAL_FK1", goalId, GoalTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
   }
   /** Collection-like TableQuery object for table GoalBacklogItemTable */
   lazy val GoalBacklogItemTable = new TableQuery(tag => new GoalBacklogItemTable(tag))
+
+  /** Entity class storing rows of table GoalSkillTable
+   *  @param goalId Database column GOAL_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class GoalSkillRow(goalId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching GoalSkillRow objects using plain SQL queries */
+  implicit def GetResultGoalSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[GoalSkillRow] = GR{
+    prs => import prs._
+    GoalSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table GOAL_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class GoalSkillTable(_tableTag: Tag) extends profile.api.Table[GoalSkillRow](_tableTag, "GOAL_SKILL") {
+    def * = (goalId, skillId, relevance, level) <> (GoalSkillRow.tupled, GoalSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(goalId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> GoalSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column GOAL_ID SqlType(BIGINT) */
+    val goalId: Rep[Long] = column[Long]("GOAL_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing GoalTable (database name GOAL_FK2) */
+    lazy val goalTableFk = foreignKey("GOAL_FK2", goalId, GoalTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK1) */
+    lazy val skillTableFk = foreignKey("SKILL_FK1", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (goalId,skillId) (database name CONSTRAINT_INDEX_3C) */
+    val index1 = index("CONSTRAINT_INDEX_3C", (goalId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table GoalSkillTable */
+  lazy val GoalSkillTable = new TableQuery(tag => new GoalSkillTable(tag))
 
   /** Entity class storing rows of table GoalTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -219,6 +256,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table GoalTable */
   lazy val GoalTable = new TableQuery(tag => new GoalTable(tag))
+
+  /** Entity class storing rows of table HobbySkillTable
+   *  @param hobbyId Database column HOBBY_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class HobbySkillRow(hobbyId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching HobbySkillRow objects using plain SQL queries */
+  implicit def GetResultHobbySkillRow(implicit e0: GR[Long], e1: GR[String]): GR[HobbySkillRow] = GR{
+    prs => import prs._
+    HobbySkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table HOBBY_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class HobbySkillTable(_tableTag: Tag) extends profile.api.Table[HobbySkillRow](_tableTag, "HOBBY_SKILL") {
+    def * = (hobbyId, skillId, relevance, level) <> (HobbySkillRow.tupled, HobbySkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(hobbyId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> HobbySkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column HOBBY_ID SqlType(BIGINT) */
+    val hobbyId: Rep[Long] = column[Long]("HOBBY_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing HobbyTable (database name HOBBY_FK) */
+    lazy val hobbyTableFk = foreignKey("HOBBY_FK", hobbyId, HobbyTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK5) */
+    lazy val skillTableFk = foreignKey("SKILL_FK5", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (hobbyId,skillId) (database name CONSTRAINT_INDEX_4F) */
+    val index1 = index("CONSTRAINT_INDEX_4F", (hobbyId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table HobbySkillTable */
+  lazy val HobbySkillTable = new TableQuery(tag => new HobbySkillTable(tag))
 
   /** Entity class storing rows of table HobbyTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -271,6 +345,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table HobbyTable */
   lazy val HobbyTable = new TableQuery(tag => new HobbyTable(tag))
+
+  /** Entity class storing rows of table LaserDonutSkillTable
+   *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class LaserDonutSkillRow(laserDonutId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching LaserDonutSkillRow objects using plain SQL queries */
+  implicit def GetResultLaserDonutSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[LaserDonutSkillRow] = GR{
+    prs => import prs._
+    LaserDonutSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table LASER_DONUT_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class LaserDonutSkillTable(_tableTag: Tag) extends profile.api.Table[LaserDonutSkillRow](_tableTag, "LASER_DONUT_SKILL") {
+    def * = (laserDonutId, skillId, relevance, level) <> (LaserDonutSkillRow.tupled, LaserDonutSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(laserDonutId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column LASER_DONUT_ID SqlType(BIGINT) */
+    val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK2) */
+    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK2", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK4) */
+    lazy val skillTableFk = foreignKey("SKILL_FK4", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (laserDonutId,skillId) (database name CONSTRAINT_INDEX_18) */
+    val index1 = index("CONSTRAINT_INDEX_18", (laserDonutId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table LaserDonutSkillTable */
+  lazy val LaserDonutSkillTable = new TableQuery(tag => new LaserDonutSkillTable(tag))
 
   /** Entity class storing rows of table LaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -329,6 +440,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table LaserDonutTable */
   lazy val LaserDonutTable = new TableQuery(tag => new LaserDonutTable(tag))
+
+  /** Entity class storing rows of table OneOffSkillTable
+   *  @param oneOffId Database column ONE_OFF_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class OneOffSkillRow(oneOffId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching OneOffSkillRow objects using plain SQL queries */
+  implicit def GetResultOneOffSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[OneOffSkillRow] = GR{
+    prs => import prs._
+    OneOffSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table ONE_OFF_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class OneOffSkillTable(_tableTag: Tag) extends profile.api.Table[OneOffSkillRow](_tableTag, "ONE_OFF_SKILL") {
+    def * = (oneOffId, skillId, relevance, level) <> (OneOffSkillRow.tupled, OneOffSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(oneOffId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> OneOffSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ONE_OFF_ID SqlType(BIGINT) */
+    val oneOffId: Rep[Long] = column[Long]("ONE_OFF_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing OneOffTable (database name ONE_OFF_FK) */
+    lazy val oneOffTableFk = foreignKey("ONE_OFF_FK", oneOffId, OneOffTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK6) */
+    lazy val skillTableFk = foreignKey("SKILL_FK6", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (oneOffId,skillId) (database name CONSTRAINT_INDEX_1E) */
+    val index1 = index("CONSTRAINT_INDEX_1E", (oneOffId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table OneOffSkillTable */
+  lazy val OneOffSkillTable = new TableQuery(tag => new OneOffSkillTable(tag))
 
   /** Entity class storing rows of table OneOffTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -453,14 +601,51 @@ trait Tables {
     /** Database column IS_CURRENT SqlType(TINYINT) */
     val isCurrent: Rep[Byte] = column[Byte]("IS_CURRENT")
 
-    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
-    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK1) */
+    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK1", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (laserDonutId) (database name CONSTRAINT_INDEX_8) */
     val index1 = index("CONSTRAINT_INDEX_8", laserDonutId, unique=true)
   }
   /** Collection-like TableQuery object for table ScheduledLaserDonutTable */
   lazy val ScheduledLaserDonutTable = new TableQuery(tag => new ScheduledLaserDonutTable(tag))
+
+  /** Entity class storing rows of table ScheduledOneOffSkillTable
+   *  @param scheduledOneOffId Database column SCHEDULED_ONE_OFF_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class ScheduledOneOffSkillRow(scheduledOneOffId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching ScheduledOneOffSkillRow objects using plain SQL queries */
+  implicit def GetResultScheduledOneOffSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[ScheduledOneOffSkillRow] = GR{
+    prs => import prs._
+    ScheduledOneOffSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table SCHEDULED_ONE_OFF_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class ScheduledOneOffSkillTable(_tableTag: Tag) extends profile.api.Table[ScheduledOneOffSkillRow](_tableTag, "SCHEDULED_ONE_OFF_SKILL") {
+    def * = (scheduledOneOffId, skillId, relevance, level) <> (ScheduledOneOffSkillRow.tupled, ScheduledOneOffSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(scheduledOneOffId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> ScheduledOneOffSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column SCHEDULED_ONE_OFF_ID SqlType(BIGINT) */
+    val scheduledOneOffId: Rep[Long] = column[Long]("SCHEDULED_ONE_OFF_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing ScheduledOneOffTable (database name SCHEDULED_ONE_OFF_FK) */
+    lazy val scheduledOneOffTableFk = foreignKey("SCHEDULED_ONE_OFF_FK", scheduledOneOffId, ScheduledOneOffTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK7) */
+    lazy val skillTableFk = foreignKey("SKILL_FK7", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (scheduledOneOffId,skillId) (database name CONSTRAINT_INDEX_92) */
+    val index1 = index("CONSTRAINT_INDEX_92", (scheduledOneOffId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table ScheduledOneOffSkillTable */
+  lazy val ScheduledOneOffSkillTable = new TableQuery(tag => new ScheduledOneOffSkillTable(tag))
 
   /** Entity class storing rows of table ScheduledOneOffTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -512,6 +697,44 @@ trait Tables {
   /** Collection-like TableQuery object for table ScheduledOneOffTable */
   lazy val ScheduledOneOffTable = new TableQuery(tag => new ScheduledOneOffTable(tag))
 
+  /** Entity class storing rows of table SkillTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
+   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
+   *  @param proficiency Database column PROFICIENCY SqlType(VARCHAR), Length(36,true)
+   *  @param practisedHours Database column PRACTISED_HOURS SqlType(BIGINT)
+   *  @param lastApplied Database column LAST_APPLIED SqlType(TIMESTAMP) */
+  case class SkillRow(id: Long, uuid: String, name: String, proficiency: String, practisedHours: Long, lastApplied: java.sql.Timestamp)
+  /** GetResult implicit for fetching SkillRow objects using plain SQL queries */
+  implicit def GetResultSkillRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp]): GR[SkillRow] = GR{
+    prs => import prs._
+    SkillRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[Long], <<[java.sql.Timestamp]))
+  }
+  /** Table description of table SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class SkillTable(_tableTag: Tag) extends profile.api.Table[SkillRow](_tableTag, "SKILL") {
+    def * = (id, uuid, name, proficiency, practisedHours, lastApplied) <> (SkillRow.tupled, SkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(proficiency), Rep.Some(practisedHours), Rep.Some(lastApplied)).shaped.<>({r=>import r._; _1.map(_=> SkillRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column UUID SqlType(VARCHAR), Length(36,true) */
+    val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
+    /** Database column NAME SqlType(VARCHAR), Length(256,true) */
+    val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
+    /** Database column PROFICIENCY SqlType(VARCHAR), Length(36,true) */
+    val proficiency: Rep[String] = column[String]("PROFICIENCY", O.Length(36,varying=true))
+    /** Database column PRACTISED_HOURS SqlType(BIGINT) */
+    val practisedHours: Rep[Long] = column[Long]("PRACTISED_HOURS")
+    /** Database column LAST_APPLIED SqlType(TIMESTAMP) */
+    val lastApplied: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("LAST_APPLIED")
+
+    /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4B) */
+    val index1 = index("CONSTRAINT_INDEX_4B", uuid, unique=true)
+  }
+  /** Collection-like TableQuery object for table SkillTable */
+  lazy val SkillTable = new TableQuery(tag => new SkillTable(tag))
+
   /** Entity class storing rows of table ThemeTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
@@ -549,6 +772,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table ThemeTable */
   lazy val ThemeTable = new TableQuery(tag => new ThemeTable(tag))
+
+  /** Entity class storing rows of table ThreadSkillTable
+   *  @param threadId Database column THREAD_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class ThreadSkillRow(threadId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching ThreadSkillRow objects using plain SQL queries */
+  implicit def GetResultThreadSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[ThreadSkillRow] = GR{
+    prs => import prs._
+    ThreadSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table THREAD_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class ThreadSkillTable(_tableTag: Tag) extends profile.api.Table[ThreadSkillRow](_tableTag, "THREAD_SKILL") {
+    def * = (threadId, skillId, relevance, level) <> (ThreadSkillRow.tupled, ThreadSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(threadId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> ThreadSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column THREAD_ID SqlType(BIGINT) */
+    val threadId: Rep[Long] = column[Long]("THREAD_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing SkillTable (database name SKILL_FK2) */
+    lazy val skillTableFk = foreignKey("SKILL_FK2", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing ThreadTable (database name THREAD_FK) */
+    lazy val threadTableFk = foreignKey("THREAD_FK", threadId, ThreadTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (threadId,skillId) (database name CONSTRAINT_INDEX_B) */
+    val index1 = index("CONSTRAINT_INDEX_B", (threadId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table ThreadSkillTable */
+  lazy val ThreadSkillTable = new TableQuery(tag => new ThreadSkillTable(tag))
 
   /** Entity class storing rows of table ThreadTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -643,6 +903,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table TodoTable */
   lazy val TodoTable = new TableQuery(tag => new TodoTable(tag))
+
+  /** Entity class storing rows of table WeaveSkillTable
+   *  @param weaveId Database column WEAVE_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class WeaveSkillRow(weaveId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching WeaveSkillRow objects using plain SQL queries */
+  implicit def GetResultWeaveSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[WeaveSkillRow] = GR{
+    prs => import prs._
+    WeaveSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table WEAVE_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class WeaveSkillTable(_tableTag: Tag) extends profile.api.Table[WeaveSkillRow](_tableTag, "WEAVE_SKILL") {
+    def * = (weaveId, skillId, relevance, level) <> (WeaveSkillRow.tupled, WeaveSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(weaveId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> WeaveSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column WEAVE_ID SqlType(BIGINT) */
+    val weaveId: Rep[Long] = column[Long]("WEAVE_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing SkillTable (database name SKILL_FK3) */
+    lazy val skillTableFk = foreignKey("SKILL_FK3", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing WeaveTable (database name WEAVE_FK) */
+    lazy val weaveTableFk = foreignKey("WEAVE_FK", weaveId, WeaveTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (weaveId,skillId) (database name CONSTRAINT_INDEX_E5) */
+    val index1 = index("CONSTRAINT_INDEX_E5", (weaveId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table WeaveSkillTable */
+  lazy val WeaveSkillTable = new TableQuery(tag => new WeaveSkillTable(tag))
 
   /** Entity class storing rows of table WeaveTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
