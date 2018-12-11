@@ -46,6 +46,7 @@ object Model {
     backlogItems: Seq[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     graduation: GraduationTypes.GraduationType,
     status: GoalStatuses.GoalStatus,
     createdOn: LocalDateTime,
@@ -57,6 +58,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     performance: ThreadPerformances.ThreadPerformance,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],
@@ -68,6 +70,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     `type`: WeaveTypes.WeaveType,
     status: Statuses.Status,
     createdOn: LocalDateTime,
@@ -104,6 +107,7 @@ object Model {
     uuid: UUID,
     parentId: UUID,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     order: Int,
     isDone: Boolean,
     createdOn: LocalDateTime,
@@ -116,6 +120,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     frequency: HobbyFrequencies.HobbyFrequency,
     `type`: HobbyTypes.HobbyType,
     createdOn: LocalDateTime,
@@ -127,6 +132,7 @@ object Model {
     uuid: UUID,
     goalId: Option[UUID],
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     estimate: Long,
     order: Int,
     status: Statuses.Status,
@@ -140,6 +146,7 @@ object Model {
     occursOn: LocalDateTime,
     goalId: Option[UUID],
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     estimate: Long,
     status: Statuses.Status,
     createdOn: LocalDateTime,
@@ -184,6 +191,21 @@ object Model {
     uuid: UUID,
     order: Int,
     isDone: Boolean
+  )
+
+  case class Skill (
+    uuid: UUID,
+    name: String,
+    categoryId: UUID,
+    proficiency: Proficiency.Proficiency,
+    practisedHours: Long,
+    lastApplied: Option[LocalDateTime]
+  )
+
+  case class AssociatedSkill (
+    skillId: UUID,
+    relevance: SkillRelevance.SkillRelevance,
+    level: Proficiency.SkillLevel
   )
 
   trait TypeEnum {
@@ -399,6 +421,77 @@ object Model {
 
     case object Unexplored extends HobbyFrequency {
       override val dbValue = "UNEXPLORED"
+    }
+  }
+
+  object Proficiency {
+
+    def skillLevel(name: String): SkillLevel = name match {
+      case Basic.dbValue => Basic
+      case Novice.dbValue => Novice
+      case Intermediate.dbValue => Intermediate
+      case Advanced.dbValue => Advanced
+      case Expert.dbValue => Expert
+    }
+
+    def withName(name: String): Proficiency = name match {
+      case Zero.dbValue => Zero
+      case Basic.dbValue => Basic
+      case Novice.dbValue => Novice
+      case Intermediate.dbValue => Intermediate
+      case Advanced.dbValue => Advanced
+      case Expert.dbValue => Expert
+    }
+
+    sealed trait Proficiency extends TypeEnum
+
+    sealed trait SkillLevel extends TypeEnum
+
+    case object Zero extends Proficiency {
+      override val dbValue = "ZERO"
+    }
+
+    case object Basic extends SkillLevel with Proficiency {
+      override val dbValue = "BASIC"
+    }
+
+    case object Novice extends SkillLevel with Proficiency {
+      override val dbValue = "NOVICE"
+    }
+
+    case object Intermediate extends SkillLevel with Proficiency {
+      override val dbValue = "INTERMEDIATE"
+    }
+
+    case object Advanced extends SkillLevel with Proficiency {
+      override val dbValue = "ADVANCED"
+    }
+
+    case object Expert extends SkillLevel with Proficiency {
+      override val dbValue = "EXPERT"
+    }
+  }
+
+  object SkillRelevance {
+
+    def withName(name: String): SkillRelevance = name match {
+      case Needed.dbValue => Needed
+      case ToBeAcquired.dbValue => ToBeAcquired
+      case Maintenance.dbValue => Maintenance
+    }
+
+    sealed trait SkillRelevance extends TypeEnum
+
+    case object Needed extends SkillRelevance {
+      override val dbValue = "NEEDED"
+    }
+
+    case object ToBeAcquired extends SkillRelevance {
+      override val dbValue = "TO_BE_ACQUIRED"
+    }
+
+    case object Maintenance extends SkillRelevance {
+      override val dbValue = "MAINTENANCE"
     }
   }
 }

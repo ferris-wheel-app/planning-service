@@ -62,6 +62,7 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       graduation: String,
       status: String
     ) {
@@ -73,6 +74,7 @@ object Resources {
       backlogItems: Option[Seq[UUID]],
       summary: Option[String],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       graduation: Option[String],
       status: Option[String]
     ) {
@@ -83,6 +85,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       performance: String
     ) {
       checkValidity(this)
@@ -92,6 +95,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       performance: Option[String]
     ) {
       checkValidity(this)
@@ -101,6 +105,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       `type`: String,
       status: String
     ) {
@@ -111,6 +116,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       `type`: Option[String],
       status: Option[String]
     ) {
@@ -157,12 +163,14 @@ object Resources {
 
     case class TodoCreation (
       parentId: UUID,
-      description: String
+      description: String,
+      associatedSkills: Set[AssociatedSkillInsertion]
     )
 
     case class TodoUpdate (
       parentId: Option[UUID],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       isDone: Option[Boolean]
     )
 
@@ -170,6 +178,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       frequency: String,
       `type`: String
     ) {
@@ -180,6 +189,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       frequency: Option[String],
       `type`: Option[String]
     ) {
@@ -189,6 +199,7 @@ object Resources {
     case class OneOffCreation (
       goalId: Option[UUID],
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       estimate: Long,
       status: String
     ) {
@@ -198,6 +209,7 @@ object Resources {
     case class OneOffUpdate (
       goalId: Option[UUID],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       estimate: Option[Long],
       status: Option[String]
     ) {
@@ -208,6 +220,7 @@ object Resources {
       occursOn: LocalDateTime,
       goalId: Option[UUID],
       description: String,
+      associatedSkills: Set[AssociatedSkillInsertion],
       estimate: Long,
       status: String
     ) {
@@ -218,6 +231,7 @@ object Resources {
       occursOn: Option[LocalDateTime],
       goalId: Option[UUID],
       description: Option[String],
+      associatedSkills: Option[Set[AssociatedSkillInsertion]],
       estimate: Option[Long],
       status: Option[String]
     ) {
@@ -239,6 +253,21 @@ object Resources {
     ) {
       checkValidity(this)
     }
+
+    case class SkillCreation (
+      uuid: UUID,
+      name: String,
+      proficiency: String,
+      practisedHours: Long
+    ) {
+      checkValidity(this)
+    }
+
+    case class AssociatedSkillInsertion (
+      skillId: UUID,
+      relevance: String,
+      level: String
+    )
   }
 
   object Out {
@@ -284,6 +313,7 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       graduation: String,
       status: String,
       createdOn: LocalDateTime,
@@ -295,6 +325,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       performance: String,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
@@ -306,6 +337,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       `type`: String,
       status: String,
       createdOn: LocalDateTime,
@@ -351,6 +383,7 @@ object Resources {
       uuid: UUID,
       parentId: UUID,
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       order: Int,
       isDone: Boolean,
       createdOn: LocalDateTime,
@@ -363,6 +396,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       frequency: String,
       `type`: String,
       createdOn: LocalDateTime,
@@ -374,6 +408,7 @@ object Resources {
       uuid: UUID,
       goalId: Option[UUID],
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       estimate: Long,
       order: Int,
       status: String,
@@ -387,6 +422,7 @@ object Resources {
       occursOn: LocalDateTime,
       goalId: Option[UUID],
       description: String,
+      associatedSkills: Set[AssociatedSkillView],
       estimate: Long,
       status: String,
       createdOn: LocalDateTime,
@@ -400,6 +436,20 @@ object Resources {
 
     case class PyramidOfImportanceView (
       tiers: Seq[TierView]
+    )
+
+    case class SkillView (
+      uuid: UUID,
+      name: String,
+      proficiency: String,
+      practisedHours: Long,
+      lastApplied: Option[LocalDateTime]
+    )
+
+    case class AssociatedSkillView (
+      skillId: UUID,
+      relevance: String,
+      level: String
     )
   }
 }

@@ -65,4 +65,23 @@ object TypeFields {
     val unexplored = "unexplored"
     val values = Set(frequent, scattered, rare, unexplored)
   }
+
+  object Proficiency {
+    val zero = "zero"
+    val basic = "basic"
+    val novice = "novice"
+    val intermediate = "intermediate"
+    val advanced = "advanced"
+    val expert = "expert"
+    val values = Set(zero, basic, novice, intermediate, advanced, expert)
+  }
+
+  object SkillLevel {
+    val basic = "basic"
+    val novice = "novice"
+    val intermediate = "intermediate"
+    val advanced = "advanced"
+    val expert = "expert"
+    val values = Set(basic, novice, intermediate, advanced, expert)
+  }
 }

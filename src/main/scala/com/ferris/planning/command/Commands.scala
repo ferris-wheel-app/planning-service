@@ -56,6 +56,7 @@ object Commands {
     backlogItems: Seq[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     graduation: GraduationTypes.GraduationType,
     status: GoalStatuses.GoalStatus
   )
@@ -65,6 +66,7 @@ object Commands {
     backlogItems: Option[Seq[UUID]],
     summary: Option[String],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     graduation: Option[GraduationTypes.GraduationType],
     status: Option[GoalStatuses.GoalStatus]
   )
@@ -73,6 +75,7 @@ object Commands {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     performance: ThreadPerformances.ThreadPerformance
   )
 
@@ -80,6 +83,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     performance: Option[ThreadPerformances.ThreadPerformance]
   )
 
@@ -87,6 +91,7 @@ object Commands {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     `type`: WeaveTypes.WeaveType,
     status: Statuses.Status
   )
@@ -95,6 +100,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     `type`: Option[WeaveTypes.WeaveType],
     status: Option[Statuses.Status]
   )
@@ -131,12 +137,14 @@ object Commands {
 
   case class CreateTodo (
     parentId: UUID,
-    description: String
+    description: String,
+    associatedSkills: Set[AssociatedSkill]
   )
 
   case class UpdateTodo (
     parentId: Option[UUID],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     isDone: Option[Boolean]
   )
 
@@ -144,6 +152,7 @@ object Commands {
     goalId: Option[UUID],
     summary: String,
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     frequency: HobbyFrequencies.HobbyFrequency,
     `type`: HobbyTypes.HobbyType
   )
@@ -152,6 +161,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     frequency: Option[HobbyFrequencies.HobbyFrequency],
     `type`: Option[HobbyTypes.HobbyType]
   )
@@ -159,6 +169,7 @@ object Commands {
   case class CreateOneOff (
     goalId: Option[UUID],
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     estimate: Long,
     status: Statuses.Status
   )
@@ -166,6 +177,7 @@ object Commands {
   case class UpdateOneOff (
     goalId: Option[UUID],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     estimate: Option[Long],
     status: Option[Statuses.Status]
   )
@@ -174,6 +186,7 @@ object Commands {
     occursOn: LocalDateTime,
     goalId: Option[UUID],
     description: String,
+    associatedSkills: Set[AssociatedSkill],
     estimate: Long,
     status: Statuses.Status
   )
@@ -182,8 +195,16 @@ object Commands {
     occursOn: Option[LocalDateTime],
     goalId: Option[UUID],
     description: Option[String],
+    associatedSkills: Option[Set[AssociatedSkill]],
     estimate: Option[Long],
     status: Option[Statuses.Status]
+  )
+
+  case class CreateSkill (
+    uuid: UUID,
+    name: String,
+    proficiency: Proficiency.Proficiency,
+    practisedHours: Long
   )
 
   case class UpdateList (

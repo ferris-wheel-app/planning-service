@@ -56,47 +56,75 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow])) {
-    def asGoal: Goal = rows match { case (goal, backlogItems) =>
-      Goal(
-        uuid = UUID.fromString(goal.uuid),
-        themeId = UUID.fromString(goal.themeId),
-        backlogItems = backlogItems.map(item => UUID.fromString(item.uuid)),
-        summary = goal.summary,
-        description = goal.description,
-        status = GoalStatuses.withName(goal.status),
-        graduation = GraduationTypes.withName(goal.graduation),
-        createdOn = goal.createdOn.toLocalDateTime,
-        lastModified = goal.lastModified.map(_.toLocalDateTime)
-      )
+  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow], Seq[(tables.GoalSkillRow, String)])) {
+    def asGoal: Goal = rows match {
+      case (goal, backlogItems, associatedSkills) =>
+        Goal(
+          uuid = UUID.fromString(goal.uuid),
+          themeId = UUID.fromString(goal.themeId),
+          backlogItems = backlogItems.map(item => UUID.fromString(item.uuid)),
+          summary = goal.summary,
+          description = goal.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          status = GoalStatuses.withName(goal.status),
+          graduation = GraduationTypes.withName(goal.graduation),
+          createdOn = goal.createdOn.toLocalDateTime,
+          lastModified = goal.lastModified.map(_.toLocalDateTime)
+        )
     }
   }
 
-  implicit class ThreadBuilder(val row: tables.ThreadRow) {
-    def asThread: Thread = Thread(
-      uuid = UUID.fromString(row.uuid),
-      goalId = row.goalId.map(UUID.fromString),
-      summary = row.summary,
-      description = row.description,
-      performance = ThreadPerformances.withName(row.performance),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class ThreadBuilder(val row: (tables.ThreadRow, Seq[(tables.ThreadSkillRow, String)])) {
+    def asThread: Thread = row match {
+      case (thread, associatedSkills) =>
+        Thread(
+          uuid = UUID.fromString(thread.uuid),
+          goalId = thread.goalId.map(UUID.fromString),
+          summary = thread.summary,
+          description = thread.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          performance = ThreadPerformances.withName(thread.performance),
+          createdOn = thread.createdOn.toLocalDateTime,
+          lastModified = thread.lastModified.map(_.toLocalDateTime),
+          lastPerformed = thread.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
-  implicit class WeaveBuilder(val row: tables.WeaveRow) {
-    def asWeave: Weave = Weave(
-      uuid = UUID.fromString(row.uuid),
-      goalId = row.goalId.map(UUID.fromString),
-      summary = row.summary,
-      description = row.description,
-      status = Statuses.withName(row.status),
-      `type` = WeaveTypes.withName(row.`type`),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class WeaveBuilder(val row: (tables.WeaveRow, Seq[(tables.WeaveSkillRow, String)])) {
+    def asWeave: Weave = row match {
+      case (weave, associatedSkills) =>
+        Weave(
+          uuid = UUID.fromString(weave.uuid),
+          goalId = weave.goalId.map(UUID.fromString),
+          summary = weave.summary,
+          description = weave.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          status = Statuses.withName(weave.status),
+          `type` = WeaveTypes.withName(weave.`type`),
+          createdOn = weave.createdOn.toLocalDateTime,
+          lastModified = weave.lastModified.map(_.toLocalDateTime),
+          lastPerformed = weave.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
   implicit class LaserDonutBuilder(val row: tables.LaserDonutRow) {
@@ -128,59 +156,113 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class TodoBuilder(val row: tables.TodoRow) {
-    def asTodo: Todo = Todo(
-      uuid = UUID.fromString(row.uuid),
-      parentId = UUID.fromString(row.parentId),
-      description = row.description,
-      order = row.order,
-      isDone = row.isDone,
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class TodoBuilder(val row: (tables.TodoRow, Seq[(tables.TodoSkillRow, String)])) {
+    def asTodo: Todo = row match {
+      case (todo, associatedSkills) =>
+        Todo(
+          uuid = UUID.fromString(todo.uuid),
+          parentId = UUID.fromString(todo.parentId),
+          description = todo.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          order = todo.order,
+          isDone = todo.isDone,
+          createdOn = todo.createdOn.toLocalDateTime,
+          lastModified = todo.lastModified.map(_.toLocalDateTime),
+          lastPerformed = todo.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
-  implicit class HobbyBuilder(val row: tables.HobbyRow) {
-    def asHobby: Hobby = Hobby(
-      uuid = UUID.fromString(row.uuid),
-      goalId = row.goalId.map(UUID.fromString),
-      summary = row.summary,
-      description = row.description,
-      frequency = HobbyFrequencies.withName(row.frequency),
-      `type` = HobbyTypes.withName(row.`type`),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[(tables.TodoSkillRow, String)])) {
+    def asHobby: Hobby = row match {
+      case (hobby, associatedSkills) =>
+        Hobby(
+          uuid = UUID.fromString(hobby.uuid),
+          goalId = hobby.goalId.map(UUID.fromString),
+          summary = hobby.summary,
+          description = hobby.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          frequency = HobbyFrequencies.withName(hobby.frequency),
+          `type` = HobbyTypes.withName(hobby.`type`),
+          createdOn = hobby.createdOn.toLocalDateTime,
+          lastModified = hobby.lastModified.map(_.toLocalDateTime),
+          lastPerformed = hobby.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
-  implicit class OneOffBuilder(val row: tables.OneOffRow) {
-    def asOneOff: OneOff = OneOff(
-      uuid = UUID.fromString(row.uuid),
-      goalId = row.goalId.map(UUID.fromString),
-      description = row.description,
-      estimate = row.estimate,
-      order = row.order,
-      status = Statuses.withName(row.status),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class OneOffBuilder(val row: (tables.OneOffRow, Seq[(tables.TodoSkillRow, String)])) {
+    def asOneOff: OneOff = row match {
+      case (oneOff, associatedSkills) =>
+        OneOff(
+          uuid = UUID.fromString(oneOff.uuid),
+          goalId = oneOff.goalId.map(UUID.fromString),
+          description = oneOff.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          estimate = oneOff.estimate,
+          order = oneOff.order,
+          status = Statuses.withName(oneOff.status),
+          createdOn = oneOff.createdOn.toLocalDateTime,
+          lastModified = oneOff.lastModified.map(_.toLocalDateTime),
+          lastPerformed = oneOff.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
-  implicit class ScheduledOneOffBuilder(val row: tables.ScheduledOneOffRow) {
-    def asScheduledOneOff: ScheduledOneOff = ScheduledOneOff(
-      uuid = UUID.fromString(row.uuid),
-      occursOn = row.occursOn.toLocalDateTime,
-      goalId = row.goalId.map(UUID.fromString),
-      description = row.description,
-      estimate = row.estimate,
-      status = Statuses.withName(row.status),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class ScheduledOneOffBuilder(val row: (tables.ScheduledOneOffRow, Seq[(tables.TodoSkillRow, String)])) {
+    def asScheduledOneOff: ScheduledOneOff = row match {
+      case (scheduledOneOff, associatedSkills) =>
+        ScheduledOneOff(
+          uuid = UUID.fromString(scheduledOneOff.uuid),
+          occursOn = scheduledOneOff.occursOn.toLocalDateTime,
+          goalId = scheduledOneOff.goalId.map(UUID.fromString),
+          description = scheduledOneOff.description,
+          associatedSkills = associatedSkills.map { case (skill, id) =>
+            AssociatedSkill(
+              skillId = UUID.fromString(id),
+              relevance = SkillRelevance.withName(skill.relevance),
+              level = Proficiency.skillLevel(skill.level)
+            )
+          }.toSet,
+          estimate = scheduledOneOff.estimate,
+          status = Statuses.withName(scheduledOneOff.status),
+          createdOn = scheduledOneOff.createdOn.toLocalDateTime,
+          lastModified = scheduledOneOff.lastModified.map(_.toLocalDateTime),
+          lastPerformed = scheduledOneOff.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
+  }
+
+  implicit class SkillBuilder(val row: (tables.SkillRow, String)) {
+    def asSkill: Skill = row match {
+      case (skill, categoryId) =>
+        Skill(
+          uuid = UUID.fromString(skill.uuid),
+          name = skill.name,
+          categoryId = UUID.fromString(categoryId),
+          proficiency = Proficiency.withName(skill.proficiency),
+          practisedHours = skill.practisedHours,
+          lastApplied = skill.lastApplied.map(_.toLocalDateTime)
+        )
+    }
   }
 
   implicit class PyramidBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow)]) {

@@ -194,7 +194,7 @@ create table scheduled_laser_donut (
   is_current TINYINT(1) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (laser_donut_id),
-  CONSTRAINT laser_donut_fk1 FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table current_activity (
@@ -209,15 +209,25 @@ create table current_activity (
   CONSTRAINT current_portion_fk FOREIGN KEY (current_portion) REFERENCES portion (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
+create table skill_category (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  uuid VARCHAR(36) NOT NULL,
+  name VARCHAR(256) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY (uuid)
+) ENGINE=InnoDB;
+
 create table skill (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
   name VARCHAR(256) NOT NULL,
+  category_id BIGINT NOT NULL,
   proficiency VARCHAR(36) NOT NULL check (proficiency in ('ZERO', 'BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   practised_hours BIGINT NOT NULL,
-  last_applied TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_applied TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY (uuid)
+  UNIQUE KEY (uuid),
+  CONSTRAINT category_fk FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
 ) ENGINE=InnoDB;
 
 create table goal_skill (
@@ -250,13 +260,13 @@ create table weave_skill (
   CONSTRAINT skill_fk3 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
-create table laser_donut_skill (
-  laser_donut_id BIGINT NOT NULL,
+create table todo_skill (
+  todo_id BIGINT NOT NULL,
   skill_id BIGINT NOT NULL,
   relevance VARCHAR(36) NOT NULL check (relevance in ('NEEDED', 'TO_BE_ACQUIRED', 'MAINTENANCE')),
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
-  UNIQUE KEY (laser_donut_id, skill_id),
-  CONSTRAINT laser_donut_fk2 FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  UNIQUE KEY (todo_id, skill_id),
+  CONSTRAINT todo_fk FOREIGN KEY (todo_id) REFERENCES todo (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT skill_fk4 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 

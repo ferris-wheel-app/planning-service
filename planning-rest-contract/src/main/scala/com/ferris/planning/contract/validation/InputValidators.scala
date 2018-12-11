@@ -19,6 +19,7 @@ object InputValidators extends InputValidation {
   private val LaserDonutsField = "laserDonuts"
   private val TiersField = "tiers"
   private val EstimateField = "estimate"
+  private val ProficiencyField = "proficiency"
 
   private val MaxGoalBacklogItemsSize = 10
   private val MaxTierSize = 10
@@ -126,6 +127,10 @@ object InputValidators extends InputValidation {
 
   def checkValidity(pyramidCreation: PyramidOfImportanceUpsert): Unit = {
     checkMinSize(pyramidCreation.tiers, TiersField, MinPyramidSize)
+  }
+
+  def checkValidity(skillCreation: SkillCreation): Unit = {
+    checkField(Proficiency.values.contains(skillCreation.proficiency), ProficiencyField)
   }
 
   private def checkEstimate(estimate: Long): Unit = {
