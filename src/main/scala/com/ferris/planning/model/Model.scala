@@ -46,7 +46,7 @@ object Model {
     backlogItems: Seq[UUID],
     summary: String,
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     graduation: GraduationTypes.GraduationType,
     status: GoalStatuses.GoalStatus,
     createdOn: LocalDateTime,
@@ -58,7 +58,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     performance: ThreadPerformances.ThreadPerformance,
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime],
@@ -70,7 +70,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     `type`: WeaveTypes.WeaveType,
     status: Statuses.Status,
     createdOn: LocalDateTime,
@@ -107,7 +107,7 @@ object Model {
     uuid: UUID,
     parentId: UUID,
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     order: Int,
     isDone: Boolean,
     createdOn: LocalDateTime,
@@ -120,7 +120,7 @@ object Model {
     goalId: Option[UUID],
     summary: String,
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     frequency: HobbyFrequencies.HobbyFrequency,
     `type`: HobbyTypes.HobbyType,
     createdOn: LocalDateTime,
@@ -132,7 +132,7 @@ object Model {
     uuid: UUID,
     goalId: Option[UUID],
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     estimate: Long,
     order: Int,
     status: Statuses.Status,
@@ -146,7 +146,7 @@ object Model {
     occursOn: LocalDateTime,
     goalId: Option[UUID],
     description: String,
-    associatedSkills: Set[AssociatedSkill],
+    associatedSkills: Seq[AssociatedSkill],
     estimate: Long,
     status: Statuses.Status,
     createdOn: LocalDateTime,
@@ -193,19 +193,25 @@ object Model {
     isDone: Boolean
   )
 
+  case class SkillCategory (
+    uuid: UUID,
+    name: String,
+    categoryId: UUID
+  )
+
   case class Skill (
     uuid: UUID,
     name: String,
     categoryId: UUID,
-    proficiency: Proficiency.Proficiency,
+    proficiency: Proficiencies.Proficiency,
     practisedHours: Long,
     lastApplied: Option[LocalDateTime]
   )
 
   case class AssociatedSkill (
     skillId: UUID,
-    relevance: SkillRelevance.SkillRelevance,
-    level: Proficiency.SkillLevel
+    relevance: SkillRelevances.SkillRelevance,
+    level: Proficiencies.SkillLevel
   )
 
   trait TypeEnum {
@@ -424,7 +430,7 @@ object Model {
     }
   }
 
-  object Proficiency {
+  object Proficiencies {
 
     def skillLevel(name: String): SkillLevel = name match {
       case Basic.dbValue => Basic
@@ -472,7 +478,7 @@ object Model {
     }
   }
 
-  object SkillRelevance {
+  object SkillRelevances {
 
     def withName(name: String): SkillRelevance = name match {
       case Needed.dbValue => Needed

@@ -663,18 +663,19 @@ trait Tables {
   /** Entity class storing rows of table SkillCategoryTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
-   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true) */
-  case class SkillCategoryRow(id: Long, uuid: String, name: String)
+   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
+   *  @param categoryId Database column CATEGORY_ID SqlType(BIGINT) */
+  case class SkillCategoryRow(id: Long, uuid: String, name: String, categoryId: Long)
   /** GetResult implicit for fetching SkillCategoryRow objects using plain SQL queries */
   implicit def GetResultSkillCategoryRow(implicit e0: GR[Long], e1: GR[String]): GR[SkillCategoryRow] = GR{
     prs => import prs._
-    SkillCategoryRow.tupled((<<[Long], <<[String], <<[String]))
+    SkillCategoryRow.tupled((<<[Long], <<[String], <<[String], <<[Long]))
   }
   /** Table description of table SKILL_CATEGORY. Objects of this class serve as prototypes for rows in queries. */
   class SkillCategoryTable(_tableTag: Tag) extends profile.api.Table[SkillCategoryRow](_tableTag, "SKILL_CATEGORY") {
-    def * = (id, uuid, name) <> (SkillCategoryRow.tupled, SkillCategoryRow.unapply)
+    def * = (id, uuid, name, categoryId) <> (SkillCategoryRow.tupled, SkillCategoryRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name)).shaped.<>({r=>import r._; _1.map(_=> SkillCategoryRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(categoryId)).shaped.<>({r=>import r._; _1.map(_=> SkillCategoryRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -682,6 +683,11 @@ trait Tables {
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
     /** Database column NAME SqlType(VARCHAR), Length(256,true) */
     val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
+    /** Database column CATEGORY_ID SqlType(BIGINT) */
+    val categoryId: Rep[Long] = column[Long]("CATEGORY_ID")
+
+    /** Foreign key referencing SkillCategoryTable (database name CATEGORY_FK1) */
+    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK1", categoryId, SkillCategoryTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_3D) */
     val index1 = index("CONSTRAINT_INDEX_3D", uuid, unique=true)
@@ -724,8 +730,8 @@ trait Tables {
     /** Database column LAST_APPLIED SqlType(TIMESTAMP) */
     val lastApplied: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_APPLIED")
 
-    /** Foreign key referencing SkillCategoryTable (database name CATEGORY_FK) */
-    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK", categoryId, SkillCategoryTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillCategoryTable (database name CATEGORY_FK2) */
+    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK2", categoryId, SkillCategoryTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4B) */
     val index1 = index("CONSTRAINT_INDEX_4B", uuid, unique=true)

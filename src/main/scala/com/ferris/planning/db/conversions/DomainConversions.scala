@@ -68,10 +68,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           status = GoalStatuses.withName(goal.status),
           graduation = GraduationTypes.withName(goal.graduation),
           createdOn = goal.createdOn.toLocalDateTime,
@@ -91,10 +91,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           performance = ThreadPerformances.withName(thread.performance),
           createdOn = thread.createdOn.toLocalDateTime,
           lastModified = thread.lastModified.map(_.toLocalDateTime),
@@ -114,10 +114,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           status = Statuses.withName(weave.status),
           `type` = WeaveTypes.withName(weave.`type`),
           createdOn = weave.createdOn.toLocalDateTime,
@@ -166,10 +166,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           order = todo.order,
           isDone = todo.isDone,
           createdOn = todo.createdOn.toLocalDateTime,
@@ -190,10 +190,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           frequency = HobbyFrequencies.withName(hobby.frequency),
           `type` = HobbyTypes.withName(hobby.`type`),
           createdOn = hobby.createdOn.toLocalDateTime,
@@ -213,10 +213,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           estimate = oneOff.estimate,
           order = oneOff.order,
           status = Statuses.withName(oneOff.status),
@@ -238,10 +238,10 @@ class DomainConversions(val tables: Tables) {
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
-              relevance = SkillRelevance.withName(skill.relevance),
-              level = Proficiency.skillLevel(skill.level)
+              relevance = SkillRelevances.withName(skill.relevance),
+              level = Proficiencies.skillLevel(skill.level)
             )
-          }.toSet,
+          },
           estimate = scheduledOneOff.estimate,
           status = Statuses.withName(scheduledOneOff.status),
           createdOn = scheduledOneOff.createdOn.toLocalDateTime,
@@ -258,7 +258,7 @@ class DomainConversions(val tables: Tables) {
           uuid = UUID.fromString(skill.uuid),
           name = skill.name,
           categoryId = UUID.fromString(categoryId),
-          proficiency = Proficiency.withName(skill.proficiency),
+          proficiency = Proficiencies.withName(skill.proficiency),
           practisedHours = skill.practisedHours,
           lastApplied = skill.lastApplied.map(_.toLocalDateTime)
         )

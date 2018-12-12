@@ -84,4 +84,11 @@ object TypeFields {
     val expert = "expert"
     val values = Set(basic, novice, intermediate, advanced, expert)
   }
+
+  object SkillRelevance {
+    val needed = "needed"
+    val toBeAcquired = "to_be_acquired"
+    val maintenance = "maintenance"
+    val values = Set(needed, toBeAcquired, maintenance)
+  }
 }

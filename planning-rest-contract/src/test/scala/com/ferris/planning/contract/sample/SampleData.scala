@@ -11,6 +11,33 @@ object SampleData {
   private val currentYear = LocalDate.now
   private val nextYear = currentYear.plusYears(1)
 
+  val skillCategory = SkillCategoryView(
+    uuid = UUID.randomUUID,
+    name = "Functional Programming",
+    categoryId = UUID.randomUUID
+  )
+
+  val skill = SkillView(
+    uuid = UUID.randomUUID,
+    name = "Cats",
+    categoryId = UUID.randomUUID,
+    proficiency = "intermediate",
+    practisedHours = 500L,
+    lastApplied = Some(LocalDateTime.now)
+  )
+
+  val associatedSkillInsertion = AssociatedSkillInsertion(
+    skillId = UUID.randomUUID,
+    relevance = "maintenance",
+    level = "intermediate"
+  )
+
+  val associatedSkill = AssociatedSkillView(
+    skillId = UUID.randomUUID,
+    relevance = "maintenance",
+    level = "intermediate"
+  )
+
   val backlogItemCreation = BacklogItemCreation(
     summary = "I need to get my shit together",
     description = "I need to get my shit together",
@@ -95,6 +122,7 @@ object SampleData {
     backlogItems = Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
+    associatedSkills = associatedSkillInsertion :: Nil,
     graduation = "hobby",
     status = "not_achieved"
   )
@@ -104,6 +132,7 @@ object SampleData {
     backlogItems = Some(Nil),
     summary = Some("Learn to play an instrument"),
     description = Some("Learn to play the piano, the guitar, and the saxophone"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     graduation = Some("abandoned"),
     status = Some("employed")
   )
@@ -114,6 +143,7 @@ object SampleData {
     backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
+    associatedSkills = associatedSkill :: Nil,
     graduation = "hobby",
     status = "not_achieved",
     createdOn = LocalDateTime.now,
@@ -124,6 +154,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
+    associatedSkills = associatedSkillInsertion :: Nil,
     performance = "poor"
   )
 
@@ -131,6 +162,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Sleep"),
     description = Some("Sleep for 8 hours"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     performance = Some("improving")
   )
 
@@ -139,6 +171,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
+    associatedSkills = associatedSkill :: Nil,
     performance = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
@@ -149,6 +182,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
+    associatedSkills = associatedSkillInsertion :: Nil,
     `type` = "pdr",
     status = "planned"
   )
@@ -157,6 +191,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Apply your new-found Go knowledge"),
     description = Some("Create a snuffleupagus"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     `type` = Some("bau"),
     status = Some("complete")
   )
@@ -166,6 +201,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
+    associatedSkills = associatedSkill :: Nil,
     `type` = "pdr",
     status = "planned",
     createdOn = LocalDateTime.now,
@@ -230,12 +266,14 @@ object SampleData {
 
   val todoCreation = TodoCreation(
     parentId = UUID.randomUUID,
-    description = "Create sample data for tests"
+    description = "Create sample data for tests",
+    associatedSkills = associatedSkillInsertion :: Nil
   )
 
   val todoUpdate = TodoUpdate(
     parentId = Some(UUID.randomUUID),
     description = Some("Create repository tests"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     isDone = Some(true)
   )
 
@@ -243,6 +281,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     parentId = UUID.randomUUID,
     description = "Create sample data for tests",
+    associatedSkills = associatedSkill :: Nil,
     order = 4,
     isDone = true,
     createdOn = LocalDateTime.now,
@@ -254,6 +293,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
+    associatedSkills = associatedSkillInsertion :: Nil,
     frequency = "unexplored",
     `type` = "active"
   )
@@ -262,6 +302,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Play ping-pong"),
     description = Some("Table tennis"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     frequency = Some("scattered"),
     `type` = Some("active")
   )
@@ -271,6 +312,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
+    associatedSkills = associatedSkill :: Nil,
     frequency = "frequent",
     `type` = "active",
     createdOn = LocalDateTime.now,
@@ -281,6 +323,7 @@ object SampleData {
   val oneOffCreation = OneOffCreation(
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
+    associatedSkills = associatedSkillInsertion :: Nil,
     estimate = 14400000L,
     status = "planned"
   )
@@ -288,6 +331,7 @@ object SampleData {
   val oneOffUpdate = OneOffUpdate(
     goalId = Some(UUID.randomUUID),
     description = Some("Get doors fixed"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     estimate = Some(14400000L),
     status = Some("planned")
   )
@@ -296,6 +340,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
+    associatedSkills = associatedSkill :: Nil,
     estimate = 14400000L,
     order = 5,
     status = "planned",
@@ -308,6 +353,7 @@ object SampleData {
     occursOn = LocalDateTime.of(2018, 12, 3, 17, 36, 5),
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
+    associatedSkills = associatedSkillInsertion :: Nil,
     estimate = 14400000L,
     status = "planned"
   )
@@ -316,6 +362,7 @@ object SampleData {
     occursOn = Some(LocalDateTime.of(2018, 12, 3, 17, 36, 5)),
     goalId = Some(UUID.randomUUID),
     description = Some("Get window fixed"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
     estimate = Some(14400000L),
     status = Some("planned")
   )
@@ -325,6 +372,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
+    associatedSkills = associatedSkill :: Nil,
     estimate = 14400000L,
     status = "planned",
     createdOn = LocalDateTime.now,

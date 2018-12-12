@@ -7,6 +7,8 @@ import com.ferris.planning.model.Model.GoalStatuses.GoalStatus
 import com.ferris.planning.model.Model.GraduationTypes.GraduationType
 import com.ferris.planning.model.Model.HobbyFrequencies.HobbyFrequency
 import com.ferris.planning.model.Model.HobbyTypes.HobbyType
+import com.ferris.planning.model.Model.Proficiencies.{Proficiency, SkillLevel}
+import com.ferris.planning.model.Model.SkillRelevances.SkillRelevance
 import com.ferris.planning.model.Model.Statuses.Status
 import com.ferris.planning.model.Model.ThreadPerformances.ThreadPerformance
 import com.ferris.planning.model.Model.WeaveTypes.WeaveType
@@ -180,6 +182,70 @@ object TypeResolvers {
       case HobbyFrequencies.Rare => rare
       case HobbyFrequencies.Unexplored => unexplored
       case o => throw new IllegalArgumentException(s"Invalid hobby frequency: $o")
+    }
+  }
+
+  object Proficiency extends TypeResolver[Proficiencies.Proficiency] {
+    import TypeFields.Proficiency._
+
+    override def withName(name: String): Proficiency = name match {
+      case `zero` => Proficiencies.Zero
+      case `basic` => Proficiencies.Basic
+      case `novice` => Proficiencies.Novice
+      case `intermediate` => Proficiencies.Intermediate
+      case `advanced` => Proficiencies.Advanced
+      case `expert` => Proficiencies.Expert
+      case o => throw new IllegalArgumentException(s"Invalid proficiency: $o")
+    }
+
+    override def toString(`type`: Proficiency): String = `type` match {
+      case Proficiencies.Zero => zero
+      case Proficiencies.Basic => basic
+      case Proficiencies.Novice => novice
+      case Proficiencies.Intermediate => intermediate
+      case Proficiencies.Advanced => advanced
+      case Proficiencies.Expert => expert
+      case o => throw new IllegalArgumentException(s"Invalid proficiency: $o")
+    }
+  }
+
+  object SkillLevel extends TypeResolver[Proficiencies.SkillLevel] {
+    import TypeFields.Proficiency._
+
+    override def withName(name: String): SkillLevel = name match {
+      case `basic` => Proficiencies.Basic
+      case `novice` => Proficiencies.Novice
+      case `intermediate` => Proficiencies.Intermediate
+      case `advanced` => Proficiencies.Advanced
+      case `expert` => Proficiencies.Expert
+      case o => throw new IllegalArgumentException(s"Invalid skill-level: $o")
+    }
+
+    override def toString(`type`: SkillLevel): String = `type` match {
+      case Proficiencies.Basic => basic
+      case Proficiencies.Novice => novice
+      case Proficiencies.Intermediate => intermediate
+      case Proficiencies.Advanced => advanced
+      case Proficiencies.Expert => expert
+      case o => throw new IllegalArgumentException(s"Invalid skill-level: $o")
+    }
+  }
+
+  object SkillRelevance extends TypeResolver[SkillRelevances.SkillRelevance] {
+    import TypeFields.SkillRelevance._
+
+    override def withName(name: String): SkillRelevance = name match {
+      case `needed` => SkillRelevances.Needed
+      case `toBeAcquired` => SkillRelevances.ToBeAcquired
+      case `maintenance` => SkillRelevances.Maintenance
+      case o => throw new IllegalArgumentException(s"Invalid skill-relevance: $o")
+    }
+
+    override def toString(`type`: SkillRelevance): String = `type` match {
+      case SkillRelevances.Needed => needed
+      case SkillRelevances.ToBeAcquired => toBeAcquired
+      case SkillRelevances.Maintenance => maintenance
+      case o => throw new IllegalArgumentException(s"Invalid skill-relevance: $o")
     }
   }
 }

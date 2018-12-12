@@ -16,6 +16,27 @@ object SampleData {
   private val scheduledDateTime = LocalDateTime.of(2018, 12, 3, 17, 16, 20)
 
   object domain {
+    val skillCategory = SkillCategory(
+      uuid = UUID.randomUUID,
+      name = "Functional Programming",
+      categoryId = UUID.randomUUID
+    )
+
+    val skill = Skill(
+      uuid = UUID.randomUUID,
+      name = "Cats",
+      categoryId = UUID.randomUUID,
+      proficiency = Proficiencies.Intermediate,
+      practisedHours = 500L,
+      lastApplied = Some(LocalDateTime.now)
+    )
+
+    val associatedSkill = AssociatedSkill(
+      skillId = UUID.randomUUID,
+      relevance = SkillRelevances.Maintenance,
+      level = Proficiencies.Intermediate
+    )
+
     val backlogItemCreation = CreateBacklogItem(
       summary = "I need to get my shit together",
       description = "I need to get my shit together",
@@ -100,6 +121,7 @@ object SampleData {
       backlogItems = Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
+      associatedSkills = associatedSkill :: Nil,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved
     )
@@ -109,6 +131,7 @@ object SampleData {
       backlogItems = Some(Nil),
       summary = Some("Learn to play an instrument"),
       description = Some("Learn to play the piano, the guitar, and the saxophone"),
+      associatedSkills = Some(associatedSkill :: Nil),
       graduation = Some(GraduationTypes.Abandoned),
       status = Some(GoalStatuses.Employed)
     )
@@ -119,6 +142,7 @@ object SampleData {
       backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
+      associatedSkills = associatedSkill :: Nil,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved,
       createdOn = LocalDateTime.now,
@@ -129,6 +153,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
+      associatedSkills = associatedSkill :: Nil,
       performance = ThreadPerformances.Improving
     )
 
@@ -136,6 +161,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Sleep"),
       description = Some("Sleep for 8 hours"),
+      associatedSkills = Some(associatedSkill :: Nil),
       performance = Some(ThreadPerformances.OnTrack)
     )
 
@@ -144,6 +170,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
+      associatedSkills = associatedSkill :: Nil,
       performance = ThreadPerformances.OnTrack,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
@@ -154,6 +181,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
+      associatedSkills = associatedSkill :: Nil,
       `type` = WeaveTypes.PDR,
       status = Statuses.Planned
     )
@@ -162,6 +190,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Apply your new-found Go knowledge"),
       description = Some("Create a snuffleupagus"),
+      associatedSkills = Some(associatedSkill :: Nil),
       `type` = Some(WeaveTypes.BAU),
       status = Some(Statuses.Complete)
     )
@@ -171,6 +200,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
+      associatedSkills = associatedSkill :: Nil,
       `type` = WeaveTypes.PDR,
       status = Statuses.Planned,
       createdOn = LocalDateTime.now,
@@ -235,12 +265,14 @@ object SampleData {
 
     val todoCreation = CreateTodo(
       parentId = UUID.randomUUID,
-      description = "Create sample data for tests"
+      description = "Create sample data for tests",
+      associatedSkills = associatedSkill :: Nil
     )
 
     val todoUpdate = UpdateTodo(
       parentId = Some(UUID.randomUUID),
       description = Some("Create repository tests"),
+      associatedSkills = Some(associatedSkill :: Nil),
       isDone = Some(true)
     )
 
@@ -248,6 +280,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       parentId = UUID.randomUUID,
       description = "Create sample data for tests",
+      associatedSkills = associatedSkill :: Nil,
       order = 4,
       isDone = true,
       createdOn = LocalDateTime.now,
@@ -259,6 +292,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
+      associatedSkills = associatedSkill :: Nil,
       frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active
     )
@@ -267,6 +301,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Play ping-pong"),
       description = Some("Table tennis"),
+      associatedSkills = Some(associatedSkill :: Nil),
       frequency = Some(HobbyFrequencies.Frequent),
       `type` = Some(HobbyTypes.Active)
     )
@@ -276,6 +311,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
+      associatedSkills = associatedSkill :: Nil,
       frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active,
       createdOn = LocalDateTime.now,
@@ -286,6 +322,7 @@ object SampleData {
     val oneOffCreation = CreateOneOff(
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
+      associatedSkills = associatedSkill :: Nil,
       estimate = 14400000L,
       status = Statuses.Planned
     )
@@ -293,6 +330,7 @@ object SampleData {
     val oneOffUpdate = UpdateOneOff(
       goalId = Some(UUID.randomUUID),
       description = Some("Get doors fixed"),
+      associatedSkills = Some(associatedSkill :: Nil),
       estimate = Some(14400000L),
       status = Some(Statuses.Planned)
     )
@@ -301,6 +339,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
+      associatedSkills = associatedSkill :: Nil,
       estimate = 14400000L,
       order = 5,
       status = Statuses.Planned,
@@ -313,6 +352,7 @@ object SampleData {
       occursOn = scheduledDateTime,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
+      associatedSkills = associatedSkill :: Nil,
       estimate = 14400000L,
       status = Statuses.Planned
     )
@@ -321,6 +361,7 @@ object SampleData {
       occursOn = Some(scheduledDateTime),
       goalId = Some(UUID.randomUUID),
       description = Some("Get window fixed"),
+      associatedSkills = Some(associatedSkill :: Nil),
       estimate = Some(14400000L),
       status = Some(Statuses.Planned)
     )
@@ -330,6 +371,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
+      associatedSkills = associatedSkill :: Nil,
       estimate = 14400000L,
       status = Statuses.Planned,
       createdOn = LocalDateTime.now,
@@ -390,6 +432,33 @@ object SampleData {
   }
 
   object rest {
+    val skillCategory = SkillCategoryView(
+      uuid = domain.skillCategory.uuid,
+      name = domain.skillCategory.name,
+      categoryId = domain.skillCategory.categoryId
+    )
+
+    val skill = SkillView(
+      uuid = domain.skillCategory.uuid,
+      name = domain.skillCategory.name,
+      categoryId = domain.skillCategory.categoryId,
+      proficiency = Proficiency.toString(domain.skill.proficiency),
+      practisedHours = domain.skill.practisedHours,
+      lastApplied = domain.skill.lastApplied
+    )
+
+    val associatedSkillInsertion = AssociatedSkillInsertion(
+      skillId = domain.associatedSkill.skillId,
+      relevance = SkillRelevance.toString(domain.associatedSkill.relevance),
+      level = SkillLevel.toString(domain.associatedSkill.level)
+    )
+
+    val associatedSkill = AssociatedSkillView(
+      skillId = domain.associatedSkill.skillId,
+      relevance = SkillRelevance.toString(domain.associatedSkill.relevance),
+      level = SkillLevel.toString(domain.associatedSkill.level)
+    )
+
     val backlogItemCreation = BacklogItemCreation(
       summary = domain.backlogItemCreation.summary,
       description = domain.backlogItemCreation.description,
@@ -474,6 +543,7 @@ object SampleData {
       backlogItems = domain.goalCreation.backlogItems,
       summary = domain.goalCreation.summary,
       description = domain.goalCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       graduation = GraduationType.toString(domain.goalCreation.graduation),
       status = GoalStatus.toString(domain.goalCreation.status)
     )
@@ -483,6 +553,7 @@ object SampleData {
       backlogItems = domain.goalUpdate.backlogItems,
       summary = domain.goalUpdate.summary,
       description = domain.goalUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       graduation = domain.goalUpdate.graduation.map(GraduationType.toString),
       status = domain.goalUpdate.status.map(GoalStatus.toString)
     )
@@ -493,6 +564,7 @@ object SampleData {
       backlogItems = domain.goal.backlogItems,
       summary = domain.goal.summary,
       description = domain.goal.description,
+      associatedSkills = associatedSkill :: Nil,
       graduation = GraduationType.toString(domain.goal.graduation),
       status = GoalStatus.toString(domain.goal.status),
       createdOn = domain.goal.createdOn,
@@ -503,6 +575,7 @@ object SampleData {
       goalId = domain.threadCreation.goalId,
       summary = domain.threadCreation.summary,
       description = domain.threadCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       performance = ThreadPerformance.toString(domain.threadCreation.performance)
     )
 
@@ -510,6 +583,7 @@ object SampleData {
       goalId = domain.threadUpdate.goalId,
       summary = domain.threadUpdate.summary,
       description = domain.threadUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       performance = domain.threadUpdate.performance.map(ThreadPerformance.toString)
     )
 
@@ -518,6 +592,7 @@ object SampleData {
       goalId = domain.thread.goalId,
       summary = domain.thread.summary,
       description = domain.thread.description,
+      associatedSkills = associatedSkill :: Nil,
       performance = ThreadPerformance.toString(domain.thread.performance),
       createdOn = domain.thread.createdOn,
       lastModified = domain.thread.lastModified,
@@ -528,6 +603,7 @@ object SampleData {
       goalId = domain.weaveCreation.goalId,
       summary = domain.weaveCreation.summary,
       description = domain.weaveCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       `type` = WeaveType.toString(domain.weaveCreation.`type`),
       status = Status.toString(domain.weaveCreation.status)
     )
@@ -536,6 +612,7 @@ object SampleData {
       goalId = domain.weaveUpdate.goalId,
       summary = domain.weaveUpdate.summary,
       description = domain.weaveUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       `type` = domain.weaveUpdate.`type`.map(WeaveType.toString),
       status = domain.weaveUpdate.status.map(Status.toString)
     )
@@ -545,6 +622,7 @@ object SampleData {
       goalId = domain.weave.goalId,
       summary = domain.weave.summary,
       description = domain.weave.description,
+      associatedSkills = associatedSkill :: Nil,
       `type` = WeaveType.toString(domain.weave.`type`),
       status = Status.toString(domain.weave.status),
       createdOn = domain.weave.createdOn,
@@ -609,12 +687,14 @@ object SampleData {
 
     val todoCreation = TodoCreation(
       parentId = domain.todoCreation.parentId,
-      description = domain.todoCreation.description
+      description = domain.todoCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil
     )
 
     val todoUpdate = TodoUpdate(
       parentId = domain.todoUpdate.parentId,
       description = domain.todoUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       isDone = domain.todoUpdate.isDone
     )
 
@@ -622,6 +702,7 @@ object SampleData {
       uuid = domain.todo.uuid,
       parentId = domain.todo.parentId,
       description = domain.todo.description,
+      associatedSkills = associatedSkill :: Nil,
       order = domain.todo.order,
       isDone = domain.todo.isDone,
       createdOn = domain.todo.createdOn,
@@ -633,6 +714,7 @@ object SampleData {
       goalId = domain.hobbyCreation.goalId,
       summary = domain.hobbyCreation.summary,
       description = domain.hobbyCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       frequency = HobbyFrequency.toString(domain.hobbyCreation.frequency),
       `type` = HobbyType.toString(domain.hobbyCreation.`type`)
     )
@@ -641,6 +723,7 @@ object SampleData {
       goalId = domain.hobbyUpdate.goalId,
       summary = domain.hobbyUpdate.summary,
       description = domain.hobbyUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       frequency = domain.hobbyUpdate.frequency.map(HobbyFrequency.toString),
       `type` = domain.hobbyUpdate.`type`.map(HobbyType.toString)
     )
@@ -650,6 +733,7 @@ object SampleData {
       goalId = domain.hobby.goalId,
       summary = domain.hobby.summary,
       description = domain.hobby.description,
+      associatedSkills = associatedSkill :: Nil,
       frequency = HobbyFrequency.toString(domain.hobby.frequency),
       `type` = HobbyType.toString(domain.hobby.`type`),
       createdOn = domain.hobby.createdOn,
@@ -660,6 +744,7 @@ object SampleData {
     val oneOffCreation = OneOffCreation(
       goalId = domain.oneOffCreation.goalId,
       description = domain.oneOffCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       estimate = domain.oneOffCreation.estimate,
       status = Status.toString(domain.oneOffCreation.status)
     )
@@ -667,6 +752,7 @@ object SampleData {
     val oneOffUpdate = OneOffUpdate(
       goalId = domain.oneOffUpdate.goalId,
       description = domain.oneOffUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       estimate = domain.oneOffUpdate.estimate,
       status = domain.oneOffUpdate.status.map(Status.toString)
     )
@@ -675,6 +761,7 @@ object SampleData {
       uuid = domain.oneOff.uuid,
       goalId = domain.oneOff.goalId,
       description = domain.oneOff.description,
+      associatedSkills = associatedSkill :: Nil,
       estimate = domain.oneOff.estimate,
       order = 5,
       status = Status.toString(domain.oneOff.status),
@@ -687,6 +774,7 @@ object SampleData {
       occursOn = domain.scheduledOneOffCreation.occursOn,
       goalId = domain.scheduledOneOffCreation.goalId,
       description = domain.scheduledOneOffCreation.description,
+      associatedSkills = associatedSkillInsertion :: Nil,
       estimate = domain.scheduledOneOffCreation.estimate,
       status = Status.toString(domain.scheduledOneOffCreation.status)
     )
@@ -695,6 +783,7 @@ object SampleData {
       occursOn = domain.scheduledOneOffUpdate.occursOn,
       goalId = domain.scheduledOneOffUpdate.goalId,
       description = domain.scheduledOneOffUpdate.description,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
       estimate = domain.scheduledOneOffUpdate.estimate,
       status = domain.scheduledOneOffUpdate.status.map(Status.toString)
     )
@@ -704,6 +793,7 @@ object SampleData {
       occursOn = domain.scheduledOneOff.occursOn,
       goalId = domain.scheduledOneOff.goalId,
       description = domain.scheduledOneOff.description,
+      associatedSkills = associatedSkill :: Nil,
       estimate = domain.scheduledOneOff.estimate,
       status = Status.toString(domain.scheduledOneOff.status),
       createdOn = domain.scheduledOneOff.createdOn,

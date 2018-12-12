@@ -213,8 +213,10 @@ create table skill_category (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
   name VARCHAR(256) NOT NULL,
+  category_id BIGINT NOT NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY (uuid)
+  UNIQUE KEY (uuid),
+  CONSTRAINT category_fk1 FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table skill (
@@ -227,7 +229,7 @@ create table skill (
   last_applied TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid),
-  CONSTRAINT category_fk FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT category_fk2 FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table goal_skill (

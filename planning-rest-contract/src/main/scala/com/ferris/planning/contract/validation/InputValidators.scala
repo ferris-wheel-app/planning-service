@@ -20,6 +20,8 @@ object InputValidators extends InputValidation {
   private val TiersField = "tiers"
   private val EstimateField = "estimate"
   private val ProficiencyField = "proficiency"
+  private val SkillLevelField = "level"
+  private val SkillRelevanceField = "relevance"
 
   private val MaxGoalBacklogItemsSize = 10
   private val MaxTierSize = 10
@@ -131,6 +133,11 @@ object InputValidators extends InputValidation {
 
   def checkValidity(skillCreation: SkillCreation): Unit = {
     checkField(Proficiency.values.contains(skillCreation.proficiency), ProficiencyField)
+  }
+
+  def checkValidity(skillAssociation: AssociatedSkillInsertion): Unit = {
+    checkField(SkillRelevance.values.contains(skillAssociation.relevance), SkillRelevanceField)
+    checkField(SkillLevel.values.contains(skillAssociation.level), SkillLevelField)
   }
 
   private def checkEstimate(estimate: Long): Unit = {
