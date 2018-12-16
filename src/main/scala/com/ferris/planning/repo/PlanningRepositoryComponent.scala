@@ -195,43 +195,71 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
       }
 
-      val action = insertGoalAction(creation).zip(getBacklogItemsAction(creation.backlogItems)).flatMap { case ((goal, backlogItems)) =>
-        insertGoalBacklogItemsAction(goal.id, backlogItems.map(_.id)).andThen(DBIO.successful(goal).zip(DBIO.successful(backlogItems)))
-      }.transactionally
-      db.run(action) map (row => row.asGoal)
+      val action = for {
+        goal <- insertGoalAction(creation)
+        backlogItems <- getBacklogItemsAction(creation.backlogItems)
+        _ <- insertGoalBacklogItemsAction(goal.id, backlogItems.map(_.id))
+        goalSkills <- insertGoalSkillsAction(goal.id, creation.associatedSkills)
+      } yield {
+        (goal, backlogItems, goalSkills.zip(creation.associatedSkills).map {
+          case (goalSkill, associatedSkill) => (goalSkill, associatedSkill.skillId)
+        }).asGoal
+      }
+      db.run(action)
     }
 
     override def createThread(creation: CreateThread): Future[Thread] = {
-      val row = ThreadRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        goalId = creation.goalId,
-        summary = creation.summary,
-        description = creation.description,
-        performance = creation.performance.dbValue,
-        createdOn = timer.timestampOfNow,
-        lastModified = None,
-        lastPerformed = None
-      )
-      val action = (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
-      db.run(action) map (row => row.asThread)
+      def insertThreadAction(creation: CreateThread): DBIO[ThreadRow] = {
+        val row = ThreadRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          performance = creation.performance.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
+      }
+
+      val action = for {
+        thread <- insertThreadAction(creation)
+        threadSkills <- insertThreadSkillsAction(thread.id, creation.associatedSkills)
+      } yield {
+        (thread, threadSkills.zip(creation.associatedSkills).map {
+          case (threadSkill, associatedSkill) => (threadSkill, associatedSkill.skillId)
+        }).asThread
+      }
+      db.run(action)
     }
 
     override def createWeave(creation: CreateWeave): Future[Weave] = {
-      val row = WeaveRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        goalId = creation.goalId,
-        summary = creation.summary,
-        description = creation.description,
-        status = creation.status.dbValue,
-        `type` = creation.`type`.dbValue,
-        createdOn = timer.timestampOfNow,
-        lastModified = None,
-        lastPerformed = None
-      )
-      val action = (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
-      db.run(action) map (row => row.asWeave)
+      def insertWeaveAction(creation: CreateWeave): DBIO[WeaveRow] = {
+        val row = WeaveRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          status = creation.status.dbValue,
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
+      }
+      val action = for {
+        weave <- insertWeaveAction(creation)
+        weaveSkills <- insertWeaveSkillsAction(weave.id, creation.associatedSkills)
+      } yield {
+        (weave, weaveSkills.zip(creation.associatedSkills).map {
+          case (weaveSkill, associatedSkill) => (weaveSkill, associatedSkill.skillId)
+        }).asWeave
+      }
+      db.run(action)
     }
 
     override def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = {
@@ -274,7 +302,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createTodo(creation: CreateTodo): Future[Todo] = {
-      val action = todosByParentId(creation.parentId).result.flatMap { existingTodos =>
+      def insertTodoAction(creation: CreateTodo, existingTodos: Seq[TodoRow]): DBIO[TodoRow] = {
         val row = TodoRow(
           id = 0L,
           uuid = UUID.randomUUID,
@@ -287,29 +315,48 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           lastPerformed = None
         )
         (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
-      }.transactionally
-      db.run(action) map (row => row.asTodo)
+      }
+      val action = for {
+        existingTodos <- todosByParentId(creation.parentId).result
+        todo <- insertTodoAction(creation, existingTodos)
+        todoSkills <- insertTodoSkillsAction(todo.id, creation.associatedSkills)
+      } yield {
+        (todo, todoSkills.zip(creation.associatedSkills).map {
+          case (todoSkill, associatedSkill) => (todoSkill, associatedSkill.skillId)
+        }).asTodo
+      }
+      db.run(action)
     }
 
     override def createHobby(creation: CreateHobby): Future[Hobby] = {
-      val row = HobbyRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        goalId = creation.goalId,
-        summary = creation.summary,
-        description = creation.description,
-        frequency = creation.frequency.dbValue,
-        `type` = creation.`type`.dbValue,
-        createdOn = timer.timestampOfNow,
-        lastModified = None,
-        lastPerformed = None
-      )
-      val action = (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
-      db.run(action) map (row => row.asHobby)
+      def insertHobbyAction(creation: CreateHobby): DBIO[HobbyRow] = {
+        val row = HobbyRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          frequency = creation.frequency.dbValue,
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
+      }
+      val action = for {
+        hobby <- insertHobbyAction(creation)
+        hobbySkills <- insertHobbySkillsAction(hobby.id, creation.associatedSkills)
+      } yield {
+        (hobby, hobbySkills.zip(creation.associatedSkills).map {
+          case (hobbySkill, associatedSkill) => (hobbySkill, associatedSkill.skillId)
+        }).asHobby
+      }
+      db.run(action)
     }
 
     override def createOneOff(creation: CreateOneOff): Future[OneOff] = {
-      val action = OneOffTable.result.flatMap { existingOneOffs =>
+      def insertOneOffAction(creation: CreateOneOff, existingOneOffs: Seq[OneOffRow]): DBIO[OneOffRow] = {
         val row = OneOffRow(
           id = 0L,
           uuid = UUID.randomUUID,
@@ -323,25 +370,44 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           lastPerformed = None
         )
         (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
-      }.transactionally
-      db.run(action) map (row => row.asOneOff)
+      }
+      val action = for {
+        existingOneOffs <- OneOffTable.result
+        oneOff <- insertOneOffAction(creation, existingOneOffs)
+        oneOffSkills <- insertOneOffSkillsAction(oneOff.id, creation.associatedSkills)
+      } yield {
+        (oneOff, oneOffSkills.zip(creation.associatedSkills).map {
+          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
+        }).asOneOff
+      }
+      db.run(action)
     }
 
     override def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff] = {
-      val row = ScheduledOneOffRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        occursOn = creation.occursOn.toTimestamp,
-        goalId = creation.goalId,
-        description = creation.description,
-        estimate = creation.estimate,
-        status = creation.status.dbValue,
-        createdOn = timer.timestampOfNow,
-        lastModified = None,
-        lastPerformed = None
-      )
-      val action = (ScheduledOneOffTable returning ScheduledOneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
-      db.run(action) map (row => row.asScheduledOneOff)
+      def insertScheduledOneOffAction(creation: CreateScheduledOneOff): DBIO[ScheduledOneOffRow] = {
+        val row = ScheduledOneOffRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          occursOn = creation.occursOn.toTimestamp,
+          goalId = creation.goalId,
+          description = creation.description,
+          estimate = creation.estimate,
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (ScheduledOneOffTable returning ScheduledOneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      }
+      val action = for {
+        oneOff <- insertScheduledOneOffAction(creation)
+        oneOffSkills <- insertScheduledOneOffSkillsAction(oneOff.id, creation.associatedSkills)
+      } yield {
+        (oneOff, oneOffSkills.zip(creation.associatedSkills).map {
+          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
+        }).asScheduledOneOff
+      }
+      db.run(action)
     }
 
     override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance] = {
@@ -1011,6 +1077,111 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       (GoalBacklogItemTable returning GoalBacklogItemTable.map(_.id) into ((goalAndItem, id) => goalAndItem.copy(id = id))) ++= rows
     }
 
+    private def insertGoalSkillsAction(goalId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[GoalSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        goalSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          GoalSkillRow(
+            goalId = goalId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- GoalSkillTable ++= goalSkills
+      } yield goalSkills
+    }
+
+    private def insertThreadSkillsAction(threadId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[ThreadSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        threadSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          ThreadSkillRow(
+            threadId = threadId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- ThreadSkillTable ++= threadSkills
+      } yield threadSkills
+    }
+
+    private def insertWeaveSkillsAction(weaveId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[WeaveSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        weaveSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          WeaveSkillRow(
+            weaveId = weaveId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- WeaveSkillTable ++= weaveSkills
+      } yield weaveSkills
+    }
+
+    private def insertTodoSkillsAction(todoId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[TodoSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        todoSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          TodoSkillRow(
+            todoId = todoId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- TodoSkillTable ++= todoSkills
+      } yield todoSkills
+    }
+
+    private def insertHobbySkillsAction(hobbyId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[HobbySkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        hobbySkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          HobbySkillRow(
+            hobbyId = hobbyId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- HobbySkillTable ++= hobbySkills
+      } yield hobbySkills
+    }
+
+    private def insertOneOffSkillsAction(oneOffId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[OneOffSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        oneOffSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          OneOffSkillRow(
+            oneOffId = oneOffId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- OneOffSkillTable ++= oneOffSkills
+      } yield oneOffSkills
+    }
+
+    private def insertScheduledOneOffSkillsAction(oneOffId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[ScheduledOneOffSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        oneOffSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          ScheduledOneOffSkillRow(
+            scheduledOneOffId = oneOffId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- ScheduledOneOffSkillTable ++= oneOffSkills
+      } yield oneOffSkills
+    }
+
     private def getBacklogItemsAction(uuids: Seq[UUID]) = {
       backlogItemsByUuid(uuids).result
     }
@@ -1069,6 +1240,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def getScheduledOneOffAction(uuid: UUID) = {
       scheduledOneOffByUuid(uuid).result.headOption
+    }
+
+    private def getSkillsAction(uuids: Seq[UUID]) = {
+      skillsByUuid(uuids).result
     }
 
     private def getPyramidOfImportanceAction = {
@@ -1174,6 +1349,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def scheduledOneOffByUuid(uuid: UUID) = {
       ScheduledOneOffTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def skillsByUuid(uuids: Seq[UUID]) = {
+      SkillTable.filter(_.uuid inSet uuids.map(_.toString))
     }
 
     private def getUpdateTimes(contentUpdate: Seq[Option[Any]], statusUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {

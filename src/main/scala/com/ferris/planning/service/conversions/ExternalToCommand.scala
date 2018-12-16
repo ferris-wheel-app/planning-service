@@ -2,6 +2,7 @@ package com.ferris.planning.service.conversions
 
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.contract.resource.Resources.In._
+import com.ferris.planning.model.Model.AssociatedSkill
 
 object ExternalToCommand {
 
@@ -75,6 +76,7 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
+      associatedSkills = goal.associatedSkills.map(_.toCommand),
       status = TypeResolvers.GoalStatus.withName(goal.status),
       graduation = TypeResolvers.GraduationType.withName(goal.graduation)
     )
@@ -86,6 +88,7 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
+      associatedSkills = goal.associatedSkills.map(_.map(_.toCommand)),
       status = goal.status.map(TypeResolvers.GoalStatus.withName),
       graduation = goal.graduation.map(TypeResolvers.GraduationType.withName)
     )
@@ -96,6 +99,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
+      associatedSkills = thread.associatedSkills.map(_.toCommand),
       performance = TypeResolvers.ThreadPerformance.withName(thread.performance)
     )
   }
@@ -105,6 +109,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
+      associatedSkills = thread.associatedSkills.map(_.map(_.toCommand)),
       performance = thread.performance.map(TypeResolvers.ThreadPerformance.withName)
     )
   }
@@ -114,6 +119,7 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
+      associatedSkills = weave.associatedSkills.map(_.toCommand),
       status = TypeResolvers.Status.withName(weave.status),
       `type` = TypeResolvers.WeaveType.withName(weave.`type`)
     )
@@ -124,6 +130,7 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
+      associatedSkills = weave.associatedSkills.map(_.map(_.toCommand)),
       status = weave.status.map(TypeResolvers.Status.withName),
       `type` = weave.`type`.map(TypeResolvers.WeaveType.withName)
     )
@@ -170,7 +177,8 @@ object ExternalToCommand {
   implicit class TodoCreationConversion(todo: TodoCreation) extends CommandConversion[CreateTodo] {
     override def toCommand = CreateTodo(
       parentId = todo.parentId,
-      description = todo.description
+      description = todo.description,
+      associatedSkills = todo.associatedSkills.map(_.toCommand)
     )
   }
 
@@ -178,6 +186,7 @@ object ExternalToCommand {
     override def toCommand = UpdateTodo(
       parentId = todo.parentId,
       description = todo.description,
+      associatedSkills = todo.associatedSkills.map(_.map(_.toCommand)),
       isDone = todo.isDone
     )
   }
@@ -187,6 +196,7 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
+      associatedSkills = hobby.associatedSkills.map(_.toCommand),
       frequency = TypeResolvers.HobbyFrequency.withName(hobby.frequency),
       `type` = TypeResolvers.HobbyType.withName(hobby.`type`)
     )
@@ -197,6 +207,7 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
+      associatedSkills = hobby.associatedSkills.map(_.map(_.toCommand)),
       frequency = hobby.frequency.map(TypeResolvers.HobbyFrequency.withName),
       `type` = hobby.`type`.map(TypeResolvers.HobbyType.withName)
     )
@@ -206,6 +217,7 @@ object ExternalToCommand {
     override def toCommand = CreateOneOff(
       goalId = oneOff.goalId,
       description = oneOff.description,
+      associatedSkills = oneOff.associatedSkills.map(_.toCommand),
       estimate = oneOff.estimate,
       status = TypeResolvers.Status.withName(oneOff.status)
     )
@@ -215,6 +227,7 @@ object ExternalToCommand {
     override def toCommand = UpdateOneOff(
       goalId = oneOff.goalId,
       description = oneOff.description,
+      associatedSkills = oneOff.associatedSkills.map(_.map(_.toCommand)),
       estimate = oneOff.estimate,
       status = oneOff.status.map(TypeResolvers.Status.withName)
     )
@@ -225,6 +238,7 @@ object ExternalToCommand {
       occursOn = oneOff.occursOn,
       goalId = oneOff.goalId,
       description = oneOff.description,
+      associatedSkills = oneOff.associatedSkills.map(_.toCommand),
       estimate = oneOff.estimate,
       status = TypeResolvers.Status.withName(oneOff.status)
     )
@@ -235,6 +249,7 @@ object ExternalToCommand {
       occursOn = oneOff.occursOn,
       goalId = oneOff.goalId,
       description = oneOff.description,
+      associatedSkills = oneOff.associatedSkills.map(_.map(_.toCommand)),
       estimate = oneOff.estimate,
       status = oneOff.status.map(TypeResolvers.Status.withName)
     )
@@ -249,6 +264,14 @@ object ExternalToCommand {
   implicit class PyramidOfImportanceUpsertConversion(pyramid: PyramidOfImportanceUpsert) extends CommandConversion[UpsertPyramidOfImportance] {
     override def toCommand = UpsertPyramidOfImportance(
       tiers = pyramid.tiers.map(tier => UpsertTier(tier.laserDonuts))
+    )
+  }
+
+  implicit class AssociatedSkillConversion(associatedSkill: AssociatedSkillInsertion) extends CommandConversion[AssociatedSkill] {
+    override def toCommand = AssociatedSkill(
+      skillId = associatedSkill.skillId,
+      relevance = TypeResolvers.SkillRelevance.withName(associatedSkill.relevance),
+      level = TypeResolvers.SkillLevel.withName(associatedSkill.level)
     )
   }
 }

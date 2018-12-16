@@ -64,6 +64,7 @@ object ModelToView {
         backlogItems = goal.backlogItems,
         summary = goal.summary,
         description = goal.description,
+        associatedSkills = goal.associatedSkills.map(_.toView),
         status = TypeResolvers.GoalStatus.toString(goal.status),
         graduation = TypeResolvers.GraduationType.toString(goal.graduation),
         createdOn = goal.createdOn,
@@ -79,6 +80,7 @@ object ModelToView {
         goalId = thread.goalId,
         summary = thread.summary,
         description = thread.description,
+        associatedSkills = thread.associatedSkills.map(_.toView),
         performance = TypeResolvers.ThreadPerformance.toString(thread.performance),
         createdOn = thread.createdOn,
         lastModified = thread.lastModified,
@@ -94,6 +96,7 @@ object ModelToView {
         goalId = weave.goalId,
         summary = weave.summary,
         description = weave.description,
+        associatedSkills = weave.associatedSkills.map(_.toView),
         status = TypeResolvers.Status.toString(weave.status),
         `type` = TypeResolvers.WeaveType.toString(weave.`type`),
         createdOn = weave.createdOn,
@@ -142,6 +145,7 @@ object ModelToView {
         uuid = todo.uuid,
         parentId = todo.parentId,
         description = todo.description,
+        associatedSkills = todo.associatedSkills.map(_.toView),
         order = todo.order,
         isDone = todo.isDone,
         createdOn = todo.createdOn,
@@ -158,6 +162,7 @@ object ModelToView {
         goalId = hobby.goalId,
         summary = hobby.summary,
         description = hobby.description,
+        associatedSkills = hobby.associatedSkills.map(_.toView),
         frequency = TypeResolvers.HobbyFrequency.toString(hobby.frequency),
         `type` = TypeResolvers.HobbyType.toString(hobby.`type`),
         createdOn = hobby.createdOn,
@@ -173,6 +178,7 @@ object ModelToView {
         uuid = oneOff.uuid,
         goalId = oneOff.goalId,
         description = oneOff.description,
+        associatedSkills = oneOff.associatedSkills.map(_.toView),
         estimate = oneOff.estimate,
         order = oneOff.order,
         status = TypeResolvers.Status.toString(oneOff.status),
@@ -190,6 +196,7 @@ object ModelToView {
         occursOn = oneOff.occursOn,
         goalId = oneOff.goalId,
         description = oneOff.description,
+        associatedSkills = oneOff.associatedSkills.map(_.toView),
         estimate = oneOff.estimate,
         status = TypeResolvers.Status.toString(oneOff.status),
         createdOn = oneOff.createdOn,
@@ -203,6 +210,16 @@ object ModelToView {
     def toView: PyramidOfImportanceView = {
       PyramidOfImportanceView(
         tiers = pyramid.tiers.map(tier => TierView(tier.laserDonuts))
+      )
+    }
+  }
+
+  implicit class AssociatedSkillConversion(associatedSkill: AssociatedSkill) {
+    def toView: AssociatedSkillView = {
+      AssociatedSkillView(
+        skillId = associatedSkill.skillId,
+        relevance = TypeResolvers.SkillRelevance.toString(associatedSkill.relevance),
+        level = TypeResolvers.SkillLevel.toString(associatedSkill.level)
       )
     }
   }

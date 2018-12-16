@@ -56,7 +56,7 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow], Seq[(tables.GoalSkillRow, String)])) {
+  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow], Seq[(tables.GoalSkillRow, UUID)])) {
     def asGoal: Goal = rows match {
       case (goal, backlogItems, associatedSkills) =>
         Goal(
@@ -67,7 +67,7 @@ class DomainConversions(val tables: Tables) {
           description = goal.description,
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
-              skillId = UUID.fromString(id),
+              skillId = id,
               relevance = SkillRelevances.withName(skill.relevance),
               level = Proficiencies.skillLevel(skill.level)
             )
@@ -80,7 +80,7 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class ThreadBuilder(val row: (tables.ThreadRow, Seq[(tables.ThreadSkillRow, String)])) {
+  implicit class ThreadBuilder(val row: (tables.ThreadRow, Seq[(tables.ThreadSkillRow, UUID)])) {
     def asThread: Thread = row match {
       case (thread, associatedSkills) =>
         Thread(
@@ -103,7 +103,7 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class WeaveBuilder(val row: (tables.WeaveRow, Seq[(tables.WeaveSkillRow, String)])) {
+  implicit class WeaveBuilder(val row: (tables.WeaveRow, Seq[(tables.WeaveSkillRow, UUID)])) {
     def asWeave: Weave = row match {
       case (weave, associatedSkills) =>
         Weave(
@@ -156,7 +156,7 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class TodoBuilder(val row: (tables.TodoRow, Seq[(tables.TodoSkillRow, String)])) {
+  implicit class TodoBuilder(val row: (tables.TodoRow, Seq[(tables.TodoSkillRow, UUID)])) {
     def asTodo: Todo = row match {
       case (todo, associatedSkills) =>
         Todo(
@@ -179,7 +179,7 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[(tables.TodoSkillRow, String)])) {
+  implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[(tables.HobbySkillRow, UUID)])) {
     def asHobby: Hobby = row match {
       case (hobby, associatedSkills) =>
         Hobby(
@@ -203,7 +203,7 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class OneOffBuilder(val row: (tables.OneOffRow, Seq[(tables.TodoSkillRow, String)])) {
+  implicit class OneOffBuilder(val row: (tables.OneOffRow, Seq[(tables.OneOffSkillRow, UUID)])) {
     def asOneOff: OneOff = row match {
       case (oneOff, associatedSkills) =>
         OneOff(
@@ -227,7 +227,7 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class ScheduledOneOffBuilder(val row: (tables.ScheduledOneOffRow, Seq[(tables.TodoSkillRow, String)])) {
+  implicit class ScheduledOneOffBuilder(val row: (tables.ScheduledOneOffRow, Seq[(tables.ScheduledOneOffSkillRow, UUID)])) {
     def asScheduledOneOff: ScheduledOneOff = row match {
       case (scheduledOneOff, associatedSkills) =>
         ScheduledOneOff(
