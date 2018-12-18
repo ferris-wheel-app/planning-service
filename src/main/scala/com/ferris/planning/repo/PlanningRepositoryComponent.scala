@@ -4,6 +4,7 @@ import java.sql.{Date, Timestamp}
 import java.time.LocalDate
 import java.util.UUID
 
+import cats.data._
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
 import com.ferris.planning.db.conversions.DomainConversions
@@ -13,6 +14,9 @@ import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
+import com.rms.miu.slickcats.DBIOInstances._
+import slick.dbio.Effect.Read
+import slick.sql.FixedSqlStreamingAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -488,22 +492,28 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
             UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
       }
 
-      val action = getGoalAction(uuid).flatMap { maybeObj =>
-        maybeObj map { case (old, _) =>
-          updateGoal(uuid, update, old)
-            .flatMap { _ =>
-              update.backlogItems match {
-                case Some(backlogItems) =>
-                  for {
-                    _ <- GoalBacklogItemTable.filter(_.goalId === old.id).delete
-                    newBacklogItems <- getBacklogItemsAction(backlogItems)
-                    result <- insertGoalBacklogItemsAction(old.id, newBacklogItems.map(_.id)).andThen(getGoalAction(uuid).map(_.head))
-                  } yield result
-                case None => getGoalAction(uuid).map(_.head)
-              }
-            }
-        } getOrElse DBIO.failed(GoalNotFoundException())
-      }.transactionally
+      def updateBacklogItems(goal: GoalRow) = update.backlogItems match {
+        case Some(backlogItems) =>
+          for {
+            _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
+            newBacklogItems <- getBacklogItemsAction(backlogItems)
+            result <- insertGoalBacklogItemsAction(goal.id, newBacklogItems.map(_.id))
+          } yield result
+        case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
+      }
+
+      val action = for {
+        goalAndBacklog <- EitherT.fromOptionF(getGoalAction(uuid), GoalNotFoundException())
+        (old, _) = goalAndBacklog
+        _ <- updateGoal(uuid, update, old)
+        _ <- updateBacklogItems(old)
+        updatedGoal <- getGoalAction(uuid).map(_.head)
+      } yield {
+        (updatedGoal, backlogItems, goalSkills.zip(creation.associatedSkills).map {
+          case (goalSkill, associatedSkill) => (goalSkill, associatedSkill.skillId)
+        }).asGoal
+      }
+
       db.run(action).map(row => row.asGoal)
     }
 
@@ -1202,8 +1212,23 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       themeByUuid(uuid).result.headOption
     }
 
-    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow])]] = {
-      goalsWithBacklogItems.result.map(groupByGoal)
+    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow], Seq[(GoalSkillRow, UUID)])]] = {
+//      goalsWithBacklogItems.result.map(groupByGoal)
+
+//      GoalTable
+//        .joinLeft(GoalBacklogItemTable)
+//        .on(_.id === _.goalId)
+//        .joinLeft(BacklogItemTable)
+//        .on { case ((_, goalBacklogItem), backlogItem) => goalBacklogItem.map(_.backlogItemId).getOrElse(-1L) === backlogItem.id }
+//        .map { case ((goal, _), backlogItem) => (goal, backlogItem) }
+
+      val result: DBIO[Seq[(GoalRow, BacklogItemRow, SkillRow)]] = (for {
+        goal <- GoalTable
+        backlogLink <- GoalBacklogItemTable if backlogLink.goalId === goal.id
+        backlogItem <- BacklogItemTable if backlogItem.id == backlogLink.backlogItemId
+        skillLink <- GoalSkillTable if skillLink.goalId === goal.id
+        skill <- SkillTable if skill.id === skillLink.skillId
+      } yield (goal, backlogItem, skill)).result.map(groupByGoal)
     }
 
     private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow])]] = {
@@ -1291,8 +1316,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         .map { case ((goal, _), backlogItem) => (goal, backlogItem) }
     }
 
-    private def groupByGoal(goalBacklogItems: Seq[(GoalRow, Option[BacklogItemRow])]): Seq[(GoalRow, Seq[BacklogItemRow])] = {
-      goalBacklogItems.groupBy { case (goal, _) => goal }.map { case (goal, pairs) => (goal, pairs.flatMap(_._2)) }.toSeq
+    private def groupByGoal(goalsWithExtras: Seq[(GoalRow, BacklogItemRow, SkillRow)]): Seq[(GoalRow, Seq[BacklogItemRow], Seq[SkillRow])] = {
+      goalsWithExtras.groupBy { case (goal, _, _) => goal }.map { case (goal, goalBacklogItems, goalSkills) => (goal, goalBacklogItems.flatMap(_._2), goalBacklogItems.flatMap(_._3)) }.toSeq
     }
 
     private def threadByUuid(uuid: UUID) = {
