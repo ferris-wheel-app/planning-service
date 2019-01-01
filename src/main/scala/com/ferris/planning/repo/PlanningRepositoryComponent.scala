@@ -16,7 +16,9 @@ import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateEx
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
 import com.rms.miu.slickcats.DBIOInstances._
+import slick.dbio.Effect.Write
 import slick.lifted.QueryBase
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -484,56 +486,77 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal] = {
-//      def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow) = {
-//        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.status,
-//          goal.graduation, goal.lastModified))
-//          .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
-//            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-//            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
-//      }
-//
-//      def updateBacklogItems(goal: GoalRow) = update.backlogItems match {
-//        case Some(backlogItems) =>
-//          for {
-//            _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
-//            newBacklogItems <- getBacklogItemsAction(backlogItems)
-//            result <- insertGoalBacklogItemsAction(goal.id, newBacklogItems.map(_.id))
-//          } yield result
-//        case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
-//      }
-//
-//      val action = for {
-//        goalAndBacklog <- EitherT.fromOptionF(getGoalAction(uuid), GoalNotFoundException())
-//        (old, _) = goalAndBacklog
-//        _ <- updateGoal(uuid, update, old)
-//        _ <- updateBacklogItems(old)
-//        updatedGoal <- getGoalAction(uuid).map(_.head)
-//      } yield {
-//        (updatedGoal, backlogItems, goalSkills.zip(creation.associatedSkills).map {
-//          case (goalSkill, associatedSkill) => (goalSkill, associatedSkill.skillId)
-//        }).asGoal
-//      }
-//
-//      db.run(action).map(row => row.asGoal)
-      ???
+      def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow): DBIO[Int] = {
+        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.status,
+          goal.graduation, goal.lastModified))
+          .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
+      }
+
+      def updateBacklogItems(goal: GoalRow) = update.backlogItems match {
+        case Some(backlogItems) =>
+          for {
+            _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
+            newBacklogItems <- getBacklogItemsAction(backlogItems)
+            result <- insertGoalBacklogItemsAction(goal.id, newBacklogItems.map(_.id))
+          } yield result
+        case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
+      }
+
+      def updateAssociatedSkills(goal: GoalRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
+            result <- insertGoalSkillsAction(goal.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(GoalSkillRow, UUID)])
+      }
+
+      val action = (for {
+        goalAndBacklog <- getGoalAction(uuid).map(_.getOrElse(throw GoalNotFoundException()))
+        (old, _, _) = goalAndBacklog
+        _ <- updateGoal(uuid, update, old)
+        _ <- updateBacklogItems(old)
+        _ <- updateAssociatedSkills(old)
+        updatedGoal <- getGoalAction(uuid).map(_.head)
+      } yield updatedGoal.asGoal).transactionally
+
+      db.run(action)
     }
 
     override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.goalId :: update.summary :: update.description :: Nil,
-        statusUpdate = update.performance :: Nil
-      )
-      val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.performance,
-        thread.lastModified, thread.lastPerformed))
-      val action = getThreadAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.performance, old.performance),
-            lastModified, lastPerformed)
-            .andThen(getThreadAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(ThreadNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asThread)
+      def updateThread(uuid: UUID, update: UpdateThread, old: ThreadRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.goalId :: update.summary :: update.description :: Nil,
+          statusUpdate = update.performance :: Nil
+        )
+        val query = threadByUuid(uuid).map(thread => (thread.goalId, thread.summary, thread.description, thread.performance,
+          thread.lastModified, thread.lastPerformed))
+        query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+          update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.performance, old.performance),
+          lastModified, lastPerformed)
+          .andThen(getThreadAction(uuid).map(_.head))
+      }
+
+      def updateAssociatedSkills(thread: ThreadRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- ThreadSkillTable.filter(_.threadId === thread.id).delete
+            result <- insertThreadSkillsAction(thread.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(ThreadSkillRow, UUID)])
+      }
+
+      val action = (for {
+        threadAndSkills <- getThreadAction(uuid).map(_.getOrElse(throw ThreadNotFoundException()))
+        (old, _) = threadAndSkills
+        _ <- updateThread(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedThread <- getThreadAction(uuid).map(_.head)
+      } yield updatedThread.asThread).transactionally
+
+      db.run(action)
     }
 
     override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave] = {
@@ -1222,7 +1245,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getThreadAction(uuid: UUID) = {
-      threadByUuid(uuid).result.headOption
+      threadWithExtrasByUuid(uuid).map(groupByThread(_).headOption)
     }
 
     private def getWeaveAction(uuid: UUID) = {
@@ -1329,6 +1352,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def threadsByParentId(goalId: UUID) = {
       ThreadTable.filter(_.goalId === goalId.toString)
+    }
+
+    private def threadWithExtrasByUuid(uuid: UUID) = {
+      threadsWithExtras.map(_.filter { case (thread, _) => thread.uuid == uuid.toString })
+    }
+
+    private def threadsWithExtras = {
+      ThreadTable
+        .joinLeft(ThreadSkillTable)
+        .on(_.id === _.threadId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((thread, skillLink), skill) => (thread, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (thread, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (thread, skillTuple)
+        }
+      }
+    }
+
+    private def groupByThread(threadsWithExtras: Seq[(ThreadRow, Option[(ThreadSkillRow, SkillRow)])]): Seq[(ThreadRow, Seq[(ThreadSkillRow, UUID)])] = {
+      threadsWithExtras.groupBy { case (goal, _) => goal }
+        .map { case (goal, links) =>
+          (goal, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def weaveByUuid(uuid: UUID) = {
