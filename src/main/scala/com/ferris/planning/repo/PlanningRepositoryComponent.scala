@@ -323,7 +323,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
       }
       val action = for {
-        existingTodos <- todosByParentId(creation.parentId).result
+        existingTodos <- getTodosByParent(creation.parentId).map(_.map(_._1))
         todo <- insertTodoAction(creation, existingTodos)
         todoSkills <- insertTodoSkillsAction(todo.id, creation.associatedSkills)
       } yield {
@@ -560,21 +560,37 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateWeave(uuid: UUID, update: UpdateWeave): Future[Weave] = {
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.goalId :: update.summary :: update.description :: update.`type` :: Nil,
-        statusUpdate = update.status :: Nil
-      )
-      val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`,
-        weave.lastModified, weave.lastPerformed))
-      val action = getWeaveAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
-            .andThen(getWeaveAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(WeaveNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asWeave)
+      def updateWeave(uuid: UUID, update: UpdateWeave, old: WeaveRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.goalId :: update.summary :: update.description :: update.`type` :: Nil,
+          statusUpdate = update.status :: Nil
+        )
+        val query = weaveByUuid(uuid).map(weave => (weave.goalId, weave.summary, weave.description, weave.status, weave.`type`,
+          weave.lastModified, weave.lastPerformed))
+        query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+          update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+          UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
+          .andThen(getWeaveAction(uuid).map(_.head))
+      }
+
+      def updateAssociatedSkills(weave: WeaveRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- WeaveSkillTable.filter(_.weaveId === weave.id).delete
+            result <- insertWeaveSkillsAction(weave.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(WeaveSkillRow, UUID)])
+      }
+
+      val action = (for {
+        weaveAndSkills <- getWeaveAction(uuid).map(_.getOrElse(throw WeaveNotFoundException()))
+        (old, _) = weaveAndSkills
+        _ <- updateWeave(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedWeave <- getWeaveAction(uuid).map(_.head)
+      } yield updatedWeave.asWeave).transactionally
+
+      db.run(action)
     }
 
     override def updateLaserDonut(uuid: UUID, update: UpdateLaserDonut): Future[LaserDonut] = {
@@ -648,43 +664,56 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
+      def updateTodo(uuid: UUID, update: UpdateTodo, old: TodoRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.parentId :: update.description :: Nil,
+          statusUpdate = update.isDone :: Nil
+        )
+        val query = todoByUuid(uuid).map(todo => (todo.parentId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
+        for {
+          _ <- query.update(UpdateId.keepOrReplace(update.parentId, old.parentId), update.description.getOrElse(old.description),
+            UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
+          updatedTodo <- getTodoAction(uuid).map(_.head)
+          _ <- updatePortionStatus(UUID.fromString(updatedTodo._1.parentId))
+        } yield updatedTodo
+      }
+
       def updatePortionStatus(uuid: UUID) = {
         for {
-          todos <- todosByParentId(uuid).result
+          todos <- getTodosByParent(uuid)
           update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
-            .update(getOutcomeSummary(todos.map(_.isDone: Boolean)).dbValue).map(_ > 0)
+            .update(getOutcomeSummary(todos.map(_._1.isDone: Boolean)).dbValue).map(_ > 0)
         } yield update
       }
 
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.parentId :: update.description :: Nil,
-        statusUpdate = update.isDone :: Nil
-      )
-      val query = todoByUuid(uuid).map(todo => (todo.parentId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
-      val action = getTodoAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
+      def updateAssociatedSkills(todo: TodoRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
           for {
-            _ <- query.update(UpdateId.keepOrReplace(update.parentId, old.parentId), update.description.getOrElse(old.description),
-              UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
-            updatedTodo <- getTodoAction(uuid).map(_.head)
-            _ <- updatePortionStatus(UUID.fromString(updatedTodo.parentId))
-          } yield updatedTodo
-        } getOrElse DBIO.failed(TodoNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asTodo)
+            _ <- TodoSkillTable.filter(_.todoId === todo.id).delete
+            result <- insertTodoSkillsAction(todo.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(TodoSkillRow, UUID)])
+      }
+
+      val action = (for {
+        todoAndSkills <- getTodoAction(uuid).map(_.getOrElse(throw TodoNotFoundException()))
+        (old, _) = todoAndSkills
+        _ <- updateTodo(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedTodo <- getTodoAction(uuid).map(_.head)
+      } yield updatedTodo.asTodo).transactionally
+
+      db.run(action)
     }
 
     override def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]] = {
-      def getTodosAction(uuids: Seq[String]) = {
-        TodoTable.filter(_.uuid inSet uuids).sortBy(_.order).result
-      }
-      val action = todosByParentId(parentId).result.flatMap { todos =>
+      val action = getTodosByParent(parentId).flatMap { todos =>
         if (todos.size <= update.reordered.size) {
-          val todoIds = todos.map(_.uuid)
+          val todoIds = todos.map(_._1.uuid).map(UUID.fromString)
           update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
               todoByUuid(uuid).map(_.order).update(index + 1)
-            }).andThen(getTodosAction(todoIds))
+            }).andThen(getTodosAction(todoIds).map(_.map(_.asTodo)))
             case outliers => DBIO.failed(
               InvalidTodosUpdateException(s"the todos (${outliers.mkString(", ")}) do not belong to the portion $parentId")
             )
@@ -694,53 +723,82 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           InvalidTodosUpdateException("the length of the update list should be the same as the number of todos for the portion")
         )
       }.transactionally
-      db.run(action).map(_.map(_.asTodo))
+      db.run(action)
     }
 
     override def updateHobby(uuid: UUID, update: UpdateHobby): Future[Hobby] = {
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.goalId :: update.summary :: update.description :: update.frequency :: update.`type` :: Nil,
-        statusUpdate = Nil
-      )
-      val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency,
-        hobby.`type`, hobby.lastModified, hobby.lastPerformed))
-      val action = getHobbyAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
-            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.frequency, old.frequency),
-            UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
-            .andThen(getHobbyAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(HobbyNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asHobby)
+      def updateHobby(uuid: UUID, update: UpdateHobby, old: HobbyRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.goalId :: update.summary :: update.description :: update.frequency :: update.`type` :: Nil,
+          statusUpdate = Nil
+        )
+        val query = hobbyByUuid(uuid).map(hobby => (hobby.goalId, hobby.summary, hobby.description, hobby.frequency,
+          hobby.`type`, hobby.lastModified, hobby.lastPerformed))
+        query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.summary.getOrElse(old.summary),
+          update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.frequency, old.frequency),
+          UpdateTypeEnum.keepOrReplace(update.`type`, old.`type`), lastModified, lastPerformed)
+          .andThen(getHobbyAction(uuid).map(_.head))
+      }
+
+      def updateAssociatedSkills(hobby: HobbyRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- HobbySkillTable.filter(_.hobbyId === hobby.id).delete
+            result <- insertHobbySkillsAction(hobby.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(HobbySkillRow, UUID)])
+      }
+
+      val action = (for {
+        hobbyAndSkills <- getHobbyAction(uuid).map(_.getOrElse(throw HobbyNotFoundException()))
+        (old, _) = hobbyAndSkills
+        _ <- updateHobby(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedHobby <- getHobbyAction(uuid).map(_.head)
+      } yield updatedHobby.asHobby).transactionally
+
+      db.run(action)
     }
 
     override def updateOneOff(uuid: UUID, update: UpdateOneOff): Future[OneOff] = {
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.goalId :: update.description :: update.estimate :: update.status :: Nil,
-        statusUpdate = Nil
-      )
-      val query = oneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.description, oneOff.estimate, oneOff.status,
-        oneOff.lastModified, oneOff.lastPerformed))
-      val action = getOneOffAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.description.getOrElse(old.description),
-            update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
-            .andThen(getOneOffAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(OneOffNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asOneOff)
+      def updateOneOff(uuid: UUID, update: UpdateOneOff, old: OneOffRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.goalId :: update.description :: update.estimate :: update.status :: Nil,
+          statusUpdate = Nil
+        )
+        val query = oneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.description, oneOff.estimate, oneOff.status,
+          oneOff.lastModified, oneOff.lastPerformed))
+        query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), update.description.getOrElse(old.description),
+          update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+          .andThen(getOneOffAction(uuid).map(_.head))
+      }
+
+      def updateAssociatedSkills(oneOff: OneOffRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- OneOffSkillTable.filter(_.oneOffId === oneOff.id).delete
+            result <- insertOneOffSkillsAction(oneOff.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(OneOffSkillRow, UUID)])
+      }
+
+      val action = (for {
+        oneOffAndSkills <- getOneOffAction(uuid).map(_.getOrElse(throw OneOffNotFoundException()))
+        (old, _) = oneOffAndSkills
+        _ <- updateOneOff(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedOneOff <- getOneOffAction(uuid).map(_.head)
+      } yield updatedOneOff.asOneOff).transactionally
+
+      db.run(action)
     }
 
     override def updateOneOffs(update: UpdateList): Future[Seq[OneOff]] = {
-      def getSortedOneOffs(uuids: Seq[String]): DBIO[Seq[OneOffRow]] =
-        OneOffTable.filter(_.uuid inSet uuids).sortBy(_.order).result
-
-      def updateOrdering(oneOffIds: Seq[String]): DBIO[Seq[OneOffRow]] =
+      def updateOrdering(oneOffIds: Seq[String]) =
         update.reordered.filterNot(id => oneOffIds.contains(id.toString)) match {
           case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
             oneOffByUuid(uuid).map(_.order).update(index + 1)
-          }).andThen(getSortedOneOffs(oneOffIds))
+          }).andThen(getOneOffsAction(oneOffIds.map(UUID.fromString)).map(_.map(_.asOneOff)))
           case outliers => DBIO.failed(
             InvalidOneOffsUpdateException(s"the one-offs (${outliers.mkString(", ")}) do not exist")
           )
@@ -755,24 +813,40 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         )
       }
 
-      db.run(action).map(_.map(_.asOneOff))
+      db.run(action)
     }
 
     override def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff): Future[ScheduledOneOff] = {
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.goalId :: update.occursOn :: update.description :: update.estimate :: update.status :: Nil,
-        statusUpdate = Nil
-      )
-      val query = scheduledOneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.occursOn, oneOff.description, oneOff.estimate, oneOff.status,
-        oneOff.lastModified, oneOff.lastPerformed))
-      val action = getScheduledOneOffAction(uuid).flatMap { maybeObj =>
-        maybeObj.map { (old: ScheduledOneOffRow) =>
-          query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), UpdateDateTime.keepOrReplace(update.occursOn, old.occursOn),
-            update.description.getOrElse(old.description), update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-            lastModified, lastPerformed).andThen(getScheduledOneOffAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(ScheduledOneOffNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asScheduledOneOff)
+      def updateScheduledOneOff(uuid: UUID, update: UpdateScheduledOneOff, old: ScheduledOneOffRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.goalId :: update.occursOn :: update.description :: update.estimate :: update.status :: Nil,
+          statusUpdate = Nil
+        )
+        val query = scheduledOneOffByUuid(uuid).map(oneOff => (oneOff.goalId, oneOff.occursOn, oneOff.description, oneOff.estimate, oneOff.status,
+          oneOff.lastModified, oneOff.lastPerformed))
+        query.update(UpdateIdOption.keepOrReplace(update.goalId, old.goalId), UpdateDateTime.keepOrReplace(update.occursOn, old.occursOn),
+          update.description.getOrElse(old.description), update.estimate.getOrElse(old.estimate), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+          lastModified, lastPerformed).andThen(getScheduledOneOffAction(uuid).map(_.head))
+      }
+
+      def updateAssociatedSkills(oneOff: ScheduledOneOffRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- ScheduledOneOffSkillTable.filter(_.scheduledOneOffId === oneOff.id).delete
+            result <- insertScheduledOneOffSkillsAction(oneOff.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(ScheduledOneOffSkillRow, UUID)])
+      }
+
+      val action = (for {
+        scheduledOneOffAndSkills <- getScheduledOneOffAction(uuid).map(_.getOrElse(throw ScheduledOneOffNotFoundException()))
+        (old, _) = scheduledOneOffAndSkills
+        _ <- updateScheduledOneOff(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedOneOff <- getScheduledOneOffAction(uuid).map(_.head)
+      } yield updatedOneOff.asScheduledOneOff).transactionally
+
+      db.run(action)
     }
 
     override def refreshPyramidOfImportance(): Future[Boolean] = {
@@ -909,11 +983,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getThreads: Future[Seq[Thread]] = {
-      db.run(ThreadTable.result.map(_.map(_.asThread)))
+      db.run(getThreadsAction.map(_.map(_.asThread)))
     }
 
     override def getThreads(goalId: UUID): Future[Seq[Thread]] = {
-      db.run(threadsByParentId(goalId).result.map(_.map(_.asThread)))
+      db.run(getThreadsByParent(goalId).map(_.map(_.asThread)))
     }
 
     override def getThread(uuid: UUID): Future[Option[Thread]] = {
@@ -921,11 +995,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getWeaves: Future[Seq[Weave]] = {
-      db.run(WeaveTable.result.map(_.map(_.asWeave)))
+      db.run(getWeavesAction.map(_.map(_.asWeave)))
     }
 
     override def getWeaves(goalId: UUID): Future[Seq[Weave]] = {
-      db.run(weavesByParentId(goalId).result.map(_.map(_.asWeave)))
+      db.run(getWeavesByParent(goalId).map(_.map(_.asWeave)))
     }
 
     override def getWeave(uuid: UUID): Future[Option[Weave]] = {
@@ -973,11 +1047,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getTodos: Future[Seq[Todo]] = {
-      db.run(TodoTable.result.map(_.map(_.asTodo)))
+      db.run(getTodosAction.map(_.map(_.asTodo)))
     }
 
     override def getTodos(parentId: UUID): Future[Seq[Todo]] = {
-      db.run(todosByParentId(parentId).result.map(_.map(_.asTodo)))
+      db.run(getTodosByParent(parentId).map(_.map(_.asTodo)))
     }
 
     override def getTodo(uuid: UUID): Future[Option[Todo]] = {
@@ -985,11 +1059,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getHobbies: Future[Seq[Hobby]] = {
-      db.run(HobbyTable.result.map(_.map(_.asHobby)))
+      db.run(getHobbiesAction.map(_.map(_.asHobby)))
     }
 
     override def getHobbies(goalId: UUID): Future[Seq[Hobby]] = {
-      db.run(hobbiesByParentId(goalId).result.map(_.map(_.asHobby)))
+      db.run(getHobbiesByParent(goalId).map(_.map(_.asHobby)))
     }
 
     override def getHobby(uuid: UUID): Future[Option[Hobby]] = {
@@ -997,7 +1071,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getOneOffs: Future[Seq[OneOff]] = {
-      db.run(OneOffTable.sortBy(_.order).result.map(_.map(_.asOneOff)))
+      db.run(getOneOffsAction.map(_.map(_.asOneOff)))
     }
 
     override def getOneOff(uuid: UUID): Future[Option[OneOff]] = {
@@ -1006,9 +1080,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def getScheduledOneOffs(date: Option[LocalDate]): Future[Seq[ScheduledOneOff]] = {
       val retrieval = date.map { chosenDate =>
-        ScheduledOneOffTable.result
-          .map(_.filter(_.occursOn.toLocalDateTime.toLocalDate == chosenDate))
-      }.getOrElse(ScheduledOneOffTable.result)
+        getScheduledOneOffsAction
+          .map(_.filter(_._1.occursOn.toLocalDateTime.toLocalDate == chosenDate))
+      }.getOrElse(getScheduledOneOffsAction)
       val action = retrieval.map(_.map(_.asScheduledOneOff))
       db.run(action)
     }
@@ -1044,9 +1118,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def deleteGoal(uuid: UUID): Future[Boolean] = {
       val action = getGoalAction(uuid).flatMap { maybeObj =>
-        maybeObj map { case (goal, _) =>
+        maybeObj map { case (goal, _, _) =>
           for {
             _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
+            _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
             result <- GoalTable.filter(_.id === goal.id).delete
           } yield result
         } getOrElse DBIO.failed(GoalNotFoundException())
@@ -1055,12 +1130,22 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def deleteThread(uuid: UUID): Future[Boolean] = {
-      val action = threadByUuid(uuid).delete
+      val action = (for {
+        threadAndSkills <- getThreadAction(uuid).map(_.getOrElse(throw ThreadNotFoundException()))
+        (thread, _) = threadAndSkills
+        _ <- ThreadSkillTable.filter(_.threadId === thread.id).delete
+        result <- ThreadTable.filter(_.id === thread.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteWeave(uuid: UUID): Future[Boolean] = {
-      val action = weaveByUuid(uuid).delete
+      val action = (for {
+        weaveAndSkills <- getWeaveAction(uuid).map(_.getOrElse(throw WeaveNotFoundException()))
+        (weave, _) = weaveAndSkills
+        _ <- WeaveSkillTable.filter(_.weaveId === weave.id).delete
+        result <- WeaveTable.filter(_.id === weave.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
@@ -1075,22 +1160,42 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def deleteTodo(uuid: UUID): Future[Boolean] = {
-      val action = todoByUuid(uuid).delete
+      val action = (for {
+        todoAndSkills <- getTodoAction(uuid).map(_.getOrElse(throw TodoNotFoundException()))
+        (todo, _) = todoAndSkills
+        _ <- TodoSkillTable.filter(_.todoId === todo.id).delete
+        result <- TodoTable.filter(_.id === todo.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteHobby(uuid: UUID): Future[Boolean] = {
-      val action = hobbyByUuid(uuid).delete
+      val action = (for {
+        hobbyAndSkills <- getHobbyAction(uuid).map(_.getOrElse(throw HobbyNotFoundException()))
+        (hobby, _) = hobbyAndSkills
+        _ <- HobbySkillTable.filter(_.hobbyId === hobby.id).delete
+        result <- HobbyTable.filter(_.id === hobby.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteOneOff(uuid: UUID): Future[Boolean] = {
-      val action = oneOffByUuid(uuid).delete
+      val action = (for {
+        oneOffAndSkills <- getOneOffAction(uuid).map(_.getOrElse(throw OneOffNotFoundException()))
+        (oneOff, _) = oneOffAndSkills
+        _ <- OneOffSkillTable.filter(_.oneOffId === oneOff.id).delete
+        result <- OneOffTable.filter(_.id === oneOff.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteScheduledOneOff(uuid: UUID): Future[Boolean] = {
-      val action = scheduledOneOffByUuid(uuid).delete
+      val action = (for {
+        scheduledOneOffAndSkills <- getScheduledOneOffAction(uuid).map(_.getOrElse(throw ScheduledOneOffNotFoundException()))
+        (scheduledOneOff, _) = scheduledOneOffAndSkills
+        _ <- ScheduledOneOffSkillTable.filter(_.scheduledOneOffId === scheduledOneOff.id).delete
+        result <- ScheduledOneOffTable.filter(_.id === scheduledOneOff.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
@@ -1244,12 +1349,28 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       goalWithExtrasByUuid(uuid).map(groupByGoal(_).headOption)
     }
 
+    private def getThreadsAction = {
+      threadsWithExtras.map(groupByThread(_))
+    }
+
     private def getThreadAction(uuid: UUID) = {
       threadWithExtrasByUuid(uuid).map(groupByThread(_).headOption)
     }
 
+    private def getThreadsByParent(parentId: UUID) = {
+      threadsByParentId(parentId).map(groupByThread(_))
+    }
+
+    private def getWeavesAction = {
+      weavesWithExtras.map(groupByWeave(_))
+    }
+
+    private def getWeavesByParent(parentId: UUID) = {
+      weavesByParentId(parentId).map(groupByWeave(_))
+    }
+
     private def getWeaveAction(uuid: UUID) = {
-      weaveWithExtrasByUuid(uuid).map(groupByThread(_).headOption)
+      weaveWithExtrasByUuid(uuid).map(groupByWeave(_).headOption)
     }
 
     private def getLaserDonutAction(uuid: UUID) = {
@@ -1260,20 +1381,57 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       portionByUuid(uuid).result.headOption
     }
 
+    private def getTodosAction = {
+      todosWithExtras.map(groupByTodo)
+    }
+
+    private def getTodosAction(uuids: Seq[UUID]) = {
+      todosWithExtrasByUuid(uuids).map(groupByTodo(_))
+    }
+
+    private def getTodosByParent(parentId: UUID) = {
+      todosByParentId(parentId).map(groupByTodo)
+    }
+
     private def getTodoAction(uuid: UUID) = {
-      todoByUuid(uuid).result.headOption
+      todoWithExtrasByUuid(uuid).map(groupByTodo(_).headOption)
+    }
+
+    private def getHobbiesAction = {
+      hobbiesWithExtras.map(groupByHobby)
+    }
+
+    private def getHobbiesByParent(parentId: UUID) = {
+      hobbiesByParentId(parentId).map(groupByHobby)
     }
 
     private def getHobbyAction(uuid: UUID) = {
-      hobbyByUuid(uuid).result.headOption
+      hobbyWithExtrasByUuid(uuid).map(groupByHobby(_).headOption)
+    }
+
+    private def getOneOffsAction = {
+      oneOffsWithExtras.map(groupByOneOff)
+    }
+
+
+    private def getOneOffsAction(uuids: Seq[UUID]) = {
+      oneOffsWithExtrasByUuid(uuids).map(groupByOneOff)
     }
 
     private def getOneOffAction(uuid: UUID) = {
-      oneOffByUuid(uuid).result.headOption
+      oneOffWithExtrasByUuid(uuid).map(groupByOneOff(_).headOption)
+    }
+
+    private def getScheduledOneOffsAction = {
+      scheduledOneOffsWithExtras.map(groupByScheduledOneOff)
+    }
+
+    private def getScheduledOneOffsAction(uuids: Seq[UUID]) = {
+      scheduledOneOffsWithExtrasByUuid(uuids).map(groupByScheduledOneOff)
     }
 
     private def getScheduledOneOffAction(uuid: UUID) = {
-      scheduledOneOffByUuid(uuid).result.headOption
+      scheduledOneOffWithExtrasByUuid(uuid).map(groupByScheduledOneOff(_).headOption)
     }
 
     private def getSkillsAction(uuids: Seq[UUID]) = {
@@ -1351,7 +1509,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def threadsByParentId(goalId: UUID) = {
-      ThreadTable.filter(_.goalId === goalId.toString)
+      threadsWithExtras.map(_.filter(_._1.goalId.contains(goalId.toString)))
     }
 
     private def threadWithExtrasByUuid(uuid: UUID) = {
@@ -1389,7 +1547,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def weavesByParentId(goalId: UUID) = {
-      WeaveTable.filter(_.goalId === goalId.toString)
+      weavesWithExtras.map(_.filter(_._1.goalId.contains(goalId.toString)))
     }
 
     private def weaveWithExtrasByUuid(uuid: UUID) = {
@@ -1442,8 +1600,42 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       TodoTable.filter(_.uuid === uuid.toString)
     }
 
+    private def todoWithExtrasByUuid(uuid: UUID) = {
+      todosWithExtras.map(_.filter { case (todo, _) => todo.uuid == uuid.toString })
+    }
+
+    private def todosWithExtrasByUuid(uuids: Seq[UUID]) = {
+      todosWithExtras.map(_.filter { case (todo, _) => uuids.contains(todo.uuid) })
+    }
+
     private def todosByParentId(parentId: UUID) = {
-      TodoTable.filter(_.parentId === parentId.toString).sortBy(_.order)
+      todosWithExtras.map(_.filter(_._1.parentId.contains(parentId.toString)).sortBy(_._1.order))
+    }
+
+    private def todosWithExtras = {
+      TodoTable
+        .joinLeft(TodoSkillTable)
+        .on(_.id === _.todoId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((todo, skillLink), skill) => (todo, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (todo, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (todo, skillTuple)
+        }
+      }
+    }
+
+    private def groupByTodo(todosWithExtras: Seq[(TodoRow, Option[(TodoSkillRow, SkillRow)])]): Seq[(TodoRow, Seq[(TodoSkillRow, UUID)])] = {
+      todosWithExtras.groupBy { case (todo, _) => todo }
+        .map { case (todo, links) =>
+          (todo, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def hobbyByUuid(uuid: UUID) = {
@@ -1451,15 +1643,113 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def hobbiesByParentId(goalId: UUID) = {
-      HobbyTable.filter(_.goalId === goalId.toString)
+      hobbiesWithExtras.map(_.filter(_._1.goalId.contains(goalId.toString)))
+    }
+
+    private def hobbyWithExtrasByUuid(uuid: UUID) = {
+      hobbiesWithExtras.map(_.filter { case (todo, _) => todo.uuid == uuid.toString })
+    }
+
+    private def hobbiesWithExtras = {
+      HobbyTable
+        .joinLeft(HobbySkillTable)
+        .on(_.id === _.hobbyId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((hobby, skillLink), skill) => (hobby, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (hobby, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (hobby, skillTuple)
+        }
+      }
+    }
+
+    private def groupByHobby(hobbiesWithExtras: Seq[(HobbyRow, Option[(HobbySkillRow, SkillRow)])]): Seq[(HobbyRow, Seq[(HobbySkillRow, UUID)])] = {
+      hobbiesWithExtras.groupBy { case (hobby, _) => hobby }
+        .map { case (hobby, links) =>
+          (hobby, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def oneOffByUuid(uuid: UUID) = {
       OneOffTable.filter(_.uuid === uuid.toString)
     }
 
+    private def oneOffWithExtrasByUuid(uuid: UUID) = {
+      oneOffsWithExtras.map(_.filter { case (oneOff, _) => oneOff.uuid == uuid.toString })
+    }
+
+    private def oneOffsWithExtrasByUuid(uuids: Seq[UUID]) = {
+      oneOffsWithExtras.map(_.filter { case (oneOff, _) => uuids.contains(oneOff.uuid) })
+    }
+
+    private def oneOffsWithExtras = {
+      OneOffTable
+        .joinLeft(OneOffSkillTable)
+        .on(_.id === _.oneOffId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((oneOff, skillLink), skill) => (oneOff, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (oneOff, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (oneOff, skillTuple)
+        }
+      }
+    }
+
+    private def groupByOneOff(oneOffsWithExtras: Seq[(OneOffRow, Option[(OneOffSkillRow, SkillRow)])]): Seq[(OneOffRow, Seq[(OneOffSkillRow, UUID)])] = {
+      oneOffsWithExtras.groupBy { case (oneOff, _) => oneOff }
+        .map { case (oneOff, links) =>
+          (oneOff, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
+    }
+
     private def scheduledOneOffByUuid(uuid: UUID) = {
       ScheduledOneOffTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def scheduledOneOffWithExtrasByUuid(uuid: UUID) = {
+      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _) => oneOff.uuid == uuid.toString })
+    }
+
+    private def scheduledOneOffsWithExtrasByUuid(uuids: Seq[UUID]) = {
+      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _) => uuids.contains(oneOff.uuid) })
+    }
+
+    private def scheduledOneOffsWithExtras = {
+      ScheduledOneOffTable
+        .joinLeft(ScheduledOneOffSkillTable)
+        .on(_.id === _.scheduledOneOffId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((scheduledOneOff, skillLink), skill) => (scheduledOneOff, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (scheduledOneOff, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (scheduledOneOff, skillTuple)
+        }
+      }
+    }
+
+    private def groupByScheduledOneOff(scheduledOneOffsWithExtras: Seq[(ScheduledOneOffRow, Option[(ScheduledOneOffSkillRow, SkillRow)])]) = {
+      scheduledOneOffsWithExtras.groupBy { case (oneOff, _) => oneOff }
+        .map { case (oneOff, links) =>
+          (oneOff, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def skillsByUuid(uuids: Seq[UUID]) = {
