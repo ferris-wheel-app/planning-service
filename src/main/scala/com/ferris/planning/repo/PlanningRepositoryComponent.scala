@@ -1249,7 +1249,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getWeaveAction(uuid: UUID) = {
-      weaveByUuid(uuid).result.headOption
+      weaveWithExtrasByUuid(uuid).map(groupByThread(_).headOption)
     }
 
     private def getLaserDonutAction(uuid: UUID) = {
@@ -1378,9 +1378,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def groupByThread(threadsWithExtras: Seq[(ThreadRow, Option[(ThreadSkillRow, SkillRow)])]): Seq[(ThreadRow, Seq[(ThreadSkillRow, UUID)])] = {
-      threadsWithExtras.groupBy { case (goal, _) => goal }
-        .map { case (goal, links) =>
-          (goal, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+      threadsWithExtras.groupBy { case (thread, _) => thread }
+        .map { case (thread, links) =>
+          (thread, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
         }.toSeq
     }
 
@@ -1390,6 +1390,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def weavesByParentId(goalId: UUID) = {
       WeaveTable.filter(_.goalId === goalId.toString)
+    }
+
+    private def weaveWithExtrasByUuid(uuid: UUID) = {
+      weavesWithExtras.map(_.filter { case (weave, _) => weave.uuid == uuid.toString })
+    }
+
+    private def weavesWithExtras = {
+      WeaveTable
+        .joinLeft(WeaveSkillTable)
+        .on(_.id === _.weaveId)
+        .joinLeft(SkillTable)
+        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .map { case ((weave, skillLink), skill) => (weave, skillLink, skill) }
+        .result.map {
+        _.collect {
+          case (weave, skillLink, skill) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (weave, skillTuple)
+        }
+      }
+    }
+
+    private def groupByWeave(weavesWithExtras: Seq[(WeaveRow, Option[(WeaveSkillRow, SkillRow)])]): Seq[(WeaveRow, Seq[(WeaveSkillRow, UUID)])] = {
+      weavesWithExtras.groupBy { case (weave, _) => weave }
+        .map { case (weave, links) =>
+          (weave, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def laserDonutByUuid(uuid: UUID) = {
