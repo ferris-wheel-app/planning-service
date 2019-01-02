@@ -251,6 +251,17 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
+  implicit class SkillCategoryBuilder(val row: (tables.SkillCategoryRow, String)) {
+    def asSkillCategory: SkillCategory = row match {
+      case (skillCategory, categoryId) =>
+        SkillCategory(
+          uuid = UUID.fromString(skillCategory.uuid),
+          name = skillCategory.name,
+          categoryId = UUID.fromString(categoryId)
+        )
+    }
+  }
+
   implicit class SkillBuilder(val row: (tables.SkillRow, String)) {
     def asSkill: Skill = row match {
       case (skill, categoryId) =>

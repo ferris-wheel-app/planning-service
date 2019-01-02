@@ -13,6 +13,8 @@ trait PlanningServiceComponent {
   val planningService: PlanningService
 
   trait PlanningService {
+    def createSkillCategory(creation: CreateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory]
+    def createSkill(creation: CreateSkill)(implicit ex: ExecutionContext): Future[Skill]
     def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
     def createEpoch(creation: CreateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
     def createYear(creation: CreateYear)(implicit ex: ExecutionContext): Future[Year]
@@ -47,6 +49,8 @@ trait PlanningServiceComponent {
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
 
+    def getSkillCategories(implicit ex: ExecutionContext): Future[Seq[SkillCategory]]
+    def getSkills(implicit ex: ExecutionContext): Future[Seq[Skill]]
     def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]]
     def getEpochs(implicit ex: ExecutionContext): Future[Seq[Epoch]]
     def getYears(implicit ex: ExecutionContext): Future[Seq[Year]]
@@ -67,6 +71,8 @@ trait PlanningServiceComponent {
     def getOneOffs()(implicit ex: ExecutionContext): Future[Seq[OneOff]]
     def getScheduledOneOffs(date: Option[LocalDate])(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
 
+    def getSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[SkillCategory]]
+    def getSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Skill]]
     def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Epoch]]
     def getYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Year]]
@@ -84,6 +90,8 @@ trait PlanningServiceComponent {
     def getScheduledOneOff(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[ScheduledOneOff]]
     def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]]
 
+    def deleteSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
+    def deleteSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteYear(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]

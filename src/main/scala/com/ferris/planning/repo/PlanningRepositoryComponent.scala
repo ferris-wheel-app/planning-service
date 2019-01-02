@@ -4,7 +4,6 @@ import java.sql.{Date, Timestamp}
 import java.time.LocalDate
 import java.util.UUID
 
-import cats.data._
 import cats.implicits._
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.config.{DefaultPlanningServiceConfig, PlanningServiceConfig}
@@ -15,10 +14,6 @@ import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
-import com.rms.miu.slickcats.DBIOInstances._
-import slick.dbio.Effect.Write
-import slick.lifted.QueryBase
-import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,6 +22,8 @@ trait PlanningRepositoryComponent {
   val repo: PlanningRepository
 
   trait PlanningRepository {
+    def createSkillCategory(creation: CreateSkillCategory): Future[SkillCategory]
+    def createSkill(creation: CreateSkill): Future[Skill]
     def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem]
     def createEpoch(creation: CreateEpoch): Future[Epoch]
     def createYear(creation: CreateYear): Future[Year]
@@ -61,6 +58,8 @@ trait PlanningRepositoryComponent {
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
+    def getSkillCategories: Future[Seq[SkillCategory]]
+    def getSkills: Future[Seq[Skill]]
     def getBacklogItems: Future[Seq[BacklogItem]]
     def getEpochs: Future[Seq[Epoch]]
     def getYears: Future[Seq[Year]]
@@ -81,6 +80,8 @@ trait PlanningRepositoryComponent {
     def getOneOffs: Future[Seq[OneOff]]
     def getScheduledOneOffs(date: Option[LocalDate]): Future[Seq[ScheduledOneOff]]
 
+    def getSkillCategory(uuid: UUID): Future[Option[SkillCategory]]
+    def getSkill(uuid: UUID): Future[Option[Skill]]
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
     def getEpoch(uuid: UUID): Future[Option[Epoch]]
     def getYear(uuid: UUID): Future[Option[Year]]
@@ -98,6 +99,8 @@ trait PlanningRepositoryComponent {
     def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]]
     def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
+    def deleteSkillCategory(uuid: UUID): Future[Boolean]
+    def deleteSkill(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]
     def deleteEpoch(uuid: UUID): Future[Boolean]
     def deleteYear(uuid: UUID): Future[Boolean]
@@ -130,6 +133,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   class SqlPlanningRepository(config: PlanningServiceConfig) extends PlanningRepository {
 
     // Create endpoints
+    override def createSkillCategory(creation: CreateSkillCategory): Future[CreateSkillCategory] = {
+      val
+    }
+
     override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
       val row = BacklogItemRow(
         id = 0L,
