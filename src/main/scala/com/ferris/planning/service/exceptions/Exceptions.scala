@@ -4,6 +4,10 @@ object Exceptions {
 
   sealed abstract class PlanningServiceException(message: String) extends Exception(message)
 
+  case class SkillCategoryNotFoundException(message: String = "skill category not found") extends PlanningServiceException(message)
+
+  case class SkillNotFoundException(message: String = "skill not found") extends PlanningServiceException(message)
+
   case class BacklogItemNotFoundException(message: String = "backlog-item not found") extends PlanningServiceException(message)
 
   case class EpochNotFoundException(message: String = "epoch not found") extends PlanningServiceException(message)

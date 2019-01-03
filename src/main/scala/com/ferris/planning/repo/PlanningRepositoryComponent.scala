@@ -39,6 +39,8 @@ trait PlanningRepositoryComponent {
     def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
 
+    def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[SkillCategory]
+    def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
     def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch]
     def updateYear(uuid: UUID, update: UpdateYear): Future[Year]
@@ -133,8 +135,35 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   class SqlPlanningRepository(config: PlanningServiceConfig) extends PlanningRepository {
 
     // Create endpoints
-    override def createSkillCategory(creation: CreateSkillCategory): Future[CreateSkillCategory] = {
-      val
+    override def createSkillCategory(creation: CreateSkillCategory): Future[SkillCategory] = {
+      val action = (for {
+        parentCategory <- getSkillCategoryAction(creation.categoryId).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        row = SkillCategoryRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          name = creation.name,
+          categoryId = parentCategory.id
+        )
+        category <- (SkillCategoryTable returning SkillCategoryTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
+      } yield (category, parentCategory.uuid).asSkillCategory).transactionally
+      db.run(action)
+    }
+
+    override def createSkill(creation: CreateSkill): Future[Skill] = {
+      val action = (for {
+        parentCategory <- getSkillAction(creation.categoryId).map(_.getOrElse(throw SkillNotFoundException()))
+        row = SkillRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          name = creation.name,
+          categoryId = parentCategory.id,
+          proficiency = creation.proficiency.dbValue,
+          practisedHours = creation.practisedHours,
+          lastApplied = None
+        )
+        category <- (SkillTable returning SkillTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
+      } yield (category, parentCategory.uuid).asSkill).transactionally
+      db.run(action)
     }
 
     override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
@@ -445,6 +474,29 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Update endpoints
+    override def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[] = {
+      def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory, old: SkillCategoryRow, newParentId: Option[Long]): DBIO[Int] = {
+        skillCategoryByUuid(uuid).map(category => (category.name, category.categoryId))
+          .update(update.name.getOrElse(old.name), newParentId.getOrElse(old.categoryId))
+      }
+
+      def getParentCategory(categoryId: Option[UUID]) = {
+        categoryId match {
+          case Some(uuid) => getSkillCategoryAction(uuid)
+          case None => DBIO.successful(None)
+        }
+      }
+
+      val action = (for {
+        old <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        parent <- getParentCategory(update.categoryId)
+        _ <- updateSkillCategory(uuid, update, old, parent.map(_.categoryId))
+        updatedCategory <- getSkillCategoryAction(uuid).map(_.head)
+      } yield (updatedCategory, parent.map(_.uuid).getOrElse(old.)).asGoal).transactionally
+
+      db.run(action)
+    }
+
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`, item.lastModified))
       val action = getBacklogItemAction(uuid).flatMap { maybeObj =>
@@ -1328,6 +1380,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield oneOffSkills
     }
 
+    private def getSkillCategoryAction(uuid: UUID) = {
+      skillCategoryByUuid(uuid).result.headOption
+    }
+
+    private def getSkillAction(uuid: UUID) = {
+      skillByUuid(uuid).result.headOption
+    }
+
     private def getBacklogItemsAction(uuids: Seq[UUID]) = {
       backlogItemsByUuid(uuids).result
     }
@@ -1420,7 +1480,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       oneOffsWithExtras.map(groupByOneOff)
     }
 
-
     private def getOneOffsAction(uuids: Seq[UUID]) = {
       oneOffsWithExtrasByUuid(uuids).map(groupByOneOff)
     }
@@ -1453,6 +1512,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Queries
+    private def skillCategoryByUuid(uuid: UUID) = {
+      SkillCategoryTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def skillByUuid(uuid: UUID) = {
+      SkillTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def skillsByUuid(uuids: Seq[UUID]) = {
+      SkillTable.filter(_.uuid inSet uuids.map(_.toString))
+    }
+
     private def backlogItemsByUuid(uuids: Seq[UUID]) = {
       BacklogItemTable.filter(_.uuid inSet uuids.map(_.toString))
     }
@@ -1757,10 +1828,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         .map { case (oneOff, links) =>
           (oneOff, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
         }.toSeq
-    }
-
-    private def skillsByUuid(uuids: Seq[UUID]) = {
-      SkillTable.filter(_.uuid inSet uuids.map(_.toString))
     }
 
     private def getUpdateTimes(contentUpdate: Seq[Option[Any]], statusUpdate: Seq[Option[Any]]): (Option[Timestamp], Option[Timestamp]) = {

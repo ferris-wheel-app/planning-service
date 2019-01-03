@@ -30,6 +30,8 @@ trait PlanningServiceComponent {
     def createScheduledOneOff(creation: CreateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
+    def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory]
+    def updateSkill(uuid: UUID, update: UpdateSkill)(implicit ex: ExecutionContext): Future[Skill]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
     def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
     def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Year]
