@@ -474,27 +474,47 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Update endpoints
-    override def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[] = {
-      def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory, old: SkillCategoryRow, newParentId: Option[Long]): DBIO[Int] = {
+    override def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[SkillCategory] = {
+      def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory, old: SkillCategoryRow, newParentId: Long): DBIO[Int] = {
         skillCategoryByUuid(uuid).map(category => (category.name, category.categoryId))
-          .update(update.name.getOrElse(old.name), newParentId.getOrElse(old.categoryId))
-      }
-
-      def getParentCategory(categoryId: Option[UUID]) = {
-        categoryId match {
-          case Some(uuid) => getSkillCategoryAction(uuid)
-          case None => DBIO.successful(None)
-        }
+          .update(update.name.getOrElse(old.name), newParentId)
       }
 
       val action = (for {
-        old <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        oldAndParent <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        (old, parentId) = oldAndParent
         parent <- getParentCategory(update.categoryId)
-        _ <- updateSkillCategory(uuid, update, old, parent.map(_.categoryId))
+        newParentId = parent.map(_._1.id).getOrElse(old.categoryId)
+        _ <- updateSkillCategory(uuid, update, old, newParentId)
         updatedCategory <- getSkillCategoryAction(uuid).map(_.head)
-      } yield (updatedCategory, parent.map(_.uuid).getOrElse(old.)).asGoal).transactionally
+      } yield (updatedCategory, parent.map(_._1.uuid).getOrElse()).asSkillCategory).transactionally
 
       db.run(action)
+    }
+    override def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill] = {
+      def updateSkill(uuid: UUID, update: UpdateSkill, old: SkillRow, newParentId: Option[Long]): DBIO[Int] = {
+        skillByUuid(uuid).map(skill => (skill.name, skill.categoryId, skill.proficiency, skill.practisedHours, skill.lastApplied))
+          .update(update.name.getOrElse(old.name), newParentId.getOrElse(old.categoryId),
+            UpdateTypeEnum.keepOrReplace(update.proficiency, old.proficiency), update.practisedHours.getOrElse(old.practisedHours),
+            Some(timer.timestampOfNow))
+      }
+
+      val action = (for {
+        old <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
+        oldParent <- SkillCategoryTable.filter(_.id === old.categoryId).result.head
+        parent <- getParentCategory(update.categoryId)
+        _ <- updateSkill(uuid, update, old, parent.map(_.categoryId))
+        updatedSkill <- getSkillAction(uuid).map(_.head)
+      } yield (updatedSkill, parent.map(_.uuid).getOrElse(oldParent.uuid)).asSkill).transactionally
+
+      db.run(action)
+    }
+
+    private def getParentCategory(categoryId: Option[UUID]) = {
+      categoryId match {
+        case Some(uuid) => getSkillCategoryAction(uuid)
+        case None => DBIO.successful(None)
+      }
     }
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
@@ -1001,6 +1021,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Get endpoints
+    override def getSkillCategories: Future[Seq[SkillCategory]] = {
+      val action = for {
+
+      } yield ()
+    }
+
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
       db.run(BacklogItemTable.result.map(_.map(_.asBacklogItem)))
     }
@@ -1381,11 +1407,23 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getSkillCategoryAction(uuid: UUID) = {
-      skillCategoryByUuid(uuid).result.headOption
+      for {
+        category <- skillCategoryByUuid(uuid).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.map(_.categoryId)).result.headOption
+      } yield (category, parent) match {
+        case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
+        case _ => None
+      }
     }
 
     private def getSkillAction(uuid: UUID) = {
-      skillByUuid(uuid).result.headOption
+      for {
+        skill <- skillByUuid(uuid).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.categoryId)).result.headOption
+      } yield (skill, category) match {
+        case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
+        case _ => None
+      }
     }
 
     private def getBacklogItemsAction(uuids: Seq[UUID]) = {
