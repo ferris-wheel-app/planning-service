@@ -21,7 +21,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   implicit def routeEc: ExecutionContext
   implicit val materializer: Materializer
 
-  private val messagesPathSegment = "messages"
+  private val categories = "categories"
+  private val skills = "skills"
   private val backlogItemsPathSegment = "backlog-items"
   private val epochsPathSegment = "epochs"
   private val yearsPathSegment = "years"

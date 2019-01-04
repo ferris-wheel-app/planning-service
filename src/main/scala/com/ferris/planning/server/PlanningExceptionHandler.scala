@@ -7,6 +7,8 @@ import com.ferris.planning.service.exceptions.Exceptions._
 object PlanningExceptionHandler {
 
   val handler: ExceptionHandler = ExceptionHandler {
+    case e: SkillCategoryNotFoundException => throw ApiExceptions.NotFoundException("SkillCategoryNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
+    case e: SkillNotFoundException => throw ApiExceptions.NotFoundException("SkillNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
     case e: BacklogItemNotFoundException => throw ApiExceptions.NotFoundException("BacklogItemNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
     case e: EpochNotFoundException => throw ApiExceptions.NotFoundException("EpochNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))
     case e: YearNotFoundException => throw ApiExceptions.NotFoundException("YearNotFound", e.message, Some(ApiExceptions.NotFoundPayload("uuid")))

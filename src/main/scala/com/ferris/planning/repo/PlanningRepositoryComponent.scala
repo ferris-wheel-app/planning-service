@@ -142,10 +142,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           id = 0L,
           uuid = UUID.randomUUID,
           name = creation.name,
-          categoryId = parentCategory.id
+          categoryId = parentCategory._1.id
         )
         category <- (SkillCategoryTable returning SkillCategoryTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
-      } yield (category, parentCategory.uuid).asSkillCategory).transactionally
+      } yield (category, parentCategory._1.uuid).asSkillCategory).transactionally
       db.run(action)
     }
 
@@ -156,13 +156,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           id = 0L,
           uuid = UUID.randomUUID,
           name = creation.name,
-          categoryId = parentCategory.id,
+          categoryId = parentCategory._1.id,
           proficiency = creation.proficiency.dbValue,
           practisedHours = creation.practisedHours,
           lastApplied = None
         )
         category <- (SkillTable returning SkillTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
-      } yield (category, parentCategory.uuid).asSkill).transactionally
+      } yield (category, parentCategory._1.uuid).asSkill).transactionally
       db.run(action)
     }
 
@@ -1024,8 +1024,27 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     // Get endpoints
     override def getSkillCategories: Future[Seq[SkillCategory]] = {
-      // Use Cats!!!
-      ???
+      val action = for {
+        skillCategories <- SkillCategoryTable.result
+        withParents <- DBIO.sequence(skillCategories.map(item => getSkillCategoryAction(item.id)))
+      } yield withParents.flatten.map(_.asSkillCategory)
+      db.run(action)
+    }
+
+    override def getSkillCategory(uuid: UUID): Future[Option[SkillCategory]] = {
+      db.run(getSkillCategoryAction(uuid).map(_.map(_.asSkillCategory)))
+    }
+
+    override def getSkills: Future[Seq[Skill]] = {
+      val action = for {
+        skills <- SkillTable.result
+        withParents <- DBIO.sequence(skills.map(item => getSkillAction(item.id)))
+      } yield withParents.flatten.map(_.asSkill)
+      db.run(action)
+    }
+
+    override def getSkill(uuid: UUID): Future[Option[Skill]] = {
+      db.run(getSkillAction(uuid).map(_.map(_.asSkill)))
     }
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
@@ -1182,6 +1201,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     // Delete endpoints
+    override def deleteSkillCategory(uuid: UUID): Future[Boolean] = {
+      val action = skillCategoryByUuid(uuid).delete
+      db.run(action).map(_ > 0)
+    }
+
+    override def deleteSkill(uuid: UUID): Future[Boolean] = {
+      val action = skillByUuid(uuid).delete
+      db.run(action).map(_ > 0)
+    }
+
     override def deleteBacklogItem(uuid: UUID): Future[Boolean] = {
       val action = backlogItemByUuid(uuid).delete
       db.run(action).map(_ > 0)
@@ -1417,9 +1446,29 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
     }
 
+    private def getSkillCategoryAction(id: Long) = {
+      for {
+        category <- skillCategoryById(id).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.map(_.categoryId)).result.headOption
+      } yield (category, parent) match {
+        case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
+        case _ => None
+      }
+    }
+
     private def getSkillAction(uuid: UUID) = {
       for {
         skill <- skillByUuid(uuid).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.categoryId)).result.headOption
+      } yield (skill, category) match {
+        case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
+        case _ => None
+      }
+    }
+
+    private def getSkillAction(id: Long) = {
+      for {
+        skill <- skillById(id).result.headOption
         category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.categoryId)).result.headOption
       } yield (skill, category) match {
         case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
@@ -1555,8 +1604,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       SkillCategoryTable.filter(_.uuid === uuid.toString)
     }
 
+    private def skillCategoryById(id: Long) = {
+      SkillCategoryTable.filter(_.id === id)
+    }
+
     private def skillByUuid(uuid: UUID) = {
       SkillTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def skillById(id: Long) = {
+      SkillTable.filter(_.id === id)
     }
 
     private def skillsByUuid(uuids: Seq[UUID]) = {

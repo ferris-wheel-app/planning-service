@@ -1298,7 +1298,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         retrieved shouldBe empty
       }
 
-      it("should retrieve a list of all cheduled-one-offs") {
+      it("should retrieve a list of all scheduled-one-offs") {
         val created1 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
         val created2 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
         val retrieved = repo.getScheduledOneOffs(None).futureValue

@@ -5,6 +5,19 @@ import com.ferris.planning.model.Model._
 
 object ModelToView {
 
+  implicit class SkillCategoryConversion(skillCategory: SkillCategory) {
+    def toView: SkillCategoryView = {
+      SkillCategoryView(
+        uuid = backlogItem.uuid,
+        summary = backlogItem.summary,
+        description = backlogItem.description,
+        `type` = TypeResolvers.BacklogItemType.toString(backlogItem.`type`),
+        createdOn = backlogItem.createdOn,
+        lastModified = backlogItem.lastModified
+      )
+    }
+  }
+
   implicit class BacklogItemConversion(backlogItem: BacklogItem) {
     def toView: BacklogItemView = {
       BacklogItemView(

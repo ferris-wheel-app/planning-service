@@ -117,6 +117,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
   class DefaultPlanningService extends PlanningService {
 
+    override def createSkillCategory(creation: CreateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory] = {
+      repo.createSkillCategory(creation)
+    }
+
+    override def createSkill(creation: CreateSkill)(implicit ex: ExecutionContext): Future[Skill] = {
+      repo.createSkill(creation)
+    }
+
     override def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
       repo.createBacklogItem(creation)
     }
@@ -171,6 +179,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def createPyramidOfImportance(creation: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance] = {
       repo.createPyramidOfImportance(creation)
+    }
+
+    override def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory] = {
+      repo.updateSkillCategory(uuid, update)
+    }
+
+    override def updateSkill(uuid: UUID, update: UpdateSkill)(implicit ex: ExecutionContext): Future[Skill] = {
+      repo.updateSkill(uuid, update)
     }
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
@@ -243,6 +259,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.refreshPortion()
+    }
+
+    override def getSkillCategories(implicit ex: ExecutionContext): Future[Seq[SkillCategory]] = {
+      repo.getSkillCategories
+    }
+
+    override def getSkills(implicit ex: ExecutionContext): Future[Seq[Skill]] = {
+      repo.getSkills
     }
 
     override def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]] = {
@@ -321,6 +345,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getScheduledOneOffs(date)
     }
 
+    override def getSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[SkillCategory]] = {
+      repo.getSkillCategory(uuid)
+    }
+
+    override def getSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Skill]] = {
+      repo.getSkill(uuid)
+    }
+
     override def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
       repo.getBacklogItem(uuid)
     }
@@ -383,6 +415,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]] = {
       repo.getPyramidOfImportance
+    }
+
+    override def deleteSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteSkillCategory(uuid)
+    }
+
+    override def deleteSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteSkill(uuid)
     }
 
     override def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {

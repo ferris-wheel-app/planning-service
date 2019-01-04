@@ -10,6 +10,11 @@ import com.ferris.planning.service.exceptions.Exceptions._
 
 trait PlanningResponseMappings extends FerrisResponseMappings {
 
+  def mapSkillCategory(response: Option[SkillCategory]): (Success, SkillCategoryView) = response match {
+    case Some(skillCategory) => (StatusCodes.OK, skillCategory.toView)
+    case None => throw BacklogItemNotFoundException()
+  }
+
   def mapBacklogItem(response: Option[BacklogItem]): (Success, BacklogItemView) = response match {
     case Some(backlogItem) => (StatusCodes.OK, backlogItem.toView)
     case None => throw BacklogItemNotFoundException()
