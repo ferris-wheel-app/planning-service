@@ -1024,6 +1024,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     // Get endpoints
     override def getSkillCategories: Future[Seq[SkillCategory]] = {
+      // Use Cats!!!
       ???
     }
 
