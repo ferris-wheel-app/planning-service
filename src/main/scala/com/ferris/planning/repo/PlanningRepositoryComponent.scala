@@ -483,29 +483,31 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = (for {
         oldAndParent <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
         (old, parentId) = oldAndParent
-        parent <- getParentCategory(update.categoryId)
-        newParentId = parent.map(_._1.id).getOrElse(old.categoryId)
+        newParent <- getParentCategory(update.categoryId)
+        newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
         _ <- updateSkillCategory(uuid, update, old, newParentId)
         updatedCategory <- getSkillCategoryAction(uuid).map(_.head)
-      } yield (updatedCategory, parent.map(_._1.uuid).getOrElse()).asSkillCategory).transactionally
+      } yield updatedCategory.asSkillCategory).transactionally
 
       db.run(action)
     }
+
     override def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill] = {
-      def updateSkill(uuid: UUID, update: UpdateSkill, old: SkillRow, newParentId: Option[Long]): DBIO[Int] = {
+      def updateSkill(uuid: UUID, update: UpdateSkill, old: SkillRow, newParentId: Long): DBIO[Int] = {
         skillByUuid(uuid).map(skill => (skill.name, skill.categoryId, skill.proficiency, skill.practisedHours, skill.lastApplied))
-          .update(update.name.getOrElse(old.name), newParentId.getOrElse(old.categoryId),
+          .update(update.name.getOrElse(old.name), newParentId,
             UpdateTypeEnum.keepOrReplace(update.proficiency, old.proficiency), update.practisedHours.getOrElse(old.practisedHours),
             Some(timer.timestampOfNow))
       }
 
       val action = (for {
-        old <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
-        oldParent <- SkillCategoryTable.filter(_.id === old.categoryId).result.head
-        parent <- getParentCategory(update.categoryId)
-        _ <- updateSkill(uuid, update, old, parent.map(_.categoryId))
+        oldAndParent <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
+        (old, parentId) = oldAndParent
+        newParent <- getParentCategory(update.categoryId)
+        newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
+        _ <- updateSkill(uuid, update, old, newParentId)
         updatedSkill <- getSkillAction(uuid).map(_.head)
-      } yield (updatedSkill, parent.map(_.uuid).getOrElse(oldParent.uuid)).asSkill).transactionally
+      } yield updatedSkill.asSkill).transactionally
 
       db.run(action)
     }
@@ -1022,9 +1024,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     // Get endpoints
     override def getSkillCategories: Future[Seq[SkillCategory]] = {
-      val action = for {
-
-      } yield ()
+      ???
     }
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
