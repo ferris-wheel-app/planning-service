@@ -12,7 +12,12 @@ trait PlanningResponseMappings extends FerrisResponseMappings {
 
   def mapSkillCategory(response: Option[SkillCategory]): (Success, SkillCategoryView) = response match {
     case Some(skillCategory) => (StatusCodes.OK, skillCategory.toView)
-    case None => throw BacklogItemNotFoundException()
+    case None => throw SkillCategoryNotFoundException()
+  }
+
+  def mapSkill(response: Option[Skill]): (Success, SkillView) = response match {
+    case Some(skill) => (StatusCodes.OK, skill.toView)
+    case None => throw SkillNotFoundException()
   }
 
   def mapBacklogItem(response: Option[BacklogItem]): (Success, BacklogItemView) = response match {

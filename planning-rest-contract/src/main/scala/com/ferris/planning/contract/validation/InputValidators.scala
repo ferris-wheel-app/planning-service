@@ -135,6 +135,10 @@ object InputValidators extends InputValidation {
     checkField(Proficiency.values.contains(skillCreation.proficiency), ProficiencyField)
   }
 
+  def checkValidity(skillUpdate: SkillUpdate): Unit = {
+    skillUpdate.proficiency.foreach(proficiency => checkField(Proficiency.values.contains(proficiency), ProficiencyField))
+  }
+
   def checkValidity(skillAssociation: AssociatedSkillInsertion): Unit = {
     checkField(SkillRelevance.values.contains(skillAssociation.relevance), SkillRelevanceField)
     checkField(SkillLevel.values.contains(skillAssociation.level), SkillLevelField)

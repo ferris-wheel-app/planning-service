@@ -8,12 +8,22 @@ object ModelToView {
   implicit class SkillCategoryConversion(skillCategory: SkillCategory) {
     def toView: SkillCategoryView = {
       SkillCategoryView(
-        uuid = backlogItem.uuid,
-        summary = backlogItem.summary,
-        description = backlogItem.description,
-        `type` = TypeResolvers.BacklogItemType.toString(backlogItem.`type`),
-        createdOn = backlogItem.createdOn,
-        lastModified = backlogItem.lastModified
+        uuid = skillCategory.uuid,
+        name = skillCategory.name,
+        categoryId = skillCategory.categoryId
+      )
+    }
+  }
+
+  implicit class SkillConversion(skill: Skill) {
+    def toView: SkillView = {
+      SkillView(
+        uuid = skill.uuid,
+        name = skill.name,
+        categoryId = skill.categoryId,
+        proficiency = TypeResolvers.Proficiency.toString(skill.proficiency),
+        practisedHours = skill.practisedHours,
+        lastApplied = skill.lastApplied
       )
     }
   }

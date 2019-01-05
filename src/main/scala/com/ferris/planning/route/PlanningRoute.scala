@@ -21,8 +21,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   implicit def routeEc: ExecutionContext
   implicit val materializer: Materializer
 
-  private val categories = "categories"
-  private val skills = "skills"
+  private val categoriesPathSegment = "categories"
+  private val skillsPathSegment = "skills"
   private val backlogItemsPathSegment = "backlog-items"
   private val epochsPathSegment = "epochs"
   private val yearsPathSegment = "years"
@@ -39,6 +39,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val pyramidPathSegment = "pyramid"
   private val currentPathSegment = "current"
   private val refreshPathSegment = "refresh"
+
+  private val createSkillCategoryRoute = pathPrefix(skillsPathSegment / categoriesPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[SkillCategoryCreation]) { creation =>
+          onSuccess(planningService.createSkillCategory(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val createSkillRoute = pathPrefix(skillsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[SkillCreation]) { creation =>
+          onSuccess(planningService.createSkill(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
 
   private val createBacklogItemRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
@@ -201,6 +225,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       post {
         entity(as[PyramidOfImportanceUpsert]) { creation =>
           onSuccess(planningService.createPyramidOfImportance(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateSkillCategoryRoute = pathPrefix(skillsPathSegment / categoriesPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[SkillCategoryUpdate]) { update =>
+          onSuccess(planningService.updateSkillCategory(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateSkillRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[SkillUpdate]) { update =>
+          onSuccess(planningService.updateSkill(id, update.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
@@ -416,6 +464,26 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getSkillsCategoriesRoute = pathPrefix(skillsPathSegment / categoriesPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getSkills) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getSkillsRoute = pathPrefix(skillsPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getSkills) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getBacklogItemsRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       get {
@@ -608,6 +676,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getSkillCategoryRoute = pathPrefix(skillsPathSegment / categoriesPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getSkillCategory(id))(outcome => complete(mapSkillCategory(outcome)))
+      }
+    }
+  }
+
+  private val getSkillRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getSkill(id))(outcome => complete(mapSkill(outcome)))
+      }
+    }
+  }
+
   private val getBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
@@ -736,6 +820,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val deleteSkillCategoryRoute = pathPrefix(skillsPathSegment / categoriesPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteSkillCategory(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
+  private val deleteSkillRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteSkill(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
   private val deleteBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
@@ -841,6 +941,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   }
 
   val planningRoute: Route = {
+    createSkillCategoryRoute ~
+    createSkillRoute ~
     createBacklogItemRoute ~
     createEpochRoute ~
     createYearRoute ~
@@ -855,6 +957,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     createOneOffRoute ~
     createScheduledOneOffRoute ~
     createPyramidRoute ~
+    updateSkillCategoryRoute ~
+    updateSkillRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
     updateYearRoute ~
@@ -873,6 +977,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     updateScheduledOneOffRoute ~
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~
+    getSkillsCategoriesRoute ~
+    getSkillRoute ~
     getBacklogItemsRoute ~
     getEpochsRoute ~
     getYearsRoute ~
@@ -892,6 +998,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getHobbiesByGoalRoute ~
     getOneOffsRoute ~
     getScheduledOneOffsRoute ~
+    getSkillCategoryRoute ~
+    getSkillRoute ~
     getBacklogItemRoute ~
     getEpochRoute ~
     getYearRoute ~
@@ -908,6 +1016,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getOneOffRoute ~
     getScheduledOneOffRoute ~
     getPyramidRoute ~
+    deleteSkillCategoryRoute ~
+    deleteSkillRoute ~
     deleteBacklogItemRoute ~
     deleteEpochRoute ~
     deleteYearRoute ~

@@ -260,12 +260,28 @@ object Resources {
       categoryId: UUID
     )
 
+    case class SkillCategoryUpdate (
+      uuid: Option[UUID],
+      name: Option[String],
+      categoryId: Option[UUID]
+    )
+
     case class SkillCreation (
       uuid: UUID,
       name: String,
       categoryId: UUID,
       proficiency: String,
       practisedHours: Long
+    ) {
+      checkValidity(this)
+    }
+
+    case class SkillUpdate (
+      uuid: Option[UUID],
+      name: Option[String],
+      categoryId: Option[UUID],
+      proficiency: Option[String],
+      practisedHours: Option[Long]
     ) {
       checkValidity(this)
     }
