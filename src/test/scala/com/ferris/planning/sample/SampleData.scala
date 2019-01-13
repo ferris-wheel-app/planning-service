@@ -16,10 +16,34 @@ object SampleData {
   private val scheduledDateTime = LocalDateTime.of(2018, 12, 3, 17, 16, 20)
 
   object domain {
+    val skillCategoryCreation = CreateSkillCategory(
+      name = "Functional Programming",
+      categoryId = UUID.randomUUID
+    )
+
+    val skillCategoryUpdate = UpdateSkillCategory(
+      name = Some("Functional Programming"),
+      categoryId = Some(UUID.randomUUID)
+    )
+
     val skillCategory = SkillCategory(
       uuid = UUID.randomUUID,
       name = "Functional Programming",
       categoryId = UUID.randomUUID
+    )
+
+    val skillCreation = CreateSkill(
+      name = "Cats",
+      categoryId = UUID.randomUUID,
+      proficiency = Proficiencies.Intermediate,
+      practisedHours = 500L
+    )
+
+    val skillUpdate = UpdateSkill(
+      name = Some("Cats"),
+      categoryId = Some(UUID.randomUUID),
+      proficiency = Some(Proficiencies.Intermediate),
+      practisedHours = Some(500L)
     )
 
     val skill = Skill(
@@ -432,10 +456,34 @@ object SampleData {
   }
 
   object rest {
+    val skillCategoryCreation = SkillCategoryCreation(
+      name = "Functional Programming",
+      categoryId = UUID.randomUUID
+    )
+
+    val skillCategoryUpdate = SkillCategoryUpdate(
+      name = Some("Functional Programming"),
+      categoryId = Some(UUID.randomUUID)
+    )
+
     val skillCategory = SkillCategoryView(
       uuid = domain.skillCategory.uuid,
       name = domain.skillCategory.name,
       categoryId = domain.skillCategory.categoryId
+    )
+
+    val skillCreation = SkillCreation(
+      name = "Cats",
+      categoryId = UUID.randomUUID,
+      proficiency = "intermediate",
+      practisedHours = 500L
+    )
+
+    val skillUpdate = SkillUpdate(
+      name = Some("Cats"),
+      categoryId = Some(UUID.randomUUID),
+      proficiency = Some("intermediate"),
+      practisedHours = Some(500L)
     )
 
     val skill = SkillView(
@@ -445,6 +493,10 @@ object SampleData {
       proficiency = Proficiency.toString(domain.skill.proficiency),
       practisedHours = domain.skill.practisedHours,
       lastApplied = domain.skill.lastApplied
+    )
+
+    val practisedHours = PractisedHours(
+      value = 1000L
     )
 
     val associatedSkillInsertion = AssociatedSkillInsertion(

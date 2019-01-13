@@ -23,6 +23,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   private val categoriesPath = "categories"
   private val skillsPath = "skills"
+  private val practisedHoursPath = "practised-hours"
+  private val incrementPath = "increment"
   private val backlogItemsPath = "backlog-items"
   private val epochsPath = "epochs"
   private val yearsPath = "years"
@@ -92,6 +94,9 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def updateSkill(id: UUID, update: SkillUpdate): Future[SkillView] =
     makePutRequest[SkillUpdate, SkillView](Uri(path = apiPath / skillsPath / id.toString), update)
+
+  def updatePractisedHours(id: UUID, practisedHours: Long): Future[SkillView] =
+    makePutRequest[PractisedHours, SkillView](Uri(path = apiPath / skillsPath / id.toString / practisedHoursPath / incrementPath), PractisedHours(practisedHours))
 
   def updateBacklogItem(id: UUID, update: BacklogItemUpdate): Future[BacklogItemView] =
     makePutRequest[BacklogItemUpdate, BacklogItemView](Uri(path = apiPath / backlogItemsPath / id.toString), update)

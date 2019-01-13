@@ -19,6 +19,7 @@ object InputValidators extends InputValidation {
   private val LaserDonutsField = "laserDonuts"
   private val TiersField = "tiers"
   private val EstimateField = "estimate"
+  private val PractisedHoursField = "practised-hours"
   private val ProficiencyField = "proficiency"
   private val SkillLevelField = "level"
   private val SkillRelevanceField = "relevance"
@@ -142,6 +143,10 @@ object InputValidators extends InputValidation {
   def checkValidity(skillAssociation: AssociatedSkillInsertion): Unit = {
     checkField(SkillRelevance.values.contains(skillAssociation.relevance), SkillRelevanceField)
     checkField(SkillLevel.values.contains(skillAssociation.level), SkillLevelField)
+  }
+
+  def checkValidity(practisedHours: PractisedHours): Unit = {
+    checkField(practisedHours.value >= 0, PractisedHoursField, "practised hours must be a non-negative value")
   }
 
   private def checkEstimate(estimate: Long): Unit = {

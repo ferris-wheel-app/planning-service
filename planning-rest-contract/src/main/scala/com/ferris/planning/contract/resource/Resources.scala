@@ -255,19 +255,16 @@ object Resources {
     }
 
     case class SkillCategoryCreation (
-      uuid: UUID,
       name: String,
       categoryId: UUID
     )
 
     case class SkillCategoryUpdate (
-      uuid: Option[UUID],
       name: Option[String],
       categoryId: Option[UUID]
     )
 
     case class SkillCreation (
-      uuid: UUID,
       name: String,
       categoryId: UUID,
       proficiency: String,
@@ -277,7 +274,6 @@ object Resources {
     }
 
     case class SkillUpdate (
-      uuid: Option[UUID],
       name: Option[String],
       categoryId: Option[UUID],
       proficiency: Option[String],
@@ -290,6 +286,12 @@ object Resources {
       skillId: UUID,
       relevance: String,
       level: String
+    ) {
+      checkValidity(this)
+    }
+
+    case class PractisedHours (
+      value: Long
     ) {
       checkValidity(this)
     }

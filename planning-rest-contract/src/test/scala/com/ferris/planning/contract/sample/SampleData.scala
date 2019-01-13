@@ -11,10 +11,34 @@ object SampleData {
   private val currentYear = LocalDate.now
   private val nextYear = currentYear.plusYears(1)
 
+  val skillCategoryCreation = SkillCategoryCreation(
+    name = "Functional Programming",
+    categoryId = UUID.randomUUID
+  )
+
+  val skillCategoryUpdate = SkillCategoryUpdate(
+    name = Some("Functional Programming"),
+    categoryId = Some(UUID.randomUUID)
+  )
+
   val skillCategory = SkillCategoryView(
     uuid = UUID.randomUUID,
     name = "Functional Programming",
     categoryId = UUID.randomUUID
+  )
+
+  val skillCreation = SkillCreation(
+    name = "Cats",
+    categoryId = UUID.randomUUID,
+    proficiency = "intermediate",
+    practisedHours = 500L
+  )
+
+  val skillUpdate = SkillUpdate(
+    name = Some("Cats"),
+    categoryId = Some(UUID.randomUUID),
+    proficiency = Some("intermediate"),
+    practisedHours = Some(500L)
   )
 
   val skill = SkillView(
@@ -24,6 +48,10 @@ object SampleData {
     proficiency = "intermediate",
     practisedHours = 500L,
     lastApplied = Some(LocalDateTime.now)
+  )
+
+  val practisedHours = PractisedHours(
+    value = 1000L
   )
 
   val associatedSkillInsertion = AssociatedSkillInsertion(

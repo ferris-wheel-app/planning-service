@@ -23,6 +23,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
 
   private val categoriesPathSegment = "categories"
   private val skillsPathSegment = "skills"
+  private val practisedHoursPathSegment = "practised-hours"
+  private val incrementPathSegment = "increment"
   private val backlogItemsPathSegment = "backlog-items"
   private val epochsPathSegment = "epochs"
   private val yearsPathSegment = "years"
@@ -249,6 +251,18 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       put {
         entity(as[SkillUpdate]) { update =>
           onSuccess(planningService.updateSkill(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updatePractisedHoursRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID / practisedHoursPathSegment / incrementPathSegment) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[PractisedHours]) { update =>
+          onSuccess(planningService.updatePractisedHours(id, update.value)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
