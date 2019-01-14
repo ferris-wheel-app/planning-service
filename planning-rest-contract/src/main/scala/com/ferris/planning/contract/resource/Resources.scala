@@ -401,6 +401,7 @@ object Resources {
       summary: String,
       order: Int,
       status: String,
+      associatedSkills: Seq[AssociatedSkillView],
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]
@@ -410,7 +411,6 @@ object Resources {
       uuid: UUID,
       parentId: UUID,
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
       order: Int,
       isDone: Boolean,
       createdOn: LocalDateTime,

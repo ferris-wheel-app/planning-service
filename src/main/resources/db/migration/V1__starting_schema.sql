@@ -262,13 +262,13 @@ create table weave_skill (
   CONSTRAINT skill_fk3 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
-create table todo_skill (
-  todo_id BIGINT NOT NULL,
+create table portion_skill (
+  portion_id BIGINT NOT NULL,
   skill_id BIGINT NOT NULL,
   relevance VARCHAR(36) NOT NULL check (relevance in ('NEEDED', 'TO_BE_ACQUIRED', 'MAINTENANCE')),
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
-  UNIQUE KEY (todo_id, skill_id),
-  CONSTRAINT todo_fk FOREIGN KEY (todo_id) REFERENCES todo (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  UNIQUE KEY (portion_id, skill_id),
+  CONSTRAINT portion_fk FOREIGN KEY (portion_id) REFERENCES portion (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT skill_fk4 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 

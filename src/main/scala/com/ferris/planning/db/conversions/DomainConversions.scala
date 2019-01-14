@@ -143,26 +143,13 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class PortionBuilder(val row: tables.PortionRow) {
-    def asPortion: Portion = Portion(
-      uuid = UUID.fromString(row.uuid),
-      laserDonutId = UUID.fromString(row.laserDonutId),
-      summary = row.summary,
-      order = row.order,
-      status = Statuses.withName(row.status),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
-  }
-
-  implicit class TodoBuilder(val row: (tables.TodoRow, Seq[(tables.TodoSkillRow, UUID)])) {
-    def asTodo: Todo = row match {
-      case (todo, associatedSkills) =>
-        Todo(
-          uuid = UUID.fromString(todo.uuid),
-          parentId = UUID.fromString(todo.parentId),
-          description = todo.description,
+  implicit class PortionBuilder(val row: (tables.PortionRow, Seq[(tables.TodoSkillRow, UUID)])) {
+    def asPortion: Portion = row match {
+      case (portion, associatedSkills) =>
+        Portion(
+          uuid = UUID.fromString(portion.uuid),
+          laserDonutId = UUID.fromString(portion.laserDonutId),
+          summary = portion.summary,
           associatedSkills = associatedSkills.map { case (skill, id) =>
             AssociatedSkill(
               skillId = UUID.fromString(id),
@@ -170,13 +157,26 @@ class DomainConversions(val tables: Tables) {
               level = Proficiencies.skillLevel(skill.level)
             )
           },
-          order = todo.order,
-          isDone = todo.isDone,
-          createdOn = todo.createdOn.toLocalDateTime,
-          lastModified = todo.lastModified.map(_.toLocalDateTime),
-          lastPerformed = todo.lastPerformed.map(_.toLocalDateTime)
+          order = portion.order,
+          status = Statuses.withName(portion.status),
+          createdOn = portion.createdOn.toLocalDateTime,
+          lastModified = portion.lastModified.map(_.toLocalDateTime),
+          lastPerformed = portion.lastPerformed.map(_.toLocalDateTime)
         )
     }
+  }
+
+  implicit class TodoBuilder(val row: tables.TodoRow) {
+    def asTodo: Todo = Todo(
+      uuid = UUID.fromString(row.uuid),
+      parentId = UUID.fromString(row.parentId),
+      description = row.description,
+      order = row.order,
+      isDone = row.isDone,
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
+    )
   }
 
   implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[(tables.HobbySkillRow, UUID)])) {

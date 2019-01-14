@@ -343,6 +343,33 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action) map (row => row.asPortion)
     }
 
+    override def createPortion(creation: CreatePortion): Future[Portion] = {
+      def insertPortionAction(creation: CreatePortion, existingPortions: Seq[PortionRow]): DBIO[PortionRow] = {
+        val row = PortionRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          laserDonutId = creation.laserDonutId,
+          summary = creation.summary,
+          order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
+      }
+      val action = for {
+        existingTodos <- getPortionsByParent(creation.parentId).map(_.map(_._1))
+        todo <- insertTodoAction(creation, existingTodos)
+        todoSkills <- insertTodoSkillsAction(todo.id, creation.associatedSkills)
+      } yield {
+        (todo, todoSkills.zip(creation.associatedSkills).map {
+          case (todoSkill, associatedSkill) => (todoSkill, associatedSkill.skillId)
+        }).asTodo
+      }
+      db.run(action)
+    }
+
     override def createTodo(creation: CreateTodo): Future[Todo] = {
       def insertTodoAction(creation: CreateTodo, existingTodos: Seq[TodoRow]): DBIO[TodoRow] = {
         val row = TodoRow(
@@ -1774,41 +1801,41 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       TodoTable.filter(_.uuid === uuid.toString)
     }
 
-    private def todoWithExtrasByUuid(uuid: UUID) = {
-      todosWithExtras.map(_.filter { case (todo, _) => todo.uuid == uuid.toString })
+    private def portionWithExtrasByUuid(uuid: UUID) = {
+      portionsWithExtras.map(_.filter { case (portion, _) => portion.uuid == uuid.toString })
     }
 
-    private def todosWithExtrasByUuid(uuids: Seq[UUID]) = {
-      todosWithExtras.map(_.filter { case (todo, _) => uuids.contains(todo.uuid) })
+    private def portionsWithExtrasByUuid(uuids: Seq[UUID]) = {
+      portionsWithExtras.map(_.filter { case (portion, _) => uuids.contains(portion.uuid) })
     }
 
-    private def todosByParentId(parentId: UUID) = {
-      todosWithExtras.map(_.filter(_._1.parentId.contains(parentId.toString)).sortBy(_._1.order))
+    private def portionsByParentId(parentId: UUID) = {
+      portionsWithExtras.map(_.filter(_._1.laserDonutId.contains(parentId.toString)).sortBy(_._1.order))
     }
 
-    private def todosWithExtras = {
-      TodoTable
-        .joinLeft(TodoSkillTable)
-        .on(_.id === _.todoId)
+    private def portionsWithExtras = {
+      PortionTable
+        .joinLeft(PortionSkillTable)
+        .on(_.id === _.portionId)
         .joinLeft(SkillTable)
         .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((todo, skillLink), skill) => (todo, skillLink, skill) }
+        .map { case ((portion, skillLink), skill) => (portion, skillLink, skill) }
         .result.map {
         _.collect {
-          case (todo, skillLink, skill) =>
+          case (portion, skillLink, skill) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (todo, skillTuple)
+            (portion, skillTuple)
         }
       }
     }
 
-    private def groupByTodo(todosWithExtras: Seq[(TodoRow, Option[(TodoSkillRow, SkillRow)])]): Seq[(TodoRow, Seq[(TodoSkillRow, UUID)])] = {
-      todosWithExtras.groupBy { case (todo, _) => todo }
-        .map { case (todo, links) =>
-          (todo, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+    private def groupByPortion(portionsWithExtras: Seq[(TodoRow, Option[(PortionSkillRow, SkillRow)])]): Seq[(TodoRow, Seq[(PortionSkillRow, UUID)])] = {
+      portionsWithExtras.groupBy { case (portion, _) => portion }
+        .map { case (portion, links) =>
+          (portion, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
         }.toSeq
     }
 

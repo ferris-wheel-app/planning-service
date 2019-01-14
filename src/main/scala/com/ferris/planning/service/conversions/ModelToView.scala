@@ -155,6 +155,7 @@ object ModelToView {
         summary = portion.summary,
         order = portion.order,
         status = TypeResolvers.Status.toString(portion.status),
+        associatedSkills = portion.associatedSkills.map(_.toView),
         createdOn = portion.createdOn,
         lastModified = portion.lastModified,
         lastPerformed = portion.lastPerformed
@@ -168,7 +169,6 @@ object ModelToView {
         uuid = todo.uuid,
         parentId = todo.parentId,
         description = todo.description,
-        associatedSkills = todo.associatedSkills.map(_.toView),
         order = todo.order,
         isDone = todo.isDone,
         createdOn = todo.createdOn,
