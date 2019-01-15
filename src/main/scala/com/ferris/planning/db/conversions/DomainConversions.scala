@@ -143,7 +143,7 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class PortionBuilder(val row: (tables.PortionRow, Seq[(tables.TodoSkillRow, UUID)])) {
+  implicit class PortionBuilder(val row: (tables.PortionRow, Seq[(tables.PortionSkillRow, UUID)])) {
     def asPortion: Portion = row match {
       case (portion, associatedSkills) =>
         Portion(

@@ -326,24 +326,6 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createPortion(creation: CreatePortion): Future[Portion] = {
-      val action = portionsByParentId(creation.laserDonutId).result.flatMap { existingPortions =>
-        val row = PortionRow(
-          id = 0L,
-          uuid = UUID.randomUUID,
-          laserDonutId = creation.laserDonutId,
-          summary = creation.summary,
-          order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
-          status = creation.status.dbValue,
-          createdOn = timer.timestampOfNow,
-          lastModified = None,
-          lastPerformed = None
-        )
-        (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
-      }.transactionally
-      db.run(action) map (row => row.asPortion)
-    }
-
-    override def createPortion(creation: CreatePortion): Future[Portion] = {
       def insertPortionAction(creation: CreatePortion, existingPortions: Seq[PortionRow]): DBIO[PortionRow] = {
         val row = PortionRow(
           id = 0L,
@@ -359,13 +341,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
       }
       val action = for {
-        existingTodos <- getPortionsByParent(creation.parentId).map(_.map(_._1))
-        todo <- insertTodoAction(creation, existingTodos)
-        todoSkills <- insertTodoSkillsAction(todo.id, creation.associatedSkills)
+        existingPortions <- getPortionsByParent(creation.laserDonutId).map(_.map(_._1))
+        portion <- insertPortionAction(creation, existingPortions)
+        portionSkills <- insertPortionSkillsAction(portion.id, creation.associatedSkills)
       } yield {
-        (todo, todoSkills.zip(creation.associatedSkills).map {
-          case (todoSkill, associatedSkill) => (todoSkill, associatedSkill.skillId)
-        }).asTodo
+        (portion, portionSkills.zip(creation.associatedSkills).map {
+          case (portionSkill, associatedSkill) => (portionSkill, associatedSkill.skillId)
+        }).asPortion
       }
       db.run(action)
     }
@@ -386,14 +368,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         (TodoTable returning TodoTable.map(_.id) into ((todo, id) => todo.copy(id = id))) += row
       }
       val action = for {
-        existingTodos <- getTodosByParent(creation.parentId).map(_.map(_._1))
+        existingTodos <- getTodosByParent(creation.parentId)
         todo <- insertTodoAction(creation, existingTodos)
-        todoSkills <- insertTodoSkillsAction(todo.id, creation.associatedSkills)
-      } yield {
-        (todo, todoSkills.zip(creation.associatedSkills).map {
-          case (todoSkill, associatedSkill) => (todoSkill, associatedSkill.skillId)
-        }).asTodo
-      }
+      } yield todo.asTodo
       db.run(action)
     }
 
@@ -721,40 +698,55 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updatePortion(uuid: UUID, update: UpdatePortion): Future[Portion] = {
-      def updateLaserDonutStatus(uuid: UUID) = {
+      def updatePortion(uuid: UUID, update: UpdatePortion, old: PortionRow) = {
+        val (lastModified, lastPerformed) = getUpdateTimes(
+          contentUpdate = update.laserDonutId :: update.summary :: Nil,
+          statusUpdate = update.status :: Nil
+        )
+        val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status, portion.lastModified, portion.lastPerformed))
         for {
-          portions <- portionsByParentId(uuid).result
-          update <- LaserDonutTable.filter(_.uuid === uuid.toString).map(_.status)
-            .update(getStatusSummary(portions.map(portion => Statuses.withName(portion.status))).dbValue).map(_ > 0)
+          _ <- query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
+            UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
+          updatedPortion <- getPortionAction(uuid).map(_.head)
+          _ <- updatePortionStatus(UUID.fromString(updatedPortion._1.laserDonutId))
+        } yield updatedPortion
+      }
+
+      def updatePortionStatus(uuid: UUID) = {
+        for {
+          portions <- getPortionsByParent(uuid)
+          update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
+            .update(getStatusSummary(portions.map(_._1.status).map(Statuses.withName)).dbValue).map(_ > 0)
         } yield update
       }
 
-      val (lastModified, lastPerformed) = getUpdateTimes(
-        contentUpdate = update.laserDonutId :: update.summary :: Nil,
-        statusUpdate = update.status :: Nil
-      )
-      val query = portionByUuid(uuid).map(portion => (portion.laserDonutId, portion.summary, portion.status,
-        portion.lastModified, portion.lastPerformed))
-      val action = getPortionAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
+      def updateAssociatedSkills(portion: PortionRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
           for {
-            _ <- query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
-              UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
-            updatedPortion <- getPortionAction(uuid).map(_.head)
-            _ <- updateLaserDonutStatus(UUID.fromString(updatedPortion.laserDonutId))
-          } yield updatedPortion
-        } getOrElse DBIO.failed(PortionNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asPortion)
+            _ <- PortionSkillTable.filter(_.portionId === portion.id).delete
+            result <- insertPortionSkillsAction(portion.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(PortionSkillRow, UUID)])
+      }
+
+      val action = (for {
+        portionAndSkills <- getPortionAction(uuid).map(_.getOrElse(throw PortionNotFoundException()))
+        (old, _) = portionAndSkills
+        _ <- updatePortion(uuid, update, old)
+        _ <- updateAssociatedSkills(old)
+        updatedPortion <- getPortionAction(uuid).map(_.head)
+      } yield updatedPortion.asPortion).transactionally
+
+      db.run(action)
     }
 
     override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = {
       def getPortionsAction(uuids: Seq[String]) = {
         PortionTable.filter(_.uuid inSet uuids).sortBy(_.order).result
       }
-      val action = portionsByParentId(laserDonutId).result.flatMap { portions =>
+      val action = portionsByParentId(laserDonutId).flatMap { portions =>
         if (portions.size <= update.reordered.size) {
-          val portionIds = portions.map(_.uuid)
+          val portionIds = portions.map(_._1.uuid)
           update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
               portionByUuid(uuid).map(_.order).update(index + 1)
@@ -772,53 +764,37 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateTodo(uuid: UUID, update: UpdateTodo): Future[Todo] = {
-      def updateTodo(uuid: UUID, update: UpdateTodo, old: TodoRow) = {
-        val (lastModified, lastPerformed) = getUpdateTimes(
-          contentUpdate = update.parentId :: update.description :: Nil,
-          statusUpdate = update.isDone :: Nil
-        )
-        val query = todoByUuid(uuid).map(todo => (todo.parentId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
-        for {
-          _ <- query.update(UpdateId.keepOrReplace(update.parentId, old.parentId), update.description.getOrElse(old.description),
-            UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
-          updatedTodo <- getTodoAction(uuid).map(_.head)
-          _ <- updatePortionStatus(UUID.fromString(updatedTodo._1.parentId))
-        } yield updatedTodo
-      }
-
       def updatePortionStatus(uuid: UUID) = {
         for {
-          todos <- getTodosByParent(uuid)
+          todos <- todosByParentId(uuid).result
           update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
-            .update(getOutcomeSummary(todos.map(_._1.isDone: Boolean)).dbValue).map(_ > 0)
+            .update(getOutcomeSummary(todos.map(todo => todo.isDone: Boolean)).dbValue).map(_ > 0)
         } yield update
       }
 
-      def updateAssociatedSkills(todo: TodoRow) = update.associatedSkills match {
-        case Some(associatedSkills) =>
+      val (lastModified, lastPerformed) = getUpdateTimes(
+        contentUpdate = update.parentId :: update.description :: Nil,
+        statusUpdate = update.isDone :: Nil
+      )
+      val query = todoByUuid(uuid).map(todo => (todo.parentId, todo.description, todo.isDone, todo.lastModified, todo.lastPerformed))
+      val action = getTodoAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
           for {
-            _ <- TodoSkillTable.filter(_.todoId === todo.id).delete
-            result <- insertTodoSkillsAction(todo.id, associatedSkills)
-          } yield result.zip(associatedSkills.map(_.skillId))
-        case None => DBIO.successful(Seq.empty[(TodoSkillRow, UUID)])
-      }
-
-      val action = (for {
-        todoAndSkills <- getTodoAction(uuid).map(_.getOrElse(throw TodoNotFoundException()))
-        (old, _) = todoAndSkills
-        _ <- updateTodo(uuid, update, old)
-        _ <- updateAssociatedSkills(old)
-        updatedTodo <- getTodoAction(uuid).map(_.head)
-      } yield updatedTodo.asTodo).transactionally
-
-      db.run(action)
+            _ <- query.update(UpdateId.keepOrReplace(update.parentId, old.parentId), update.description.getOrElse(old.description),
+              UpdateBoolean.keepOrReplace(update.isDone, old.isDone), lastModified, lastPerformed)
+            updatedTodo <- getTodoAction(uuid).map(_.head)
+            _ <- updatePortionStatus(UUID.fromString(updatedTodo.parentId))
+          } yield updatedTodo
+        } getOrElse DBIO.failed(TodoNotFoundException())
+      }.transactionally
+      db.run(action).map(row => row.asTodo)
     }
 
     override def updateTodos(parentId: UUID, update: UpdateList): Future[Seq[Todo]] = {
       val action = getTodosByParent(parentId).flatMap { todos =>
         if (todos.size <= update.reordered.size) {
-          val todoIds = todos.map(_._1.uuid).map(UUID.fromString)
-          update.reordered.filterNot(id => todoIds.contains(id.toString)) match {
+          val todoIds = todos.map(_.uuid).map(UUID.fromString)
+          update.reordered.filterNot(id => todoIds.contains(id)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
               todoByUuid(uuid).map(_.order).update(index + 1)
             }).andThen(getTodosAction(todoIds).map(_.map(_.asTodo)))
@@ -1403,19 +1379,19 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield weaveSkills
     }
 
-    private def insertTodoSkillsAction(todoId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[TodoSkillRow]] = {
+    private def insertPortionSkillsAction(portionId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[PortionSkillRow]] = {
       for {
         skills <- getSkillsAction(associatedSkills.map(_.skillId))
-        todoSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
-          TodoSkillRow(
-            todoId = todoId,
+        portionSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          PortionSkillRow(
+            portionId = portionId,
             skillId = skill.id,
             relevance = associatedSkill.relevance.dbValue,
             level = associatedSkill.level.dbValue
           )
         }
-        _ <- TodoSkillTable ++= todoSkills
-      } yield todoSkills
+        _ <- PortionSkillTable ++= portionSkills
+      } yield portionSkills
     }
 
     private def insertHobbySkillsAction(hobbyId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[HobbySkillRow]] = {
@@ -1559,24 +1535,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       laserDonutByUuid(uuid).result.headOption
     }
 
+    private def getPortionsAction = {
+      portionsWithExtras.map(groupByPortion)
+    }
+
+    private def getPortionsAction(uuids: Seq[UUID]) = {
+      portionsWithExtrasByUuid(uuids).map(groupByPortion(_))
+    }
+
+    private def getPortionsByParent(parentId: UUID) = {
+      portionsByParentId(parentId).map(groupByPortion)
+    }
+
     private def getPortionAction(uuid: UUID) = {
-      portionByUuid(uuid).result.headOption
+      portionWithExtrasByUuid(uuid).map(groupByPortion(_).headOption)
     }
 
     private def getTodosAction = {
-      todosWithExtras.map(groupByTodo)
+      TodoTable.result
     }
 
     private def getTodosAction(uuids: Seq[UUID]) = {
-      todosWithExtrasByUuid(uuids).map(groupByTodo(_))
-    }
-
-    private def getTodosByParent(parentId: UUID) = {
-      todosByParentId(parentId).map(groupByTodo)
+      TodoTable.filter(_.uuid inSet uuids).result
     }
 
     private def getTodoAction(uuid: UUID) = {
-      todoWithExtrasByUuid(uuid).map(groupByTodo(_).headOption)
+      todoByUuid(uuid).result.headOption
+    }
+
+    private def getTodosByParent(parentId: UUID) = {
+      todosByParentId(parentId).result
     }
 
     private def getHobbiesAction = {
@@ -1793,8 +1781,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       PortionTable.filter(_.uuid === uuid.toString)
     }
 
-    private def portionsByParentId(laserDonutId: UUID) = {
-      PortionTable.filter(_.laserDonutId === laserDonutId.toString).sortBy(_.order)
+    private def todosByParentId(parentId: UUID) = {
+      TodoTable.filter(_.parentId === parentId.toString).sortBy(_.order)
     }
 
     private def todoByUuid(uuid: UUID) = {
@@ -1832,7 +1820,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
     }
 
-    private def groupByPortion(portionsWithExtras: Seq[(TodoRow, Option[(PortionSkillRow, SkillRow)])]): Seq[(TodoRow, Seq[(PortionSkillRow, UUID)])] = {
+    private def groupByPortion(portionsWithExtras: Seq[(PortionRow, Option[(PortionSkillRow, SkillRow)])]): Seq[(PortionRow, Seq[(PortionSkillRow, UUID)])] = {
       portionsWithExtras.groupBy { case (portion, _) => portion }
         .map { case (portion, links) =>
           (portion, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))

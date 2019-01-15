@@ -126,25 +126,25 @@ object Commands {
   case class CreatePortion (
     laserDonutId: UUID,
     summary: String,
-    status: Statuses.Status
+    status: Statuses.Status,
+    associatedSkills: Seq[AssociatedSkill]
   )
 
   case class UpdatePortion (
     laserDonutId: Option[UUID],
     summary: Option[String],
-    status: Option[Statuses.Status]
+    status: Option[Statuses.Status],
+    associatedSkills: Option[Seq[AssociatedSkill]]
   )
 
   case class CreateTodo (
     parentId: UUID,
-    description: String,
-    associatedSkills: Seq[AssociatedSkill]
+    description: String
   )
 
   case class UpdateTodo (
     parentId: Option[UUID],
     description: Option[String],
-    associatedSkills: Option[Seq[AssociatedSkill]],
     isDone: Option[Boolean]
   )
 
