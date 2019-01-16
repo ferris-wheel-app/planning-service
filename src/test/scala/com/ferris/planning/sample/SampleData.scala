@@ -267,13 +267,15 @@ object SampleData {
     val portionCreation = CreatePortion(
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
-      status = Statuses.InProgress
+      status = Statuses.InProgress,
+      associatedSkills = associatedSkill :: Nil
     )
 
     val portionUpdate = UpdatePortion(
       laserDonutId = Some(UUID.randomUUID),
       summary = Some("Split into sub-projects"),
-      status = Some(Statuses.InProgress)
+      status = Some(Statuses.InProgress),
+      associatedSkills = Some(associatedSkill :: Nil)
     )
 
     val portion = Portion(
@@ -282,6 +284,7 @@ object SampleData {
       summary = "Write tests",
       order = 13,
       status = Statuses.InProgress,
+      associatedSkills = associatedSkill :: Nil,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -289,14 +292,12 @@ object SampleData {
 
     val todoCreation = CreateTodo(
       parentId = UUID.randomUUID,
-      description = "Create sample data for tests",
-      associatedSkills = associatedSkill :: Nil
+      description = "Create sample data for tests"
     )
 
     val todoUpdate = UpdateTodo(
       parentId = Some(UUID.randomUUID),
       description = Some("Create repository tests"),
-      associatedSkills = Some(associatedSkill :: Nil),
       isDone = Some(true)
     )
 
@@ -304,7 +305,6 @@ object SampleData {
       uuid = UUID.randomUUID,
       parentId = UUID.randomUUID,
       description = "Create sample data for tests",
-      associatedSkills = associatedSkill :: Nil,
       order = 4,
       isDone = true,
       createdOn = LocalDateTime.now,
@@ -717,13 +717,15 @@ object SampleData {
     val portionCreation = PortionCreation(
       laserDonutId = domain.portionCreation.laserDonutId,
       summary = domain.portionCreation.summary,
-      status = Status.toString(domain.portionCreation.status)
+      status = Status.toString(domain.portionCreation.status),
+      associatedSkills = associatedSkillInsertion :: Nil
     )
 
     val portionUpdate = PortionUpdate(
       laserDonutId = domain.portionUpdate.laserDonutId,
       summary = domain.portionUpdate.summary,
-      status = domain.portionUpdate.status.map(Status.toString)
+      status = domain.portionUpdate.status.map(Status.toString),
+      associatedSkills = Some(associatedSkillInsertion :: Nil)
     )
 
     val portion = PortionView(
@@ -732,6 +734,7 @@ object SampleData {
       summary = domain.portion.summary,
       order = domain.portion.order,
       status = Status.toString(domain.portion.status),
+      associatedSkills = associatedSkill :: Nil,
       createdOn = domain.portion.createdOn,
       lastModified = domain.portion.lastModified,
       lastPerformed = domain.portion.lastPerformed
@@ -739,14 +742,12 @@ object SampleData {
 
     val todoCreation = TodoCreation(
       parentId = domain.todoCreation.parentId,
-      description = domain.todoCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil
+      description = domain.todoCreation.description
     )
 
     val todoUpdate = TodoUpdate(
       parentId = domain.todoUpdate.parentId,
       description = domain.todoUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
       isDone = domain.todoUpdate.isDone
     )
 
@@ -754,7 +755,6 @@ object SampleData {
       uuid = domain.todo.uuid,
       parentId = domain.todo.parentId,
       description = domain.todo.description,
-      associatedSkills = associatedSkill :: Nil,
       order = domain.todo.order,
       isDone = domain.todo.isDone,
       createdOn = domain.todo.createdOn,

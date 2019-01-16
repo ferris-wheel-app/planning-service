@@ -148,7 +148,8 @@ object Resources {
     case class PortionCreation (
       laserDonutId: UUID,
       summary: String,
-      status: String
+      status: String,
+      associatedSkills: Seq[AssociatedSkillInsertion]
     ) {
       checkValidity(this)
     }
@@ -156,21 +157,20 @@ object Resources {
     case class PortionUpdate (
       laserDonutId: Option[UUID],
       summary: Option[String],
-      status: Option[String]
+      status: Option[String],
+      associatedSkills: Option[Seq[AssociatedSkillInsertion]]
     ) {
       checkValidity(this)
     }
 
     case class TodoCreation (
       parentId: UUID,
-      description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion]
+      description: String
     )
 
     case class TodoUpdate (
       parentId: Option[UUID],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
       isDone: Option[Boolean]
     )
 

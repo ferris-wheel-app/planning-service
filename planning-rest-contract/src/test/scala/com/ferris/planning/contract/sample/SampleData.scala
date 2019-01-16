@@ -272,13 +272,15 @@ object SampleData {
   val portionCreation = PortionCreation(
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
-    status = "in_progress"
+    status = "in_progress",
+    associatedSkills = associatedSkillInsertion :: Nil
   )
 
   val portionUpdate = PortionUpdate(
     laserDonutId = Some(UUID.randomUUID),
     summary = Some("Split into sub-projects"),
-    status = Some("in_progress")
+    status = Some("in_progress"),
+    associatedSkills = Some(associatedSkillInsertion :: Nil)
   )
 
   val portion = PortionView(
@@ -295,14 +297,12 @@ object SampleData {
 
   val todoCreation = TodoCreation(
     parentId = UUID.randomUUID,
-    description = "Create sample data for tests",
-    associatedSkills = associatedSkillInsertion :: Nil
+    description = "Create sample data for tests"
   )
 
   val todoUpdate = TodoUpdate(
     parentId = Some(UUID.randomUUID),
     description = Some("Create repository tests"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
     isDone = Some(true)
   )
 

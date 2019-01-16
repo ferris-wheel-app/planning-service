@@ -194,7 +194,8 @@ object ExternalToCommand {
     override def toCommand = CreatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      status = TypeResolvers.Status.withName(portion.status)
+      status = TypeResolvers.Status.withName(portion.status),
+      associatedSkills = portion.associatedSkills.map(_.toCommand)
     )
   }
 
@@ -202,15 +203,15 @@ object ExternalToCommand {
     override def toCommand = UpdatePortion(
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
-      status = portion.status.map(TypeResolvers.Status.withName)
+      status = portion.status.map(TypeResolvers.Status.withName),
+      associatedSkills = portion.associatedSkills.map(_.map(_.toCommand))
     )
   }
 
   implicit class TodoCreationConversion(todo: TodoCreation) extends CommandConversion[CreateTodo] {
     override def toCommand = CreateTodo(
       parentId = todo.parentId,
-      description = todo.description,
-      associatedSkills = todo.associatedSkills.map(_.toCommand)
+      description = todo.description
     )
   }
 
@@ -218,7 +219,6 @@ object ExternalToCommand {
     override def toCommand = UpdateTodo(
       parentId = todo.parentId,
       description = todo.description,
-      associatedSkills = todo.associatedSkills.map(_.map(_.toCommand)),
       isDone = todo.isDone
     )
   }

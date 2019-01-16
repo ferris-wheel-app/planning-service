@@ -14,6 +14,7 @@ import com.ferris.planning.scheduler.LifeSchedulerComponent
 import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateException, _}
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
+import slick.dbio.DBIOAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -741,16 +742,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = {
-      def getPortionsAction(uuids: Seq[String]) = {
-        PortionTable.filter(_.uuid inSet uuids).sortBy(_.order).result
-      }
       val action = portionsByParentId(laserDonutId).flatMap { portions =>
         if (portions.size <= update.reordered.size) {
           val portionIds = portions.map(_._1.uuid)
           update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
               portionByUuid(uuid).map(_.order).update(index + 1)
-            }).andThen(getPortionsAction(portionIds))
+            }).andThen(getPortionsAction(portionIds.map(UUID.fromString)))
             case outliers => DBIO.failed(
               InvalidPortionsUpdateException(s"the portions (${outliers.mkString(", ")}) do not belong to the laser-donut $laserDonutId")
             )
@@ -1135,11 +1133,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getPortions: Future[Seq[Portion]] = {
-      db.run(PortionTable.result.map(_.map(_.asPortion)))
+      db.run(getPortionsAction.map(_.map(_.asPortion)))
     }
 
     override def getPortions(laserDonutId: UUID): Future[Seq[Portion]] = {
-      db.run(portionsByParentId(laserDonutId).result.map(_.map(_.asPortion)))
+      db.run(getPortionsByParent(laserDonutId).map(_.map(_.asPortion)))
     }
 
     override def getPortion(uuid: UUID): Future[Option[Portion]] = {
@@ -1147,10 +1145,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getCurrentPortion: Future[Option[Portion]] = {
-      val action = (for {
+      val currentPortionRow = (for {
         currentActivity <- CurrentActivityTable
         portionRow <- PortionTable if portionRow.id === currentActivity.currentPortion
       } yield portionRow).result.headOption
+
+      val action = for {
+        portionRow <- currentPortionRow
+        currentPortion <- portionRow.map(row => getPortionAction(UUID.fromString(row.uuid))).getOrElse(DBIOAction.successful(None))
+      } yield currentPortion
+
       db.run(action).map(_.map(_.asPortion))
     }
 
@@ -1279,9 +1283,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def deleteTodo(uuid: UUID): Future[Boolean] = {
       val action = (for {
-        todoAndSkills <- getTodoAction(uuid).map(_.getOrElse(throw TodoNotFoundException()))
-        (todo, _) = todoAndSkills
-        _ <- TodoSkillTable.filter(_.todoId === todo.id).delete
+        todo <- getTodoAction(uuid).map(_.getOrElse(throw TodoNotFoundException()))
         result <- TodoTable.filter(_.id === todo.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
