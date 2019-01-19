@@ -1,6 +1,6 @@
 package com.ferris.planning.repo
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateList
@@ -18,7 +18,7 @@ import com.ferris.utils.MockTimerComponent
 import org.mockito.Matchers.{eq => eqTo}
 import org.mockito.Mockito.when
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class PlanningRepositoryTest extends AsyncFunSpec
@@ -29,6 +29,8 @@ class PlanningRepositoryTest extends AsyncFunSpec
   with H2PlanningRepositoryComponent
   with MockTimerComponent
   with MockLifeSchedulerComponent {
+
+  implicit val defaultTimeout: PatienceConfig = PatienceConfig(scaled(15.seconds))
 
   implicit val dbTimeout: FiniteDuration = 20.seconds
 
@@ -428,7 +430,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created2 = repo.createThread(SD.threadCreation).futureValue
         val retrieved = repo.getThreads.futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
 
       it("should retrieve a list of threads based on the goal they belong to") {
@@ -439,7 +441,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         repo.createThread(SD.threadCreation.copy(goalId = Some(otherGoalId))).futureValue
         val retrieved = repo.getThreads(goalId).futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
     }
 
@@ -504,7 +506,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created2 = repo.createWeave(SD.weaveCreation).futureValue
         val retrieved = repo.getWeaves.futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
 
       it("should retrieve a list of weaves based on the goal they belong to") {
@@ -515,7 +517,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         repo.createWeave(SD.weaveCreation.copy(goalId = Some(otherGoalId))).futureValue
         val retrieved = repo.getWeaves(goalId).futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
     }
 
@@ -701,17 +703,18 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
       it("should reorder a list of portions that belong to a specific laser-donut") {
         val laserDonutId = UUID.randomUUID
-        val first = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
-        val second = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
-        val third = repo.createPortion(SD.portionCreation.copy(laserDonutId = laserDonutId)).futureValue
+        val first = repo.createPortion(SD.portionCreation.copy(summary = "first-before", laserDonutId = laserDonutId)).futureValue
+        val second = repo.createPortion(SD.portionCreation.copy(summary = "second-before", laserDonutId = laserDonutId)).futureValue
+        val third = repo.createPortion(SD.portionCreation.copy(summary = "third-before", laserDonutId = laserDonutId)).futureValue
+        val fourth = repo.createPortion(SD.portionCreation.copy(summary = "fourth-before", laserDonutId = laserDonutId)).futureValue
         val beforeUpdate = repo.getPortions(laserDonutId).futureValue
-        val update = UpdateList(second.uuid :: third.uuid :: first.uuid :: Nil)
+        val update = UpdateList(second.uuid :: fourth.uuid :: third.uuid :: first.uuid :: Nil)
 
         repo.updatePortions(laserDonutId, update).futureValue
         val afterUpdate = repo.getPortions(laserDonutId).futureValue
 
-        beforeUpdate should contain theSameElementsInOrderAs (first :: second :: third :: Nil)
-        afterUpdate should contain theSameElementsInOrderAs (second.copy(order = 1) :: third.copy(order = 2) :: first.copy(order = 3) :: Nil)
+        beforeUpdate should contain theSameElementsInOrderAs (first :: second :: third :: fourth :: Nil)
+        afterUpdate should contain theSameElementsInOrderAs (second.copy(order = 1) :: fourth.copy(order = 2) :: third.copy(order = 3) :: first.copy(order = 4) :: Nil)
       }
 
       it("should throw an exception if an invalid portion id is given in the update list") {
@@ -1129,7 +1132,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created2 = repo.createHobby(SD.hobbyCreation).futureValue
         val retrieved = repo.getHobbies.futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
 
       it("should retrieve a list of hobbies based on the goal they belong to") {
@@ -1140,7 +1143,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         repo.createHobby(SD.hobbyCreation.copy(goalId = Some(otherGoalId))).futureValue
         val retrieved = repo.getHobbies(goalId).futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
     }
 
@@ -1303,7 +1306,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         val created2 = repo.createScheduledOneOff(SD.scheduledOneOffCreation).futureValue
         val retrieved = repo.getScheduledOneOffs(None).futureValue
         retrieved should not be empty
-        retrieved shouldBe Seq(created1, created2)
+        retrieved should contain theSameElementsAs Seq(created1, created2)
       }
 
       it("should retrieve a list of scheduled-one-offs by date") {

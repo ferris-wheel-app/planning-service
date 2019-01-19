@@ -133,6 +133,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
   override val repo = new SqlPlanningRepository(DefaultPlanningServiceConfig.apply)
   val db: tables.profile.api.Database
 
+  implicit val timestampOrdering: Ordering[Timestamp] = Ordering.by(_.toString)
+  implicit val dateOrdering: Ordering[Date] = Ordering.by(_.toString)
+
   class SqlPlanningRepository(config: PlanningServiceConfig) extends PlanningRepository {
 
     // Create endpoints
@@ -333,7 +336,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           uuid = UUID.randomUUID,
           laserDonutId = creation.laserDonutId,
           summary = creation.summary,
-          order = existingPortions.lastOption.map(_.order + 1).getOrElse(1),
+          order = existingPortions.sortBy(_.order).lastOption.map(_.order + 1).getOrElse(1),
           status = creation.status.dbValue,
           createdOn = timer.timestampOfNow,
           lastModified = None,
@@ -709,15 +712,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           _ <- query.update(UpdateId.keepOrReplace(update.laserDonutId, old.laserDonutId), update.summary.getOrElse(old.summary),
             UpdateTypeEnum.keepOrReplace(update.status, old.status), lastModified, lastPerformed)
           updatedPortion <- getPortionAction(uuid).map(_.head)
-          _ <- updatePortionStatus(UUID.fromString(updatedPortion._1.laserDonutId))
+          _ <- updateLaserDonutStatus(UUID.fromString(updatedPortion._1.laserDonutId))
         } yield updatedPortion
       }
 
-      def updatePortionStatus(uuid: UUID) = {
+      def updateLaserDonutStatus(uuid: UUID) = {
         for {
-          portions <- getPortionsByParent(uuid)
-          update <- PortionTable.filter(_.uuid === uuid.toString).map(_.status)
-            .update(getStatusSummary(portions.map(_._1.status).map(Statuses.withName)).dbValue).map(_ > 0)
+          portions <- portionsByParentId(uuid)
+          update <- LaserDonutTable.filter(_.uuid === uuid.toString).map(_.status)
+            .update(getStatusSummary(portions.map(portion => Statuses.withName(portion._1.status))).dbValue).map(_ > 0)
         } yield update
       }
 
@@ -742,13 +745,17 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updatePortions(laserDonutId: UUID, update: UpdateList): Future[Seq[Portion]] = {
+      def getSortedPortions(uuids: Seq[UUID]) = {
+        portionsWithExtrasByUuid(uuids).map(groupByPortion(_)).map(_.sortBy(_._1.order))
+      }
+
       val action = portionsByParentId(laserDonutId).flatMap { portions =>
         if (portions.size <= update.reordered.size) {
           val portionIds = portions.map(_._1.uuid)
           update.reordered.filterNot(id => portionIds.contains(id.toString)) match {
             case Nil => DBIO.sequence(update.reordered.zipWithIndex.map { case (uuid, index) =>
               portionByUuid(uuid).map(_.order).update(index + 1)
-            }).andThen(getPortionsAction(portionIds.map(UUID.fromString)))
+            }).andThen(getSortedPortions(portionIds.map(UUID.fromString)))
             case outliers => DBIO.failed(
               InvalidPortionsUpdateException(s"the portions (${outliers.mkString(", ")}) do not belong to the laser-donut $laserDonutId")
             )
@@ -1049,7 +1056,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
-      db.run(BacklogItemTable.result.map(_.map(_.asBacklogItem)))
+      db.run(BacklogItemTable.result.map(_.sortBy(_.createdOn).map(_.asBacklogItem)))
     }
 
     override def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]] = {
@@ -1057,7 +1064,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getEpochs: Future[Seq[Epoch]] = {
-      db.run(EpochTable.result.map(_.map(_.asEpoch)))
+      db.run(EpochTable.result.map(_.sortBy(_.createdOn).map(_.asEpoch)))
     }
 
     override def getEpoch(uuid: UUID): Future[Option[Epoch]] = {
@@ -1065,7 +1072,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getYears: Future[Seq[Year]] = {
-      db.run(YearTable.result.map(_.map(_.asYear)))
+      db.run(YearTable.result.map(_.sortBy(_.startDate).map(_.asYear)))
     }
 
     override def getYear(uuid: UUID): Future[Option[Year]] = {
@@ -1073,7 +1080,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getThemes: Future[Seq[Theme]] = {
-      db.run(ThemeTable.result.map(_.map(_.asTheme)))
+      db.run(ThemeTable.result.map(_.sortBy(_.createdOn).map(_.asTheme)))
     }
 
     override def getTheme(uuid: UUID): Future[Option[Theme]] = {
@@ -1081,7 +1088,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getGoals: Future[Seq[Goal]] = {
-      db.run(getGoalsAction.map(_.map(_.asGoal)))
+      db.run(getGoalsAction.map(_.sortBy(_._1.createdOn).map(_.asGoal)))
     }
 
     override def getGoal(uuid: UUID): Future[Option[Goal]] = {
@@ -1089,11 +1096,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getThreads: Future[Seq[Thread]] = {
-      db.run(getThreadsAction.map(_.map(_.asThread)))
+      db.run(getThreadsAction.map(_.sortBy(_._1.createdOn).map(_.asThread)))
     }
 
     override def getThreads(goalId: UUID): Future[Seq[Thread]] = {
-      db.run(getThreadsByParent(goalId).map(_.map(_.asThread)))
+      db.run(getThreadsByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asThread)))
     }
 
     override def getThread(uuid: UUID): Future[Option[Thread]] = {
@@ -1101,11 +1108,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getWeaves: Future[Seq[Weave]] = {
-      db.run(getWeavesAction.map(_.map(_.asWeave)))
+      db.run(getWeavesAction.map(_.sortBy(_._1.createdOn).map(_.asWeave)))
     }
 
     override def getWeaves(goalId: UUID): Future[Seq[Weave]] = {
-      db.run(getWeavesByParent(goalId).map(_.map(_.asWeave)))
+      db.run(getWeavesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asWeave)))
     }
 
     override def getWeave(uuid: UUID): Future[Option[Weave]] = {
@@ -1113,11 +1120,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getLaserDonuts: Future[Seq[LaserDonut]] = {
-      db.run(LaserDonutTable.result.map(_.map(_.asLaserDonut)))
+      db.run(LaserDonutTable.result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
     }
 
     override def getLaserDonuts(goalId: UUID): Future[Seq[LaserDonut]] = {
-      db.run(laserDonutsByParentId(goalId).result.map(_.map(_.asLaserDonut)))
+      db.run(laserDonutsByParentId(goalId).result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
     }
 
     override def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = {
@@ -1171,11 +1178,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getHobbies: Future[Seq[Hobby]] = {
-      db.run(getHobbiesAction.map(_.map(_.asHobby)))
+      db.run(getHobbiesAction.map(_.sortBy(_._1.createdOn).map(_.asHobby)))
     }
 
     override def getHobbies(goalId: UUID): Future[Seq[Hobby]] = {
-      db.run(getHobbiesByParent(goalId).map(_.map(_.asHobby)))
+      db.run(getHobbiesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asHobby)))
     }
 
     override def getHobby(uuid: UUID): Future[Option[Hobby]] = {
@@ -1195,7 +1202,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         getScheduledOneOffsAction
           .map(_.filter(_._1.occursOn.toLocalDateTime.toLocalDate == chosenDate))
       }.getOrElse(getScheduledOneOffsAction)
-      val action = retrieval.map(_.map(_.asScheduledOneOff))
+      val action = retrieval.map(_.sortBy(_._1.occursOn).map(_.asScheduledOneOff))
       db.run(action)
     }
 
@@ -1538,15 +1545,15 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getPortionsAction = {
-      portionsWithExtras.map(groupByPortion)
+      portionsWithExtras.map(groupByPortion).map(_.sortBy(_._1.order))
     }
 
     private def getPortionsAction(uuids: Seq[UUID]) = {
-      portionsWithExtrasByUuid(uuids).map(groupByPortion(_))
+      portionsWithExtrasByUuid(uuids).map(groupByPortion(_)).map(_.sortBy(_._1.order))
     }
 
     private def getPortionsByParent(parentId: UUID) = {
-      portionsByParentId(parentId).map(groupByPortion)
+      portionsByParentId(parentId).map(groupByPortion).map(_.sortBy(_._1.order))
     }
 
     private def getPortionAction(uuid: UUID) = {
@@ -1582,11 +1589,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getOneOffsAction = {
-      oneOffsWithExtras.map(groupByOneOff)
+      oneOffsWithExtras.map(groupByOneOff).map(_.sortBy(_._1.order))
     }
 
     private def getOneOffsAction(uuids: Seq[UUID]) = {
-      oneOffsWithExtrasByUuid(uuids).map(groupByOneOff)
+      oneOffsWithExtrasByUuid(uuids).map(groupByOneOff).map(_.sortBy(_._1.order))
     }
 
     private def getOneOffAction(uuid: UUID) = {
@@ -1792,11 +1799,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def portionWithExtrasByUuid(uuid: UUID) = {
-      portionsWithExtras.map(_.filter { case (portion, _) => portion.uuid == uuid.toString })
+      portionsWithExtrasByUuid(Seq(uuid))
     }
 
     private def portionsWithExtrasByUuid(uuids: Seq[UUID]) = {
-      portionsWithExtras.map(_.filter { case (portion, _) => uuids.contains(portion.uuid) })
+      portionsWithExtras.map(_.filter { case (portion, _) => uuids.map(_.toString).contains(portion.uuid) })
     }
 
     private def portionsByParentId(parentId: UUID) = {
