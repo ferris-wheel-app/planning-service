@@ -213,7 +213,10 @@ create table skill_category (
   id BIGINT NOT NULL AUTO_INCREMENT,
   uuid VARCHAR(36) NOT NULL,
   name VARCHAR(256) NOT NULL,
-  category_id BIGINT NOT NULL,
+  category_id BIGINT,
+  created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid),
   CONSTRAINT category_fk1 FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -227,6 +230,9 @@ create table skill (
   proficiency VARCHAR(36) NOT NULL check (proficiency in ('ZERO', 'BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   practised_hours BIGINT NOT NULL,
   last_applied TIMESTAMP,
+  created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP,
+  last_performed TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid),
   CONSTRAINT category_fk2 FOREIGN KEY (category_id) REFERENCES skill_category (id) ON DELETE RESTRICT ON UPDATE RESTRICT

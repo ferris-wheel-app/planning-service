@@ -1451,7 +1451,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillCategoryAction(uuid: UUID) = {
       for {
         category <- skillCategoryByUuid(uuid).result.headOption
-        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.map(_.categoryId)).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.categoryId)).result.headOption
       } yield (category, parent) match {
         case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
         case _ => None
@@ -1461,7 +1461,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillCategoryAction(id: Long) = {
       for {
         category <- skillCategoryById(id).result.headOption
-        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.map(_.categoryId)).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.categoryId)).result.headOption
       } yield (category, parent) match {
         case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
         case _ => None

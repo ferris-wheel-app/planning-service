@@ -43,6 +43,67 @@ class PlanningRepositoryTest extends AsyncFunSpec
     super.beforeEach
   }
 
+  describe("skill category") {
+    describe("creating") {
+      it("should create a skill category item") {
+        val created = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        created.summary shouldBe SD.backlogItemCreation.summary
+        created.description shouldBe SD.backlogItemCreation.description
+        created.`type` shouldBe SD.backlogItemCreation.`type`
+      }
+    }
+
+    describe("updating") {
+      it("should update a backlog item") {
+        val original = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val updated = repo.updateBacklogItem(original.uuid, SD.backlogItemUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.summary shouldBe SD.backlogItemUpdate.summary.value
+        updated.description shouldBe SD.backlogItemUpdate.description.value
+        updated.`type` shouldBe SD.backlogItemUpdate.`type`.value
+      }
+
+      it("should throw an exception if a message is not found") {
+        whenReady(repo.updateBacklogItem(UUID.randomUUID, SD.backlogItemUpdate).failed) { exception =>
+          exception shouldBe BacklogItemNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a backlog-item") {
+        val created = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val retrieved = repo.getBacklogItem(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a backlog-item is not found") {
+        val retrieved = repo.getBacklogItem(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of backlog-items") {
+        val created1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val created2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val retrieved = repo.getBacklogItems.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a backlog-item") {
+        val created = repo.createBacklogItem(SD.backlogItemCreation).futureValue
+        val deletion = repo.deleteBacklogItem(created.uuid).futureValue
+        val retrieved = repo.getBacklogItem(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
   describe("backlog item") {
     describe("creating") {
       it("should create a backlog item") {
