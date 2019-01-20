@@ -13,30 +13,30 @@ object SampleData {
 
   val skillCategoryCreation = SkillCategoryCreation(
     name = "Functional Programming",
-    categoryId = UUID.randomUUID
+    parentCategory = UUID.randomUUID
   )
 
   val skillCategoryUpdate = SkillCategoryUpdate(
     name = Some("Functional Programming"),
-    categoryId = Some(UUID.randomUUID)
+    parentCategory = Some(UUID.randomUUID)
   )
 
   val skillCategory = SkillCategoryView(
     uuid = UUID.randomUUID,
     name = "Functional Programming",
-    categoryId = UUID.randomUUID
+    parentCategory = UUID.randomUUID
   )
 
   val skillCreation = SkillCreation(
     name = "Cats",
-    categoryId = UUID.randomUUID,
+    parentCategory = UUID.randomUUID,
     proficiency = "intermediate",
     practisedHours = 500L
   )
 
   val skillUpdate = SkillUpdate(
     name = Some("Cats"),
-    categoryId = Some(UUID.randomUUID),
+    parentCategory = Some(UUID.randomUUID),
     proficiency = Some("intermediate"),
     practisedHours = Some(500L)
   )
@@ -44,7 +44,7 @@ object SampleData {
   val skill = SkillView(
     uuid = UUID.randomUUID,
     name = "Cats",
-    categoryId = UUID.randomUUID,
+    parentCategory = UUID.randomUUID,
     proficiency = "intermediate",
     practisedHours = 500L,
     lastApplied = Some(LocalDateTime.now)

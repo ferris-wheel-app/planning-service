@@ -196,13 +196,13 @@ object Model {
   case class SkillCategory (
     uuid: UUID,
     name: String,
-    categoryId: UUID
+    parentCategory: Option[UUID]
   )
 
   case class Skill (
     uuid: UUID,
     name: String,
-    categoryId: UUID,
+    parentCategory: UUID,
     proficiency: Proficiencies.Proficiency,
     practisedHours: Long,
     lastApplied: Option[LocalDateTime]

@@ -18,38 +18,33 @@ object SampleData {
   object domain {
     val skillCategoryCreation = CreateSkillCategory(
       name = "Functional Programming",
-      categoryId = UUID.randomUUID
+      parentCategory = UUID.randomUUID
     )
 
     val skillCategoryUpdate = UpdateSkillCategory(
       name = Some("Functional Programming"),
-      categoryId = Some(UUID.randomUUID)
+      parentCategory = Some(UUID.randomUUID)
     )
 
     val skillCategory = SkillCategory(
       uuid = UUID.randomUUID,
       name = "Functional Programming",
-      categoryId = UUID.randomUUID
+      parentCategory = UUID.randomUUID
     )
 
     val skillCreation = CreateSkill(
       name = "Cats",
-      categoryId = UUID.randomUUID,
+      parentCategory = UUID.randomUUID,
       proficiency = Proficiencies.Intermediate,
       practisedHours = 500L
     )
 
-    val skillUpdate = UpdateSkill(
-      name = Some("Cats"),
-      categoryId = Some(UUID.randomUUID),
-      proficiency = Some(Proficiencies.Intermediate),
-      practisedHours = Some(500L)
-    )
+    val skillUpdate = UpdateSkill(name = Some("Cats"), parentCategory = Some(UUID.randomUUID), proficiency = Some(Proficiencies.Intermediate), practisedHours = Some(500L))
 
     val skill = Skill(
       uuid = UUID.randomUUID,
       name = "Cats",
-      categoryId = UUID.randomUUID,
+      parentCategory = UUID.randomUUID,
       proficiency = Proficiencies.Intermediate,
       practisedHours = 500L,
       lastApplied = Some(LocalDateTime.now)
@@ -458,30 +453,30 @@ object SampleData {
   object rest {
     val skillCategoryCreation = SkillCategoryCreation(
       name = "Functional Programming",
-      categoryId = UUID.randomUUID
+      parentCategory = UUID.randomUUID
     )
 
     val skillCategoryUpdate = SkillCategoryUpdate(
       name = Some("Functional Programming"),
-      categoryId = Some(UUID.randomUUID)
+      parentCategory = Some(UUID.randomUUID)
     )
 
     val skillCategory = SkillCategoryView(
       uuid = domain.skillCategory.uuid,
       name = domain.skillCategory.name,
-      categoryId = domain.skillCategory.categoryId
+      parentCategory = domain.skillCategory.parentCategory
     )
 
     val skillCreation = SkillCreation(
       name = "Cats",
-      categoryId = UUID.randomUUID,
+      parentCategory = UUID.randomUUID,
       proficiency = "intermediate",
       practisedHours = 500L
     )
 
     val skillUpdate = SkillUpdate(
       name = Some("Cats"),
-      categoryId = Some(UUID.randomUUID),
+      parentCategory = Some(UUID.randomUUID),
       proficiency = Some("intermediate"),
       practisedHours = Some(500L)
     )
@@ -489,7 +484,7 @@ object SampleData {
     val skill = SkillView(
       uuid = domain.skillCategory.uuid,
       name = domain.skillCategory.name,
-      categoryId = domain.skillCategory.categoryId,
+      parentCategory = domain.skillCategory.parentCategory,
       proficiency = Proficiency.toString(domain.skill.proficiency),
       practisedHours = domain.skill.practisedHours,
       lastApplied = domain.skill.lastApplied

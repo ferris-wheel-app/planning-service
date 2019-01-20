@@ -701,11 +701,11 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
-   *  @param categoryId Database column CATEGORY_ID SqlType(BIGINT)
+   *  @param parentCategory Database column PARENT_CATEGORY SqlType(BIGINT)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class SkillCategoryRow(id: Long, uuid: String, name: String, categoryId: Option[Long], createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class SkillCategoryRow(id: Long, uuid: String, name: String, parentCategory: Option[Long], createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching SkillCategoryRow objects using plain SQL queries */
   implicit def GetResultSkillCategoryRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[Long]], e3: GR[java.sql.Timestamp], e4: GR[Option[java.sql.Timestamp]]): GR[SkillCategoryRow] = GR{
     prs => import prs._
@@ -713,9 +713,9 @@ trait Tables {
   }
   /** Table description of table SKILL_CATEGORY. Objects of this class serve as prototypes for rows in queries. */
   class SkillCategoryTable(_tableTag: Tag) extends profile.api.Table[SkillCategoryRow](_tableTag, "SKILL_CATEGORY") {
-    def * = (id, uuid, name, categoryId, createdOn, lastModified, lastPerformed) <> (SkillCategoryRow.tupled, SkillCategoryRow.unapply)
+    def * = (id, uuid, name, parentCategory, createdOn, lastModified, lastPerformed) <> (SkillCategoryRow.tupled, SkillCategoryRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), categoryId, Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> SkillCategoryRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), parentCategory, Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> SkillCategoryRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -723,8 +723,8 @@ trait Tables {
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
     /** Database column NAME SqlType(VARCHAR), Length(256,true) */
     val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
-    /** Database column CATEGORY_ID SqlType(BIGINT) */
-    val categoryId: Rep[Option[Long]] = column[Option[Long]]("CATEGORY_ID")
+    /** Database column PARENT_CATEGORY SqlType(BIGINT) */
+    val parentCategory: Rep[Option[Long]] = column[Option[Long]]("PARENT_CATEGORY")
     /** Database column CREATED_ON SqlType(TIMESTAMP) */
     val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
     /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
@@ -733,7 +733,7 @@ trait Tables {
     val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Foreign key referencing SkillCategoryTable (database name CATEGORY_FK1) */
-    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK1", categoryId, SkillCategoryTable)(r => Rep.Some(r.id), onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK1", parentCategory, SkillCategoryTable)(r => Rep.Some(r.id), onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_3D) */
     val index1 = index("CONSTRAINT_INDEX_3D", uuid, unique=true)
@@ -745,14 +745,14 @@ trait Tables {
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
    *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
    *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
-   *  @param categoryId Database column CATEGORY_ID SqlType(BIGINT)
+   *  @param parentCategory Database column PARENT_CATEGORY SqlType(BIGINT)
    *  @param proficiency Database column PROFICIENCY SqlType(VARCHAR), Length(36,true)
    *  @param practisedHours Database column PRACTISED_HOURS SqlType(BIGINT)
    *  @param lastApplied Database column LAST_APPLIED SqlType(TIMESTAMP)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
    *  @param lastPerformed Database column LAST_PERFORMED SqlType(TIMESTAMP) */
-  case class SkillRow(id: Long, uuid: String, name: String, categoryId: Long, proficiency: String, practisedHours: Long, lastApplied: Option[java.sql.Timestamp], createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
+  case class SkillRow(id: Long, uuid: String, name: String, parentCategory: Long, proficiency: String, practisedHours: Long, lastApplied: Option[java.sql.Timestamp], createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastPerformed: Option[java.sql.Timestamp])
   /** GetResult implicit for fetching SkillRow objects using plain SQL queries */
   implicit def GetResultSkillRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[java.sql.Timestamp]], e3: GR[java.sql.Timestamp]): GR[SkillRow] = GR{
     prs => import prs._
@@ -760,9 +760,9 @@ trait Tables {
   }
   /** Table description of table SKILL. Objects of this class serve as prototypes for rows in queries. */
   class SkillTable(_tableTag: Tag) extends profile.api.Table[SkillRow](_tableTag, "SKILL") {
-    def * = (id, uuid, name, categoryId, proficiency, practisedHours, lastApplied, createdOn, lastModified, lastPerformed) <> (SkillRow.tupled, SkillRow.unapply)
+    def * = (id, uuid, name, parentCategory, proficiency, practisedHours, lastApplied, createdOn, lastModified, lastPerformed) <> (SkillRow.tupled, SkillRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(categoryId), Rep.Some(proficiency), Rep.Some(practisedHours), lastApplied, Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> SkillRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(parentCategory), Rep.Some(proficiency), Rep.Some(practisedHours), lastApplied, Rep.Some(createdOn), lastModified, lastPerformed).shaped.<>({r=>import r._; _1.map(_=> SkillRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7, _8.get, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
     val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
@@ -770,8 +770,8 @@ trait Tables {
     val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
     /** Database column NAME SqlType(VARCHAR), Length(256,true) */
     val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
-    /** Database column CATEGORY_ID SqlType(BIGINT) */
-    val categoryId: Rep[Long] = column[Long]("CATEGORY_ID")
+    /** Database column PARENT_CATEGORY SqlType(BIGINT) */
+    val parentCategory: Rep[Long] = column[Long]("PARENT_CATEGORY")
     /** Database column PROFICIENCY SqlType(VARCHAR), Length(36,true) */
     val proficiency: Rep[String] = column[String]("PROFICIENCY", O.Length(36,varying=true))
     /** Database column PRACTISED_HOURS SqlType(BIGINT) */
@@ -786,7 +786,7 @@ trait Tables {
     val lastPerformed: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_PERFORMED")
 
     /** Foreign key referencing SkillCategoryTable (database name CATEGORY_FK2) */
-    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK2", categoryId, SkillCategoryTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    lazy val skillCategoryTableFk = foreignKey("CATEGORY_FK2", parentCategory, SkillCategoryTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_4B) */
     val index1 = index("CONSTRAINT_INDEX_4B", uuid, unique=true)

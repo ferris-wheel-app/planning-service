@@ -256,17 +256,17 @@ object Resources {
 
     case class SkillCategoryCreation (
       name: String,
-      categoryId: UUID
+      parentCategory: UUID
     )
 
     case class SkillCategoryUpdate (
       name: Option[String],
-      categoryId: Option[UUID]
+      parentCategory: Option[UUID]
     )
 
     case class SkillCreation (
       name: String,
-      categoryId: UUID,
+      parentCategory: UUID,
       proficiency: String,
       practisedHours: Long
     ) {
@@ -275,7 +275,7 @@ object Resources {
 
     case class SkillUpdate (
       name: Option[String],
-      categoryId: Option[UUID],
+      parentCategory: Option[UUID],
       proficiency: Option[String],
       practisedHours: Option[Long]
     ) {
@@ -468,13 +468,13 @@ object Resources {
     case class SkillCategoryView (
       uuid: UUID,
       name: String,
-      categoryId: UUID
+      parentCategory: UUID
     )
 
     case class SkillView (
       uuid: UUID,
       name: String,
-      categoryId: UUID,
+      parentCategory: UUID,
       proficiency: String,
       practisedHours: Long,
       lastApplied: Option[LocalDateTime]

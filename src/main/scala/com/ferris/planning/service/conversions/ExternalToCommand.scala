@@ -13,33 +13,28 @@ object ExternalToCommand {
   implicit class SkillCategoryCreationConversion(skillCategory: SkillCategoryCreation) extends CommandConversion[CreateSkillCategory] {
     override def toCommand = CreateSkillCategory(
       name = skillCategory.name,
-      categoryId = skillCategory.categoryId
+      parentCategory = skillCategory.parentCategory
     )
   }
 
   implicit class SkillCategoryUpdateConversion(skillCategory: SkillCategoryUpdate) extends CommandConversion[UpdateSkillCategory] {
     override def toCommand = UpdateSkillCategory(
       name = skillCategory.name,
-      categoryId = skillCategory.categoryId
+      parentCategory = skillCategory.parentCategory
     )
   }
 
   implicit class SkillCreationConversion(skill: SkillCreation) extends CommandConversion[CreateSkill] {
     override def toCommand = CreateSkill(
       name = skill.name,
-      categoryId = skill.categoryId,
+      parentCategory = skill.parentCategory,
       proficiency = TypeResolvers.Proficiency.withName(skill.proficiency),
       practisedHours = skill.practisedHours
     )
   }
 
   implicit class SkillUpdateConversion(skill: SkillUpdate) extends CommandConversion[UpdateSkill] {
-    override def toCommand = UpdateSkill(
-      name = skill.name,
-      categoryId = skill.categoryId,
-      proficiency = skill.proficiency.map(TypeResolvers.Proficiency.withName),
-      practisedHours = skill.practisedHours
-    )
+    override def toCommand = UpdateSkill(name = skill.name, parentCategory = skill.parentCategory, proficiency = skill.proficiency.map(TypeResolvers.Proficiency.withName), practisedHours = skill.practisedHours)
   }
 
   implicit class BacklogItemCreationConversion(backlogItem: BacklogItemCreation) extends CommandConversion[CreateBacklogItem] {

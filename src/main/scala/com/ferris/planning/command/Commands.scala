@@ -202,27 +202,22 @@ object Commands {
 
   case class CreateSkillCategory (
     name: String,
-    categoryId: UUID
+    parentCategory: Option[UUID]
   )
 
   case class UpdateSkillCategory (
     name: Option[String],
-    categoryId: Option[UUID]
+    parentCategory: Option[UUID]
   )
 
   case class CreateSkill (
     name: String,
-    categoryId: UUID,
+    parentCategory: UUID,
     proficiency: Proficiencies.Proficiency,
     practisedHours: Long
   )
 
-  case class UpdateSkill (
-    name: Option[String],
-    categoryId: Option[UUID],
-    proficiency: Option[Proficiencies.Proficiency],
-    practisedHours: Option[Long]
-  )
+  case class UpdateSkill(name: Option[String], parentCategory: Option[UUID], proficiency: Option[Any], practisedHours: Option[Long])
 
   case class UpdateList (
     reordered: Seq[UUID]

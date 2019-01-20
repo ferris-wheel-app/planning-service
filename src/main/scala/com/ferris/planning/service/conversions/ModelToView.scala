@@ -10,7 +10,7 @@ object ModelToView {
       SkillCategoryView(
         uuid = skillCategory.uuid,
         name = skillCategory.name,
-        categoryId = skillCategory.categoryId
+        parentCategory = skillCategory.parentCategory
       )
     }
   }
@@ -20,7 +20,7 @@ object ModelToView {
       SkillView(
         uuid = skill.uuid,
         name = skill.name,
-        categoryId = skill.categoryId,
+        parentCategory = skill.parentCategory,
         proficiency = TypeResolvers.Proficiency.toString(skill.proficiency),
         practisedHours = skill.practisedHours,
         lastApplied = skill.lastApplied

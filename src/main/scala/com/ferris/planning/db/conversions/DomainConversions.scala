@@ -251,13 +251,13 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class SkillCategoryBuilder(val row: (tables.SkillCategoryRow, String)) {
+  implicit class SkillCategoryBuilder(val row: (tables.SkillCategoryRow, Option[String])) {
     def asSkillCategory: SkillCategory = row match {
-      case (skillCategory, categoryId) =>
+      case (skillCategory, parentCategory) =>
         SkillCategory(
           uuid = UUID.fromString(skillCategory.uuid),
           name = skillCategory.name,
-          categoryId = UUID.fromString(categoryId)
+          parentCategory = parentCategory.map(UUID.fromString)
         )
     }
   }
@@ -268,7 +268,7 @@ class DomainConversions(val tables: Tables) {
         Skill(
           uuid = UUID.fromString(skill.uuid),
           name = skill.name,
-          categoryId = UUID.fromString(categoryId),
+          parentCategory = UUID.fromString(categoryId),
           proficiency = Proficiencies.withName(skill.proficiency),
           practisedHours = skill.practisedHours,
           lastApplied = skill.lastApplied.map(_.toLocalDateTime)

@@ -141,12 +141,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     // Create endpoints
     override def createSkillCategory(creation: CreateSkillCategory): Future[SkillCategory] = {
       val action = (for {
-        parentCategory <- getSkillCategoryAction(creation.categoryId).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        parentCategory <- creation.parentCategory.map(getSkillCategoryAction).getOrElse(DBIO.successful(None))
         row = SkillCategoryRow(
           id = 0L,
           uuid = UUID.randomUUID,
           name = creation.name,
-          categoryId = parentCategory._1.id
+          parentCategory = parentCategory.map(_._1.id)
         )
         category <- (SkillCategoryTable returning SkillCategoryTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
       } yield (category, parentCategory._1.uuid).asSkillCategory).transactionally
@@ -155,12 +155,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def createSkill(creation: CreateSkill): Future[Skill] = {
       val action = (for {
-        parentCategory <- getSkillAction(creation.categoryId).map(_.getOrElse(throw SkillNotFoundException()))
+        parentCategory <- getSkillAction(creation.parentCategory)
         row = SkillRow(
           id = 0L,
           uuid = UUID.randomUUID,
           name = creation.name,
-          categoryId = parentCategory._1.id,
+          parentCategory = parentCategory._1.id,
           proficiency = creation.proficiency.dbValue,
           practisedHours = creation.practisedHours,
           lastApplied = None
@@ -491,7 +491,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = (for {
         oldAndParent <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
         (old, parentId) = oldAndParent
-        newParent <- getParentCategory(update.categoryId)
+        newParent <- getParentCategory(update.parentCategory)
         newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
         _ <- updateSkillCategory(uuid, update, old, newParentId)
         updatedCategory <- getSkillCategoryAction(uuid).map(_.head)
@@ -511,7 +511,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       val action = (for {
         oldAndParent <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
         (old, parentId) = oldAndParent
-        newParent <- getParentCategory(update.categoryId)
+        newParent <- getParentCategory(update.parentCategory)
         newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
         _ <- updateSkill(uuid, update, old, newParentId)
         updatedSkill <- getSkillAction(uuid).map(_.head)
@@ -1451,7 +1451,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillCategoryAction(uuid: UUID) = {
       for {
         category <- skillCategoryByUuid(uuid).result.headOption
-        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.categoryId)).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.parentCategory)).result.headOption
       } yield (category, parent) match {
         case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
         case _ => None
@@ -1461,7 +1461,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillCategoryAction(id: Long) = {
       for {
         category <- skillCategoryById(id).result.headOption
-        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.categoryId)).result.headOption
+        parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.parentCategory)).result.headOption
       } yield (category, parent) match {
         case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
         case _ => None
@@ -1471,7 +1471,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillAction(uuid: UUID) = {
       for {
         skill <- skillByUuid(uuid).result.headOption
-        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.categoryId)).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.flatMap(_.parentCategory)).result.headOption
       } yield (skill, category) match {
         case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
         case _ => None
@@ -1481,7 +1481,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillAction(id: Long) = {
       for {
         skill <- skillById(id).result.headOption
-        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.categoryId)).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.flatMap(_.parentCategory)).result.headOption
       } yield (skill, category) match {
         case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
         case _ => None
