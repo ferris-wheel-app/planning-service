@@ -217,7 +217,12 @@ object Commands {
     practisedHours: Long
   )
 
-  case class UpdateSkill(name: Option[String], parentCategory: Option[UUID], proficiency: Option[Any], practisedHours: Option[Long])
+  case class UpdateSkill(
+    name: Option[String],
+    parentCategory: Option[UUID],
+    proficiency: Option[Proficiencies.Proficiency],
+    practisedHours: Option[Long]
+  )
 
   case class UpdateList (
     reordered: Seq[UUID]

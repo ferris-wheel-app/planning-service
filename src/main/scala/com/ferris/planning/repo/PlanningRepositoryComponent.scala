@@ -146,16 +146,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           id = 0L,
           uuid = UUID.randomUUID,
           name = creation.name,
-          parentCategory = parentCategory.map(_._1.id)
+          parentCategory = parentCategory.map(_._1.id),
+          createdOn = timer.timestampOfNow,
+          lastModified = None
         )
         category <- (SkillCategoryTable returning SkillCategoryTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
-      } yield (category, parentCategory._1.uuid).asSkillCategory).transactionally
+      } yield (category, parentCategory.map(_._1.uuid)).asSkillCategory).transactionally
       db.run(action)
     }
 
     override def createSkill(creation: CreateSkill): Future[Skill] = {
       val action = (for {
-        parentCategory <- getSkillAction(creation.parentCategory)
+        parentCategory <- getSkillAction(creation.parentCategory).map(_.getOrElse(throw SkillCategoryNotFoundException()))
         row = SkillRow(
           id = 0L,
           uuid = UUID.randomUUID,
@@ -163,6 +165,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           parentCategory = parentCategory._1.id,
           proficiency = creation.proficiency.dbValue,
           practisedHours = creation.practisedHours,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
           lastApplied = None
         )
         category <- (SkillTable returning SkillTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
@@ -483,8 +487,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     // Update endpoints
     override def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[SkillCategory] = {
-      def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory, old: SkillCategoryRow, newParentId: Long): DBIO[Int] = {
-        skillCategoryByUuid(uuid).map(category => (category.name, category.categoryId))
+      def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory, old: SkillCategoryRow, newParentId: Option[Long]): DBIO[Int] = {
+        skillCategoryByUuid(uuid).map(category => (category.name, category.parentCategory))
           .update(update.name.getOrElse(old.name), newParentId)
       }
 
@@ -492,7 +496,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         oldAndParent <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
         (old, parentId) = oldAndParent
         newParent <- getParentCategory(update.parentCategory)
-        newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
+        newParentId = newParent.map(_._1.id).orElse(old.parentCategory)
         _ <- updateSkillCategory(uuid, update, old, newParentId)
         updatedCategory <- getSkillCategoryAction(uuid).map(_.head)
       } yield updatedCategory.asSkillCategory).transactionally
@@ -502,7 +506,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill] = {
       def updateSkill(uuid: UUID, update: UpdateSkill, old: SkillRow, newParentId: Long): DBIO[Int] = {
-        skillByUuid(uuid).map(skill => (skill.name, skill.categoryId, skill.proficiency, skill.practisedHours, skill.lastApplied))
+        skillByUuid(uuid).map(skill => (skill.name, skill.parentCategory, skill.proficiency, skill.practisedHours, skill.lastModified))
           .update(update.name.getOrElse(old.name), newParentId,
             UpdateTypeEnum.keepOrReplace(update.proficiency, old.proficiency), update.practisedHours.getOrElse(old.practisedHours),
             Some(timer.timestampOfNow))
@@ -512,7 +516,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         oldAndParent <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
         (old, parentId) = oldAndParent
         newParent <- getParentCategory(update.parentCategory)
-        newParentId = newParent.map(_._1.id).getOrElse(old.categoryId)
+        newParentId = newParent.map(_._1.id).getOrElse(old.parentCategory)
         _ <- updateSkill(uuid, update, old, newParentId)
         updatedSkill <- getSkillAction(uuid).map(_.head)
       } yield updatedSkill.asSkill).transactionally
@@ -1452,8 +1456,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       for {
         category <- skillCategoryByUuid(uuid).result.headOption
         parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.parentCategory)).result.headOption
-      } yield (category, parent) match {
-        case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
+      } yield (category, parent.map(_.uuid)) match {
+        case (Some(cat), parentId) => Some((cat, parentId))
         case _ => None
       }
     }
@@ -1462,16 +1466,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       for {
         category <- skillCategoryById(id).result.headOption
         parent <- SkillCategoryTable.filter(_.id inSet category.toSeq.flatMap(_.parentCategory)).result.headOption
-      } yield (category, parent) match {
-        case (Some(cat), Some(prt)) => Some((cat, prt.uuid))
-        case _ => None
-      }
+      } yield (category, parent.map(_.uuid))
     }
 
     private def getSkillAction(uuid: UUID) = {
       for {
         skill <- skillByUuid(uuid).result.headOption
-        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.flatMap(_.parentCategory)).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.parentCategory)).result.headOption
       } yield (skill, category) match {
         case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
         case _ => None
@@ -1481,7 +1482,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     private def getSkillAction(id: Long) = {
       for {
         skill <- skillById(id).result.headOption
-        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.flatMap(_.parentCategory)).result.headOption
+        category <- SkillCategoryTable.filter(_.id inSet skill.toSeq.map(_.parentCategory)).result.headOption
       } yield (skill, category) match {
         case (Some(skl), Some(cat)) => Some((skl, cat.uuid))
         case _ => None
