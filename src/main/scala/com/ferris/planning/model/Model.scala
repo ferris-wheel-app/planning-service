@@ -196,7 +196,8 @@ object Model {
   case class SkillCategory (
     uuid: UUID,
     name: String,
-    parentCategory: Option[UUID]
+    parentCategory: Option[UUID],
+    lastModified: Option[LocalDateTime]
   )
 
   case class Skill (
@@ -205,7 +206,8 @@ object Model {
     parentCategory: UUID,
     proficiency: Proficiencies.Proficiency,
     practisedHours: Long,
-    lastApplied: Option[LocalDateTime]
+    lastApplied: Option[LocalDateTime],
+    lastModified: Option[LocalDateTime]
   )
 
   case class AssociatedSkill (

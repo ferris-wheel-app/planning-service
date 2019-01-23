@@ -45,59 +45,138 @@ class PlanningRepositoryTest extends AsyncFunSpec
 
   describe("skill category") {
     describe("creating") {
-      it("should create a skill category item") {
-        val created = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
-        created.summary shouldBe SD.backlogItemCreation.summary
-        created.description shouldBe SD.backlogItemCreation.description
-        created.`type` shouldBe SD.backlogItemCreation.`type`
+      it("should create a skill category") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created = repo.createSkillCategory(SD.skillCategoryCreation.copy(parentCategory = Some(parentCategory.uuid))).futureValue
+        created.name shouldBe SD.skillCategoryCreation.name
+        created.parentCategory.value shouldBe parentCategory.uuid
       }
     }
 
     describe("updating") {
-      it("should update a backlog item") {
-        val original = repo.createBacklogItem(SD.backlogItemCreation).futureValue
-        val updated = repo.updateBacklogItem(original.uuid, SD.backlogItemUpdate).futureValue
+      it("should update a skill category") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val original = repo.createSkillCategory(SD.skillCategoryCreation.copy(parentCategory = Some(parentCategory.uuid))).futureValue
+        val updated = repo.updateSkillCategory(original.uuid, SD.skillCategoryUpdate).futureValue
         updated should not be original
         updated.uuid shouldBe original.uuid
-        updated.summary shouldBe SD.backlogItemUpdate.summary.value
-        updated.description shouldBe SD.backlogItemUpdate.description.value
-        updated.`type` shouldBe SD.backlogItemUpdate.`type`.value
+        updated.name shouldBe SD.skillCategoryUpdate.name.value
+        updated.parentCategory.value shouldBe parentCategory.uuid
       }
 
-      it("should throw an exception if a message is not found") {
-        whenReady(repo.updateBacklogItem(UUID.randomUUID, SD.backlogItemUpdate).failed) { exception =>
-          exception shouldBe BacklogItemNotFoundException()
+      it("should throw an exception if a skill category is not found") {
+        whenReady(repo.updateSkillCategory(UUID.randomUUID, SD.skillCategoryUpdate).failed) { exception =>
+          exception shouldBe SkillCategoryNotFoundException()
         }
       }
     }
 
     describe("retrieving") {
-      it("should retrieve a backlog-item") {
-        val created = repo.createBacklogItem(SD.backlogItemCreation).futureValue
-        val retrieved = repo.getBacklogItem(created.uuid).futureValue
+      it("should retrieve a skill category") {
+        val created = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val retrieved = repo.getSkillCategory(created.uuid).futureValue
         retrieved should not be empty
         retrieved.value shouldBe created
       }
 
-      it("should return none if a backlog-item is not found") {
-        val retrieved = repo.getBacklogItem(UUID.randomUUID).futureValue
+      it("should return none if a skill category is not found") {
+        val retrieved = repo.getSkillCategory(UUID.randomUUID).futureValue
         retrieved shouldBe empty
       }
 
-      it("should retrieve a list of backlog-items") {
-        val created1 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
-        val created2 = repo.createBacklogItem(SD.backlogItemCreation).futureValue
-        val retrieved = repo.getBacklogItems.futureValue
+      it("should retrieve a list of skill categories") {
+        val created1 = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created2 = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val retrieved = repo.getSkillCategories.futureValue
         retrieved should not be empty
         retrieved shouldBe Seq(created1, created2)
       }
     }
 
     describe("deleting") {
-      it("should delete a backlog-item") {
-        val created = repo.createBacklogItem(SD.backlogItemCreation).futureValue
-        val deletion = repo.deleteBacklogItem(created.uuid).futureValue
-        val retrieved = repo.getBacklogItem(created.uuid).futureValue
+      it("should delete a skill category") {
+        val created = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val deletion = repo.deleteSkillCategory(created.uuid).futureValue
+        val retrieved = repo.getSkillCategory(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("skill") {
+    describe("creating") {
+      it("should create a skill") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        created.name shouldBe SD.skillCreation.name
+        created.parentCategory shouldBe parentCategory.uuid
+        created.proficiency shouldBe SD.skillCreation.proficiency
+        created.practisedHours shouldBe SD.skillCreation.practisedHours
+        created.lastApplied shouldBe empty
+      }
+
+      it("should throw an exception if a parent category is not found") {
+        whenReady(repo.createSkill(SD.skillCreation).failed) { exception =>
+          exception shouldBe SkillCategoryNotFoundException()
+        }
+      }
+    }
+
+    describe("updating") {
+      it("should update a skill") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val original = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        val updateTime = LocalDateTime.now
+        when(timer.timestampOfNow).thenReturn(updateTime.toTimestamp)
+        val updated = repo.updateSkill(original.uuid, SD.skillUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.name shouldBe SD.skillUpdate.name.value
+        updated.parentCategory shouldBe parentCategory.uuid
+        updated.proficiency shouldBe SD.skillUpdate.proficiency.value
+        updated.practisedHours shouldBe SD.skillUpdate.practisedHours.value
+        updated.lastApplied shouldBe empty
+        updated.lastModified.value shouldBe updateTime
+      }
+
+      it("should throw an exception if a skill is not found") {
+        whenReady(repo.updateSkill(UUID.randomUUID, SD.skillUpdate).failed) { exception =>
+          exception shouldBe SkillNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a skill") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        val retrieved = repo.getSkill(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a skill is not found") {
+        val retrieved = repo.getSkill(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of skills") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created1 = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        val created2 = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        val retrieved = repo.getSkills.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a skill") {
+        val parentCategory = repo.createSkillCategory(SD.skillCategoryCreation).futureValue
+        val created = repo.createSkill(SD.skillCreation.copy(parentCategory = parentCategory.uuid)).futureValue
+        val deletion = repo.deleteSkill(created.uuid).futureValue
+        val retrieved = repo.getSkill(created.uuid).futureValue
         deletion shouldBe true
         retrieved shouldBe empty
       }
@@ -125,7 +204,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.`type` shouldBe SD.backlogItemUpdate.`type`.value
       }
 
-      it("should throw an exception if a message is not found") {
+      it("should throw an exception if a backlog-item is not found") {
         whenReady(repo.updateBacklogItem(UUID.randomUUID, SD.backlogItemUpdate).failed) { exception =>
           exception shouldBe BacklogItemNotFoundException()
         }

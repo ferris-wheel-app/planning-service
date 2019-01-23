@@ -256,7 +256,7 @@ object Resources {
 
     case class SkillCategoryCreation (
       name: String,
-      parentCategory: UUID
+      parentCategory: Option[UUID]
     )
 
     case class SkillCategoryUpdate (
@@ -468,7 +468,7 @@ object Resources {
     case class SkillCategoryView (
       uuid: UUID,
       name: String,
-      parentCategory: UUID
+      parentCategory: Option[UUID]
     )
 
     case class SkillView (

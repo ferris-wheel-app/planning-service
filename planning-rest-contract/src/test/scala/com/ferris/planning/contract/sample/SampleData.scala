@@ -13,7 +13,7 @@ object SampleData {
 
   val skillCategoryCreation = SkillCategoryCreation(
     name = "Functional Programming",
-    parentCategory = UUID.randomUUID
+    parentCategory = Some(UUID.randomUUID)
   )
 
   val skillCategoryUpdate = SkillCategoryUpdate(
@@ -24,7 +24,7 @@ object SampleData {
   val skillCategory = SkillCategoryView(
     uuid = UUID.randomUUID,
     name = "Functional Programming",
-    parentCategory = UUID.randomUUID
+    parentCategory = Some(UUID.randomUUID)
   )
 
   val skillCreation = SkillCreation(

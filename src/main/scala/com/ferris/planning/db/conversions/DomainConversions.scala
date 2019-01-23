@@ -257,7 +257,8 @@ class DomainConversions(val tables: Tables) {
         SkillCategory(
           uuid = UUID.fromString(skillCategory.uuid),
           name = skillCategory.name,
-          parentCategory = parentCategory.map(UUID.fromString)
+          parentCategory = parentCategory.map(UUID.fromString),
+          lastModified = skillCategory.lastModified.map(_.toLocalDateTime)
         )
     }
   }
@@ -271,7 +272,8 @@ class DomainConversions(val tables: Tables) {
           parentCategory = UUID.fromString(categoryId),
           proficiency = Proficiencies.withName(skill.proficiency),
           practisedHours = skill.practisedHours,
-          lastApplied = skill.lastApplied.map(_.toLocalDateTime)
+          lastApplied = skill.lastApplied.map(_.toLocalDateTime),
+          lastModified = skill.lastModified.map(_.toLocalDateTime)
         )
     }
   }
