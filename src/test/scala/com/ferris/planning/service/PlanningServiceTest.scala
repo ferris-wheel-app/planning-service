@@ -23,6 +23,144 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
   }
 
   describe("a planning service") {
+    describe("handling skill categories") {
+      it("should be able to create a skill-category") {
+        val server = newServer
+        when(server.repo.createSkillCategory(SD.skillCategoryCreation)).thenReturn(Future.successful(SD.skillCategory))
+        whenReady(server.planningService.createSkillCategory(SD.skillCategoryCreation)) { result =>
+          result shouldBe SD.skillCategory
+          verify(server.repo, times(1)).createSkillCategory(SD.skillCategoryCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a skill-category") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.skillCategory
+        when(server.repo.updateSkillCategory(eqTo(id), eqTo(SD.skillCategoryUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateSkillCategory(id, SD.skillCategoryUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateSkillCategory(eqTo(id), eqTo(SD.skillCategoryUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a skill-category is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = SkillCategoryNotFoundException()
+        when(server.repo.updateSkillCategory(eqTo(id), eqTo(SD.skillCategoryUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateSkillCategory(id, SD.skillCategoryUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateSkillCategory(eqTo(id), eqTo(SD.skillCategoryUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a skill-category") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getSkillCategory(id)).thenReturn(Future.successful(Some(SD.skillCategory)))
+        whenReady(server.planningService.getSkillCategory(id)) { result =>
+          result shouldBe Some(SD.skillCategory)
+          verify(server.repo, times(1)).getSkillCategory(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all skill-categories") {
+        val server = newServer
+        val skillCategories = Seq(SD.skillCategory, SD.skillCategory.copy(uuid = UUID.randomUUID))
+        when(server.repo.getSkillCategories).thenReturn(Future.successful(skillCategories))
+        whenReady(server.planningService.getSkillCategories) { result =>
+          result shouldBe skillCategories
+          verify(server.repo, times(1)).getSkillCategories
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a skill-category") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteSkillCategory(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteSkillCategory(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteSkillCategory(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
+    describe("handling skills") {
+      it("should be able to create a skill") {
+        val server = newServer
+        when(server.repo.createSkill(SD.skillCreation)).thenReturn(Future.successful(SD.skill))
+        whenReady(server.planningService.createSkill(SD.skillCreation)) { result =>
+          result shouldBe SD.skill
+          verify(server.repo, times(1)).createSkill(SD.skillCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a skill") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.skill
+        when(server.repo.updateSkill(eqTo(id), eqTo(SD.skillUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateSkill(id, SD.skillUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateSkill(eqTo(id), eqTo(SD.skillUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a skill is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = SkillNotFoundException()
+        when(server.repo.updateSkill(eqTo(id), eqTo(SD.skillUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateSkill(id, SD.skillUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateSkill(eqTo(id), eqTo(SD.skillUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a skill") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getSkill(id)).thenReturn(Future.successful(Some(SD.skill)))
+        whenReady(server.planningService.getSkill(id)) { result =>
+          result shouldBe Some(SD.skill)
+          verify(server.repo, times(1)).getSkill(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all skills") {
+        val server = newServer
+        val skills = Seq(SD.skill, SD.skill.copy(uuid = UUID.randomUUID))
+        when(server.repo.getSkills).thenReturn(Future.successful(skills))
+        whenReady(server.planningService.getSkills) { result =>
+          result shouldBe skills
+          verify(server.repo, times(1)).getSkills
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a skill") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteSkill(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteSkill(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteSkill(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
     describe("handling backlog-items") {
       it("should be able to create a backlog-item") {
         val server = newServer
