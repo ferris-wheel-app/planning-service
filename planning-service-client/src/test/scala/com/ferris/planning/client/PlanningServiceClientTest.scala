@@ -36,6 +36,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
 
   describe("a planning service client") {
     describe("handling creations") {
+      it("should be able to create a skill-category") {
+        val creationRequest = Marshal(SD.skillCategoryCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.skillCategory)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/skills/categories", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createSkillCategory(SD.skillCategoryCreation)) { response =>
+          response shouldBe SD.skillCategory
+        }
+      }
+
+      it("should be able to create a skill") {
+        val creationRequest = Marshal(SD.skillCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/skills", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createSkill(SD.skillCreation)) { response =>
+          response shouldBe SD.skill
+        }
+      }
+
       it("should be able to create a backlog-item") {
         val creationRequest = Marshal(SD.backlogItemCreation.toJson).to[RequestEntity].futureValue
         val creationResponse = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
@@ -164,6 +182,36 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling updates") {
+      it("should be able to update a skill-category") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.skillCategoryUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.skillCategory)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/skills/categories/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateSkillCategory(id, SD.skillCategoryUpdate)) { response =>
+          response shouldBe SD.skillCategory
+        }
+      }
+
+      it("should be able to update a skill") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.skillUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/skills/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateSkill(id, SD.skillUpdate)) { response =>
+          response shouldBe SD.skill
+        }
+      }
+
+      it("should be able to update the practised hours for a skill") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.practisedHours.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/skills/$id/practised-hours/increment", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updatePractisedHours(id, SD.practisedHours.value)) { response =>
+          response shouldBe SD.skill
+        }
+      }
+
       it("should be able to update a backlog-item") {
         val id = UUID.randomUUID
         val updateRequest = Marshal(SD.backlogItemUpdate.toJson).to[RequestEntity].futureValue
@@ -296,6 +344,42 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling retrievals") {
+      it("should be able to retrieve a skill-category") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.skillCategory)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/skills/categories/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.skillCategory(id)) { response =>
+          response.value shouldBe SD.skillCategory
+        }
+      }
+
+      it("should be able to retrieve a list of skill-categories") {
+        val list = SD.skillCategory :: SD.skillCategory :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/skills/categories")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.skillCategories) { response =>
+          response shouldBe list
+        }
+      }
+
+      it("should be able to retrieve a skill") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/skills/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.skill(id)) { response =>
+          response.value shouldBe SD.skill`
+        }
+      }
+
+      it("should be able to retrieve a list of skill") {
+        val list = SD.skill :: SD.skill :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/skills")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.skills) { response =>
+          response shouldBe list
+        }
+      }
+
       it("should be able to retrieve a backlog-item") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
@@ -566,6 +650,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
     }
 
     describe("handling deletions") {
+      it("should be able to delete a skill-category") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/skills/categories/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteSkillCategory(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
+      it("should be able to delete a skill") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/skills/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteSkill(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
       it("should be able to delete a backlog-item") {
         val id = UUID.randomUUID
         val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
