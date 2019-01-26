@@ -114,6 +114,101 @@ class PlanningRouteTest extends RouteTestFramework {
       }
     }
 
+    describe("handling skills") {
+      describe("creating a skill") {
+        it("should respond with the created skill") {
+          when(testServer.planningService.createSkill(eqTo(domain.skillCreation))(any())).thenReturn(Future.successful(domain.skill))
+          Post("/api/skills", rest.skillCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillView]].data shouldBe rest.skill
+            verify(testServer.planningService, times(1)).createSkill(eqTo(domain.skillCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a skill") {
+        it("should respond with the updated skill") {
+          val id = UUID.randomUUID
+          val update = rest.skillUpdate
+          val updated = domain.skill
+
+          when(testServer.planningService.updateSkill(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/skills/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateSkill(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a skill") {
+        it("should respond with the requested skill") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getSkill(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.skill)))
+          Get(s"/api/skills/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillView]].data shouldBe rest.skill
+            verify(testServer.planningService, times(1)).getSkill(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the skill is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getSkill(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/skills/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getSkill(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting skills") {
+        it("should retrieve a list of all skills") {
+          val skills = Seq(domain.skill, domain.skill.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getSkills(any())).thenReturn(Future.successful(skills))
+          Get(s"/api/skills") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[SkillView]]].data shouldBe skills.map(_.toView)
+            verify(testServer.planningService, times(1)).getSkills(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a skill") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteSkill(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/skills/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteSkill(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteSkill(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/skills/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteSkill(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
     describe("handling backlog-items") {
       describe("creating a backlog-item") {
         it("should respond with the created backlog-item") {
