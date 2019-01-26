@@ -19,6 +19,101 @@ import scala.concurrent.Future
 class PlanningRouteTest extends RouteTestFramework {
 
   describe("a planning API") {
+    describe("handling skill-categories") {
+      describe("creating a skill-category") {
+        it("should respond with the created skill-category") {
+          when(testServer.planningService.createSkillCategory(eqTo(domain.skillCategoryCreation))(any())).thenReturn(Future.successful(domain.skillCategory))
+          Post("/api/skills/categories", rest.skillCategoryCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillCategoryView]].data shouldBe rest.skillCategory
+            verify(testServer.planningService, times(1)).createSkillCategory(eqTo(domain.skillCategoryCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a skill-category") {
+        it("should respond with the updated skill-category") {
+          val id = UUID.randomUUID
+          val update = rest.skillCategoryUpdate
+          val updated = domain.skillCategory
+
+          when(testServer.planningService.updateSkillCategory(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/skills/categories/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillCategoryView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateSkillCategory(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a skill-category") {
+        it("should respond with the requested skill-category") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getSkillCategory(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.skillCategory)))
+          Get(s"/api/skills/categories/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillCategoryView]].data shouldBe rest.skillCategory
+            verify(testServer.planningService, times(1)).getSkillCategory(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the skill-category is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getSkillCategory(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/skills/categories/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getSkillCategory(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting skill-categories") {
+        it("should retrieve a list of all skill-categories") {
+          val skillCategories = Seq(domain.skillCategory, domain.skillCategory.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getSkillCategories(any())).thenReturn(Future.successful(skillCategories))
+          Get(s"/api/skills/categories") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[SkillCategoryView]]].data shouldBe skillCategories.map(_.toView)
+            verify(testServer.planningService, times(1)).getSkillCategories(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a skill-category") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteSkillCategory(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/skills/categories/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteSkillCategory(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteSkillCategory(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/skills/categories/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteSkillCategory(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
     describe("handling backlog-items") {
       describe("creating a backlog-item") {
         it("should respond with the created backlog-item") {

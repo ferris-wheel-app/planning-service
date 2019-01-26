@@ -481,7 +481,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val getSkillsCategoriesRoute = pathPrefix(skillsPathSegment / categoriesPathSegment) {
     pathEndOrSingleSlash {
       get {
-        onSuccess(planningService.getSkills) { response =>
+        onSuccess(planningService.getSkillCategories) { response =>
           complete(StatusCodes.OK, response.map(_.toView))
         }
       }
@@ -973,6 +973,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     createPyramidRoute ~
     updateSkillCategoryRoute ~
     updateSkillRoute ~
+    updatePractisedHoursRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
     updateYearRoute ~
@@ -992,7 +993,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     refreshPyramidRoute ~
     refreshCurrentPortionRoute ~
     getSkillsCategoriesRoute ~
-    getSkillRoute ~
+    getSkillsRoute ~
     getBacklogItemsRoute ~
     getEpochsRoute ~
     getYearsRoute ~

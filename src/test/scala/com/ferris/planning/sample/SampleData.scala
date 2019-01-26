@@ -454,13 +454,13 @@ object SampleData {
 
   object rest {
     val skillCategoryCreation = SkillCategoryCreation(
-      name = "Functional Programming",
-      parentCategory = Some(UUID.randomUUID)
+      name = domain.skillCategoryCreation.name,
+      parentCategory = domain.skillCategoryCreation.parentCategory
     )
 
     val skillCategoryUpdate = SkillCategoryUpdate(
-      name = Some("Functional Programming"),
-      parentCategory = Some(UUID.randomUUID)
+      name = domain.skillCategoryUpdate.name,
+      parentCategory = domain.skillCategoryUpdate.parentCategory
     )
 
     val skillCategory = SkillCategoryView(
@@ -470,17 +470,17 @@ object SampleData {
     )
 
     val skillCreation = SkillCreation(
-      name = "Cats",
-      parentCategory = UUID.randomUUID,
-      proficiency = "intermediate",
-      practisedHours = 500L
+      name = domain.skillCreation.name,
+      parentCategory = domain.skillCreation.parentCategory,
+      proficiency = Proficiency.toString(domain.skillCreation.proficiency),
+      practisedHours = domain.skillCreation.practisedHours
     )
 
     val skillUpdate = SkillUpdate(
-      name = Some("Cats"),
-      parentCategory = Some(UUID.randomUUID),
-      proficiency = Some("intermediate"),
-      practisedHours = Some(500L)
+      name = domain.skillUpdate.name,
+      parentCategory = domain.skillUpdate.parentCategory,
+      proficiency = domain.skillUpdate.proficiency.map(Proficiency.toString),
+      practisedHours = domain.skillUpdate.practisedHours
     )
 
     val skill = SkillView(
