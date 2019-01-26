@@ -2,6 +2,7 @@ package com.ferris.planning.service
 
 import java.util.UUID
 
+import com.ferris.planning.command.Commands.UpdateSkill
 import com.ferris.planning.sample.SampleData.{domain => SD}
 import com.ferris.planning.service.exceptions.Exceptions._
 import org.mockito.Matchers.{eq => eqTo}
@@ -111,6 +112,22 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.updateSkill(id, SD.skillUpdate)) { result =>
           result shouldBe updated
           verify(server.repo, times(1)).updateSkill(eqTo(id), eqTo(SD.skillUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update the practised hours of a skill") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val practisedHours = 1000L
+        val update = UpdateSkill(None, None, None, practisedHours = Some(1500L))
+        val updated = SD.skill.copy(practisedHours = 1500L)
+        when(server.repo.getSkill(id)).thenReturn(Future.successful(Some(SD.skill)))
+        when(server.repo.updateSkill(eqTo(id), eqTo(update))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updatePractisedHours(id, practisedHours)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).getSkill(id)
+          verify(server.repo, times(1)).updateSkill(eqTo(id), eqTo(update))
           verifyNoMoreInteractions(server.repo)
         }
       }

@@ -143,6 +143,22 @@ class PlanningRouteTest extends RouteTestFramework {
         }
       }
 
+      describe("updating the practised hours for a skill") {
+        it("should respond with the updated skill") {
+          val id = UUID.randomUUID
+          val update = rest.practisedHours
+          val updated = domain.skill
+
+          when(testServer.planningService.updatePractisedHours(eqTo(id), eqTo(update.value))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/skills/$id/practised-hours/increment", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[SkillView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updatePractisedHours(eqTo(id), eqTo(update.value))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
       describe("getting a skill") {
         it("should respond with the requested skill") {
           val id = UUID.randomUUID
