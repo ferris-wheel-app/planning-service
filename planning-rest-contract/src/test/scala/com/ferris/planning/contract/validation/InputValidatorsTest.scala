@@ -10,6 +10,89 @@ import org.scalatest.{Assertions, FunSpec, Matchers}
 
 class InputValidatorsTest extends FunSpec with Matchers with Assertions {
 
+  describe("validating a skill creation") {
+    it("should allow the creation of a valid object") {
+      SD.skillCreation.copy(
+        proficiency = SD.skillCreation.proficiency
+      )
+    }
+
+    it("should throw an exception if the proficiency is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.skillCreation.copy(
+          proficiency = "not_good"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Proficiency", Some(InvalidFieldPayload("proficiency")))
+      caught.message shouldBe expected.message
+    }
+  }
+
+  describe("validating a skill update") {
+    it("should allow the creation of a valid object") {
+      SD.skillUpdate.copy(
+        proficiency = SD.skillUpdate.proficiency
+      )
+    }
+
+    it("should throw an exception if the proficiency is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.skillUpdate.copy(
+          proficiency = Some("not_good")
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Proficiency", Some(InvalidFieldPayload("proficiency")))
+      caught.message shouldBe expected.message
+    }
+  }
+
+  describe("validating an associated skill") {
+    it("should allow the creation of a valid object") {
+      SD.associatedSkillInsertion.copy(
+        relevance = SD.associatedSkillInsertion.relevance,
+        level = SD.associatedSkillInsertion.level
+      )
+    }
+
+    it("should throw an exception if the relevance is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.associatedSkillInsertion.copy(
+          relevance = "not_needed"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Relevance", Some(InvalidFieldPayload("relevance")))
+      caught.message shouldBe expected.message
+    }
+
+    it("should throw an exception if the level is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.associatedSkillInsertion.copy(
+          level = "rubbish"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Level", Some(InvalidFieldPayload("level")))
+      caught.message shouldBe expected.message
+    }
+  }
+
+  describe("validating practised hours") {
+    it("should allow the creation of a valid object") {
+      SD.practisedHours.copy(
+        value = SD.practisedHours.value
+      )
+    }
+
+    it("should throw an exception if the practised hours are invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.practisedHours.copy(
+          value = -1000L
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "practised hours must be a non-negative value", Some(InvalidFieldPayload("practised-hours")))
+      caught.message shouldBe expected.message
+    }
+  }
+
   describe("validating a backlog-item creation") {
     it("should allow the creation of a valid object") {
       SD.backlogItemCreation.copy(
