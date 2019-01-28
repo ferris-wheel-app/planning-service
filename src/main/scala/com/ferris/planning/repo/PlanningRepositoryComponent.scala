@@ -1364,6 +1364,21 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield goalSkills
     }
 
+    private def insertLaserDonutSkillsAction(laserDonutId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[LaserDonutSkillRow]] = {
+      for {
+        skills <- getSkillsAction(associatedSkills.map(_.skillId))
+        laserDonutSkills = skills.zip(associatedSkills).map { case (skill, associatedSkill) =>
+          LaserDonutSkillRow(
+            laserDonutId = laserDonutId,
+            skillId = skill.id,
+            relevance = associatedSkill.relevance.dbValue,
+            level = associatedSkill.level.dbValue
+          )
+        }
+        _ <- LaserDonutSkillTable ++= laserDonutSkills
+      } yield laserDonutSkills
+    }
+
     private def insertThreadSkillsAction(threadId: Long, associatedSkills: Seq[AssociatedSkill]): DBIO[Seq[ThreadSkillRow]] = {
       for {
         skills <- getSkillsAction(associatedSkills.map(_.skillId))

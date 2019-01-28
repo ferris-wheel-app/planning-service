@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalSkillTable.schema, GoalTable.schema, HobbySkillTable.schema, HobbyTable.schema, LaserDonutTable.schema, OneOffSkillTable.schema, OneOffTable.schema, PortionSkillTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffSkillTable.schema, ScheduledOneOffTable.schema, SkillCategoryTable.schema, SkillTable.schema, ThemeTable.schema, ThreadSkillTable.schema, ThreadTable.schema, TodoTable.schema, WeaveSkillTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalSkillTable.schema, GoalTable.schema, HobbySkillTable.schema, HobbyTable.schema, LaserDonutSkillTable.schema, LaserDonutTable.schema, OneOffSkillTable.schema, OneOffTable.schema, PortionSkillTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffSkillTable.schema, ScheduledOneOffTable.schema, SkillCategoryTable.schema, SkillTable.schema, ThemeTable.schema, ThreadSkillTable.schema, ThreadTable.schema, TodoTable.schema, WeaveSkillTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -285,8 +285,8 @@ trait Tables {
 
     /** Foreign key referencing HobbyTable (database name HOBBY_FK) */
     lazy val hobbyTableFk = foreignKey("HOBBY_FK", hobbyId, HobbyTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing SkillTable (database name SKILL_FK5) */
-    lazy val skillTableFk = foreignKey("SKILL_FK5", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK6) */
+    lazy val skillTableFk = foreignKey("SKILL_FK6", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (hobbyId,skillId) (database name CONSTRAINT_INDEX_4F) */
     val index1 = index("CONSTRAINT_INDEX_4F", (hobbyId, skillId), unique=true)
@@ -345,6 +345,43 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table HobbyTable */
   lazy val HobbyTable = new TableQuery(tag => new HobbyTable(tag))
+
+  /** Entity class storing rows of table LaserDonutSkillTable
+   *  @param laserDonutId Database column LASER_DONUT_ID SqlType(BIGINT)
+   *  @param skillId Database column SKILL_ID SqlType(BIGINT)
+   *  @param relevance Database column RELEVANCE SqlType(VARCHAR), Length(36,true)
+   *  @param level Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+  case class LaserDonutSkillRow(laserDonutId: Long, skillId: Long, relevance: String, level: String)
+  /** GetResult implicit for fetching LaserDonutSkillRow objects using plain SQL queries */
+  implicit def GetResultLaserDonutSkillRow(implicit e0: GR[Long], e1: GR[String]): GR[LaserDonutSkillRow] = GR{
+    prs => import prs._
+    LaserDonutSkillRow.tupled((<<[Long], <<[Long], <<[String], <<[String]))
+  }
+  /** Table description of table LASER_DONUT_SKILL. Objects of this class serve as prototypes for rows in queries. */
+  class LaserDonutSkillTable(_tableTag: Tag) extends profile.api.Table[LaserDonutSkillRow](_tableTag, "LASER_DONUT_SKILL") {
+    def * = (laserDonutId, skillId, relevance, level) <> (LaserDonutSkillRow.tupled, LaserDonutSkillRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(laserDonutId), Rep.Some(skillId), Rep.Some(relevance), Rep.Some(level)).shaped.<>({r=>import r._; _1.map(_=> LaserDonutSkillRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column LASER_DONUT_ID SqlType(BIGINT) */
+    val laserDonutId: Rep[Long] = column[Long]("LASER_DONUT_ID")
+    /** Database column SKILL_ID SqlType(BIGINT) */
+    val skillId: Rep[Long] = column[Long]("SKILL_ID")
+    /** Database column RELEVANCE SqlType(VARCHAR), Length(36,true) */
+    val relevance: Rep[String] = column[String]("RELEVANCE", O.Length(36,varying=true))
+    /** Database column LEVEL SqlType(VARCHAR), Length(36,true) */
+    val level: Rep[String] = column[String]("LEVEL", O.Length(36,varying=true))
+
+    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK2) */
+    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK2", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK4) */
+    lazy val skillTableFk = foreignKey("SKILL_FK4", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (laserDonutId,skillId) (database name CONSTRAINT_INDEX_18) */
+    val index1 = index("CONSTRAINT_INDEX_18", (laserDonutId, skillId), unique=true)
+  }
+  /** Collection-like TableQuery object for table LaserDonutSkillTable */
+  lazy val LaserDonutSkillTable = new TableQuery(tag => new LaserDonutSkillTable(tag))
 
   /** Entity class storing rows of table LaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
@@ -432,8 +469,8 @@ trait Tables {
 
     /** Foreign key referencing OneOffTable (database name ONE_OFF_FK) */
     lazy val oneOffTableFk = foreignKey("ONE_OFF_FK", oneOffId, OneOffTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing SkillTable (database name SKILL_FK6) */
-    lazy val skillTableFk = foreignKey("SKILL_FK6", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK7) */
+    lazy val skillTableFk = foreignKey("SKILL_FK7", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (oneOffId,skillId) (database name CONSTRAINT_INDEX_1E) */
     val index1 = index("CONSTRAINT_INDEX_1E", (oneOffId, skillId), unique=true)
@@ -519,8 +556,8 @@ trait Tables {
 
     /** Foreign key referencing PortionTable (database name PORTION_FK) */
     lazy val portionTableFk = foreignKey("PORTION_FK", portionId, PortionTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing SkillTable (database name SKILL_FK4) */
-    lazy val skillTableFk = foreignKey("SKILL_FK4", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK5) */
+    lazy val skillTableFk = foreignKey("SKILL_FK5", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (portionId,skillId) (database name CONSTRAINT_INDEX_DD) */
     val index1 = index("CONSTRAINT_INDEX_DD", (portionId, skillId), unique=true)
@@ -601,8 +638,8 @@ trait Tables {
     /** Database column IS_CURRENT SqlType(TINYINT) */
     val isCurrent: Rep[Byte] = column[Byte]("IS_CURRENT")
 
-    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK) */
-    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing LaserDonutTable (database name LASER_DONUT_FK1) */
+    lazy val laserDonutTableFk = foreignKey("LASER_DONUT_FK1", laserDonutId, LaserDonutTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (laserDonutId) (database name CONSTRAINT_INDEX_8) */
     val index1 = index("CONSTRAINT_INDEX_8", laserDonutId, unique=true)
@@ -638,8 +675,8 @@ trait Tables {
 
     /** Foreign key referencing ScheduledOneOffTable (database name SCHEDULED_ONE_OFF_FK) */
     lazy val scheduledOneOffTableFk = foreignKey("SCHEDULED_ONE_OFF_FK", scheduledOneOffId, ScheduledOneOffTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-    /** Foreign key referencing SkillTable (database name SKILL_FK7) */
-    lazy val skillTableFk = foreignKey("SKILL_FK7", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing SkillTable (database name SKILL_FK8) */
+    lazy val skillTableFk = foreignKey("SKILL_FK8", skillId, SkillTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
 
     /** Uniqueness Index over (scheduledOneOffId,skillId) (database name CONSTRAINT_INDEX_92) */
     val index1 = index("CONSTRAINT_INDEX_92", (scheduledOneOffId, skillId), unique=true)

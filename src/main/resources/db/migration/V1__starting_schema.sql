@@ -194,7 +194,7 @@ create table scheduled_laser_donut (
   is_current TINYINT(1) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY (laser_donut_id),
-  CONSTRAINT laser_donut_fk FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT laser_donut_fk1 FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table current_activity (
@@ -266,6 +266,16 @@ create table weave_skill (
   CONSTRAINT skill_fk3 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
+create table laser_donut_skill (
+  laser_donut_id BIGINT NOT NULL,
+  skill_id BIGINT NOT NULL,
+  relevance VARCHAR(36) NOT NULL check (relevance in ('NEEDED', 'TO_BE_ACQUIRED', 'MAINTENANCE')),
+  level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
+  UNIQUE KEY (laser_donut_id, skill_id),
+  CONSTRAINT laser_donut_fk2 FOREIGN KEY (laser_donut_id) REFERENCES laser_donut (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT skill_fk4 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;
+
 create table portion_skill (
   portion_id BIGINT NOT NULL,
   skill_id BIGINT NOT NULL,
@@ -273,7 +283,7 @@ create table portion_skill (
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   UNIQUE KEY (portion_id, skill_id),
   CONSTRAINT portion_fk FOREIGN KEY (portion_id) REFERENCES portion (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT skill_fk4 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT skill_fk5 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table hobby_skill (
@@ -283,7 +293,7 @@ create table hobby_skill (
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   UNIQUE KEY (hobby_id, skill_id),
   CONSTRAINT hobby_fk FOREIGN KEY (hobby_id) REFERENCES hobby (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT skill_fk5 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT skill_fk6 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table one_off_skill (
@@ -293,7 +303,7 @@ create table one_off_skill (
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   UNIQUE KEY (one_off_id, skill_id),
   CONSTRAINT one_off_fk FOREIGN KEY (one_off_id) REFERENCES one_off (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT skill_fk6 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT skill_fk7 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
 create table scheduled_one_off_skill (
@@ -303,5 +313,5 @@ create table scheduled_one_off_skill (
   level VARCHAR(36) NOT NULL check (level in ('BASIC', 'NOVICE', 'INTERMEDIATE', 'ADVANCED', 'EXPERT')),
   UNIQUE KEY (scheduled_one_off_id, skill_id),
   CONSTRAINT scheduled_one_off_fk FOREIGN KEY (scheduled_one_off_id) REFERENCES scheduled_one_off (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT skill_fk7 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT skill_fk8 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
