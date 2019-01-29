@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalSkillTable.schema, GoalTable.schema, HobbySkillTable.schema, HobbyTable.schema, LaserDonutSkillTable.schema, LaserDonutTable.schema, OneOffSkillTable.schema, OneOffTable.schema, PortionSkillTable.schema, PortionTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffSkillTable.schema, ScheduledOneOffTable.schema, SkillCategoryTable.schema, SkillTable.schema, ThemeTable.schema, ThreadSkillTable.schema, ThreadTable.schema, TodoTable.schema, WeaveSkillTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(BacklogItemTable.schema, CurrentActivityTable.schema, EpochTable.schema, GoalBacklogItemTable.schema, GoalRelationshipTable.schema, GoalSkillTable.schema, GoalTable.schema, HobbySkillTable.schema, HobbyTable.schema, LaserDonutSkillTable.schema, LaserDonutTable.schema, OneOffSkillTable.schema, OneOffTable.schema, PortionSkillTable.schema, PortionTable.schema, RelationshipTable.schema, ScheduledLaserDonutTable.schema, ScheduledOneOffSkillTable.schema, ScheduledOneOffTable.schema, SkillCategoryTable.schema, SkillTable.schema, ThemeTable.schema, ThreadSkillTable.schema, ThreadTable.schema, TodoTable.schema, WeaveSkillTable.schema, WeaveTable.schema, YearTable.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -172,6 +172,37 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table GoalBacklogItemTable */
   lazy val GoalBacklogItemTable = new TableQuery(tag => new GoalBacklogItemTable(tag))
+
+  /** Entity class storing rows of table GoalRelationshipTable
+   *  @param goalId Database column GOAL_ID SqlType(BIGINT)
+   *  @param relationshipId Database column RELATIONSHIP_ID SqlType(BIGINT) */
+  case class GoalRelationshipRow(goalId: Long, relationshipId: Long)
+  /** GetResult implicit for fetching GoalRelationshipRow objects using plain SQL queries */
+  implicit def GetResultGoalRelationshipRow(implicit e0: GR[Long]): GR[GoalRelationshipRow] = GR{
+    prs => import prs._
+    GoalRelationshipRow.tupled((<<[Long], <<[Long]))
+  }
+  /** Table description of table GOAL_RELATIONSHIP. Objects of this class serve as prototypes for rows in queries. */
+  class GoalRelationshipTable(_tableTag: Tag) extends profile.api.Table[GoalRelationshipRow](_tableTag, "GOAL_RELATIONSHIP") {
+    def * = (goalId, relationshipId) <> (GoalRelationshipRow.tupled, GoalRelationshipRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(goalId), Rep.Some(relationshipId)).shaped.<>({r=>import r._; _1.map(_=> GoalRelationshipRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column GOAL_ID SqlType(BIGINT) */
+    val goalId: Rep[Long] = column[Long]("GOAL_ID")
+    /** Database column RELATIONSHIP_ID SqlType(BIGINT) */
+    val relationshipId: Rep[Long] = column[Long]("RELATIONSHIP_ID")
+
+    /** Foreign key referencing GoalTable (database name GOAL_FK3) */
+    lazy val goalTableFk = foreignKey("GOAL_FK3", goalId, GoalTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+    /** Foreign key referencing RelationshipTable (database name RELATIONSHIP_FK) */
+    lazy val relationshipTableFk = foreignKey("RELATIONSHIP_FK", relationshipId, RelationshipTable)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+
+    /** Uniqueness Index over (goalId,relationshipId) (database name CONSTRAINT_INDEX_D6) */
+    val index1 = index("CONSTRAINT_INDEX_D6", (goalId, relationshipId), unique=true)
+  }
+  /** Collection-like TableQuery object for table GoalRelationshipTable */
+  lazy val GoalRelationshipTable = new TableQuery(tag => new GoalRelationshipTable(tag))
 
   /** Entity class storing rows of table GoalSkillTable
    *  @param goalId Database column GOAL_ID SqlType(BIGINT)
@@ -611,6 +642,59 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table PortionTable */
   lazy val PortionTable = new TableQuery(tag => new PortionTable(tag))
+
+  /** Entity class storing rows of table RelationshipTable
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param uuid Database column UUID SqlType(VARCHAR), Length(36,true)
+   *  @param name Database column NAME SqlType(VARCHAR), Length(256,true)
+   *  @param category Database column CATEGORY SqlType(VARCHAR), Length(36,true)
+   *  @param traits Database column TRAITS SqlType(VARCHAR), Length(2000,true)
+   *  @param likes Database column LIKES SqlType(VARCHAR), Length(2000,true)
+   *  @param dislikes Database column DISLIKES SqlType(VARCHAR), Length(2000,true)
+   *  @param hobbies Database column HOBBIES SqlType(VARCHAR), Length(2000,true)
+   *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
+   *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
+   *  @param lastMeet Database column LAST_MEET SqlType(TIMESTAMP) */
+  case class RelationshipRow(id: Long, uuid: String, name: String, category: String, traits: String, likes: String, dislikes: String, hobbies: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastMeet: Option[java.sql.Timestamp])
+  /** GetResult implicit for fetching RelationshipRow objects using plain SQL queries */
+  implicit def GetResultRelationshipRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[RelationshipRow] = GR{
+    prs => import prs._
+    RelationshipRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+  }
+  /** Table description of table RELATIONSHIP. Objects of this class serve as prototypes for rows in queries. */
+  class RelationshipTable(_tableTag: Tag) extends profile.api.Table[RelationshipRow](_tableTag, "RELATIONSHIP") {
+    def * = (id, uuid, name, category, traits, likes, dislikes, hobbies, createdOn, lastModified, lastMeet) <> (RelationshipRow.tupled, RelationshipRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(uuid), Rep.Some(name), Rep.Some(category), Rep.Some(traits), Rep.Some(likes), Rep.Some(dislikes), Rep.Some(hobbies), Rep.Some(createdOn), lastModified, lastMeet).shaped.<>({r=>import r._; _1.map(_=> RelationshipRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10, _11)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
+    /** Database column UUID SqlType(VARCHAR), Length(36,true) */
+    val uuid: Rep[String] = column[String]("UUID", O.Length(36,varying=true))
+    /** Database column NAME SqlType(VARCHAR), Length(256,true) */
+    val name: Rep[String] = column[String]("NAME", O.Length(256,varying=true))
+    /** Database column CATEGORY SqlType(VARCHAR), Length(36,true) */
+    val category: Rep[String] = column[String]("CATEGORY", O.Length(36,varying=true))
+    /** Database column TRAITS SqlType(VARCHAR), Length(2000,true) */
+    val traits: Rep[String] = column[String]("TRAITS", O.Length(2000,varying=true))
+    /** Database column LIKES SqlType(VARCHAR), Length(2000,true) */
+    val likes: Rep[String] = column[String]("LIKES", O.Length(2000,varying=true))
+    /** Database column DISLIKES SqlType(VARCHAR), Length(2000,true) */
+    val dislikes: Rep[String] = column[String]("DISLIKES", O.Length(2000,varying=true))
+    /** Database column HOBBIES SqlType(VARCHAR), Length(2000,true) */
+    val hobbies: Rep[String] = column[String]("HOBBIES", O.Length(2000,varying=true))
+    /** Database column CREATED_ON SqlType(TIMESTAMP) */
+    val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
+    /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
+    val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
+    /** Database column LAST_MEET SqlType(TIMESTAMP) */
+    val lastMeet: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MEET")
+
+    /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_7) */
+    val index1 = index("CONSTRAINT_INDEX_7", uuid, unique=true)
+  }
+  /** Collection-like TableQuery object for table RelationshipTable */
+  lazy val RelationshipTable = new TableQuery(tag => new RelationshipTable(tag))
 
   /** Entity class storing rows of table ScheduledLaserDonutTable
    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey

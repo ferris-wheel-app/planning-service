@@ -315,3 +315,27 @@ create table scheduled_one_off_skill (
   CONSTRAINT scheduled_one_off_fk FOREIGN KEY (scheduled_one_off_id) REFERENCES scheduled_one_off (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT skill_fk8 FOREIGN KEY (skill_id) REFERENCES skill (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
+
+create table relationship (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  uuid VARCHAR(36) NOT NULL,
+  name VARCHAR(256) NOT NULL,
+  category VARCHAR(36) NOT NULL check (category in ('FAMILY', 'FRIENDS', 'WORK', 'ROMANTIC', 'MENTORSHIP')),
+  traits VARCHAR(2000) NOT NULL,
+  likes VARCHAR(2000) NOT NULL,
+  dislikes VARCHAR(2000) NOT NULL,
+  hobbies VARCHAR(2000) NOT NULL,
+  created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP,
+  last_meet TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY (uuid)
+) ENGINE=InnoDB;
+
+create table goal_relationship (
+  goal_id BIGINT NOT NULL,
+  relationship_id BIGINT NOT NULL,
+  UNIQUE KEY (goal_id, relationship_id),
+  CONSTRAINT goal_fk3 FOREIGN KEY (goal_id) REFERENCES goal (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT relationship_fk FOREIGN KEY (relationship_id) REFERENCES relationship (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB;
