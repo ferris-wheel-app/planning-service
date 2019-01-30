@@ -28,13 +28,15 @@ object Resources {
     case class EpochCreation (
       name: String,
       totem: String,
-      question: String
+      question: String,
+      associatedMission: AssociatedMissionInsertion
     )
 
     case class EpochUpdate (
       name: Option[String],
       totem: Option[String],
-      question: Option[String]
+      question: Option[String],
+      associatedMission: Option[AssociatedMissionInsertion]
     )
 
     case class YearCreation (
@@ -62,7 +64,7 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       graduation: String,
       status: String
     ) {
@@ -74,7 +76,7 @@ object Resources {
       backlogItems: Option[Seq[UUID]],
       summary: Option[String],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       graduation: Option[String],
       status: Option[String]
     ) {
@@ -85,7 +87,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       performance: String
     ) {
       checkValidity(this)
@@ -95,7 +97,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       performance: Option[String]
     ) {
       checkValidity(this)
@@ -105,7 +107,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       `type`: String,
       status: String
     ) {
@@ -116,7 +118,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       `type`: Option[String],
       status: Option[String]
     ) {
@@ -127,6 +129,7 @@ object Resources {
       goalId: UUID,
       summary: String,
       description: String,
+      valueDimensions: ValueDimensionsCreation,
       milestone: String,
       `type`: String,
       status: String
@@ -138,6 +141,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
+      valueDimensions: Option[ValueDimensionsUpdate],
       milestone: Option[String],
       `type`: Option[String],
       status: Option[String]
@@ -149,7 +153,7 @@ object Resources {
       laserDonutId: UUID,
       summary: String,
       status: String,
-      associatedSkills: Seq[AssociatedSkillInsertion]
+      valueDimensions: ValueDimensionsCreation
     ) {
       checkValidity(this)
     }
@@ -158,7 +162,7 @@ object Resources {
       laserDonutId: Option[UUID],
       summary: Option[String],
       status: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]]
+      valueDimensions: Option[ValueDimensionsUpdate]
     ) {
       checkValidity(this)
     }
@@ -178,7 +182,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       frequency: String,
       `type`: String
     ) {
@@ -189,7 +193,7 @@ object Resources {
       goalId: Option[UUID],
       summary: Option[String],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       frequency: Option[String],
       `type`: Option[String]
     ) {
@@ -199,7 +203,7 @@ object Resources {
     case class OneOffCreation (
       goalId: Option[UUID],
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       estimate: Long,
       status: String
     ) {
@@ -209,7 +213,7 @@ object Resources {
     case class OneOffUpdate (
       goalId: Option[UUID],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       estimate: Option[Long],
       status: Option[String]
     ) {
@@ -220,7 +224,7 @@ object Resources {
       occursOn: LocalDateTime,
       goalId: Option[UUID],
       description: String,
-      associatedSkills: Seq[AssociatedSkillInsertion],
+      valueDimensions: ValueDimensionsCreation,
       estimate: Long,
       status: String
     ) {
@@ -231,7 +235,7 @@ object Resources {
       occursOn: Option[LocalDateTime],
       goalId: Option[UUID],
       description: Option[String],
-      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      valueDimensions: Option[ValueDimensionsUpdate],
       estimate: Option[Long],
       status: Option[String]
     ) {
@@ -295,6 +299,57 @@ object Resources {
     ) {
       checkValidity(this)
     }
+
+    case class RelationshipCreation (
+      name: String,
+      category: String,
+      traits: Seq[String],
+      likes: Seq[String],
+      dislikes: Seq[String],
+      hobbies: Seq[String],
+      lastMeet: Option[LocalDate]
+    )
+
+    case class RelationshipUpdate (
+      name: Option[String],
+      category: Option[String],
+      traits: Option[Seq[String]],
+      likes: Option[Seq[String]],
+      dislikes: Option[Seq[String]],
+      hobbies: Option[Seq[String]],
+      lastMeet: Option[LocalDate]
+    )
+
+    case class MissionCreation(
+      name: String,
+      description: String
+    )
+
+    case class MissionUpdate(
+      name: Option[String],
+      description: Option[String]
+    )
+
+    case class AssociatedMissionInsertion (
+      missionId: UUID,
+      level: String
+    )
+
+    case class ValueDimensionsCreation (
+      associatedMissions: Seq[UUID],
+      associatedSkills: Seq[AssociatedSkillInsertion],
+      relationships: Seq[UUID],
+      helpsSafetyNet: Boolean,
+      expandsWorldView: Boolean
+    )
+
+    case class ValueDimensionsUpdate(
+      associatedMissions: Option[Seq[UUID]],
+      associatedSkills: Option[Seq[AssociatedSkillInsertion]],
+      relationships: Option[Seq[UUID]],
+      helpsSafetyNet: Option[Boolean],
+      expandsWorldView: Option[Boolean]
+    )
   }
 
   object Out {
@@ -313,6 +368,7 @@ object Resources {
       name: String,
       totem: String,
       question: String,
+      associatedMission: AssociatedMissionView,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime]
     )
@@ -340,7 +396,7 @@ object Resources {
       backlogItems: Seq[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       graduation: String,
       status: String,
       createdOn: LocalDateTime,
@@ -352,7 +408,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       performance: String,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
@@ -364,7 +420,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       `type`: String,
       status: String,
       createdOn: LocalDateTime,
@@ -377,6 +433,7 @@ object Resources {
       goalId: UUID,
       summary: String,
       description: String,
+      valueDimensions: ValueDimensionsView,
       milestone: String,
       order: Int,
       `type`: String,
@@ -401,7 +458,7 @@ object Resources {
       summary: String,
       order: Int,
       status: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime],
       lastPerformed: Option[LocalDateTime]
@@ -423,7 +480,7 @@ object Resources {
       goalId: Option[UUID],
       summary: String,
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       frequency: String,
       `type`: String,
       createdOn: LocalDateTime,
@@ -435,7 +492,7 @@ object Resources {
       uuid: UUID,
       goalId: Option[UUID],
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       estimate: Long,
       order: Int,
       status: String,
@@ -449,7 +506,7 @@ object Resources {
       occursOn: LocalDateTime,
       goalId: Option[UUID],
       description: String,
-      associatedSkills: Seq[AssociatedSkillView],
+      valueDimensions: ValueDimensionsView,
       estimate: Long,
       status: String,
       createdOn: LocalDateTime,
@@ -484,6 +541,36 @@ object Resources {
       skillId: UUID,
       relevance: String,
       level: String
+    )
+
+    case class RelationshipView(
+      uuid: UUID,
+      name: String,
+      category: String,
+      traits: Seq[String],
+      likes: Seq[String],
+      dislikes: Seq[String],
+      hobbies: Seq[String],
+      lastMeet: Option[LocalDate]
+    )
+
+    case class MissionView(
+      uuid: UUID,
+      name: String,
+      description: String
+    )
+
+    case class AssociatedMissionView(
+      missionId: UUID,
+      level: String
+    )
+
+    case class ValueDimensionsView(
+      associatedMissions: Seq[UUID],
+      associatedSkills: Seq[AssociatedSkillView],
+      relationships: Seq[UUID],
+      helpsSafetyNet: Boolean,
+      expandsWorldView: Boolean
     )
   }
 }

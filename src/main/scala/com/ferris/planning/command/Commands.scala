@@ -29,7 +29,8 @@ object Commands {
   case class UpdateEpoch (
     name: Option[String],
     totem: Option[String],
-    question: Option[String]
+    question: Option[String],
+    associatedMissions: Option[Seq[AssociatedMission]]
   )
 
   case class CreateYear (
@@ -67,7 +68,7 @@ object Commands {
     backlogItems: Option[Seq[UUID]],
     summary: Option[String],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     graduation: Option[GraduationTypes.GraduationType],
     status: Option[GoalStatuses.GoalStatus]
   )
@@ -84,7 +85,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     performance: Option[ThreadPerformances.ThreadPerformance]
   )
 
@@ -101,7 +102,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     `type`: Option[WeaveTypes.WeaveType],
     status: Option[Statuses.Status]
   )
@@ -120,7 +121,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     milestone: Option[String],
     `type`: Option[DonutTypes.DonutType],
     status: Option[Statuses.Status]
@@ -137,7 +138,7 @@ object Commands {
     laserDonutId: Option[UUID],
     summary: Option[String],
     status: Option[Statuses.Status],
-    valueDimensions: Option[ValueDimensions]
+    valueDimensions: Option[UpdateValueDimensions]
   )
 
   case class CreateTodo (
@@ -164,7 +165,7 @@ object Commands {
     goalId: Option[UUID],
     summary: Option[String],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     frequency: Option[HobbyFrequencies.HobbyFrequency],
     `type`: Option[HobbyTypes.HobbyType]
   )
@@ -180,7 +181,7 @@ object Commands {
   case class UpdateOneOff (
     goalId: Option[UUID],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     estimate: Option[Long],
     status: Option[Statuses.Status]
   )
@@ -198,9 +199,21 @@ object Commands {
     occursOn: Option[LocalDateTime],
     goalId: Option[UUID],
     description: Option[String],
-    valueDimensions: Option[ValueDimensions],
+    valueDimensions: Option[UpdateValueDimensions],
     estimate: Option[Long],
     status: Option[Statuses.Status]
+  )
+
+  case class UpdateList (
+    reordered: Seq[UUID]
+  )
+
+  case class UpsertTier(
+    laserDonuts: Seq[UUID]
+  )
+
+  case class UpsertPyramidOfImportance(
+    tiers: Seq[UpsertTier]
   )
 
   case class CreateSkillCategory (
@@ -263,17 +276,5 @@ object Commands {
     relationships: Option[Seq[UUID]],
     helpsSafetyNet: Option[Boolean],
     expandsWorldView: Option[Boolean]
-  )
-
-  case class UpdateList (
-    reordered: Seq[UUID]
-  )
-
-  case class UpsertTier(
-    laserDonuts: Seq[UUID]
-  )
-
-  case class UpsertPyramidOfImportance(
-    tiers: Seq[UpsertTier]
   )
 }
