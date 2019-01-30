@@ -19,6 +19,7 @@ object Model {
     name: String,
     totem: String,
     question: String,
+    associatedMissions: Seq[AssociatedMission],
     createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime]
   )
@@ -46,7 +47,7 @@ object Model {
     backlogItems: Seq[UUID],
     summary: String,
     description: String,
-    associatedSkills: Seq[AssociatedSkill],
+    valueDimensions: ValueDimensions,
     graduation: GraduationTypes.GraduationType,
     status: GoalStatuses.GoalStatus,
     createdOn: LocalDateTime,
@@ -216,6 +217,36 @@ object Model {
     level: Proficiencies.SkillLevel
   )
 
+  case class Relationship(
+    uuid: UUID,
+    name: Seq[String],
+    category: RelationshipCategories.RelationshipCategory,
+    traits: String,
+    likes: Seq[String],
+    dislikes: Seq[String],
+    hobbies: Seq[String],
+    lastMeet: Option[LocalDate]
+  )
+
+  case class Mission(
+    uuid: UUID,
+    name: String,
+    description: String
+  )
+
+  case class AssociatedMission(
+    missionId: UUID,
+    level: MissionLevels.MissionLevel
+  )
+
+  case class ValueDimensions(
+    associatedMissions: Seq[UUID],
+    associatedSkills: Seq[AssociatedSkill],
+    relationships: Seq[UUID],
+    helpsSafetyNet: Boolean,
+    expandsWorldView: Boolean
+  )
+
   trait TypeEnum {
     def dbValue: String
   }
@@ -235,6 +266,10 @@ object Model {
 
     case object Issue extends BacklogItemType {
       override val dbValue = "ISSUE"
+    }
+
+    case object ChipOnAShoulder extends BacklogItemType {
+      override val dbValue = "CHIP_ON_A_SHOULDER"
     }
   }
 
@@ -500,6 +535,57 @@ object Model {
 
     case object Maintenance extends SkillRelevance {
       override val dbValue = "MAINTENANCE"
+    }
+  }
+
+  object RelationshipCategories {
+
+    def withName(name: String): RelationshipCategory = name match {
+      case Family.dbValue => Family
+      case Friends.dbValue => Friends
+      case Work.dbValue => Work
+      case Romantic.dbValue => Romantic
+      case Mentorship.dbValue => Mentorship
+    }
+
+    sealed trait RelationshipCategory extends TypeEnum
+
+    case object Family extends RelationshipCategory {
+      override val dbValue = "FAMILY"
+    }
+
+    case object Friends extends RelationshipCategory {
+      override val dbValue = "FRIENDS"
+    }
+
+    case object Work extends RelationshipCategory {
+      override val dbValue = "WORK"
+    }
+
+    case object Romantic extends RelationshipCategory {
+      override val dbValue = "ROMANTIC"
+    }
+
+    case object Mentorship extends RelationshipCategory {
+      override val dbValue = "MENTORSHIP"
+    }
+  }
+
+  object MissionLevels {
+
+    def withName(name: String): MissionLevel = name match {
+      case Major.dbValue => Major
+      case Minor.dbValue => Minor
+    }
+
+    sealed trait MissionLevel extends TypeEnum
+
+    case object Major extends MissionLevel {
+      override val dbValue = "MAJOR"
+    }
+
+    case object Minor extends MissionLevel {
+      override val dbValue = "MINOR"
     }
   }
 }
