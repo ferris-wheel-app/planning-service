@@ -23,6 +23,8 @@ trait PlanningRepositoryComponent {
   val repo: PlanningRepository
 
   trait PlanningRepository {
+    def createRelationship(creation: CreateRelationship): Future[Relationship]
+    def createMission(creation: CreateMission): Future[Mission]
     def createSkillCategory(creation: CreateSkillCategory): Future[SkillCategory]
     def createSkill(creation: CreateSkill): Future[Skill]
     def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem]
@@ -40,6 +42,8 @@ trait PlanningRepositoryComponent {
     def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance]
 
+    def updateRelationship(uuid: UUID, update: UpdateRelationship): Future[Relationship]
+    def updateMission(uuid: UUID, update: UpdateMission): Future[Mission]
     def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory): Future[SkillCategory]
     def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem]
@@ -61,6 +65,8 @@ trait PlanningRepositoryComponent {
     def refreshPyramidOfImportance(): Future[Boolean]
     def refreshPortion(): Future[Boolean]
 
+    def getRelationships: Future[Seq[Relationship]]
+    def getMissions: Future[Seq[Mission]]
     def getSkillCategories: Future[Seq[SkillCategory]]
     def getSkills: Future[Seq[Skill]]
     def getBacklogItems: Future[Seq[BacklogItem]]
@@ -83,6 +89,8 @@ trait PlanningRepositoryComponent {
     def getOneOffs: Future[Seq[OneOff]]
     def getScheduledOneOffs(date: Option[LocalDate]): Future[Seq[ScheduledOneOff]]
 
+    def getRelationship(uuid: UUID): Future[Option[Relationship]]
+    def getMission(uuid: UUID): Future[Option[Mission]]
     def getSkillCategory(uuid: UUID): Future[Option[SkillCategory]]
     def getSkill(uuid: UUID): Future[Option[Skill]]
     def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]]
@@ -102,6 +110,8 @@ trait PlanningRepositoryComponent {
     def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]]
     def getPyramidOfImportance: Future[Option[PyramidOfImportance]]
 
+    def deleteRelationship(uuid: UUID): Future[Boolean]
+    def deleteMission(uuid: UUID): Future[Boolean]
     def deleteSkillCategory(uuid: UUID): Future[Boolean]
     def deleteSkill(uuid: UUID): Future[Boolean]
     def deleteBacklogItem(uuid: UUID): Future[Boolean]

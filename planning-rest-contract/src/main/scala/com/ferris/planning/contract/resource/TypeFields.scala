@@ -91,4 +91,19 @@ object TypeFields {
     val maintenance = "maintenance"
     val values = Set(needed, toBeAcquired, maintenance)
   }
+
+  object RelationshipCategory {
+    val family = "family"
+    val friends = "friends"
+    val work = "work"
+    val romantic = "romantic"
+    val mentorship = "mentorship"
+    val values = Set(family, friends, work, romantic, mentorship)
+  }
+
+  object MissionLevel {
+    val major = "major"
+    val minor = "minor"
+    val values = Set(major, minor)
+  }
 }

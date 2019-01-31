@@ -13,6 +13,8 @@ trait PlanningServiceComponent {
   val planningService: PlanningService
 
   trait PlanningService {
+    def createRelationship(creation: CreateRelationship)(implicit ex: ExecutionContext): Future[Relationship]
+    def createMission(creation: CreateMission)(implicit ex: ExecutionContext): Future[Mission]
     def createSkillCategory(creation: CreateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory]
     def createSkill(creation: CreateSkill)(implicit ex: ExecutionContext): Future[Skill]
     def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
@@ -30,6 +32,8 @@ trait PlanningServiceComponent {
     def createScheduledOneOff(creation: CreateScheduledOneOff)(implicit ex: ExecutionContext): Future[ScheduledOneOff]
     def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance)(implicit ex: ExecutionContext): Future[PyramidOfImportance]
 
+    def updateRelationship(uuid: UUID, update: UpdateRelationship)(implicit ex: ExecutionContext): Future[Relationship]
+    def updateMission(uuid: UUID, update: UpdateMission)(implicit ex: ExecutionContext): Future[Mission]
     def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory]
     def updateSkill(uuid: UUID, update: UpdateSkill)(implicit ex: ExecutionContext): Future[Skill]
     def updatePractisedHours(uuid: UUID, practisedHours: Long)(implicit ex: ExecutionContext): Future[Skill]
@@ -52,6 +56,8 @@ trait PlanningServiceComponent {
     def refreshPyramidOfImportance()(implicit ex: ExecutionContext): Future[Boolean]
     def refreshPortion()(implicit ex: ExecutionContext): Future[Boolean]
 
+    def getRelationships(implicit ex: ExecutionContext): Future[Seq[Relationship]]
+    def getMissions(implicit ex: ExecutionContext): Future[Seq[Mission]]
     def getSkillCategories(implicit ex: ExecutionContext): Future[Seq[SkillCategory]]
     def getSkills(implicit ex: ExecutionContext): Future[Seq[Skill]]
     def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]]
@@ -74,6 +80,8 @@ trait PlanningServiceComponent {
     def getOneOffs()(implicit ex: ExecutionContext): Future[Seq[OneOff]]
     def getScheduledOneOffs(date: Option[LocalDate])(implicit ex: ExecutionContext): Future[Seq[ScheduledOneOff]]
 
+    def getRelationship(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Relationship]]
+    def getMission(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Mission]]
     def getSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[SkillCategory]]
     def getSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Skill]]
     def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]]
@@ -94,6 +102,8 @@ trait PlanningServiceComponent {
     def getPyramidOfImportance(implicit ex: ExecutionContext): Future[Option[PyramidOfImportance]]
 
     def deleteSkillCategory(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
+    def deleteRelationship(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
+    def deleteMission(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]
     def deleteEpoch(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean]

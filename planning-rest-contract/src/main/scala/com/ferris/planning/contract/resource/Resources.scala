@@ -368,7 +368,7 @@ object Resources {
       name: String,
       totem: String,
       question: String,
-      associatedMission: AssociatedMissionView,
+      associatedMissions: Seq[AssociatedMissionView],
       createdOn: LocalDateTime,
       lastModified: Option[LocalDateTime]
     )

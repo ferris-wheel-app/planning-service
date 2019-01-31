@@ -25,6 +25,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   private val skillsPathSegment = "skills"
   private val practisedHoursPathSegment = "practised-hours"
   private val incrementPathSegment = "increment"
+  private val relationshipsPathSegment = "relationships"
+  private val missionsPathSegment = "missions"
   private val backlogItemsPathSegment = "backlog-items"
   private val epochsPathSegment = "epochs"
   private val yearsPathSegment = "years"
@@ -59,6 +61,18 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       post {
         entity(as[SkillCreation]) { creation =>
           onSuccess(planningService.createSkill(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val createRelationshipRoute = pathPrefix(relationshipsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[RelationshipCreation]) { creation =>
+          onSuccess(planningService.createRelationship(creation.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }

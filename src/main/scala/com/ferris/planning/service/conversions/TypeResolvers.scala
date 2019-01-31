@@ -7,7 +7,9 @@ import com.ferris.planning.model.Model.GoalStatuses.GoalStatus
 import com.ferris.planning.model.Model.GraduationTypes.GraduationType
 import com.ferris.planning.model.Model.HobbyFrequencies.HobbyFrequency
 import com.ferris.planning.model.Model.HobbyTypes.HobbyType
+import com.ferris.planning.model.Model.MissionLevels.MissionLevel
 import com.ferris.planning.model.Model.Proficiencies.{Proficiency, SkillLevel}
+import com.ferris.planning.model.Model.RelationshipCategories.RelationshipCategory
 import com.ferris.planning.model.Model.SkillRelevances.SkillRelevance
 import com.ferris.planning.model.Model.Statuses.Status
 import com.ferris.planning.model.Model.ThreadPerformances.ThreadPerformance
@@ -246,6 +248,44 @@ object TypeResolvers {
       case SkillRelevances.ToBeAcquired => toBeAcquired
       case SkillRelevances.Maintenance => maintenance
       case o => throw new IllegalArgumentException(s"Invalid skill-relevance: $o")
+    }
+  }
+
+  object RelationshipCategory extends TypeResolver[RelationshipCategories.RelationshipCategory] {
+    import TypeFields.RelationshipCategory._
+
+    override def withName(name: String): RelationshipCategory = name match {
+      case `family` => RelationshipCategories.Family
+      case `friends` => RelationshipCategories.Friends
+      case `work` => RelationshipCategories.Work
+      case `romantic` => RelationshipCategories.Romantic
+      case `mentorship` => RelationshipCategories.Mentorship
+      case o => throw new IllegalArgumentException(s"Invalid relationship category: $o")
+    }
+
+    override def toString(`type`: RelationshipCategory): String = `type` match {
+      case RelationshipCategories.Family => family
+      case RelationshipCategories.Friends => friends
+      case RelationshipCategories.Work => work
+      case RelationshipCategories.Romantic => romantic
+      case RelationshipCategories.Mentorship => mentorship
+      case o => throw new IllegalArgumentException(s"Invalid relationship category: $o")
+    }
+  }
+
+  object MissionLevel extends TypeResolver[MissionLevels.MissionLevel] {
+    import TypeFields.MissionLevel._
+
+    override def withName(name: String): MissionLevel = name match {
+      case `major` => MissionLevels.Major
+      case `minor` => MissionLevels.Minor
+      case o => throw new IllegalArgumentException(s"Invalid mission level: $o")
+    }
+
+    override def toString(`type`: MissionLevel): String = `type` match {
+      case MissionLevels.Major => major
+      case MissionLevels.Minor => minor
+      case o => throw new IllegalArgumentException(s"Invalid mission level: $o")
     }
   }
 }
