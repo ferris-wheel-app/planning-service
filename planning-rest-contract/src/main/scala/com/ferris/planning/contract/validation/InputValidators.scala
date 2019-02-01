@@ -21,8 +21,10 @@ object InputValidators extends InputValidation {
   private val EstimateField = "estimate"
   private val PractisedHoursField = "practised-hours"
   private val ProficiencyField = "proficiency"
-  private val SkillLevelField = "level"
-  private val SkillRelevanceField = "relevance"
+  private val SkillLevelField = "skill-level"
+  private val SkillRelevanceField = "skill-relevance"
+  private val RelationshipCategoryField = "relationship-category"
+  private val MissionLevelField = "mission-level"
 
   private val MaxGoalBacklogItemsSize = 10
   private val MaxTierSize = 10
@@ -143,6 +145,18 @@ object InputValidators extends InputValidation {
   def checkValidity(skillAssociation: AssociatedSkillInsertion): Unit = {
     checkField(SkillRelevance.values.contains(skillAssociation.relevance), SkillRelevanceField)
     checkField(SkillLevel.values.contains(skillAssociation.level), SkillLevelField)
+  }
+
+  def checkValidity(relationshipCreation: RelationshipCreation): Unit = {
+    checkField(RelationshipCategory.values.contains(relationshipCreation.category), RelationshipCategoryField)
+  }
+
+  def checkValidity(relationshipUpdate: RelationshipUpdate): Unit = {
+    relationshipUpdate.category.foreach(category => checkField(RelationshipCategory.values.contains(category), RelationshipCategoryField))
+  }
+
+  def checkValidity(associatedMissionInsertion: AssociatedMissionInsertion): Unit = {
+    checkField(MissionLevel.values.contains(associatedMissionInsertion.level), MissionLevelField)
   }
 
   def checkValidity(practisedHours: PractisedHours): Unit = {

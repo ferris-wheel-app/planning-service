@@ -80,6 +80,18 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val createMissionRoute = pathPrefix(missionsPathSegment) {
+    pathEndOrSingleSlash {
+      post {
+        entity(as[MissionCreation]) { creation =>
+          onSuccess(planningService.createMission(creation.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
   private val createBacklogItemRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       post {
@@ -277,6 +289,30 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
       put {
         entity(as[PractisedHours]) { update =>
           onSuccess(planningService.updatePractisedHours(id, update.value)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateRelationshipRoute = pathPrefix(relationshipsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[RelationshipUpdate]) { update =>
+          onSuccess(planningService.updateRelationship(id, update.toCommand)) { response =>
+            complete(StatusCodes.OK, response.toView)
+          }
+        }
+      }
+    }
+  }
+
+  private val updateMissionRoute = pathPrefix(missionsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      put {
+        entity(as[MissionUpdate]) { update =>
+          onSuccess(planningService.updateMission(id, update.toCommand)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }
@@ -512,6 +548,26 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getRelationshipsRoute = pathPrefix(relationshipsPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getRelationships) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
+  private val getMissionsRoute = pathPrefix(missionsPathSegment) {
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getMissions) { response =>
+          complete(StatusCodes.OK, response.map(_.toView))
+        }
+      }
+    }
+  }
+
   private val getBacklogItemsRoute = pathPrefix(backlogItemsPathSegment) {
     pathEndOrSingleSlash {
       get {
@@ -720,6 +776,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
+  private val getRelationshipRoute = pathPrefix(relationshipsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getRelationship(id))(outcome => complete(mapRelationship(outcome)))
+      }
+    }
+  }
+
+  private val getMissionRoute = pathPrefix(missionsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      get {
+        onSuccess(planningService.getMission(id))(outcome => complete(mapMission(outcome)))
+      }
+    }
+  }
+
   private val getBacklogItemRoute = pathPrefix(backlogItemsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       get {
@@ -860,6 +932,22 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     pathEndOrSingleSlash {
       delete {
         onSuccess(planningService.deleteSkill(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
+  private val deleteRelationshipRoute = pathPrefix(relationshipsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteRelationship(id))(outcome => complete(mapDeletion(outcome)))
+      }
+    }
+  }
+
+  private val deleteMissionRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID) { id =>
+    pathEndOrSingleSlash {
+      delete {
+        onSuccess(planningService.deleteMission(id))(outcome => complete(mapDeletion(outcome)))
       }
     }
   }

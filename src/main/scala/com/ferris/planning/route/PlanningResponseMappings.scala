@@ -20,6 +20,16 @@ trait PlanningResponseMappings extends FerrisResponseMappings {
     case None => throw SkillNotFoundException()
   }
 
+  def mapRelationship(response: Option[Relationship]): (Success, RelationshipView) = response match {
+    case Some(relationship) => (StatusCodes.OK, relationship.toView)
+    case None => throw RelationshipNotFoundException()
+  }
+
+  def mapMission(response: Option[Mission]): (Success, MissionView) = response match {
+    case Some(mission) => (StatusCodes.OK, mission.toView)
+    case None => throw MissionNotFoundException()
+  }
+
   def mapBacklogItem(response: Option[BacklogItem]): (Success, BacklogItemView) = response match {
     case Some(backlogItem) => (StatusCodes.OK, backlogItem.toView)
     case None => throw BacklogItemNotFoundException()

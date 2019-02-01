@@ -29,14 +29,14 @@ object Resources {
       name: String,
       totem: String,
       question: String,
-      associatedMission: AssociatedMissionInsertion
+      associatedMissions: Seq[AssociatedMissionInsertion]
     )
 
     case class EpochUpdate (
       name: Option[String],
       totem: Option[String],
       question: Option[String],
-      associatedMission: Option[AssociatedMissionInsertion]
+      associatedMissions: Option[Seq[AssociatedMissionInsertion]]
     )
 
     case class YearCreation (

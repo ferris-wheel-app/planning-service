@@ -25,6 +25,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   private val skillsPath = "skills"
   private val practisedHoursPath = "practised-hours"
   private val incrementPath = "increment"
+  private val relationshipsPath = "relationships"
+  private val missionsPath = "missions"
   private val backlogItemsPath = "backlog-items"
   private val epochsPath = "epochs"
   private val yearsPath = "years"
@@ -46,6 +48,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def createSkill(creation: SkillCreation): Future[SkillView] =
     makePostRequest[SkillCreation, SkillView](Uri(path = apiPath / skillsPath), creation)
+
+  def createRelationship(creation: RelationshipCreation): Future[RelationshipView] =
+    makePostRequest[RelationshipCreation, RelationshipView](Uri(path = apiPath / relationshipsPath), creation)
+
+  def createMission(creation: MissionCreation): Future[MissionView] =
+    makePostRequest[MissionCreation, MissionView](Uri(path = apiPath / missionsPath), creation)
 
   def createBacklogItem(creation: BacklogItemCreation): Future[BacklogItemView] =
     makePostRequest[BacklogItemCreation, BacklogItemView](Uri(path = apiPath / backlogItemsPath), creation)
@@ -98,6 +106,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def updatePractisedHours(id: UUID, practisedHours: Long): Future[SkillView] =
     makePutRequest[PractisedHours, SkillView](Uri(path = apiPath / skillsPath / id.toString / practisedHoursPath / incrementPath), PractisedHours(practisedHours))
 
+  def updateRelationship(id: UUID, update: RelationshipUpdate): Future[RelationshipView] =
+    makePutRequest[RelationshipUpdate, RelationshipView](Uri(path = apiPath / relationshipsPath / id.toString), update)
+
+  def updateMission(id: UUID, update: MissionUpdate): Future[MissionView] =
+    makePutRequest[MissionUpdate, MissionView](Uri(path = apiPath / missionsPath / id.toString), update)
+
   def updateBacklogItem(id: UUID, update: BacklogItemUpdate): Future[BacklogItemView] =
     makePutRequest[BacklogItemUpdate, BacklogItemView](Uri(path = apiPath / backlogItemsPath / id.toString), update)
 
@@ -142,6 +156,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def skill(id: UUID): Future[Option[SkillView]] =
     makeGetRequest[Option[SkillView]](Uri(path = apiPath / skillsPath / id.toString))
+
+  def relationship(id: UUID): Future[Option[RelationshipView]] =
+    makeGetRequest[Option[RelationshipView]](Uri(path = apiPath / relationshipsPath / id.toString))
+
+  def mission(id: UUID): Future[Option[MissionView]] =
+    makeGetRequest[Option[MissionView]](Uri(path = apiPath / missionsPath / id.toString))
 
   def backlogItem(id: UUID): Future[Option[BacklogItemView]] =
     makeGetRequest[Option[BacklogItemView]](Uri(path = apiPath / backlogItemsPath / id.toString))
@@ -197,6 +217,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def skills: Future[List[SkillView]] =
     makeGetRequest[List[SkillView]](Uri(path = apiPath / skillsPath))
 
+  def relationships: Future[List[RelationshipView]] =
+    makeGetRequest[List[RelationshipView]](Uri(path = apiPath / relationshipsPath))
+
+  def missions: Future[List[MissionView]] =
+    makeGetRequest[List[MissionView]](Uri(path = apiPath / missionsPath))
+
   def backlogItems: Future[List[BacklogItemView]] =
     makeGetRequest[List[BacklogItemView]](Uri(path = apiPath / backlogItemsPath))
 
@@ -242,6 +268,12 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
 
   def deleteSkill(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / skillsPath / id.toString))
+
+  def deleteRelationship(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / relationshipsPath / id.toString))
+
+  def deleteMission(id: UUID): Future[DeletionResult] =
+    makeDeleteRequest[DeletionResult](Uri(path = apiPath / missionsPath / id.toString))
 
   def deleteBacklogItem(id: UUID): Future[DeletionResult] =
     makeDeleteRequest[DeletionResult](Uri(path = apiPath / backlogItemsPath / id.toString))

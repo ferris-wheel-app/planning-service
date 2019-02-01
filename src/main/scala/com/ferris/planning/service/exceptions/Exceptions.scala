@@ -8,6 +8,10 @@ object Exceptions {
 
   case class SkillNotFoundException(message: String = "skill not found") extends PlanningServiceException(message)
 
+  case class RelationshipNotFoundException(message: String = "relationship not found") extends PlanningServiceException(message)
+
+  case class MissionNotFoundException(message: String = "mission not found") extends PlanningServiceException(message)
+
   case class BacklogItemNotFoundException(message: String = "backlog-item not found") extends PlanningServiceException(message)
 
   case class EpochNotFoundException(message: String = "epoch not found") extends PlanningServiceException(message)

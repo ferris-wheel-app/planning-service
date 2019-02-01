@@ -2,7 +2,7 @@ package com.ferris.planning.service.conversions
 
 import com.ferris.planning.command.Commands._
 import com.ferris.planning.contract.resource.Resources.In._
-import com.ferris.planning.model.Model.AssociatedSkill
+import com.ferris.planning.model.Model.{AssociatedMission, AssociatedSkill, ValueDimensions}
 
 object ExternalToCommand {
 
@@ -37,6 +37,79 @@ object ExternalToCommand {
     override def toCommand = UpdateSkill(name = skill.name, parentCategory = skill.parentCategory, proficiency = skill.proficiency.map(TypeResolvers.Proficiency.withName), practisedHours = skill.practisedHours)
   }
 
+  implicit class AssociatedSkillConversion(associatedSkill: AssociatedSkillInsertion) extends CommandConversion[AssociatedSkill] {
+    override def toCommand = AssociatedSkill(
+      skillId = associatedSkill.skillId,
+      relevance = TypeResolvers.SkillRelevance.withName(associatedSkill.relevance),
+      level = TypeResolvers.SkillLevel.withName(associatedSkill.level)
+    )
+  }
+
+  implicit class RelationshipCreationConversion(relationship: RelationshipCreation) extends CommandConversion[CreateRelationship] {
+    override def toCommand = CreateRelationship(
+      name = relationship.name,
+      category = TypeResolvers.RelationshipCategory.withName(relationship.category),
+      traits = relationship.traits,
+      likes = relationship.likes,
+      dislikes = relationship.dislikes,
+      hobbies = relationship.hobbies,
+      lastMeet = relationship.lastMeet
+    )
+  }
+
+  implicit class RelationshipUpdateConversion(relationship: RelationshipUpdate) extends CommandConversion[UpdateRelationship] {
+    override def toCommand = UpdateRelationship(
+      name = relationship.name,
+      category = relationship.category.map(TypeResolvers.RelationshipCategory.withName),
+      traits = relationship.traits,
+      likes = relationship.likes,
+      dislikes = relationship.dislikes,
+      hobbies = relationship.hobbies,
+      lastMeet = relationship.lastMeet
+    )
+  }
+
+  implicit class MissionCreationConversion(mission: MissionCreation) extends CommandConversion[CreateMission] {
+    override def toCommand = CreateMission(
+      name = mission.name,
+      description = mission.description
+    )
+  }
+
+  implicit class MissionUpdateConversion(mission: MissionUpdate) extends CommandConversion[UpdateMission] {
+    override def toCommand = UpdateMission(
+      name = mission.name,
+      description = mission.description
+    )
+  }
+
+  implicit class AssociatedMissionConversion(associatedMission: AssociatedMissionInsertion) extends CommandConversion[AssociatedMission] {
+    override def toCommand = AssociatedMission(
+      missionId = associatedMission.missionId,
+      level = TypeResolvers.MissionLevel.withName(associatedMission.level)
+    )
+  }
+
+  implicit class ValueDimensionsCreationConversion(valueDimensions: ValueDimensionsCreation) extends CommandConversion[ValueDimensions] {
+    override def toCommand = ValueDimensions(
+      associatedMissions = valueDimensions.associatedMissions,
+      associatedSkills = valueDimensions.associatedSkills.map(_.toCommand),
+      relationships = valueDimensions.relationships,
+      helpsSafetyNet = valueDimensions.helpsSafetyNet,
+      expandsWorldView = valueDimensions.expandsWorldView
+    )
+  }
+
+  implicit class ValueDimensionsUpdateConversion(valueDimensions: ValueDimensionsUpdate) extends CommandConversion[UpdateValueDimensions] {
+    override def toCommand = UpdateValueDimensions(
+      associatedMissions = valueDimensions.associatedMissions,
+      associatedSkills = valueDimensions.associatedSkills.map(_.map(_.toCommand)),
+      relationships = valueDimensions.relationships,
+      helpsSafetyNet = valueDimensions.helpsSafetyNet,
+      expandsWorldView = valueDimensions.expandsWorldView
+    )
+  }
+
   implicit class BacklogItemCreationConversion(backlogItem: BacklogItemCreation) extends CommandConversion[CreateBacklogItem] {
     override def toCommand = CreateBacklogItem(
       summary = backlogItem.summary,
@@ -57,7 +130,8 @@ object ExternalToCommand {
     override def toCommand = CreateEpoch(
       name = epoch.name,
       totem = epoch.totem,
-      question = epoch.question
+      question = epoch.question,
+      associatedMissions = epoch.associatedMissions.map(_.toCommand)
     )
   }
 
@@ -65,7 +139,8 @@ object ExternalToCommand {
     override def toCommand = UpdateEpoch(
       name = epoch.name,
       totem = epoch.totem,
-      question = epoch.question
+      question = epoch.question,
+      associatedMissions = epoch.associatedMissions.map(_.map(_.toCommand))
     )
   }
 
@@ -103,7 +178,7 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
-      associatedSkills = goal.associatedSkills.map(_.toCommand),
+      valueDimensions = goal.valueDimensions.toCommand,
       status = TypeResolvers.GoalStatus.withName(goal.status),
       graduation = TypeResolvers.GraduationType.withName(goal.graduation)
     )
@@ -115,7 +190,7 @@ object ExternalToCommand {
       backlogItems = goal.backlogItems,
       summary = goal.summary,
       description = goal.description,
-      associatedSkills = goal.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = goal.valueDimensions.map(_.toCommand),
       status = goal.status.map(TypeResolvers.GoalStatus.withName),
       graduation = goal.graduation.map(TypeResolvers.GraduationType.withName)
     )
@@ -126,7 +201,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      associatedSkills = thread.associatedSkills.map(_.toCommand),
+      valueDimensions = thread.valueDimensions.toCommand,
       performance = TypeResolvers.ThreadPerformance.withName(thread.performance)
     )
   }
@@ -136,7 +211,7 @@ object ExternalToCommand {
       goalId = thread.goalId,
       summary = thread.summary,
       description = thread.description,
-      associatedSkills = thread.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = thread.valueDimensions.map(_.toCommand),
       performance = thread.performance.map(TypeResolvers.ThreadPerformance.withName)
     )
   }
@@ -146,7 +221,7 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
-      associatedSkills = weave.associatedSkills.map(_.toCommand),
+      valueDimensions = weave.valueDimensions.toCommand,
       status = TypeResolvers.Status.withName(weave.status),
       `type` = TypeResolvers.WeaveType.withName(weave.`type`)
     )
@@ -157,7 +232,7 @@ object ExternalToCommand {
       goalId = weave.goalId,
       summary = weave.summary,
       description = weave.description,
-      associatedSkills = weave.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = weave.valueDimensions.map(_.toCommand),
       status = weave.status.map(TypeResolvers.Status.withName),
       `type` = weave.`type`.map(TypeResolvers.WeaveType.withName)
     )
@@ -168,6 +243,7 @@ object ExternalToCommand {
       goalId = laserDonut.goalId,
       summary = laserDonut.summary,
       description = laserDonut.description,
+      valueDimensions = laserDonut.valueDimensions.toCommand,
       milestone = laserDonut.milestone,
       status = TypeResolvers.Status.withName(laserDonut.status),
       `type` = TypeResolvers.DonutType.withName(laserDonut.`type`)
@@ -179,6 +255,7 @@ object ExternalToCommand {
       goalId = laserDonut.goalId,
       summary = laserDonut.summary,
       description = laserDonut.description,
+      valueDimensions = laserDonut.valueDimensions.map(_.toCommand),
       milestone = laserDonut.milestone,
       status = laserDonut.status.map(TypeResolvers.Status.withName),
       `type` = laserDonut.`type`.map(TypeResolvers.DonutType.withName)
@@ -190,7 +267,7 @@ object ExternalToCommand {
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
       status = TypeResolvers.Status.withName(portion.status),
-      associatedSkills = portion.associatedSkills.map(_.toCommand)
+      valueDimensions = portion.valueDimensions.toCommand
     )
   }
 
@@ -199,7 +276,7 @@ object ExternalToCommand {
       laserDonutId = portion.laserDonutId,
       summary = portion.summary,
       status = portion.status.map(TypeResolvers.Status.withName),
-      associatedSkills = portion.associatedSkills.map(_.map(_.toCommand))
+      valueDimensions = portion.valueDimensions.map(_.toCommand)
     )
   }
 
@@ -223,7 +300,7 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
-      associatedSkills = hobby.associatedSkills.map(_.toCommand),
+      valueDimensions = hobby.valueDimensions.toCommand,
       frequency = TypeResolvers.HobbyFrequency.withName(hobby.frequency),
       `type` = TypeResolvers.HobbyType.withName(hobby.`type`)
     )
@@ -234,7 +311,7 @@ object ExternalToCommand {
       goalId = hobby.goalId,
       summary = hobby.summary,
       description = hobby.description,
-      associatedSkills = hobby.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = hobby.valueDimensions.map(_.toCommand),
       frequency = hobby.frequency.map(TypeResolvers.HobbyFrequency.withName),
       `type` = hobby.`type`.map(TypeResolvers.HobbyType.withName)
     )
@@ -244,7 +321,7 @@ object ExternalToCommand {
     override def toCommand = CreateOneOff(
       goalId = oneOff.goalId,
       description = oneOff.description,
-      associatedSkills = oneOff.associatedSkills.map(_.toCommand),
+      valueDimensions = oneOff.valueDimensions.toCommand,
       estimate = oneOff.estimate,
       status = TypeResolvers.Status.withName(oneOff.status)
     )
@@ -254,7 +331,7 @@ object ExternalToCommand {
     override def toCommand = UpdateOneOff(
       goalId = oneOff.goalId,
       description = oneOff.description,
-      associatedSkills = oneOff.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = oneOff.valueDimensions.map(_.toCommand),
       estimate = oneOff.estimate,
       status = oneOff.status.map(TypeResolvers.Status.withName)
     )
@@ -265,7 +342,7 @@ object ExternalToCommand {
       occursOn = oneOff.occursOn,
       goalId = oneOff.goalId,
       description = oneOff.description,
-      associatedSkills = oneOff.associatedSkills.map(_.toCommand),
+      valueDimensions = oneOff.valueDimensions.toCommand,
       estimate = oneOff.estimate,
       status = TypeResolvers.Status.withName(oneOff.status)
     )
@@ -276,7 +353,7 @@ object ExternalToCommand {
       occursOn = oneOff.occursOn,
       goalId = oneOff.goalId,
       description = oneOff.description,
-      associatedSkills = oneOff.associatedSkills.map(_.map(_.toCommand)),
+      valueDimensions = oneOff.valueDimensions.map(_.toCommand),
       estimate = oneOff.estimate,
       status = oneOff.status.map(TypeResolvers.Status.withName)
     )
@@ -291,14 +368,6 @@ object ExternalToCommand {
   implicit class PyramidOfImportanceUpsertConversion(pyramid: PyramidOfImportanceUpsert) extends CommandConversion[UpsertPyramidOfImportance] {
     override def toCommand = UpsertPyramidOfImportance(
       tiers = pyramid.tiers.map(tier => UpsertTier(tier.laserDonuts))
-    )
-  }
-
-  implicit class AssociatedSkillConversion(associatedSkill: AssociatedSkillInsertion) extends CommandConversion[AssociatedSkill] {
-    override def toCommand = AssociatedSkill(
-      skillId = associatedSkill.skillId,
-      relevance = TypeResolvers.SkillRelevance.withName(associatedSkill.relevance),
-      level = TypeResolvers.SkillLevel.withName(associatedSkill.level)
     )
   }
 }
