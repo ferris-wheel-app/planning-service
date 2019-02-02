@@ -54,6 +54,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
+      it("should be able to create a relationship") {
+        val creationRequest = Marshal(SD.relationshipCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.relationship)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/relationships", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createRelationship(SD.relationshipCreation)) { response =>
+          response shouldBe SD.relationship
+        }
+      }
+
+      it("should be able to create a mission") {
+        val creationRequest = Marshal(SD.missionCreation.toJson).to[RequestEntity].futureValue
+        val creationResponse = Marshal(Envelope("OK", SD.mission)).to[ResponseEntity].futureValue
+        when(mockServer.sendPostRequest("/api/missions", creationRequest)).thenReturn(Future.successful(HttpResponse(entity = creationResponse)))
+        whenReady(client.createMission(SD.missionCreation)) { response =>
+          response shouldBe SD.mission
+        }
+      }
+
       it("should be able to create a backlog-item") {
         val creationRequest = Marshal(SD.backlogItemCreation.toJson).to[RequestEntity].futureValue
         val creationResponse = Marshal(Envelope("OK", SD.backlogItem)).to[ResponseEntity].futureValue
@@ -199,6 +217,26 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         when(mockServer.sendPutRequest(s"/api/skills/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
         whenReady(client.updateSkill(id, SD.skillUpdate)) { response =>
           response shouldBe SD.skill
+        }
+      }
+
+      it("should be able to update a relationship") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.relationshipUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.relationship)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/relationships/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateRelationship(id, SD.relationshipUpdate)) { response =>
+          response shouldBe SD.relationship
+        }
+      }
+
+      it("should be able to update a mission") {
+        val id = UUID.randomUUID
+        val updateRequest = Marshal(SD.missionUpdate.toJson).to[RequestEntity].futureValue
+        val updateResponse = Marshal(Envelope("OK", SD.mission)).to[ResponseEntity].futureValue
+        when(mockServer.sendPutRequest(s"/api/missions/$id", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
+        whenReady(client.updateMission(id, SD.missionUpdate)) { response =>
+          response shouldBe SD.mission
         }
       }
 
@@ -371,11 +409,47 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         }
       }
 
-      it("should be able to retrieve a list of skill") {
+      it("should be able to retrieve a list of skills") {
         val list = SD.skill :: SD.skill :: Nil
         val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest("/api/skills")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.skills) { response =>
+          response shouldBe list
+        }
+      }
+
+      it("should be able to retrieve a relationship") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.relationship)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/relationships/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.relationship(id)) { response =>
+          response.value shouldBe SD.relationship
+        }
+      }
+
+      it("should be able to retrieve a list of relationships") {
+        val list = SD.relationship :: SD.relationship :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/relationships")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.relationships) { response =>
+          response shouldBe list
+        }
+      }
+
+      it("should be able to retrieve a mission") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", SD.mission)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest(s"/api/missions/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.mission(id)) { response =>
+          response.value shouldBe SD.mission
+        }
+      }
+
+      it("should be able to retrieve a list of missions") {
+        val list = SD.mission :: SD.mission :: Nil
+        val response = Marshal(Envelope("OK", list)).to[ResponseEntity].futureValue
+        when(mockServer.sendGetRequest("/api/missions")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.missions) { response =>
           response shouldBe list
         }
       }
@@ -664,6 +738,24 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
         when(mockServer.sendDeleteRequest(s"/api/skills/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.deleteSkill(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
+      it("should be able to delete a relationship") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/relationships/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteRelationship(id)) { response =>
+          response shouldBe DeletionResult.successful
+        }
+      }
+
+      it("should be able to delete a mission") {
+        val id = UUID.randomUUID
+        val response = Marshal(Envelope("OK", DeletionResult.successful)).to[ResponseEntity].futureValue
+        when(mockServer.sendDeleteRequest(s"/api/missions/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
+        whenReady(client.deleteMission(id)) { response =>
           response shouldBe DeletionResult.successful
         }
       }

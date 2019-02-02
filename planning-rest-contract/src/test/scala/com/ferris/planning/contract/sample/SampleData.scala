@@ -108,6 +108,11 @@ object SampleData {
     description = "Create a positive feedback loop"
   )
 
+  val missionUpdate = MissionUpdate(
+    name = Some("Ferris Wheel"),
+    description = Some("Create a positive feedback loop")
+  )
+
   val mission = MissionView(
     uuid = UUID.randomUUID,
     name = "Messinaisance",
