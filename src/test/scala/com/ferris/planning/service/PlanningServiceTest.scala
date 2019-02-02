@@ -1,5 +1,6 @@
 package com.ferris.planning.service
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 import com.ferris.planning.command.Commands.UpdateSkill
@@ -120,11 +121,12 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         val server = newServer
         val id = UUID.randomUUID
         val practisedHours = 1000L
-        val update = UpdateSkill(None, None, None, practisedHours = Some(1500L))
+        val time = LocalDateTime.now
+        val update = UpdateSkill(None, None, None, practisedHours = Some(1500L), lastPractise = Some(time))
         val updated = SD.skill.copy(practisedHours = 1500L)
         when(server.repo.getSkill(id)).thenReturn(Future.successful(Some(SD.skill)))
         when(server.repo.updateSkill(eqTo(id), eqTo(update))).thenReturn(Future.successful(updated))
-        whenReady(server.planningService.updatePractisedHours(id, practisedHours)) { result =>
+        whenReady(server.planningService.updatePractisedHours(id, practisedHours, time)) { result =>
           result shouldBe updated
           verify(server.repo, times(1)).getSkill(id)
           verify(server.repo, times(1)).updateSkill(eqTo(id), eqTo(update))
@@ -173,6 +175,144 @@ class PlanningServiceTest extends FunSpec with ScalaFutures with Matchers {
         whenReady(server.planningService.deleteSkill(id)) { result =>
           result shouldBe true
           verify(server.repo, times(1)).deleteSkill(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
+    describe("handling relationships") {
+      it("should be able to create a relationship") {
+        val server = newServer
+        when(server.repo.createRelationship(SD.relationshipCreation)).thenReturn(Future.successful(SD.relationship))
+        whenReady(server.planningService.createRelationship(SD.relationshipCreation)) { result =>
+          result shouldBe SD.relationship
+          verify(server.repo, times(1)).createRelationship(SD.relationshipCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a relationship") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.relationship
+        when(server.repo.updateRelationship(eqTo(id), eqTo(SD.relationshipUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateRelationship(id, SD.relationshipUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateRelationship(eqTo(id), eqTo(SD.relationshipUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a relationship is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = RelationshipNotFoundException()
+        when(server.repo.updateRelationship(eqTo(id), eqTo(SD.relationshipUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateRelationship(id, SD.relationshipUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateRelationship(eqTo(id), eqTo(SD.relationshipUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a relationship") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getRelationship(id)).thenReturn(Future.successful(Some(SD.relationship)))
+        whenReady(server.planningService.getRelationship(id)) { result =>
+          result shouldBe Some(SD.relationship)
+          verify(server.repo, times(1)).getRelationship(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all relationships") {
+        val server = newServer
+        val relationships = Seq(SD.relationship, SD.relationship.copy(uuid = UUID.randomUUID))
+        when(server.repo.getRelationships).thenReturn(Future.successful(relationships))
+        whenReady(server.planningService.getRelationships) { result =>
+          result shouldBe relationships
+          verify(server.repo, times(1)).getRelationships
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a relationship") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteRelationship(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteRelationship(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteRelationship(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+    }
+
+    describe("handling missions") {
+      it("should be able to create a mission") {
+        val server = newServer
+        when(server.repo.createMission(SD.missionCreation)).thenReturn(Future.successful(SD.mission))
+        whenReady(server.planningService.createMission(SD.missionCreation)) { result =>
+          result shouldBe SD.mission
+          verify(server.repo, times(1)).createMission(SD.missionCreation)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to update a mission") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val updated = SD.mission
+        when(server.repo.updateMission(eqTo(id), eqTo(SD.missionUpdate))).thenReturn(Future.successful(updated))
+        whenReady(server.planningService.updateMission(id, SD.missionUpdate)) { result =>
+          result shouldBe updated
+          verify(server.repo, times(1)).updateMission(eqTo(id), eqTo(SD.missionUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should return an error thrown by the repository when a mission is being updated") {
+        val server = newServer
+        val id = UUID.randomUUID
+        val expectedException = MissionNotFoundException()
+        when(server.repo.updateMission(eqTo(id), eqTo(SD.missionUpdate))).thenReturn(Future.failed(expectedException))
+        whenReady(server.planningService.updateMission(id, SD.missionUpdate).failed) { exception =>
+          exception shouldBe expectedException
+          verify(server.repo, times(1)).updateMission(eqTo(id), eqTo(SD.missionUpdate))
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve a mission") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.getMission(id)).thenReturn(Future.successful(Some(SD.mission)))
+        whenReady(server.planningService.getMission(id)) { result =>
+          result shouldBe Some(SD.mission)
+          verify(server.repo, times(1)).getMission(id)
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to retrieve all missions") {
+        val server = newServer
+        val missions = Seq(SD.mission, SD.mission.copy(uuid = UUID.randomUUID))
+        when(server.repo.getMissions).thenReturn(Future.successful(missions))
+        whenReady(server.planningService.getMissions) { result =>
+          result shouldBe missions
+          verify(server.repo, times(1)).getMissions
+          verifyNoMoreInteractions(server.repo)
+        }
+      }
+
+      it("should be able to delete a mission") {
+        val server = newServer
+        val id = UUID.randomUUID
+        when(server.repo.deleteMission(id)).thenReturn(Future.successful(true))
+        whenReady(server.planningService.deleteMission(id)) { result =>
+          result shouldBe true
+          verify(server.repo, times(1)).deleteMission(id)
           verifyNoMoreInteractions(server.repo)
         }
       }

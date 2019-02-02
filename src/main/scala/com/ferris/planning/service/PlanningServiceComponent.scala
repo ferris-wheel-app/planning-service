@@ -1,6 +1,6 @@
 package com.ferris.planning.service
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import com.ferris.planning.command.Commands._
@@ -36,7 +36,7 @@ trait PlanningServiceComponent {
     def updateMission(uuid: UUID, update: UpdateMission)(implicit ex: ExecutionContext): Future[Mission]
     def updateSkillCategory(uuid: UUID, update: UpdateSkillCategory)(implicit ex: ExecutionContext): Future[SkillCategory]
     def updateSkill(uuid: UUID, update: UpdateSkill)(implicit ex: ExecutionContext): Future[Skill]
-    def updatePractisedHours(uuid: UUID, practisedHours: Long)(implicit ex: ExecutionContext): Future[Skill]
+    def updatePractisedHours(uuid: UUID, practisedHours: Long, time: LocalDateTime)(implicit ex: ExecutionContext): Future[Skill]
     def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem]
     def updateEpoch(uuid: UUID, update: UpdateEpoch)(implicit ex: ExecutionContext): Future[Epoch]
     def updateYear(uuid: UUID, update: UpdateYear)(implicit ex: ExecutionContext): Future[Year]
@@ -216,10 +216,10 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.updateMission(uuid, update)
     }
 
-    override def updatePractisedHours(uuid: UUID, practisedHours: Long)(implicit ex: ExecutionContext): Future[Skill] = {
+    override def updatePractisedHours(uuid: UUID, practisedHours: Long, time: LocalDateTime)(implicit ex: ExecutionContext): Future[Skill] = {
       for {
         skill <- repo.getSkill(uuid)
-        update = UpdateSkill(None, None, None, practisedHours = skill.map(_.practisedHours + practisedHours))
+        update = UpdateSkill(None, None, None, practisedHours = skill.map(_.practisedHours + practisedHours), lastPractise = Some(time))
         updatedSkill <- repo.updateSkill(uuid, update)
       } yield updatedSkill
     }

@@ -288,7 +288,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     pathEndOrSingleSlash {
       put {
         entity(as[PractisedHours]) { update =>
-          onSuccess(planningService.updatePractisedHours(id, update.value)) { response =>
+          onSuccess(planningService.updatePractisedHours(id, update.value, update.time)) { response =>
             complete(StatusCodes.OK, response.toView)
           }
         }

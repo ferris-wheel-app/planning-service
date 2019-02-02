@@ -1,6 +1,6 @@
 package com.ferris.planning.client
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 import akka.http.scaladsl.model.Uri
@@ -103,8 +103,8 @@ class PlanningServiceClient(val server: HttpServer, implicit val mat: ActorMater
   def updateSkill(id: UUID, update: SkillUpdate): Future[SkillView] =
     makePutRequest[SkillUpdate, SkillView](Uri(path = apiPath / skillsPath / id.toString), update)
 
-  def updatePractisedHours(id: UUID, practisedHours: Long): Future[SkillView] =
-    makePutRequest[PractisedHours, SkillView](Uri(path = apiPath / skillsPath / id.toString / practisedHoursPath / incrementPath), PractisedHours(practisedHours))
+  def updatePractisedHours(id: UUID, practisedHours: Long, time: LocalDateTime): Future[SkillView] =
+    makePutRequest[PractisedHours, SkillView](Uri(path = apiPath / skillsPath / id.toString / practisedHoursPath / incrementPath), PractisedHours(practisedHours, time))
 
   def updateRelationship(id: UUID, update: RelationshipUpdate): Future[RelationshipView] =
     makePutRequest[RelationshipUpdate, RelationshipView](Uri(path = apiPath / relationshipsPath / id.toString), update)

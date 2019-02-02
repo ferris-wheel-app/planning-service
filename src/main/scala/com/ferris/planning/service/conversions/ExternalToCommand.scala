@@ -34,7 +34,13 @@ object ExternalToCommand {
   }
 
   implicit class SkillUpdateConversion(skill: SkillUpdate) extends CommandConversion[UpdateSkill] {
-    override def toCommand = UpdateSkill(name = skill.name, parentCategory = skill.parentCategory, proficiency = skill.proficiency.map(TypeResolvers.Proficiency.withName), practisedHours = skill.practisedHours)
+    override def toCommand = UpdateSkill(
+      name = skill.name,
+      parentCategory = skill.parentCategory,
+      proficiency = skill.proficiency.map(TypeResolvers.Proficiency.withName),
+      practisedHours = skill.practisedHours,
+      lastPractise = skill.lastPractise
+    )
   }
 
   implicit class AssociatedSkillConversion(associatedSkill: AssociatedSkillInsertion) extends CommandConversion[AssociatedSkill] {

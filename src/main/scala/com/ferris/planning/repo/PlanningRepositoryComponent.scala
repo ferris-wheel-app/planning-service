@@ -529,10 +529,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def updateSkill(uuid: UUID, update: UpdateSkill): Future[Skill] = {
       def updateSkill(uuid: UUID, update: UpdateSkill, old: SkillRow, newParentId: Long): DBIO[Int] = {
-        skillByUuid(uuid).map(skill => (skill.name, skill.parentCategory, skill.proficiency, skill.practisedHours, skill.lastModified))
+        skillByUuid(uuid).map(skill => (skill.name, skill.parentCategory, skill.proficiency, skill.practisedHours, skill.lastModified, skill.lastApplied))
           .update(update.name.getOrElse(old.name), newParentId,
             UpdateTypeEnum.keepOrReplace(update.proficiency, old.proficiency), update.practisedHours.getOrElse(old.practisedHours),
-            Some(timer.timestampOfNow))
+            Some(timer.timestampOfNow), UpdateDateTime.keepOrReplace(update.lastPractise, old.lastApplied))
       }
 
       val action = (for {

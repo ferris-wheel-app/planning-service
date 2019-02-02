@@ -237,7 +237,8 @@ object Commands {
     name: Option[String],
     parentCategory: Option[UUID],
     proficiency: Option[Proficiencies.Proficiency],
-    practisedHours: Option[Long]
+    practisedHours: Option[Long],
+    lastPractise: Option[LocalDateTime]
   )
 
   case class CreateRelationship(

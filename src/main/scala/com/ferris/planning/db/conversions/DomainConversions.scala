@@ -445,6 +445,10 @@ class DomainConversions(val tables: Tables) {
     override def keepOrReplace(newVersion: Option[LocalDateTime], oldVersion: Timestamp): Timestamp = {
       newVersion.map(_.toTimestamp).getOrElse(oldVersion)
     }
+
+    def keepOrReplace(newVersion: Option[LocalDateTime], oldVersion: Option[Timestamp]): Option[Timestamp] = {
+      newVersion.map(_.toTimestamp).orElse(oldVersion)
+    }
   }
 
   object UpdateTypeEnum extends Update[TypeEnum, String] {

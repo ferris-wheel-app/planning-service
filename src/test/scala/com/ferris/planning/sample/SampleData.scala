@@ -41,7 +41,13 @@ object SampleData {
       practisedHours = 500L
     )
 
-    val skillUpdate = UpdateSkill(name = Some("Cats"), parentCategory = Some(UUID.randomUUID), proficiency = Some(Proficiencies.Intermediate), practisedHours = Some(500L))
+    val skillUpdate = UpdateSkill(
+      name = Some("Cats"),
+      parentCategory = Some(UUID.randomUUID),
+      proficiency = Some(Proficiencies.Intermediate),
+      practisedHours = Some(500L),
+      lastPractise = Some(LocalDateTime.now)
+    )
 
     val skill = Skill(
       uuid = UUID.randomUUID,
@@ -560,7 +566,8 @@ object SampleData {
       name = domain.skillUpdate.name,
       parentCategory = domain.skillUpdate.parentCategory,
       proficiency = domain.skillUpdate.proficiency.map(Proficiency.toString),
-      practisedHours = domain.skillUpdate.practisedHours
+      practisedHours = domain.skillUpdate.practisedHours,
+      lastPractise = domain.skillUpdate.lastPractise
     )
 
     val skill = SkillView(
@@ -575,7 +582,8 @@ object SampleData {
     )
 
     val practisedHours = PractisedHours(
-      value = 1000L
+      value = 1000L,
+      time = LocalDateTime.now
     )
 
     val associatedSkillInsertion = AssociatedSkillInsertion(

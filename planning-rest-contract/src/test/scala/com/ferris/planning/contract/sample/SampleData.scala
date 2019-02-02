@@ -38,7 +38,8 @@ object SampleData {
     name = Some("Cats"),
     parentCategory = Some(UUID.randomUUID),
     proficiency = Some("intermediate"),
-    practisedHours = Some(500L)
+    practisedHours = Some(500L),
+    lastPractise = Some(LocalDateTime.now)
   )
 
   val skill = SkillView(
@@ -53,7 +54,8 @@ object SampleData {
   )
 
   val practisedHours = PractisedHours(
-    value = 1000L
+    value = 1000L,
+    time = LocalDateTime.now
   )
 
   val associatedSkillInsertion = AssociatedSkillInsertion(

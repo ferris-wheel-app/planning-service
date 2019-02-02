@@ -281,7 +281,8 @@ object Resources {
       name: Option[String],
       parentCategory: Option[UUID],
       proficiency: Option[String],
-      practisedHours: Option[Long]
+      practisedHours: Option[Long],
+      lastPractise: Option[LocalDateTime]
     ) {
       checkValidity(this)
     }
@@ -295,7 +296,8 @@ object Resources {
     }
 
     case class PractisedHours (
-      value: Long
+      value: Long,
+      time: LocalDateTime
     ) {
       checkValidity(this)
     }

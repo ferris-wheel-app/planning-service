@@ -207,7 +207,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val updateRequest = Marshal(SD.practisedHours.toJson).to[RequestEntity].futureValue
         val updateResponse = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
         when(mockServer.sendPutRequest(s"/api/skills/$id/practised-hours/increment", updateRequest)).thenReturn(Future.successful(HttpResponse(entity = updateResponse)))
-        whenReady(client.updatePractisedHours(id, SD.practisedHours.value)) { response =>
+        whenReady(client.updatePractisedHours(id, SD.practisedHours.value, SD.practisedHours.time)) { response =>
           response shouldBe SD.skill
         }
       }
