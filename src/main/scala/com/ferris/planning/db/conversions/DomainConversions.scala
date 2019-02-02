@@ -325,6 +325,7 @@ class DomainConversions(val tables: Tables) {
           uuid = UUID.fromString(skillCategory.uuid),
           name = skillCategory.name,
           parentCategory = parentCategory.map(UUID.fromString),
+          createdOn = skillCategory.createdOn.toLocalDateTime,
           lastModified = skillCategory.lastModified.map(_.toLocalDateTime)
         )
     }
@@ -339,10 +340,36 @@ class DomainConversions(val tables: Tables) {
           parentCategory = UUID.fromString(categoryId),
           proficiency = Proficiencies.withName(skill.proficiency),
           practisedHours = skill.practisedHours,
+          createdOn = skill.createdOn.toLocalDateTime,
           lastApplied = skill.lastApplied.map(_.toLocalDateTime),
           lastModified = skill.lastModified.map(_.toLocalDateTime)
         )
     }
+  }
+
+  implicit class RelationshipBuilder(val row: tables.RelationshipRow) {
+    def asRelationship: Relationship = Relationship(
+      uuid = UUID.fromString(row.uuid),
+      name = row.name,
+      category = RelationshipCategories.withName(row.category),
+      traits = row.traits.split(",").map(_.trim),
+      likes = row.likes.split(",").map(_.trim),
+      dislikes = row.dislikes.split(",").map(_.trim),
+      hobbies = row.hobbies.split(",").map(_.trim),
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.map(_.toLocalDateTime),
+      lastMeet = row.lastMeet.map(_.toLocalDateTime.toLocalDate)
+    )
+  }
+
+  implicit class MissionBuilder(val row: tables.MissionRow) {
+    def asMission: Mission = Mission(
+      uuid = UUID.fromString(row.uuid),
+      name = row.name,
+      description = row.description,
+      createdOn = row.createdOn.toLocalDateTime,
+      lastModified = row.lastModified.map(_.toLocalDateTime)
+    )
   }
 
   implicit class PyramidBuilder(val rows: Seq[(tables.ScheduledLaserDonutRow, tables.LaserDonutRow)]) {

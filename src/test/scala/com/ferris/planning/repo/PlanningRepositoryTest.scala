@@ -183,6 +183,138 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
   }
 
+  describe("relationship") {
+    describe("creating") {
+      it("should create a relationship") {
+        val created = repo.createRelationship(SD.relationshipCreation).futureValue
+        created.name shouldBe SD.relationshipCreation.name
+        created.category shouldBe SD.relationshipCreation.category
+        created.traits shouldBe SD.relationshipCreation.traits
+        created.likes shouldBe SD.relationshipCreation.likes
+        created.dislikes shouldBe SD.relationshipCreation.dislikes
+        created.hobbies shouldBe SD.relationshipCreation.hobbies
+        created.lastMeet.value shouldBe SD.relationshipCreation.lastMeet.value
+      }
+    }
+
+    describe("updating") {
+      it("should update a relationship") {
+        val original = repo.createRelationship(SD.relationshipCreation).futureValue
+        val updateTime = LocalDateTime.now
+        when(timer.timestampOfNow).thenReturn(updateTime.toTimestamp)
+        val updated = repo.updateRelationship(original.uuid, SD.relationshipUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.name shouldBe SD.relationshipUpdate.name.value
+        updated.category shouldBe SD.relationshipUpdate.category.value
+        updated.traits shouldBe SD.relationshipUpdate.traits.value
+        updated.likes shouldBe SD.relationshipUpdate.likes.value
+        updated.dislikes shouldBe SD.relationshipUpdate.dislikes.value
+        updated.hobbies shouldBe SD.relationshipUpdate.hobbies.value
+        updated.lastMeet shouldBe SD.relationshipUpdate.lastMeet.value
+      }
+
+      it("should throw an exception if a relationship is not found") {
+        whenReady(repo.updateRelationship(UUID.randomUUID, SD.relationshipUpdate).failed) { exception =>
+          exception shouldBe RelationshipNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a relationship") {
+        val created = repo.createRelationship(SD.relationshipCreation).futureValue
+        val retrieved = repo.getRelationship(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a relationship is not found") {
+        val retrieved = repo.getRelationship(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of relationships") {
+        val created1 = repo.createRelationship(SD.relationshipCreation).futureValue
+        val created2 = repo.createRelationship(SD.relationshipCreation).futureValue
+        val retrieved = repo.getRelationships.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a relationship") {
+        val created = repo.createRelationship(SD.relationshipCreation).futureValue
+        val deletion = repo.deleteRelationship(created.uuid).futureValue
+        val retrieved = repo.getRelationship(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
+  describe("mission") {
+    describe("creating") {
+      it("should create a mission") {
+        val created = repo.createMission(SD.missionCreation).futureValue
+        created.name shouldBe SD.missionCreation.name
+        created.description shouldBe SD.missionCreation.description
+      }
+    }
+
+    describe("updating") {
+      it("should update a mission") {
+        val original = repo.createMission(SD.missionCreation).futureValue
+        val updateTime = LocalDateTime.now
+        when(timer.timestampOfNow).thenReturn(updateTime.toTimestamp)
+        val updated = repo.updateMission(original.uuid, SD.missionUpdate).futureValue
+        updated should not be original
+        updated.uuid shouldBe original.uuid
+        updated.name shouldBe SD.missionUpdate.name.value
+        updated.description shouldBe SD.missionUpdate.description.value
+      }
+
+      it("should throw an exception if a mission is not found") {
+        whenReady(repo.updateMission(UUID.randomUUID, SD.missionUpdate).failed) { exception =>
+          exception shouldBe MissionNotFoundException()
+        }
+      }
+    }
+
+    describe("retrieving") {
+      it("should retrieve a mission") {
+        val created = repo.createMission(SD.missionCreation).futureValue
+        val retrieved = repo.getMission(created.uuid).futureValue
+        retrieved should not be empty
+        retrieved.value shouldBe created
+      }
+
+      it("should return none if a mission is not found") {
+        val retrieved = repo.getMission(UUID.randomUUID).futureValue
+        retrieved shouldBe empty
+      }
+
+      it("should retrieve a list of missions") {
+        val created1 = repo.createMission(SD.missionCreation).futureValue
+        val created2 = repo.createMission(SD.missionCreation).futureValue
+        val retrieved = repo.getMissions.futureValue
+        retrieved should not be empty
+        retrieved shouldBe Seq(created1, created2)
+      }
+    }
+
+    describe("deleting") {
+      it("should delete a mission") {
+        val created = repo.createMission(SD.missionCreation).futureValue
+        val deletion = repo.deleteMission(created.uuid).futureValue
+        val retrieved = repo.getMission(created.uuid).futureValue
+        deletion shouldBe true
+        retrieved shouldBe empty
+      }
+    }
+  }
+
   describe("backlog item") {
     describe("creating") {
       it("should create a backlog item") {

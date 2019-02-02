@@ -23,6 +23,8 @@ object ModelToView {
         parentCategory = skill.parentCategory,
         proficiency = TypeResolvers.Proficiency.toString(skill.proficiency),
         practisedHours = skill.practisedHours,
+        createdOn = skill.createdOn,
+        lastModified = skill.lastModified,
         lastApplied = skill.lastApplied
       )
     }
@@ -48,6 +50,8 @@ object ModelToView {
         likes = relationship.likes,
         dislikes = relationship.dislikes,
         hobbies = relationship.hobbies,
+        createdOn = relationship.createdOn,
+        lastModified = relationship.lastModified,
         lastMeet = relationship.lastMeet
       )
     }
@@ -58,7 +62,9 @@ object ModelToView {
       MissionView(
         uuid = mission.uuid,
         name = mission.name,
-        description = mission.description
+        description = mission.description,
+        createdOn = mission.createdOn,
+        lastModified = mission.lastModified
       )
     }
   }

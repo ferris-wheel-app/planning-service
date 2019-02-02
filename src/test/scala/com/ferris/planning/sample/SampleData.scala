@@ -30,6 +30,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       name = "Functional Programming",
       parentCategory = Some(UUID.randomUUID),
+      createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now)
     )
 
@@ -49,6 +50,7 @@ object SampleData {
       proficiency = Proficiencies.Intermediate,
       practisedHours = 500L,
       lastApplied = Some(LocalDateTime.now),
+      createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now)
     )
 
@@ -86,23 +88,27 @@ object SampleData {
       likes = "karate" :: "cars" :: Nil,
       dislikes = "bullies" :: Nil,
       hobbies = "karate" :: Nil,
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now),
       lastMeet = Some(LocalDate.now)
     )
 
     val missionCreation = CreateMission(
       name = "Messinaisance",
-      description = "Create a positive feedback loop"
+      description = "Become a better person"
     )
 
     val missionUpdate = UpdateMission(
-      name = Some("Messinaisance"),
+      name = Some("Ferris Wheel"),
       description = Some("Create a positive feedback loop")
     )
 
     val mission = Mission(
       uuid = UUID.randomUUID,
       name = "Messinaisance",
-      description = "Create a positive feedback loop"
+      description = "Create a positive feedback loop",
+      createdOn = LocalDateTime.now,
+      lastModified = Some(LocalDateTime.now)
     )
 
     val associatedMission = AssociatedMission(
@@ -563,6 +569,8 @@ object SampleData {
       parentCategory = domain.skill.parentCategory,
       proficiency = Proficiency.toString(domain.skill.proficiency),
       practisedHours = domain.skill.practisedHours,
+      createdOn = domain.skill.createdOn,
+      lastModified = domain.skill.lastModified,
       lastApplied = domain.skill.lastApplied
     )
 
@@ -610,6 +618,8 @@ object SampleData {
       likes = domain.relationship.likes,
       dislikes = domain.relationship.dislikes,
       hobbies = domain.relationship.hobbies,
+      createdOn = domain.relationship.createdOn,
+      lastModified = domain.relationship.lastModified,
       lastMeet = domain.relationship.lastMeet
     )
 
@@ -621,7 +631,9 @@ object SampleData {
     val mission = MissionView(
       uuid = domain.mission.uuid,
       name = domain.mission.name,
-      description = domain.mission.description
+      description = domain.mission.description,
+      createdOn = domain.mission.createdOn,
+      lastModified = domain.mission.lastModified
     )
 
     val associatedMissionInsertion = AssociatedMissionInsertion(

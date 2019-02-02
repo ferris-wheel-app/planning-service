@@ -199,6 +199,7 @@ object Model {
     uuid: UUID,
     name: String,
     parentCategory: Option[UUID],
+    createdOn: LocalDateTime,
     lastModified: Option[LocalDateTime]
   )
 
@@ -208,8 +209,9 @@ object Model {
     parentCategory: UUID,
     proficiency: Proficiencies.Proficiency,
     practisedHours: Long,
-    lastApplied: Option[LocalDateTime],
-    lastModified: Option[LocalDateTime]
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime],
+    lastApplied: Option[LocalDateTime]
   )
 
   case class AssociatedSkill (
@@ -226,13 +228,17 @@ object Model {
     likes: Seq[String],
     dislikes: Seq[String],
     hobbies: Seq[String],
-    lastMeet: Option[LocalDate]
+    lastMeet: Option[LocalDate],
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class Mission(
     uuid: UUID,
     name: String,
-    description: String
+    description: String,
+    createdOn: LocalDateTime,
+    lastModified: Option[LocalDateTime]
   )
 
   case class AssociatedMission(
@@ -257,6 +263,7 @@ object Model {
     def withName(name: String): BacklogItemType = name match {
       case Idea.dbValue => Idea
       case Issue.dbValue => Issue
+      case ChipOnAShoulder.dbValue => ChipOnAShoulder
     }
 
     sealed trait BacklogItemType extends TypeEnum

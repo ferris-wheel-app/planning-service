@@ -47,6 +47,8 @@ object SampleData {
     parentCategory = UUID.randomUUID,
     proficiency = "intermediate",
     practisedHours = 500L,
+    createdOn = LocalDateTime.now,
+    lastModified = Some(LocalDateTime.now),
     lastApplied = Some(LocalDateTime.now)
   )
 
@@ -94,6 +96,8 @@ object SampleData {
     likes = "karate" :: "cars" :: Nil,
     dislikes = "bullies" :: Nil,
     hobbies = "karate" :: Nil,
+    createdOn = LocalDateTime.now,
+    lastModified = Some(LocalDateTime.now),
     lastMeet = Some(LocalDate.now)
   )
 
@@ -105,7 +109,9 @@ object SampleData {
   val mission = MissionView(
     uuid = UUID.randomUUID,
     name = "Messinaisance",
-    description = "Create a positive feedback loop"
+    description = "Create a positive feedback loop",
+    createdOn = LocalDateTime.now,
+    lastModified = Some(LocalDateTime.now)
   )
 
   val associatedMissionInsertion = AssociatedMissionInsertion(

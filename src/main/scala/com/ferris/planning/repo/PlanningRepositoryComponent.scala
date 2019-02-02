@@ -184,9 +184,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action)
     }
 
-    override def createRelationship(creation: CreateRelationship) = ???
+    override def createRelationship(creation: CreateRelationship): Future[Relationship] = ???
 
-    override def createMission(creation: CreateMission) = ???
+    override def createMission(creation: CreateMission): Future[Mission] = ???
 
     override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
       val row = BacklogItemRow(
@@ -554,9 +554,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
     }
 
-    override def updateRelationship(uuid: UUID, update: UpdateRelationship) = ???
+    override def updateRelationship(uuid: UUID, update: UpdateRelationship): Future[Relationship] = ???
 
-    override def updateMission(uuid: UUID, update: UpdateMission) = ???
+    override def updateMission(uuid: UUID, update: UpdateMission): Future[Mission] = ???
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`, item.lastModified))
@@ -1100,13 +1100,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getSkillAction(uuid).map(_.map(_.asSkill)))
     }
 
-    override def getRelationships = ???
+    override def getRelationships: Future[Seq[Relationship]] = ???
 
-    override def getRelationship(uuid: UUID) = ???
+    override def getRelationship(uuid: UUID): Future[Option[Relationship]] = ???
 
-    override def getMissions = ???
+    override def getMissions: Future[Seq[Mission]] = ???
 
-    override def getMission(uuid: UUID) = ???
+    override def getMission(uuid: UUID): Future[Option[Mission]] = ???
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
       db.run(BacklogItemTable.result.map(_.sortBy(_.createdOn).map(_.asBacklogItem)))
@@ -1303,9 +1303,9 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(_ > 0)
     }
 
-    override def deleteRelationship(uuid: UUID) = ???
+    override def deleteRelationship(uuid: UUID): Future[Boolean] = ???
 
-    override def deleteMission(uuid: UUID) = ???
+    override def deleteMission(uuid: UUID): Future[Boolean] = ???
 
     override def deleteBacklogItem(uuid: UUID): Future[Boolean] = {
       val action = backlogItemByUuid(uuid).delete

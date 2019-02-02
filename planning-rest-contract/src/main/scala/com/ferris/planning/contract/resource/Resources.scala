@@ -534,6 +534,8 @@ object Resources {
       parentCategory: UUID,
       proficiency: String,
       practisedHours: Long,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime],
       lastApplied: Option[LocalDateTime]
     )
 
@@ -551,13 +553,17 @@ object Resources {
       likes: Seq[String],
       dislikes: Seq[String],
       hobbies: Seq[String],
-      lastMeet: Option[LocalDate]
+      lastMeet: Option[LocalDate],
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class MissionView(
       uuid: UUID,
       name: String,
-      description: String
+      description: String,
+      createdOn: LocalDateTime,
+      lastModified: Option[LocalDateTime]
     )
 
     case class AssociatedMissionView(
