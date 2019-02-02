@@ -225,6 +225,196 @@ class PlanningRouteTest extends RouteTestFramework {
       }
     }
 
+    describe("handling relationships") {
+      describe("creating a relationship") {
+        it("should respond with the created relationship") {
+          when(testServer.planningService.createRelationship(eqTo(domain.relationshipCreation))(any())).thenReturn(Future.successful(domain.relationship))
+          Post("/api/relationships", rest.relationshipCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[RelationshipView]].data shouldBe rest.relationship
+            verify(testServer.planningService, times(1)).createRelationship(eqTo(domain.relationshipCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a relationship") {
+        it("should respond with the updated relationship") {
+          val id = UUID.randomUUID
+          val update = rest.relationshipUpdate
+          val updated = domain.relationship
+
+          when(testServer.planningService.updateRelationship(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/relationships/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[RelationshipView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateRelationship(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a relationship") {
+        it("should respond with the requested relationship") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getRelationship(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.relationship)))
+          Get(s"/api/relationships/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[RelationshipView]].data shouldBe rest.relationship
+            verify(testServer.planningService, times(1)).getRelationship(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the relationship is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getRelationship(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/relationships/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getRelationship(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting relationships") {
+        it("should retrieve a list of all relationships") {
+          val relationships = Seq(domain.relationship, domain.relationship.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getRelationships(any())).thenReturn(Future.successful(relationships))
+          Get(s"/api/relationships") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[RelationshipView]]].data shouldBe relationships.map(_.toView)
+            verify(testServer.planningService, times(1)).getRelationships(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a relationship") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteRelationship(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/relationships/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteRelationship(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteRelationship(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/relationships/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteRelationship(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
+    describe("handling missions") {
+      describe("creating a mission") {
+        it("should respond with the created mission") {
+          when(testServer.planningService.createMission(eqTo(domain.missionCreation))(any())).thenReturn(Future.successful(domain.mission))
+          Post("/api/missions", rest.missionCreation) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[MissionView]].data shouldBe rest.mission
+            verify(testServer.planningService, times(1)).createMission(eqTo(domain.missionCreation))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("updating a mission") {
+        it("should respond with the updated mission") {
+          val id = UUID.randomUUID
+          val update = rest.missionUpdate
+          val updated = domain.mission
+
+          when(testServer.planningService.updateMission(eqTo(id), eqTo(update.toCommand))(any())).thenReturn(Future.successful(updated))
+          Put(s"/api/missions/$id", update) ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[MissionView]].data shouldBe updated.toView
+            verify(testServer.planningService, times(1)).updateMission(eqTo(id), eqTo(update.toCommand))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting a mission") {
+        it("should respond with the requested mission") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getMission(eqTo(id))(any())).thenReturn(Future.successful(Some(domain.mission)))
+          Get(s"/api/missions/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[MissionView]].data shouldBe rest.mission
+            verify(testServer.planningService, times(1)).getMission(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the mission is not found") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.getMission(eqTo(id))(any())).thenReturn(Future.successful(None))
+          Get(s"/api/missions/$id") ~> route ~> check {
+            status shouldBe StatusCodes.NotFound
+            verify(testServer.planningService, times(1)).getMission(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("getting missions") {
+        it("should retrieve a list of all missions") {
+          val missions = Seq(domain.mission, domain.mission.copy(uuid = UUID.randomUUID))
+
+          when(testServer.planningService.getMissions(any())).thenReturn(Future.successful(missions))
+          Get(s"/api/missions") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[Seq[MissionView]]].data shouldBe missions.map(_.toView)
+            verify(testServer.planningService, times(1)).getMissions(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+
+      describe("deleting a mission") {
+        it("should return OK if the deletion is completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteMission(eqTo(id))(any())).thenReturn(Future.successful(true))
+          Delete(s"/api/missions/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.successful
+            verify(testServer.planningService, times(1)).deleteMission(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+
+        it("should respond with the appropriate error if the deletion could not be completed") {
+          val id = UUID.randomUUID
+
+          when(testServer.planningService.deleteMission(eqTo(id))(any())).thenReturn(Future.successful(false))
+          Delete(s"/api/missions/$id") ~> route ~> check {
+            status shouldBe StatusCodes.OK
+            responseAs[Envelope[DeletionResult]].data shouldBe DeletionResult.unsuccessful
+            verify(testServer.planningService, times(1)).deleteMission(eqTo(id))(any())
+            verifyNoMoreInteractions(testServer.planningService)
+          }
+        }
+      }
+    }
+
     describe("handling backlog-items") {
       describe("creating a backlog-item") {
         it("should respond with the created backlog-item") {

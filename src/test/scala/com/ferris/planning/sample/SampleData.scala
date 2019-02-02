@@ -636,6 +636,11 @@ object SampleData {
       description = domain.missionCreation.description
     )
 
+    val missionUpdate = MissionUpdate(
+      name = domain.missionUpdate.name,
+      description = domain.missionUpdate.description
+    )
+
     val mission = MissionView(
       uuid = domain.mission.uuid,
       name = domain.mission.name,

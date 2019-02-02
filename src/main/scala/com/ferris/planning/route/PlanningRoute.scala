@@ -944,7 +944,7 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     }
   }
 
-  private val deleteMissionRoute = pathPrefix(skillsPathSegment / PathMatchers.JavaUUID) { id =>
+  private val deleteMissionRoute = pathPrefix(missionsPathSegment / PathMatchers.JavaUUID) { id =>
     pathEndOrSingleSlash {
       delete {
         onSuccess(planningService.deleteMission(id))(outcome => complete(mapDeletion(outcome)))
@@ -1059,6 +1059,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
   val planningRoute: Route = {
     createSkillCategoryRoute ~
     createSkillRoute ~
+    createRelationshipRoute ~
+    createMissionRoute ~
     createBacklogItemRoute ~
     createEpochRoute ~
     createYearRoute ~
@@ -1075,6 +1077,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     createPyramidRoute ~
     updateSkillCategoryRoute ~
     updateSkillRoute ~
+    updateRelationshipRoute ~
+    updateMissionRoute ~
     updatePractisedHoursRoute ~
     updateBacklogItemRoute ~
     updateEpochRoute ~
@@ -1096,6 +1100,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     refreshCurrentPortionRoute ~
     getSkillsCategoriesRoute ~
     getSkillsRoute ~
+    getRelationshipsRoute ~
+    getMissionsRoute ~
     getBacklogItemsRoute ~
     getEpochsRoute ~
     getYearsRoute ~
@@ -1117,6 +1123,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getScheduledOneOffsRoute ~
     getSkillCategoryRoute ~
     getSkillRoute ~
+    getRelationshipRoute ~
+    getMissionRoute ~
     getBacklogItemRoute ~
     getEpochRoute ~
     getYearRoute ~
@@ -1135,6 +1143,8 @@ trait PlanningRoute extends FerrisDirectives with PlanningRestFormats with Plann
     getPyramidRoute ~
     deleteSkillCategoryRoute ~
     deleteSkillRoute ~
+    deleteRelationshipRoute ~
+    deleteMissionRoute ~
     deleteBacklogItemRoute ~
     deleteEpochRoute ~
     deleteYearRoute ~
