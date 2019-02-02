@@ -60,10 +60,50 @@ object SampleData {
     level = "intermediate"
   )
 
+  val associatedMissionInsertion = AssociatedMissionInsertion(
+    missionId = UUID.randomUUID,
+    level = "major"
+  )
+
   val associatedSkill = AssociatedSkillView(
     skillId = UUID.randomUUID,
     relevance = "maintenance",
     level = "intermediate"
+  )
+
+  val mission = MissionView(
+    uuid = UUID.randomUUID,
+    name = "Ferris Wheel",
+    description = "Create a feedback loop"
+  )
+
+  val associatedMission = AssociatedMissionView(
+    missionId = UUID.randomUUID,
+    level = "major"
+  )
+
+  val valueDimensionsCreation = ValueDimensionsCreation(
+    associatedMissions = UUID.randomUUID :: Nil,
+    associatedSkills = associatedSkillInsertion :: Nil,
+    relationships = UUID.randomUUID :: Nil,
+    helpsSafetyNet = true,
+    expandsWorldView = true
+  )
+
+  val valueDimensionsUpdate = ValueDimensionsUpdate(
+    associatedMissions = Some(UUID.randomUUID :: Nil),
+    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    relationships = Some(UUID.randomUUID :: Nil),
+    helpsSafetyNet = Some(true),
+    expandsWorldView = Some(true)
+  )
+
+  val valueDimensions = ValueDimensionsView(
+    associatedMissions = UUID.randomUUID :: Nil,
+    associatedSkills = associatedSkill :: Nil,
+    relationships = UUID.randomUUID :: Nil,
+    helpsSafetyNet = true,
+    expandsWorldView = true
   )
 
   val backlogItemCreation = BacklogItemCreation(
@@ -90,13 +130,15 @@ object SampleData {
   val epochCreation = EpochCreation(
     name = "Messinaissance",
     totem = "Hero",
-    question = "Am I capable of becoming an Übermensch?"
+    question = "Am I capable of becoming an Übermensch?",
+    associatedMissions = associatedMissionInsertion :: Nil
   )
 
   val epochUpdate = EpochUpdate(
     name = Some("Wakanda"),
     totem = Some("Leader"),
-    question = Some("Is Africa capable of achieving full development?")
+    question = Some("Is Africa capable of achieving full development?"),
+    associatedMissions = Some(associatedMissionInsertion :: Nil)
   )
 
   val epoch = EpochView(
@@ -104,6 +146,7 @@ object SampleData {
     name = "Messinaissance",
     totem = "Hero",
     question = "Am I capable of becoming an Übermensch?",
+    associatedMissions = associatedMission :: Nil,
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now)
   )
@@ -150,7 +193,7 @@ object SampleData {
     backlogItems = Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     graduation = "hobby",
     status = "not_achieved"
   )
@@ -160,7 +203,7 @@ object SampleData {
     backlogItems = Some(Nil),
     summary = Some("Learn to play an instrument"),
     description = Some("Learn to play the piano, the guitar, and the saxophone"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     graduation = Some("abandoned"),
     status = Some("employed")
   )
@@ -171,7 +214,7 @@ object SampleData {
     backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
     summary = "Master at least one foreign language",
     description = "Learn French, Italian, and Korean",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     graduation = "hobby",
     status = "not_achieved",
     createdOn = LocalDateTime.now,
@@ -182,7 +225,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     performance = "poor"
   )
 
@@ -190,7 +233,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Sleep"),
     description = Some("Sleep for 8 hours"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     performance = Some("improving")
   )
 
@@ -199,7 +242,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Go for a run",
     description = "Go for a run",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     performance = "planned",
     createdOn = LocalDateTime.now,
     lastModified = Some(LocalDateTime.now),
@@ -210,7 +253,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     `type` = "pdr",
     status = "planned"
   )
@@ -219,7 +262,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Apply your new-found Go knowledge"),
     description = Some("Create a snuffleupagus"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     `type` = Some("bau"),
     status = Some("complete")
   )
@@ -229,7 +272,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Organise a tech lecture",
     description = "Create a presentation about Kafka",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     `type` = "pdr",
     status = "planned",
     createdOn = LocalDateTime.now,
@@ -241,6 +284,7 @@ object SampleData {
     goalId = UUID.randomUUID,
     summary = "Implement initial microservices",
     description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
+    valueDimensions = valueDimensionsCreation,
     milestone = "A deployed backend service",
     `type` = "project_focused",
     status = "in_progress"
@@ -250,6 +294,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Create the front-end"),
     description = Some("Use React"),
+    valueDimensions = Some(valueDimensionsUpdate),
     milestone = Some("A basic working prototype"),
     `type` = Some("project_focused"),
     status = Some("in_progress")
@@ -260,6 +305,7 @@ object SampleData {
     goalId = UUID.randomUUID,
     summary = "Implement initial microservices",
     description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
+    valueDimensions = valueDimensions,
     milestone = "A basic working prototype",
     order = 1,
     `type` = "skill_focused",
@@ -273,21 +319,21 @@ object SampleData {
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
     status = "in_progress",
-    associatedSkills = associatedSkillInsertion :: Nil
+    valueDimensions = valueDimensionsCreation
   )
 
   val portionUpdate = PortionUpdate(
     laserDonutId = Some(UUID.randomUUID),
     summary = Some("Split into sub-projects"),
     status = Some("in_progress"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil)
+    valueDimensions = Some(valueDimensionsUpdate)
   )
 
   val portion = PortionView(
     uuid = UUID.randomUUID,
     laserDonutId = UUID.randomUUID,
     summary = "Write tests",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     order = 13,
     status = "in_progress",
     createdOn = LocalDateTime.now,
@@ -321,7 +367,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     frequency = "unexplored",
     `type` = "active"
   )
@@ -330,7 +376,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = Some("Play ping-pong"),
     description = Some("Table tennis"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     frequency = Some("scattered"),
     `type` = Some("active")
   )
@@ -340,7 +386,7 @@ object SampleData {
     goalId = Some(UUID.randomUUID),
     summary = "Yoga",
     description = "Train in Acro-Yoga",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     frequency = "frequent",
     `type` = "active",
     createdOn = LocalDateTime.now,
@@ -351,7 +397,7 @@ object SampleData {
   val oneOffCreation = OneOffCreation(
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     estimate = 14400000L,
     status = "planned"
   )
@@ -359,7 +405,7 @@ object SampleData {
   val oneOffUpdate = OneOffUpdate(
     goalId = Some(UUID.randomUUID),
     description = Some("Get doors fixed"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     estimate = Some(14400000L),
     status = Some("planned")
   )
@@ -368,7 +414,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     estimate = 14400000L,
     order = 5,
     status = "planned",
@@ -381,7 +427,7 @@ object SampleData {
     occursOn = LocalDateTime.of(2018, 12, 3, 17, 36, 5),
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
-    associatedSkills = associatedSkillInsertion :: Nil,
+    valueDimensions = valueDimensionsCreation,
     estimate = 14400000L,
     status = "planned"
   )
@@ -390,7 +436,7 @@ object SampleData {
     occursOn = Some(LocalDateTime.of(2018, 12, 3, 17, 36, 5)),
     goalId = Some(UUID.randomUUID),
     description = Some("Get window fixed"),
-    associatedSkills = Some(associatedSkillInsertion :: Nil),
+    valueDimensions = Some(valueDimensionsUpdate),
     estimate = Some(14400000L),
     status = Some("planned")
   )
@@ -400,7 +446,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     goalId = Some(UUID.randomUUID),
     description = "Get window fixed",
-    associatedSkills = associatedSkill :: Nil,
+    valueDimensions = valueDimensions,
     estimate = 14400000L,
     status = "planned",
     createdOn = LocalDateTime.now,

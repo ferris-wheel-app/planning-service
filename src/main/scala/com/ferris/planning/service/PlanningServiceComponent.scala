@@ -136,6 +136,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.createSkill(creation)
     }
 
+    override def createRelationship(creation: CreateRelationship)(implicit ex: ExecutionContext): Future[Relationship] = {
+      repo.createRelationship(creation)
+    }
+
+    override def createMission(creation: CreateMission)(implicit ex: ExecutionContext): Future[Mission] = {
+      repo.createMission(creation)
+    }
+
     override def createBacklogItem(creation: CreateBacklogItem)(implicit ex: ExecutionContext): Future[BacklogItem] = {
       repo.createBacklogItem(creation)
     }
@@ -198,6 +206,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def updateSkill(uuid: UUID, update: UpdateSkill)(implicit ex: ExecutionContext): Future[Skill] = {
       repo.updateSkill(uuid, update)
+    }
+
+    override def updateRelationship(uuid: UUID, update: UpdateRelationship)(implicit ex: ExecutionContext): Future[Relationship] = {
+      repo.updateRelationship(uuid, update)
+    }
+
+    override def updateMission(uuid: UUID, update: UpdateMission)(implicit ex: ExecutionContext): Future[Mission] = {
+      repo.updateMission(uuid, update)
     }
 
     override def updatePractisedHours(uuid: UUID, practisedHours: Long)(implicit ex: ExecutionContext): Future[Skill] = {
@@ -288,6 +304,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getSkills
     }
 
+    override def getRelationships(implicit ex: ExecutionContext): Future[Seq[Relationship]] = {
+      repo.getRelationships
+    }
+
+    override def getMissions(implicit ex: ExecutionContext): Future[Seq[Mission]] = {
+      repo.getMissions
+    }
+
     override def getBacklogItems(implicit ex: ExecutionContext): Future[Seq[BacklogItem]] = {
       repo.getBacklogItems
     }
@@ -372,6 +396,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
       repo.getSkill(uuid)
     }
 
+    override def getRelationship(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Relationship]] = {
+      repo.getRelationship(uuid)
+    }
+
+    override def getMission(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[Mission]] = {
+      repo.getMission(uuid)
+    }
+
     override def getBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Option[BacklogItem]] = {
       repo.getBacklogItem(uuid)
     }
@@ -442,6 +474,14 @@ trait DefaultPlanningServiceComponent extends PlanningServiceComponent {
 
     override def deleteSkill(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
       repo.deleteSkill(uuid)
+    }
+
+    override def deleteRelationship(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteRelationship(uuid)
+    }
+
+    override def deleteMission(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
+      repo.deleteMission(uuid)
     }
 
     override def deleteBacklogItem(uuid: UUID)(implicit ex: ExecutionContext): Future[Boolean] = {
