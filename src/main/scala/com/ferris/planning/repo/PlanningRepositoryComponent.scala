@@ -203,17 +203,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createEpoch(creation: CreateEpoch): Future[Epoch] = {
-      val row = EpochRow(
-        id = 0L,
-        uuid = UUID.randomUUID,
-        name = creation.name,
-        totem = creation.totem,
-        question = creation.question,
-        createdOn = timer.timestampOfNow,
-        lastModified = None
-      )
-      val action = (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
-      db.run(action) map (row => row.asEpoch)
+//      val row = EpochRow(
+//        id = 0L,
+//        uuid = UUID.randomUUID,
+//        name = creation.name,
+//        totem = creation.totem,
+//        question = creation.question,
+//        createdOn = timer.timestampOfNow,
+//        lastModified = None
+//      )
+//      val action = (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
+//      db.run(action) map (row => row.asEpoch)
+      ???
     }
 
     override def createYear(creation: CreateYear): Future[Year] = {
@@ -570,15 +571,16 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch] = {
-      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question, epoch.lastModified))
-      val action = getEpochAction(uuid).flatMap { maybeObj =>
-        maybeObj map { old =>
-          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
-            Some(timer.timestampOfNow))
-            .andThen(getEpochAction(uuid).map(_.head))
-        } getOrElse DBIO.failed(EpochNotFoundException())
-      }.transactionally
-      db.run(action).map(row => row.asEpoch)
+//      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question, epoch.lastModified))
+//      val action = getEpochAction(uuid).flatMap { maybeObj =>
+//        maybeObj map { old =>
+//          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
+//            Some(timer.timestampOfNow))
+//            .andThen(getEpochAction(uuid).map(_.head))
+//        } getOrElse DBIO.failed(EpochNotFoundException())
+//      }.transactionally
+//      db.run(action).map(row => row.asEpoch)
+      ???
     }
 
     override def updateYear(uuid: UUID, update: UpdateYear): Future[Year] = {
@@ -1115,11 +1117,13 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getEpochs: Future[Seq[Epoch]] = {
-      db.run(EpochTable.result.map(_.sortBy(_.createdOn).map(_.asEpoch)))
+//      db.run(EpochTable.result.map(_.sortBy(_.createdOn).map(_.asEpoch)))
+      ???
     }
 
     override def getEpoch(uuid: UUID): Future[Option[Epoch]] = {
-      db.run(getEpochAction(uuid).map(_.map(_.asEpoch)))
+//      db.run(getEpochAction(uuid).map(_.map(_.asEpoch)))
+      ???
     }
 
     override def getYears: Future[Seq[Year]] = {
@@ -1139,81 +1143,97 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getGoals: Future[Seq[Goal]] = {
-      db.run(getGoalsAction.map(_.sortBy(_._1.createdOn).map(_.asGoal)))
+//      db.run(getGoalsAction.map(_.sortBy(_._1.createdOn).map(_.asGoal)))
+      ???
     }
 
     override def getGoal(uuid: UUID): Future[Option[Goal]] = {
-      db.run(getGoalAction(uuid).map(_.map(_.asGoal)))
+//      db.run(getGoalAction(uuid).map(_.map(_.asGoal)))
+      ???
     }
 
     override def getThreads: Future[Seq[Thread]] = {
-      db.run(getThreadsAction.map(_.sortBy(_._1.createdOn).map(_.asThread)))
+//      db.run(getThreadsAction.map(_.sortBy(_._1.createdOn).map(_.asThread)))
+      ???
     }
 
     override def getThreads(goalId: UUID): Future[Seq[Thread]] = {
-      db.run(getThreadsByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asThread)))
+//      db.run(getThreadsByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asThread)))
+      ???
     }
 
     override def getThread(uuid: UUID): Future[Option[Thread]] = {
-      db.run(getThreadAction(uuid).map(_.map(_.asThread)))
+//      db.run(getThreadAction(uuid).map(_.map(_.asThread)))
+      ???
     }
 
     override def getWeaves: Future[Seq[Weave]] = {
-      db.run(getWeavesAction.map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+//      db.run(getWeavesAction.map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+      ???
     }
 
     override def getWeaves(goalId: UUID): Future[Seq[Weave]] = {
-      db.run(getWeavesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+//      db.run(getWeavesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+      ???
     }
 
     override def getWeave(uuid: UUID): Future[Option[Weave]] = {
-      db.run(getWeaveAction(uuid).map(_.map(_.asWeave)))
+//      db.run(getWeaveAction(uuid).map(_.map(_.asWeave)))
+      ???
     }
 
     override def getLaserDonuts: Future[Seq[LaserDonut]] = {
-      db.run(LaserDonutTable.result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
+//      db.run(LaserDonutTable.result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
+      ???
     }
 
     override def getLaserDonuts(goalId: UUID): Future[Seq[LaserDonut]] = {
-      db.run(laserDonutsByParentId(goalId).result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
+//      db.run(laserDonutsByParentId(goalId).result.map(_.sortBy(_.createdOn).map(_.asLaserDonut)))
+      ???
     }
 
     override def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = {
-      db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
+//      db.run(getLaserDonutAction(uuid).map(_.map(_.asLaserDonut)))
+      ???
     }
 
     override def getCurrentLaserDonut: Future[Option[LaserDonut]] = {
-      val action = (for {
-        currentActivity <- CurrentActivityTable
-        laserDonutRow <- LaserDonutTable if laserDonutRow.id === currentActivity.currentLaserDonut
-      } yield laserDonutRow).result.headOption
-      db.run(action).map(_.map(_.asLaserDonut))
+//      val action = (for {
+//        currentActivity <- CurrentActivityTable
+//        laserDonutRow <- LaserDonutTable if laserDonutRow.id === currentActivity.currentLaserDonut
+//      } yield laserDonutRow).result.headOption
+//      db.run(action).map(_.map(_.asLaserDonut))
+      ???
     }
 
     override def getPortions: Future[Seq[Portion]] = {
-      db.run(getPortionsAction.map(_.map(_.asPortion)))
+//      db.run(getPortionsAction.map(_.map(_.asPortion)))
+      ???
     }
 
     override def getPortions(laserDonutId: UUID): Future[Seq[Portion]] = {
-      db.run(getPortionsByParent(laserDonutId).map(_.map(_.asPortion)))
+//      db.run(getPortionsByParent(laserDonutId).map(_.map(_.asPortion)))
+      ???
     }
 
     override def getPortion(uuid: UUID): Future[Option[Portion]] = {
-      db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
+//      db.run(getPortionAction(uuid).map(_.map(_.asPortion)))
+      ???
     }
 
     override def getCurrentPortion: Future[Option[Portion]] = {
-      val currentPortionRow = (for {
-        currentActivity <- CurrentActivityTable
-        portionRow <- PortionTable if portionRow.id === currentActivity.currentPortion
-      } yield portionRow).result.headOption
-
-      val action = for {
-        portionRow <- currentPortionRow
-        currentPortion <- portionRow.map(row => getPortionAction(UUID.fromString(row.uuid))).getOrElse(DBIOAction.successful(None))
-      } yield currentPortion
-
-      db.run(action).map(_.map(_.asPortion))
+//      val currentPortionRow = (for {
+//        currentActivity <- CurrentActivityTable
+//        portionRow <- PortionTable if portionRow.id === currentActivity.currentPortion
+//      } yield portionRow).result.headOption
+//
+//      val action = for {
+//        portionRow <- currentPortionRow
+//        currentPortion <- portionRow.map(row => getPortionAction(UUID.fromString(row.uuid))).getOrElse(DBIOAction.successful(None))
+//      } yield currentPortion
+//
+//      db.run(action).map(_.map(_.asPortion))
+      ???
     }
 
     override def getTodos: Future[Seq[Todo]] = {
@@ -1229,36 +1249,43 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getHobbies: Future[Seq[Hobby]] = {
-      db.run(getHobbiesAction.map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+//      db.run(getHobbiesAction.map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+      ???
     }
 
     override def getHobbies(goalId: UUID): Future[Seq[Hobby]] = {
-      db.run(getHobbiesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+//      db.run(getHobbiesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+      ???
     }
 
     override def getHobby(uuid: UUID): Future[Option[Hobby]] = {
-      db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
+//      db.run(getHobbyAction(uuid).map(_.map(_.asHobby)))
+      ???
     }
 
     override def getOneOffs: Future[Seq[OneOff]] = {
-      db.run(getOneOffsAction.map(_.map(_.asOneOff)))
+//      db.run(getOneOffsAction.map(_.map(_.asOneOff)))
+      ???
     }
 
     override def getOneOff(uuid: UUID): Future[Option[OneOff]] = {
-      db.run(getOneOffAction(uuid).map(_.map(_.asOneOff)))
+//      db.run(getOneOffAction(uuid).map(_.map(_.asOneOff)))
+      ???
     }
 
     override def getScheduledOneOffs(date: Option[LocalDate]): Future[Seq[ScheduledOneOff]] = {
-      val retrieval = date.map { chosenDate =>
-        getScheduledOneOffsAction
-          .map(_.filter(_._1.occursOn.toLocalDateTime.toLocalDate == chosenDate))
-      }.getOrElse(getScheduledOneOffsAction)
-      val action = retrieval.map(_.sortBy(_._1.occursOn).map(_.asScheduledOneOff))
-      db.run(action)
+//      val retrieval = date.map { chosenDate =>
+//        getScheduledOneOffsAction
+//          .map(_.filter(_._1.occursOn.toLocalDateTime.toLocalDate == chosenDate))
+//      }.getOrElse(getScheduledOneOffsAction)
+//      val action = retrieval.map(_.sortBy(_._1.occursOn).map(_.asScheduledOneOff))
+//      db.run(action)
+      ???
     }
 
     override def getScheduledOneOff(uuid: UUID): Future[Option[ScheduledOneOff]] = {
-      db.run(getScheduledOneOffAction(uuid).map(_.map(_.asScheduledOneOff)))
+//      db.run(getScheduledOneOffAction(uuid).map(_.map(_.asScheduledOneOff)))
+      ???
     }
 
     override def getPyramidOfImportance: Future[Option[PyramidOfImportance]] = {

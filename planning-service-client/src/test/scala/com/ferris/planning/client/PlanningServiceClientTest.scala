@@ -367,7 +367,7 @@ class PlanningServiceClientTest extends FunSpec with Matchers with ScalaFutures 
         val response = Marshal(Envelope("OK", SD.skill)).to[ResponseEntity].futureValue
         when(mockServer.sendGetRequest(s"/api/skills/$id")).thenReturn(Future.successful(HttpResponse(entity = response)))
         whenReady(client.skill(id)) { response =>
-          response.value shouldBe SD.skill`
+          response.value shouldBe SD.skill
         }
       }
 

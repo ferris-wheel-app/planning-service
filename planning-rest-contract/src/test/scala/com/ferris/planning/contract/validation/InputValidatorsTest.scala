@@ -60,7 +60,7 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
           relevance = "not_needed"
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Invalid Relevance", Some(InvalidFieldPayload("relevance")))
+      val expected = InvalidFieldException("InvalidField", "Invalid Skill-relevance", Some(InvalidFieldPayload("relevance")))
       caught.message shouldBe expected.message
     }
 
@@ -70,7 +70,7 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
           level = "rubbish"
         )
       }
-      val expected = InvalidFieldException("InvalidField", "Invalid Level", Some(InvalidFieldPayload("level")))
+      val expected = InvalidFieldException("InvalidField", "Invalid Skill-level", Some(InvalidFieldPayload("level")))
       caught.message shouldBe expected.message
     }
   }

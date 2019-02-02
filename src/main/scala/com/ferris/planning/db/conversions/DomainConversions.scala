@@ -24,15 +24,24 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class EpochBuilder(val row: tables.EpochRow) {
-    def asEpoch: Epoch = Epoch(
-      uuid = UUID.fromString(row.uuid),
-      name = row.name,
-      totem = row.totem,
-      question = row.question,
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime)
-    )
+  implicit class EpochBuilder(val rows: (tables.EpochRow, Seq[(tables.EpochMissionRow, UUID)])) {
+    def asEpoch: Epoch = rows match {
+      case (epoch, associatedMissions) =>
+        Epoch(
+          uuid = UUID.fromString(epoch.uuid),
+          name = epoch.name,
+          totem = epoch.totem,
+          question = epoch.question,
+          associatedMissions = associatedMissions.map { case (mission, id) =>
+            AssociatedMission(
+              missionId = id,
+              level = MissionLevels.withName(mission.level)
+            )
+          },
+          createdOn = epoch.createdOn.toLocalDateTime,
+          lastModified = epoch.lastModified.map(_.toLocalDateTime)
+        )
+    }
   }
 
   implicit class YearBuilder(val row: tables.YearRow) {
@@ -56,22 +65,28 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow], Seq[(tables.GoalSkillRow, UUID)])) {
+  implicit class GoalBuilder(val rows: (tables.GoalRow, Seq[tables.BacklogItemRow], Seq[UUID], Seq[(tables.GoalSkillRow, UUID)], Seq[UUID])) {
     def asGoal: Goal = rows match {
-      case (goal, backlogItems, associatedSkills) =>
+      case (goal, backlogItems, missions, associatedSkills, relationships) =>
         Goal(
           uuid = UUID.fromString(goal.uuid),
           themeId = UUID.fromString(goal.themeId),
           backlogItems = backlogItems.map(item => UUID.fromString(item.uuid)),
           summary = goal.summary,
           description = goal.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = id,
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = goal.safetyNet,
+            expandsWorldView = goal.worldView
+          ),
           status = GoalStatuses.withName(goal.status),
           graduation = GraduationTypes.withName(goal.graduation),
           createdOn = goal.createdOn.toLocalDateTime,
@@ -80,21 +95,27 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class ThreadBuilder(val row: (tables.ThreadRow, Seq[(tables.ThreadSkillRow, UUID)])) {
+  implicit class ThreadBuilder(val row: (tables.ThreadRow, Seq[UUID], Seq[(tables.ThreadSkillRow, UUID)], Seq[UUID])) {
     def asThread: Thread = row match {
-      case (thread, associatedSkills) =>
+      case (thread, missions, associatedSkills, relationships) =>
         Thread(
           uuid = UUID.fromString(thread.uuid),
           goalId = thread.goalId.map(UUID.fromString),
           summary = thread.summary,
           description = thread.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = thread.safetyNet,
+            expandsWorldView = thread.worldView
+          ),
           performance = ThreadPerformances.withName(thread.performance),
           createdOn = thread.createdOn.toLocalDateTime,
           lastModified = thread.lastModified.map(_.toLocalDateTime),
@@ -103,21 +124,27 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class WeaveBuilder(val row: (tables.WeaveRow, Seq[(tables.WeaveSkillRow, UUID)])) {
+  implicit class WeaveBuilder(val row: (tables.WeaveRow, Seq[UUID], Seq[(tables.WeaveSkillRow, UUID)], Seq[UUID])) {
     def asWeave: Weave = row match {
-      case (weave, associatedSkills) =>
+      case (weave, missions, associatedSkills, relationships) =>
         Weave(
           uuid = UUID.fromString(weave.uuid),
           goalId = weave.goalId.map(UUID.fromString),
           summary = weave.summary,
           description = weave.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = weave.safetyNet,
+            expandsWorldView = weave.worldView
+          ),
           status = Statuses.withName(weave.status),
           `type` = WeaveTypes.withName(weave.`type`),
           createdOn = weave.createdOn.toLocalDateTime,
@@ -127,36 +154,58 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class LaserDonutBuilder(val row: tables.LaserDonutRow) {
-    def asLaserDonut: LaserDonut = LaserDonut(
-      uuid = UUID.fromString(row.uuid),
-      goalId = UUID.fromString(row.goalId),
-      summary = row.summary,
-      description = row.description,
-      milestone = row.milestone,
-      order = row.order,
-      status = Statuses.withName(row.status),
-      `type` = DonutTypes.withName(row.`type`),
-      createdOn = row.createdOn.toLocalDateTime,
-      lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastPerformed = row.lastPerformed.map(_.toLocalDateTime)
-    )
+  implicit class LaserDonutBuilder(val row: (tables.LaserDonutRow, Seq[UUID], Seq[(tables.LaserDonutSkillRow, UUID)], Seq[UUID])) {
+    def asLaserDonut: LaserDonut = row match {
+      case (laserDonut, missions, associatedSkills, relationships) =>
+        LaserDonut(
+          uuid = UUID.fromString(laserDonut.uuid),
+          goalId = UUID.fromString(laserDonut.goalId),
+          summary = laserDonut.summary,
+          description = laserDonut.description,
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = laserDonut.safetyNet,
+            expandsWorldView = laserDonut.worldView
+          ),
+          milestone = laserDonut.milestone,
+          order = laserDonut.order,
+          status = Statuses.withName(laserDonut.status),
+          `type` = DonutTypes.withName(laserDonut.`type`),
+          createdOn = laserDonut.createdOn.toLocalDateTime,
+          lastModified = laserDonut.lastModified.map(_.toLocalDateTime),
+          lastPerformed = laserDonut.lastPerformed.map(_.toLocalDateTime)
+        )
+    }
   }
 
-  implicit class PortionBuilder(val row: (tables.PortionRow, Seq[(tables.PortionSkillRow, UUID)])) {
+  implicit class PortionBuilder(val row: (tables.PortionRow, Seq[UUID], Seq[(tables.PortionSkillRow, UUID)], Seq[UUID])) {
     def asPortion: Portion = row match {
-      case (portion, associatedSkills) =>
+      case (portion, missions, associatedSkills, relationships) =>
         Portion(
           uuid = UUID.fromString(portion.uuid),
           laserDonutId = UUID.fromString(portion.laserDonutId),
           summary = portion.summary,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = portion.safetyNet,
+            expandsWorldView = portion.worldView
+          ),
           order = portion.order,
           status = Statuses.withName(portion.status),
           createdOn = portion.createdOn.toLocalDateTime,
@@ -179,21 +228,27 @@ class DomainConversions(val tables: Tables) {
     )
   }
 
-  implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[(tables.HobbySkillRow, UUID)])) {
+  implicit class HobbyBuilder(val row: (tables.HobbyRow, Seq[UUID], Seq[(tables.HobbySkillRow, UUID)], Seq[UUID])) {
     def asHobby: Hobby = row match {
-      case (hobby, associatedSkills) =>
+      case (hobby, missions, associatedSkills, relationships) =>
         Hobby(
           uuid = UUID.fromString(hobby.uuid),
           goalId = hobby.goalId.map(UUID.fromString),
           summary = hobby.summary,
           description = hobby.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = hobby.safetyNet,
+            expandsWorldView = hobby.worldView
+          ),
           frequency = HobbyFrequencies.withName(hobby.frequency),
           `type` = HobbyTypes.withName(hobby.`type`),
           createdOn = hobby.createdOn.toLocalDateTime,
@@ -203,20 +258,26 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class OneOffBuilder(val row: (tables.OneOffRow, Seq[(tables.OneOffSkillRow, UUID)])) {
+  implicit class OneOffBuilder(val row: (tables.OneOffRow, Seq[UUID], Seq[(tables.OneOffSkillRow, UUID)], Seq[UUID])) {
     def asOneOff: OneOff = row match {
-      case (oneOff, associatedSkills) =>
+      case (oneOff, missions, associatedSkills, relationships) =>
         OneOff(
           uuid = UUID.fromString(oneOff.uuid),
           goalId = oneOff.goalId.map(UUID.fromString),
           description = oneOff.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = oneOff.safetyNet,
+            expandsWorldView = oneOff.worldView
+          ),
           estimate = oneOff.estimate,
           order = oneOff.order,
           status = Statuses.withName(oneOff.status),
@@ -227,21 +288,27 @@ class DomainConversions(val tables: Tables) {
     }
   }
 
-  implicit class ScheduledOneOffBuilder(val row: (tables.ScheduledOneOffRow, Seq[(tables.ScheduledOneOffSkillRow, UUID)])) {
+  implicit class ScheduledOneOffBuilder(val row: (tables.ScheduledOneOffRow, Seq[UUID], Seq[(tables.ScheduledOneOffSkillRow, UUID)], Seq[UUID])) {
     def asScheduledOneOff: ScheduledOneOff = row match {
-      case (scheduledOneOff, associatedSkills) =>
+      case (scheduledOneOff, missions, associatedSkills, relationships) =>
         ScheduledOneOff(
           uuid = UUID.fromString(scheduledOneOff.uuid),
           occursOn = scheduledOneOff.occursOn.toLocalDateTime,
           goalId = scheduledOneOff.goalId.map(UUID.fromString),
           description = scheduledOneOff.description,
-          associatedSkills = associatedSkills.map { case (skill, id) =>
-            AssociatedSkill(
-              skillId = UUID.fromString(id),
-              relevance = SkillRelevances.withName(skill.relevance),
-              level = Proficiencies.skillLevel(skill.level)
-            )
-          },
+          valueDimensions = ValueDimensions(
+            associatedMissions = missions,
+            associatedSkills = associatedSkills.map { case (skill, id) =>
+              AssociatedSkill(
+                skillId = id,
+                relevance = SkillRelevances.withName(skill.relevance),
+                level = Proficiencies.skillLevel(skill.level)
+              )
+            },
+            relationships = relationships,
+            helpsSafetyNet = scheduledOneOff.safetyNet,
+            expandsWorldView = scheduledOneOff.worldView
+          ),
           estimate = scheduledOneOff.estimate,
           status = Statuses.withName(scheduledOneOff.status),
           createdOn = scheduledOneOff.createdOn.toLocalDateTime,

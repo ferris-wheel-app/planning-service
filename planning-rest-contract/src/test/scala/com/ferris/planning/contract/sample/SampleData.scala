@@ -60,21 +60,57 @@ object SampleData {
     level = "intermediate"
   )
 
-  val associatedMissionInsertion = AssociatedMissionInsertion(
-    missionId = UUID.randomUUID,
-    level = "major"
-  )
-
   val associatedSkill = AssociatedSkillView(
     skillId = UUID.randomUUID,
     relevance = "maintenance",
     level = "intermediate"
   )
 
+  val relationshipCreation = RelationshipCreation(
+    name = "Daniel Larusso",
+    category = "friends",
+    traits = "focussed" :: "disciplined" :: Nil,
+    likes = "karate" :: "cars" :: Nil,
+    dislikes = "bullies" :: Nil,
+    hobbies = "karate" :: Nil,
+    lastMeet = Some(LocalDate.now)
+  )
+
+  val relationshipUpdate = RelationshipUpdate(
+    name = Some("Daniel Larusso"),
+    category = Some("friends"),
+    traits = Some("focussed" :: "disciplined" :: Nil),
+    likes = Some("karate" :: "cars" :: Nil),
+    dislikes = Some("bullies" :: Nil),
+    hobbies = Some("karate" :: Nil),
+    lastMeet = Some(LocalDate.now)
+  )
+
+  val relationship = RelationshipView(
+    uuid = UUID.randomUUID,
+    name = "Daniel Larusso",
+    category = "friends",
+    traits = "focussed" :: "disciplined" :: Nil,
+    likes = "karate" :: "cars" :: Nil,
+    dislikes = "bullies" :: Nil,
+    hobbies = "karate" :: Nil,
+    lastMeet = Some(LocalDate.now)
+  )
+
+  val missionCreation = MissionCreation(
+    name = "Messinaisance",
+    description = "Create a positive feedback loop"
+  )
+
   val mission = MissionView(
     uuid = UUID.randomUUID,
-    name = "Ferris Wheel",
-    description = "Create a feedback loop"
+    name = "Messinaisance",
+    description = "Create a positive feedback loop"
+  )
+
+  val associatedMissionInsertion = AssociatedMissionInsertion(
+    missionId = UUID.randomUUID,
+    level = "major"
   )
 
   val associatedMission = AssociatedMissionView(

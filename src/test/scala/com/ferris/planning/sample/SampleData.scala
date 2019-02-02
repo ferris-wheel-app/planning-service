@@ -58,6 +58,74 @@ object SampleData {
       level = Proficiencies.Intermediate
     )
 
+    val relationshipCreation = CreateRelationship(
+      name = "Daniel Larusso",
+      category = RelationshipCategories.Friends,
+      traits = "focussed" :: "disciplined" :: Nil,
+      likes = "karate" :: "cars" :: Nil,
+      dislikes = "bullies" :: Nil,
+      hobbies = "karate" :: Nil,
+      lastMeet = Some(LocalDate.now)
+    )
+
+    val relationshipUpdate = UpdateRelationship(
+      name = Some("Daniel Larusso"),
+      category = Some(RelationshipCategories.Friends),
+      traits = Some("focussed" :: "disciplined" :: Nil),
+      likes = Some("karate" :: "cars" :: Nil),
+      dislikes = Some("bullies" :: Nil),
+      hobbies = Some("karate" :: Nil),
+      lastMeet = Some(LocalDate.now)
+    )
+
+    val relationship = Relationship(
+      uuid = UUID.randomUUID,
+      name = "Daniel Larusso",
+      category = RelationshipCategories.Friends,
+      traits = "focused" :: "disciplined" :: Nil,
+      likes = "karate" :: "cars" :: Nil,
+      dislikes = "bullies" :: Nil,
+      hobbies = "karate" :: Nil,
+      lastMeet = Some(LocalDate.now)
+    )
+
+    val missionCreation = CreateMission(
+      name = "Messinaisance",
+      description = "Create a positive feedback loop"
+    )
+
+    val missionUpdate = UpdateMission(
+      name = Some("Messinaisance"),
+      description = Some("Create a positive feedback loop")
+    )
+
+    val mission = Mission(
+      uuid = UUID.randomUUID,
+      name = "Messinaisance",
+      description = "Create a positive feedback loop"
+    )
+
+    val associatedMission = AssociatedMission(
+      missionId = UUID.randomUUID,
+      level = MissionLevels.Major
+    )
+
+    val valueDimensions = ValueDimensions(
+      associatedMissions = UUID.randomUUID :: Nil,
+      associatedSkills = associatedSkill :: Nil,
+      relationships = UUID.randomUUID :: Nil,
+      helpsSafetyNet = true,
+      expandsWorldView = true
+    )
+
+    val valueDimensionsUpdate = UpdateValueDimensions(
+      associatedMissions = Some(UUID.randomUUID :: Nil),
+      associatedSkills = Some(associatedSkill :: Nil),
+      relationships = Some(UUID.randomUUID :: Nil),
+      helpsSafetyNet = Some(true),
+      expandsWorldView = Some(true)
+    )
+
     val backlogItemCreation = CreateBacklogItem(
       summary = "I need to get my shit together",
       description = "I need to get my shit together",
@@ -82,13 +150,15 @@ object SampleData {
     val epochCreation = CreateEpoch(
       name = "Messinaissance",
       totem = "Hero",
-      question = "Am I capable of becoming an Übermensch?"
+      question = "Am I capable of becoming an Übermensch?",
+      associatedMissions = associatedMission :: Nil
     )
 
     val epochUpdate = UpdateEpoch(
       name = Some("Wakanda"),
       totem = Some("Leader"),
-      question = Some("Is Africa capable of achieving full development?")
+      question = Some("Is Africa capable of achieving full development?"),
+      associatedMissions = Some(associatedMission :: Nil)
     )
 
     val epoch = Epoch(
@@ -96,6 +166,7 @@ object SampleData {
       name = "Messinaissance",
       totem = "Hero",
       question = "Am I capable of becoming an Übermensch?",
+      associatedMissions = associatedMission :: Nil,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now)
     )
@@ -142,7 +213,7 @@ object SampleData {
       backlogItems = Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved
     )
@@ -152,7 +223,7 @@ object SampleData {
       backlogItems = Some(Nil),
       summary = Some("Learn to play an instrument"),
       description = Some("Learn to play the piano, the guitar, and the saxophone"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       graduation = Some(GraduationTypes.Abandoned),
       status = Some(GoalStatuses.Employed)
     )
@@ -163,7 +234,7 @@ object SampleData {
       backlogItems = UUID.randomUUID :: UUID.randomUUID :: Nil,
       summary = "Master at least one foreign language",
       description = "Learn French, Italian, and Korean",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       graduation = GraduationTypes.Hobby,
       status = GoalStatuses.NotAchieved,
       createdOn = LocalDateTime.now,
@@ -174,7 +245,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       performance = ThreadPerformances.Improving
     )
 
@@ -182,7 +253,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Sleep"),
       description = Some("Sleep for 8 hours"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       performance = Some(ThreadPerformances.OnTrack)
     )
 
@@ -191,7 +262,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Go for a run",
       description = "Go for a run",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       performance = ThreadPerformances.OnTrack,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
@@ -202,7 +273,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       `type` = WeaveTypes.PDR,
       status = Statuses.Planned
     )
@@ -211,7 +282,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Apply your new-found Go knowledge"),
       description = Some("Create a snuffleupagus"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       `type` = Some(WeaveTypes.BAU),
       status = Some(Statuses.Complete)
     )
@@ -221,7 +292,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Organise a tech lecture",
       description = "Create a presentation about Kafka",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       `type` = WeaveTypes.PDR,
       status = Statuses.Planned,
       createdOn = LocalDateTime.now,
@@ -233,6 +304,7 @@ object SampleData {
       goalId = UUID.randomUUID,
       summary = "Implement initial microservices",
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
+      valueDimensions = valueDimensions,
       milestone = "A deployed backend service",
       `type` = DonutTypes.ProjectFocused,
       status = Statuses.InProgress
@@ -242,6 +314,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Create the front-end"),
       description = Some("Use React"),
+      valueDimensions = Some(valueDimensionsUpdate),
       milestone = Some("A basic working prototype"),
       `type` = Some(DonutTypes.ProjectFocused),
       status = Some(Statuses.InProgress)
@@ -252,6 +325,7 @@ object SampleData {
       goalId = UUID.randomUUID,
       summary = "Implement initial microservices",
       description = "Implement planning-service, timetable-service, and history-service, in a microservices-based architecture",
+      valueDimensions = valueDimensions,
       milestone = "A basic working prototype",
       order = 1,
       `type` = DonutTypes.SkillFocused,
@@ -265,14 +339,14 @@ object SampleData {
       laserDonutId = UUID.randomUUID,
       summary = "Write tests",
       status = Statuses.InProgress,
-      associatedSkills = associatedSkill :: Nil
+      valueDimensions = valueDimensions
     )
 
     val portionUpdate = UpdatePortion(
       laserDonutId = Some(UUID.randomUUID),
       summary = Some("Split into sub-projects"),
       status = Some(Statuses.InProgress),
-      associatedSkills = Some(associatedSkill :: Nil)
+      valueDimensions = Some(valueDimensionsUpdate)
     )
 
     val portion = Portion(
@@ -281,7 +355,7 @@ object SampleData {
       summary = "Write tests",
       order = 13,
       status = Statuses.InProgress,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       createdOn = LocalDateTime.now,
       lastModified = Some(LocalDateTime.now),
       lastPerformed = Some(LocalDateTime.now)
@@ -313,7 +387,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active
     )
@@ -322,7 +396,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = Some("Play ping-pong"),
       description = Some("Table tennis"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       frequency = Some(HobbyFrequencies.Frequent),
       `type` = Some(HobbyTypes.Active)
     )
@@ -332,7 +406,7 @@ object SampleData {
       goalId = Some(UUID.randomUUID),
       summary = "Yoga",
       description = "Train in Acro-Yoga",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       frequency = HobbyFrequencies.Frequent,
       `type` = HobbyTypes.Active,
       createdOn = LocalDateTime.now,
@@ -343,7 +417,7 @@ object SampleData {
     val oneOffCreation = CreateOneOff(
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = 14400000L,
       status = Statuses.Planned
     )
@@ -351,7 +425,7 @@ object SampleData {
     val oneOffUpdate = UpdateOneOff(
       goalId = Some(UUID.randomUUID),
       description = Some("Get doors fixed"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       estimate = Some(14400000L),
       status = Some(Statuses.Planned)
     )
@@ -360,7 +434,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = 14400000L,
       order = 5,
       status = Statuses.Planned,
@@ -373,7 +447,7 @@ object SampleData {
       occursOn = scheduledDateTime,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = 14400000L,
       status = Statuses.Planned
     )
@@ -382,7 +456,7 @@ object SampleData {
       occursOn = Some(scheduledDateTime),
       goalId = Some(UUID.randomUUID),
       description = Some("Get window fixed"),
-      associatedSkills = Some(associatedSkill :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       estimate = Some(14400000L),
       status = Some(Statuses.Planned)
     )
@@ -392,7 +466,7 @@ object SampleData {
       uuid = UUID.randomUUID,
       goalId = Some(UUID.randomUUID),
       description = "Get window fixed",
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = 14400000L,
       status = Statuses.Planned,
       createdOn = LocalDateTime.now,
@@ -508,6 +582,82 @@ object SampleData {
       level = SkillLevel.toString(domain.associatedSkill.level)
     )
 
+    val relationshipCreation = RelationshipCreation(
+      name = domain.relationshipCreation.name,
+      category = RelationshipCategory.toString(domain.relationshipCreation.category),
+      traits = domain.relationshipCreation.traits,
+      likes = domain.relationshipCreation.likes,
+      dislikes = domain.relationshipCreation.dislikes,
+      hobbies = domain.relationshipCreation.hobbies,
+      lastMeet = domain.relationshipCreation.lastMeet
+    )
+
+    val relationshipUpdate = RelationshipUpdate(
+      name = domain.relationshipUpdate.name,
+      category = domain.relationshipUpdate.category.map(RelationshipCategory.toString),
+      traits = domain.relationshipUpdate.traits,
+      likes = domain.relationshipUpdate.likes,
+      dislikes = domain.relationshipUpdate.dislikes,
+      hobbies = domain.relationshipUpdate.hobbies,
+      lastMeet = domain.relationshipUpdate.lastMeet
+    )
+
+    val relationship = RelationshipView(
+      uuid = domain.relationship.uuid,
+      name = domain.relationship.name,
+      category = RelationshipCategory.toString(domain.relationship.category),
+      traits = domain.relationship.traits,
+      likes = domain.relationship.likes,
+      dislikes = domain.relationship.dislikes,
+      hobbies = domain.relationship.hobbies,
+      lastMeet = domain.relationship.lastMeet
+    )
+
+    val missionCreation = MissionCreation(
+      name = domain.missionCreation.name,
+      description = domain.missionCreation.description
+    )
+
+    val mission = MissionView(
+      uuid = domain.mission.uuid,
+      name = domain.mission.name,
+      description = domain.mission.description
+    )
+
+    val associatedMissionInsertion = AssociatedMissionInsertion(
+      missionId = domain.associatedMission.missionId,
+      level = MissionLevel.toString(domain.associatedMission.level)
+    )
+
+    val associatedMission = AssociatedMissionView(
+      missionId = domain.associatedMission.missionId,
+      level = MissionLevel.toString(domain.associatedMission.level)
+    )
+
+    val valueDimensionsCreation = ValueDimensionsCreation(
+      associatedMissions = domain.valueDimensions.associatedMissions,
+      associatedSkills = associatedSkillInsertion :: Nil,
+      relationships = domain.valueDimensions.relationships,
+      helpsSafetyNet = domain.valueDimensions.helpsSafetyNet,
+      expandsWorldView = domain.valueDimensions.expandsWorldView
+    )
+
+    val valueDimensionsUpdate = ValueDimensionsUpdate(
+      associatedMissions = domain.valueDimensionsUpdate.associatedMissions,
+      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      relationships = domain.valueDimensionsUpdate.relationships,
+      helpsSafetyNet = domain.valueDimensionsUpdate.helpsSafetyNet,
+      expandsWorldView = domain.valueDimensionsUpdate.expandsWorldView
+    )
+
+    val valueDimensions = ValueDimensionsView(
+      associatedMissions = domain.valueDimensions.associatedMissions,
+      associatedSkills = associatedSkill :: Nil,
+      relationships = domain.valueDimensions.relationships,
+      helpsSafetyNet = domain.valueDimensions.helpsSafetyNet,
+      expandsWorldView = domain.valueDimensions.expandsWorldView
+    )
+
     val backlogItemCreation = BacklogItemCreation(
       summary = domain.backlogItemCreation.summary,
       description = domain.backlogItemCreation.description,
@@ -532,13 +682,15 @@ object SampleData {
     val epochCreation = EpochCreation(
       name = domain.epochCreation.name,
       totem = domain.epochCreation.totem,
-      question = domain.epochCreation.question
+      question = domain.epochCreation.question,
+      associatedMissions = associatedMissionInsertion :: Nil
     )
 
     val epochUpdate = EpochUpdate(
       name = domain.epochUpdate.name,
       totem = domain.epochUpdate.totem,
-      question = domain.epochUpdate.question
+      question = domain.epochUpdate.question,
+      associatedMissions = Some(associatedMissionInsertion :: Nil)
     )
 
     val epoch = EpochView(
@@ -546,6 +698,7 @@ object SampleData {
       name = domain.epoch.name,
       totem = domain.epoch.totem,
       question = domain.epoch.question,
+      associatedMissions = associatedMission :: Nil,
       createdOn = domain.epoch.createdOn,
       lastModified = domain.epoch.lastModified
     )
@@ -592,7 +745,7 @@ object SampleData {
       backlogItems = domain.goalCreation.backlogItems,
       summary = domain.goalCreation.summary,
       description = domain.goalCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       graduation = GraduationType.toString(domain.goalCreation.graduation),
       status = GoalStatus.toString(domain.goalCreation.status)
     )
@@ -602,7 +755,7 @@ object SampleData {
       backlogItems = domain.goalUpdate.backlogItems,
       summary = domain.goalUpdate.summary,
       description = domain.goalUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       graduation = domain.goalUpdate.graduation.map(GraduationType.toString),
       status = domain.goalUpdate.status.map(GoalStatus.toString)
     )
@@ -613,7 +766,7 @@ object SampleData {
       backlogItems = domain.goal.backlogItems,
       summary = domain.goal.summary,
       description = domain.goal.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       graduation = GraduationType.toString(domain.goal.graduation),
       status = GoalStatus.toString(domain.goal.status),
       createdOn = domain.goal.createdOn,
@@ -624,7 +777,7 @@ object SampleData {
       goalId = domain.threadCreation.goalId,
       summary = domain.threadCreation.summary,
       description = domain.threadCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       performance = ThreadPerformance.toString(domain.threadCreation.performance)
     )
 
@@ -632,7 +785,7 @@ object SampleData {
       goalId = domain.threadUpdate.goalId,
       summary = domain.threadUpdate.summary,
       description = domain.threadUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       performance = domain.threadUpdate.performance.map(ThreadPerformance.toString)
     )
 
@@ -641,7 +794,7 @@ object SampleData {
       goalId = domain.thread.goalId,
       summary = domain.thread.summary,
       description = domain.thread.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       performance = ThreadPerformance.toString(domain.thread.performance),
       createdOn = domain.thread.createdOn,
       lastModified = domain.thread.lastModified,
@@ -652,7 +805,7 @@ object SampleData {
       goalId = domain.weaveCreation.goalId,
       summary = domain.weaveCreation.summary,
       description = domain.weaveCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       `type` = WeaveType.toString(domain.weaveCreation.`type`),
       status = Status.toString(domain.weaveCreation.status)
     )
@@ -661,7 +814,7 @@ object SampleData {
       goalId = domain.weaveUpdate.goalId,
       summary = domain.weaveUpdate.summary,
       description = domain.weaveUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       `type` = domain.weaveUpdate.`type`.map(WeaveType.toString),
       status = domain.weaveUpdate.status.map(Status.toString)
     )
@@ -671,7 +824,7 @@ object SampleData {
       goalId = domain.weave.goalId,
       summary = domain.weave.summary,
       description = domain.weave.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       `type` = WeaveType.toString(domain.weave.`type`),
       status = Status.toString(domain.weave.status),
       createdOn = domain.weave.createdOn,
@@ -683,6 +836,7 @@ object SampleData {
       goalId = domain.laserDonutCreation.goalId,
       summary = domain.laserDonutCreation.summary,
       description = domain.laserDonutCreation.description,
+      valueDimensions = valueDimensionsCreation,
       milestone = domain.laserDonutCreation.milestone,
       `type` = DonutType.toString(domain.laserDonutCreation.`type`),
       status = Status.toString(domain.laserDonutCreation.status)
@@ -692,6 +846,7 @@ object SampleData {
       goalId = domain.laserDonutUpdate.goalId,
       summary = domain.laserDonutUpdate.summary,
       description = domain.laserDonutUpdate.description,
+      valueDimensions = Some(valueDimensionsUpdate),
       milestone = domain.laserDonutUpdate.milestone,
       `type` = domain.laserDonutUpdate.`type`.map(DonutType.toString),
       status = domain.laserDonutUpdate.status.map(Status.toString)
@@ -702,6 +857,7 @@ object SampleData {
       goalId = domain.laserDonut.goalId,
       summary = domain.laserDonut.summary,
       description = domain.laserDonut.description,
+      valueDimensions = valueDimensions,
       milestone = domain.laserDonut.milestone,
       order = domain.laserDonut.order,
       `type` = DonutType.toString(domain.laserDonut.`type`),
@@ -715,14 +871,14 @@ object SampleData {
       laserDonutId = domain.portionCreation.laserDonutId,
       summary = domain.portionCreation.summary,
       status = Status.toString(domain.portionCreation.status),
-      associatedSkills = associatedSkillInsertion :: Nil
+      valueDimensions = valueDimensionsCreation
     )
 
     val portionUpdate = PortionUpdate(
       laserDonutId = domain.portionUpdate.laserDonutId,
       summary = domain.portionUpdate.summary,
       status = domain.portionUpdate.status.map(Status.toString),
-      associatedSkills = Some(associatedSkillInsertion :: Nil)
+      valueDimensions = Some(valueDimensionsUpdate)
     )
 
     val portion = PortionView(
@@ -731,7 +887,7 @@ object SampleData {
       summary = domain.portion.summary,
       order = domain.portion.order,
       status = Status.toString(domain.portion.status),
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       createdOn = domain.portion.createdOn,
       lastModified = domain.portion.lastModified,
       lastPerformed = domain.portion.lastPerformed
@@ -763,7 +919,7 @@ object SampleData {
       goalId = domain.hobbyCreation.goalId,
       summary = domain.hobbyCreation.summary,
       description = domain.hobbyCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       frequency = HobbyFrequency.toString(domain.hobbyCreation.frequency),
       `type` = HobbyType.toString(domain.hobbyCreation.`type`)
     )
@@ -772,7 +928,7 @@ object SampleData {
       goalId = domain.hobbyUpdate.goalId,
       summary = domain.hobbyUpdate.summary,
       description = domain.hobbyUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       frequency = domain.hobbyUpdate.frequency.map(HobbyFrequency.toString),
       `type` = domain.hobbyUpdate.`type`.map(HobbyType.toString)
     )
@@ -782,7 +938,7 @@ object SampleData {
       goalId = domain.hobby.goalId,
       summary = domain.hobby.summary,
       description = domain.hobby.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       frequency = HobbyFrequency.toString(domain.hobby.frequency),
       `type` = HobbyType.toString(domain.hobby.`type`),
       createdOn = domain.hobby.createdOn,
@@ -793,7 +949,7 @@ object SampleData {
     val oneOffCreation = OneOffCreation(
       goalId = domain.oneOffCreation.goalId,
       description = domain.oneOffCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       estimate = domain.oneOffCreation.estimate,
       status = Status.toString(domain.oneOffCreation.status)
     )
@@ -801,7 +957,7 @@ object SampleData {
     val oneOffUpdate = OneOffUpdate(
       goalId = domain.oneOffUpdate.goalId,
       description = domain.oneOffUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       estimate = domain.oneOffUpdate.estimate,
       status = domain.oneOffUpdate.status.map(Status.toString)
     )
@@ -810,7 +966,7 @@ object SampleData {
       uuid = domain.oneOff.uuid,
       goalId = domain.oneOff.goalId,
       description = domain.oneOff.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = domain.oneOff.estimate,
       order = 5,
       status = Status.toString(domain.oneOff.status),
@@ -823,7 +979,7 @@ object SampleData {
       occursOn = domain.scheduledOneOffCreation.occursOn,
       goalId = domain.scheduledOneOffCreation.goalId,
       description = domain.scheduledOneOffCreation.description,
-      associatedSkills = associatedSkillInsertion :: Nil,
+      valueDimensions = valueDimensionsCreation,
       estimate = domain.scheduledOneOffCreation.estimate,
       status = Status.toString(domain.scheduledOneOffCreation.status)
     )
@@ -832,7 +988,7 @@ object SampleData {
       occursOn = domain.scheduledOneOffUpdate.occursOn,
       goalId = domain.scheduledOneOffUpdate.goalId,
       description = domain.scheduledOneOffUpdate.description,
-      associatedSkills = Some(associatedSkillInsertion :: Nil),
+      valueDimensions = Some(valueDimensionsUpdate),
       estimate = domain.scheduledOneOffUpdate.estimate,
       status = domain.scheduledOneOffUpdate.status.map(Status.toString)
     )
@@ -842,7 +998,7 @@ object SampleData {
       occursOn = domain.scheduledOneOff.occursOn,
       goalId = domain.scheduledOneOff.goalId,
       description = domain.scheduledOneOff.description,
-      associatedSkills = associatedSkill :: Nil,
+      valueDimensions = valueDimensions,
       estimate = domain.scheduledOneOff.estimate,
       status = Status.toString(domain.scheduledOneOff.status),
       createdOn = domain.scheduledOneOff.createdOn,
