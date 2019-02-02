@@ -260,7 +260,7 @@ object TypeResolvers {
       case `work` => RelationshipCategories.Work
       case `romantic` => RelationshipCategories.Romantic
       case `mentorship` => RelationshipCategories.Mentorship
-      case o => throw new IllegalArgumentException(s"Invalid relationship category: $o")
+      case o => throw new IllegalArgumentException(s"Invalid relationship-category: $o")
     }
 
     override def toString(`type`: RelationshipCategory): String = `type` match {
@@ -269,7 +269,7 @@ object TypeResolvers {
       case RelationshipCategories.Work => work
       case RelationshipCategories.Romantic => romantic
       case RelationshipCategories.Mentorship => mentorship
-      case o => throw new IllegalArgumentException(s"Invalid relationship category: $o")
+      case o => throw new IllegalArgumentException(s"Invalid relationship-category: $o")
     }
   }
 
@@ -279,13 +279,13 @@ object TypeResolvers {
     override def withName(name: String): MissionLevel = name match {
       case `major` => MissionLevels.Major
       case `minor` => MissionLevels.Minor
-      case o => throw new IllegalArgumentException(s"Invalid mission level: $o")
+      case o => throw new IllegalArgumentException(s"Invalid mission-level: $o")
     }
 
     override def toString(`type`: MissionLevel): String = `type` match {
       case MissionLevels.Major => major
       case MissionLevels.Minor => minor
-      case o => throw new IllegalArgumentException(s"Invalid mission level: $o")
+      case o => throw new IllegalArgumentException(s"Invalid mission-level: $o")
     }
   }
 }

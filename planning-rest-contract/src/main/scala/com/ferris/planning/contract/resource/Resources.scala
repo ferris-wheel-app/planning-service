@@ -310,7 +310,9 @@ object Resources {
       dislikes: Seq[String],
       hobbies: Seq[String],
       lastMeet: Option[LocalDate]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class RelationshipUpdate (
       name: Option[String],
@@ -320,7 +322,9 @@ object Resources {
       dislikes: Option[Seq[String]],
       hobbies: Option[Seq[String]],
       lastMeet: Option[LocalDate]
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class MissionCreation(
       name: String,
@@ -335,7 +339,9 @@ object Resources {
     case class AssociatedMissionInsertion (
       missionId: UUID,
       level: String
-    )
+    ) {
+      checkValidity(this)
+    }
 
     case class ValueDimensionsCreation (
       associatedMissions: Seq[UUID],

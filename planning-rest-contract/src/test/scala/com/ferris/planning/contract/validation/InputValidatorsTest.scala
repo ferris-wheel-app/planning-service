@@ -93,6 +93,60 @@ class InputValidatorsTest extends FunSpec with Matchers with Assertions {
     }
   }
 
+  describe("validating a relationship creation") {
+    it("should allow the creation of a valid object") {
+      SD.relationshipCreation.copy(
+        category = SD.relationshipCreation.category
+      )
+    }
+
+    it("should throw an exception if the category is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.relationshipCreation.copy(
+          category = "enemy"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Relationship-category", Some(InvalidFieldPayload("category")))
+      caught.message shouldBe expected.message
+    }
+  }
+
+  describe("validating a relationship update") {
+    it("should allow the creation of a valid object") {
+      SD.relationshipUpdate.copy(
+        category = SD.relationshipUpdate.category
+      )
+    }
+
+    it("should throw an exception if the category is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.relationshipUpdate.copy(
+          category = Some("enemy")
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Relationship-category", Some(InvalidFieldPayload("category")))
+      caught.message shouldBe expected.message
+    }
+  }
+
+  describe("validating an associated mission") {
+    it("should allow the creation of a valid object") {
+      SD.associatedMissionInsertion.copy(
+        level = SD.associatedMissionInsertion.level
+      )
+    }
+
+    it("should throw an exception if the level is invalid") {
+      val caught = intercept[InvalidFieldException] {
+        SD.associatedMissionInsertion.copy(
+          level = "super"
+        )
+      }
+      val expected = InvalidFieldException("InvalidField", "Invalid Mission-level", Some(InvalidFieldPayload("level")))
+      caught.message shouldBe expected.message
+    }
+  }
+
   describe("validating a backlog-item creation") {
     it("should allow the creation of a valid object") {
       SD.backlogItemCreation.copy(
