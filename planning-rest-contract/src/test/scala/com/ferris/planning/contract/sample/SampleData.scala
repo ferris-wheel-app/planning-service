@@ -73,7 +73,7 @@ object SampleData {
   val relationshipCreation = RelationshipCreation(
     name = "Daniel Larusso",
     category = "friends",
-    traits = "focussed" :: "disciplined" :: Nil,
+    traits = "focused" :: "disciplined" :: Nil,
     likes = "karate" :: "cars" :: Nil,
     dislikes = "bullies" :: Nil,
     hobbies = "karate" :: Nil,
@@ -83,7 +83,7 @@ object SampleData {
   val relationshipUpdate = RelationshipUpdate(
     name = Some("Daniel Larusso"),
     category = Some("friends"),
-    traits = Some("focussed" :: "disciplined" :: Nil),
+    traits = Some("focused" :: "disciplined" :: Nil),
     likes = Some("karate" :: "cars" :: Nil),
     dislikes = Some("bullies" :: Nil),
     hobbies = Some("karate" :: Nil),
@@ -94,7 +94,7 @@ object SampleData {
     uuid = UUID.randomUUID,
     name = "Daniel Larusso",
     category = "friends",
-    traits = "focussed" :: "disciplined" :: Nil,
+    traits = "focused" :: "disciplined" :: Nil,
     likes = "karate" :: "cars" :: Nil,
     dislikes = "bullies" :: Nil,
     hobbies = "karate" :: Nil,

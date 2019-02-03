@@ -69,7 +69,7 @@ object SampleData {
     val relationshipCreation = CreateRelationship(
       name = "Daniel Larusso",
       category = RelationshipCategories.Friends,
-      traits = "focussed" :: "disciplined" :: Nil,
+      traits = "focused" :: "disciplined" :: Nil,
       likes = "karate" :: "cars" :: Nil,
       dislikes = "bullies" :: Nil,
       hobbies = "karate" :: Nil,
@@ -79,7 +79,7 @@ object SampleData {
     val relationshipUpdate = UpdateRelationship(
       name = Some("Daniel Larusso"),
       category = Some(RelationshipCategories.Friends),
-      traits = Some("focussed" :: "disciplined" :: Nil),
+      traits = Some("focused" :: "disciplined" :: Nil),
       likes = Some("karate" :: "cars" :: Nil),
       dislikes = Some("bullies" :: Nil),
       hobbies = Some("karate" :: Nil),
