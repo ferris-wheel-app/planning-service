@@ -282,33 +282,40 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createGoal(creation: CreateGoal): Future[Goal] = {
-//      def insertGoalAction(creation: CreateGoal): DBIO[GoalRow] = {
-//        val row = GoalRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          themeId = creation.themeId,
-//          summary = creation.summary,
-//          description = creation.description,
-//          status = creation.status.dbValue,
-//          graduation = creation.graduation.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None
-//        )
-//        (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
-//      }
-//
-//      val action = for {
-//        goal <- insertGoalAction(creation)
-//        backlogItems <- getBacklogItemsAction(creation.backlogItems)
-//        _ <- insertGoalBacklogItemsAction(goal.id, backlogItems.map(_.id))
-//        goalSkills <- insertGoalSkillsAction(goal.id, creation.associatedSkills)
-//      } yield {
-//        (goal, backlogItems, goalSkills.zip(creation.associatedSkills).map {
-//          case (goalSkill, associatedSkill) => (goalSkill, associatedSkill.skillId)
-//        }).asGoal
-//      }
-//      db.run(action)
-      ???
+      def insertGoalAction(creation: CreateGoal): DBIO[GoalRow] = {
+        val row = GoalRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          themeId = creation.themeId,
+          summary = creation.summary,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet.toByte,
+          worldView = creation.valueDimensions.expandsWorldView.toByte,
+          status = creation.status.dbValue,
+          graduation = creation.graduation.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None
+        )
+        (GoalTable returning GoalTable.map(_.id) into ((goal, id) => goal.copy(id = id))) += row
+      }
+
+      val action = for {
+        goal <- insertGoalAction(creation)
+        backlogItems <- getBacklogItemsAction(creation.backlogItems)
+        _ <- insertGoalBacklogItemsAction(goal.id, backlogItems.map(_.id))
+        goalMissions <- insertGoalMissionsAction(goal.id, creation.valueDimensions.associatedMissions)
+        goalSkills <- insertGoalSkillsAction(goal.id, creation.valueDimensions.associatedSkills)
+        goalRelationships <- insertGoalRelationshipsAction(goal.id, creation.valueDimensions.relationships)
+      } yield {
+        (goal, backlogItems, goalMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, goalSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (goalSkill, associatedSkill) => (goalSkill, associatedSkill.skillId)
+        }, goalRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asGoal
+      }
+      db.run(action)
     }
 
     override def createThread(creation: CreateThread): Future[Thread] = {
@@ -1700,10 +1707,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield epochMissions
     }
 
-    private def insertGoalMissionsAction(goalId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[GoalMissionRow]] = {
+    private def insertGoalMissionsAction(goalId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[GoalMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        goalMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        goalMissions = missions.map { mission =>
           GoalMissionRow(
             goalId = goalId,
             missionId = mission.id
@@ -1713,10 +1720,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield goalMissions
     }
 
-    private def insertThreadMissionsAction(threadId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[ThreadMissionRow]] = {
+    private def insertThreadMissionsAction(threadId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[ThreadMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        threadMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        threadMissions = missions.map { mission =>
           ThreadMissionRow(
             threadId = threadId,
             missionId = mission.id
@@ -1726,10 +1733,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield threadMissions
     }
 
-    private def insertWeaveMissionsAction(weaveId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[WeaveMissionRow]] = {
+    private def insertWeaveMissionsAction(weaveId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[WeaveMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        weaveMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        weaveMissions = missions.map { mission =>
           WeaveMissionRow(
             weaveId = weaveId,
             missionId = mission.id
@@ -1739,10 +1746,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield weaveMissions
     }
 
-    private def insertLaserDonutMissionsAction(laserDonutId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[LaserDonutMissionRow]] = {
+    private def insertLaserDonutMissionsAction(laserDonutId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[LaserDonutMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        laserDonutMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        laserDonutMissions = missions.map { mission =>
           LaserDonutMissionRow(
             laserDonutId = laserDonutId,
             missionId = mission.id
@@ -1752,10 +1759,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield laserDonutMissions
     }
 
-    private def insertPortionMissionsAction(portionId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[PortionMissionRow]] = {
+    private def insertPortionMissionsAction(portionId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[PortionMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        portionMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        portionMissions = missions.map { mission =>
           PortionMissionRow(
             portionId = portionId,
             missionId = mission.id
@@ -1765,10 +1772,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield portionMissions
     }
 
-    private def insertHobbyMissionsAction(hobbyId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[HobbyMissionRow]] = {
+    private def insertHobbyMissionsAction(hobbyId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[HobbyMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        hobbyMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        hobbyMissions = missions.map { mission =>
           HobbyMissionRow(
             hobbyId = hobbyId,
             missionId = mission.id
@@ -1778,10 +1785,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield hobbyMissions
     }
 
-    private def insertOneOffMissionsAction(oneOffId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[OneOffMissionRow]] = {
+    private def insertOneOffMissionsAction(oneOffId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[OneOffMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        oneOffMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        oneOffMissions = missions.map { mission =>
           OneOffMissionRow(
             oneOffId = oneOffId,
             missionId = mission.id
@@ -1791,10 +1798,10 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield oneOffMissions
     }
 
-    private def insertScheduledOneOffMissionsAction(scheduledOneOffId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[ScheduledOneOffMissionRow]] = {
+    private def insertScheduledOneOffMissionsAction(scheduledOneOffId: Long, associatedMissions: Seq[UUID]): DBIO[Seq[ScheduledOneOffMissionRow]] = {
       for {
-        missions <- getMissionsAction(associatedMissions.map(_.missionId))
-        scheduledOneOffMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+        missions <- getMissionsAction(associatedMissions)
+        scheduledOneOffMissions = missions.map { case mission =>
           ScheduledOneOffMissionRow(
             scheduledOneOffId = scheduledOneOffId,
             missionId = mission.id
