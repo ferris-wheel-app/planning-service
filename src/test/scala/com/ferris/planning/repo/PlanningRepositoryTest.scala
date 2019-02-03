@@ -136,7 +136,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.parentCategory shouldBe parentCategory.uuid
         updated.proficiency shouldBe SD.skillUpdate.proficiency.value
         updated.practisedHours shouldBe SD.skillUpdate.practisedHours.value
-        updated.lastApplied shouldBe empty
+        updated.lastApplied.value shouldBe SD.skillUpdate.lastPractise.value
         updated.lastModified.value shouldBe updateTime
       }
 

@@ -184,9 +184,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action)
     }
 
-    override def createRelationship(creation: CreateRelationship): Future[Relationship] = ???
+    override def createRelationship(creation: CreateRelationship): Future[Relationship] = {
+      val row = RelationshipRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        name = creation.name,
+        category = creation.category.dbValue,
+        traits = creation.traits.mkString(","),
+        likes = creation.likes.mkString(","),
+        dislikes = creation.dislikes.mkString(","),
+        hobbies = creation.hobbies.mkString(","),
+        createdOn = timer.timestampOfNow,
+        lastModified = None,
+        lastMeet = None
+      )
+      val action = (RelationshipTable returning RelationshipTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
+      db.run(action) map (row => row.asRelationship)
+    }
 
-    override def createMission(creation: CreateMission): Future[Mission] = ???
+    override def createMission(creation: CreateMission): Future[Mission] = {
+      val row = MissionRow(
+        id = 0L,
+        uuid = UUID.randomUUID,
+        name = creation.name,
+        description = creation.description,
+        createdOn = timer.timestampOfNow,
+        lastModified = None
+      )
+      val action = (MissionTable returning MissionTable.map(_.id) into ((item, id) => item.copy(id = id))) += row
+      db.run(action) map (row => row.asMission)
+    }
 
     override def createBacklogItem(creation: CreateBacklogItem): Future[BacklogItem] = {
       val row = BacklogItemRow(
@@ -203,18 +230,28 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createEpoch(creation: CreateEpoch): Future[Epoch] = {
-//      val row = EpochRow(
-//        id = 0L,
-//        uuid = UUID.randomUUID,
-//        name = creation.name,
-//        totem = creation.totem,
-//        question = creation.question,
-//        createdOn = timer.timestampOfNow,
-//        lastModified = None
-//      )
-//      val action = (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
-//      db.run(action) map (row => row.asEpoch)
-      ???
+      def insertEpochAction(creation: CreateEpoch): DBIO[EpochRow] = {
+        val row = EpochRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          name = creation.name,
+          totem = creation.totem,
+          question = creation.question,
+          createdOn = timer.timestampOfNow,
+          lastModified = None
+        )
+        (EpochTable returning EpochTable.map(_.id) into ((epoch, id) => epoch.copy(id = id))) += row
+      }
+
+      val action = for {
+        epoch <- insertEpochAction(creation)
+        epochMissions <- insertEpochMissionsAction(epoch.id, creation.associatedMissions)
+      } yield {
+        (epoch, epochMissions.zip(creation.associatedMissions).map {
+          case (epochMission, associatedMission) => (epochMission, associatedMission.missionId)
+        }).asEpoch
+      }
+      db.run(action)
     }
 
     override def createYear(creation: CreateYear): Future[Year] = {
@@ -1545,6 +1582,228 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       } yield oneOffSkills
     }
 
+    private def insertGoalRelationshipsAction(goalId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[GoalRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        goalRelationships = relationships.map { relationship =>
+          GoalRelationshipRow(
+            goalId = goalId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- GoalRelationshipTable ++= goalRelationships
+      } yield goalRelationships
+    }
+
+    private def insertThreadRelationshipsAction(threadId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[ThreadRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        threadRelationships = relationships.map { relationship =>
+          ThreadRelationshipRow(
+            threadId = threadId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- ThreadRelationshipTable ++= threadRelationships
+      } yield threadRelationships
+    }
+
+    private def insertWeaveRelationshipsAction(weaveId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[WeaveRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        weaveRelationships = relationships.map { relationship =>
+          WeaveRelationshipRow(
+            weaveId = weaveId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- WeaveRelationshipTable ++= weaveRelationships
+      } yield weaveRelationships
+    }
+
+    private def insertLaserDonutRelationshipsAction(laserDonutId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[LaserDonutRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        laserDonutRelationships = relationships.map { relationship =>
+          LaserDonutRelationshipRow(
+            laserDonutId = laserDonutId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- LaserDonutRelationshipTable ++= laserDonutRelationships
+      } yield laserDonutRelationships
+    }
+
+    private def insertPortionRelationshipsAction(portionId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[PortionRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        portionRelationships = relationships.map { relationship =>
+          PortionRelationshipRow(
+            portionId = portionId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- PortionRelationshipTable ++= portionRelationships
+      } yield portionRelationships
+    }
+
+    private def insertHobbyRelationshipsAction(hobbyId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[HobbyRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        hobbyRelationships = relationships.map { relationship =>
+          HobbyRelationshipRow(
+            hobbyId = hobbyId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- HobbyRelationshipTable ++= hobbyRelationships
+      } yield hobbyRelationships
+    }
+
+    private def insertOneOffRelationshipsAction(oneOffId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[OneOffRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        oneOffRelationships = relationships.map { relationship =>
+          OneOffRelationshipRow(
+            oneOffId = oneOffId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- OneOffRelationshipTable ++= oneOffRelationships
+      } yield oneOffRelationships
+    }
+
+    private def insertScheduledOneOffRelationshipsAction(scheduledOneOffId: Long, relationshipIds: Seq[UUID]): DBIO[Seq[ScheduledOneOffRelationshipRow]] = {
+      for {
+        relationships <- getRelationshipsAction(relationshipIds)
+        scheduledOneOffRelationships = relationships.map { relationship =>
+          ScheduledOneOffRelationshipRow(
+            scheduledOneOffId = scheduledOneOffId,
+            relationshipId = relationship.id
+          )
+        }
+        _ <- ScheduledOneOffRelationshipTable ++= scheduledOneOffRelationships
+      } yield scheduledOneOffRelationships
+    }
+
+    private def insertEpochMissionsAction(epochId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[EpochMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        epochMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          EpochMissionRow(
+            epochId = epochId,
+            missionId = mission.id,
+            level = associatedMission.level.dbValue
+          )
+        }
+        _ <- EpochMissionTable ++= epochMissions
+      } yield epochMissions
+    }
+
+    private def insertGoalMissionsAction(goalId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[GoalMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        goalMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          GoalMissionRow(
+            goalId = goalId,
+            missionId = mission.id
+          )
+        }
+        _ <- GoalMissionTable ++= goalMissions
+      } yield goalMissions
+    }
+
+    private def insertThreadMissionsAction(threadId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[ThreadMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        threadMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          ThreadMissionRow(
+            threadId = threadId,
+            missionId = mission.id
+          )
+        }
+        _ <- ThreadMissionTable ++= threadMissions
+      } yield threadMissions
+    }
+
+    private def insertWeaveMissionsAction(weaveId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[WeaveMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        weaveMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          WeaveMissionRow(
+            weaveId = weaveId,
+            missionId = mission.id
+          )
+        }
+        _ <- WeaveMissionTable ++= weaveMissions
+      } yield weaveMissions
+    }
+
+    private def insertLaserDonutMissionsAction(laserDonutId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[LaserDonutMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        laserDonutMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          LaserDonutMissionRow(
+            laserDonutId = laserDonutId,
+            missionId = mission.id
+          )
+        }
+        _ <- LaserDonutMissionTable ++= laserDonutMissions
+      } yield laserDonutMissions
+    }
+
+    private def insertPortionMissionsAction(portionId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[PortionMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        portionMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          PortionMissionRow(
+            portionId = portionId,
+            missionId = mission.id
+          )
+        }
+        _ <- PortionMissionTable ++= portionMissions
+      } yield portionMissions
+    }
+
+    private def insertHobbyMissionsAction(hobbyId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[HobbyMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        hobbyMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          HobbyMissionRow(
+            hobbyId = hobbyId,
+            missionId = mission.id
+          )
+        }
+        _ <- HobbyMissionTable ++= hobbyMissions
+      } yield hobbyMissions
+    }
+
+    private def insertOneOffMissionsAction(oneOffId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[OneOffMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        oneOffMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          OneOffMissionRow(
+            oneOffId = oneOffId,
+            missionId = mission.id
+          )
+        }
+        _ <- OneOffMissionTable ++= oneOffMissions
+      } yield oneOffMissions
+    }
+
+    private def insertScheduledOneOffMissionsAction(scheduledOneOffId: Long, associatedMissions: Seq[AssociatedMission]): DBIO[Seq[ScheduledOneOffMissionRow]] = {
+      for {
+        missions <- getMissionsAction(associatedMissions.map(_.missionId))
+        scheduledOneOffMissions = missions.zip(associatedMissions).map { case (mission, associatedMission) =>
+          ScheduledOneOffMissionRow(
+            scheduledOneOffId = scheduledOneOffId,
+            missionId = mission.id
+          )
+        }
+        _ <- ScheduledOneOffMissionTable ++= scheduledOneOffMissions
+      } yield scheduledOneOffMissions
+    }
+
     private def getSkillCategoryAction(uuid: UUID) = {
       for {
         category <- skillCategoryByUuid(uuid).result.headOption
@@ -1710,6 +1969,14 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       skillsByUuid(uuids).result
     }
 
+    private def getRelationshipsAction(uuids: Seq[UUID]) = {
+      relationshipsByUuid(uuids).result
+    }
+
+    private def getMissionsAction(uuids: Seq[UUID]) = {
+      missionsByUuid(uuids).result
+    }
+
     private def getPyramidOfImportanceAction = {
       (for {
         pyramidRow <- ScheduledLaserDonutTable
@@ -1736,6 +2003,30 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def skillsByUuid(uuids: Seq[UUID]) = {
       SkillTable.filter(_.uuid inSet uuids.map(_.toString))
+    }
+
+    private def relationshipByUuid(uuid: UUID) = {
+      RelationshipTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def relationshipById(id: Long) = {
+      RelationshipTable.filter(_.id === id)
+    }
+
+    private def relationshipsByUuid(uuids: Seq[UUID]) = {
+      RelationshipTable.filter(_.uuid inSet uuids.map(_.toString))
+    }
+
+    private def missionByUuid(uuid: UUID) = {
+      MissionTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def missionById(id: Long) = {
+      MissionTable.filter(_.id === id)
+    }
+
+    private def missionsByUuid(uuids: Seq[UUID]) = {
+      MissionTable.filter(_.uuid inSet uuids.map(_.toString))
     }
 
     private def backlogItemsByUuid(uuids: Seq[UUID]) = {
