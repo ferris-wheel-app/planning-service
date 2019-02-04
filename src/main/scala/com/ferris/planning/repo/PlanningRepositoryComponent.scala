@@ -690,7 +690,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
 
       val action = (for {
-        old <- getEpochAction(uuid).map(_.getOrElse(throw EpochNotFoundException()))
+        oldAndMissions <- getEpochAction(uuid).map(_.getOrElse(throw EpochNotFoundException()))
+        (old, _) = oldAndMissions
         _ <- updateEpoch(uuid, update, old)
         _ <- updateAssociatedMissions(old)
         updatedEpoch <- getEpochAction(uuid).map(_.head)
@@ -723,44 +724,43 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateGoal(uuid: UUID, update: UpdateGoal): Future[Goal] = {
-//      def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow): DBIO[Int] = {
-//        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.status,
-//          goal.graduation, goal.lastModified))
-//          .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
-//            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
-//            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
-//      }
-//
-//      def updateBacklogItems(goal: GoalRow) = update.backlogItems match {
-//        case Some(backlogItems) =>
-//          for {
-//            _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
-//            newBacklogItems <- getBacklogItemsAction(backlogItems)
-//            result <- insertGoalBacklogItemsAction(goal.id, newBacklogItems.map(_.id))
-//          } yield result
-//        case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
-//      }
-//
-//      def updateAssociatedSkills(goal: GoalRow) = update.associatedSkills match {
-//        case Some(associatedSkills) =>
-//          for {
-//            _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
-//            result <- insertGoalSkillsAction(goal.id, associatedSkills)
-//          } yield result.zip(associatedSkills.map(_.skillId))
-//        case None => DBIO.successful(Seq.empty[(GoalSkillRow, UUID)])
-//      }
-//
-//      val action = (for {
-//        goalAndBacklog <- getGoalAction(uuid).map(_.getOrElse(throw GoalNotFoundException()))
-//        (old, _, _) = goalAndBacklog
-//        _ <- updateGoal(uuid, update, old)
-//        _ <- updateBacklogItems(old)
-//        _ <- updateAssociatedSkills(old)
-//        updatedGoal <- getGoalAction(uuid).map(_.head)
-//      } yield updatedGoal.asGoal).transactionally
-//
-//      db.run(action)
-      ???
+      def updateGoal(uuid: UUID, update: UpdateGoal, old: GoalRow): DBIO[Int] = {
+        goalByUuid(uuid).map(goal => (goal.themeId, goal.summary, goal.description, goal.status,
+          goal.graduation, goal.lastModified))
+          .update(UpdateId.keepOrReplace(update.themeId, old.themeId), update.summary.getOrElse(old.summary),
+            update.description.getOrElse(old.description), UpdateTypeEnum.keepOrReplace(update.status, old.status),
+            UpdateTypeEnum.keepOrReplace(update.graduation, old.graduation), Some(timer.timestampOfNow))
+      }
+
+      def updateBacklogItems(goal: GoalRow) = update.backlogItems match {
+        case Some(backlogItems) =>
+          for {
+            _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
+            newBacklogItems <- getBacklogItemsAction(backlogItems)
+            result <- insertGoalBacklogItemsAction(goal.id, newBacklogItems.map(_.id))
+          } yield result
+        case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
+      }
+
+      def updateAssociatedSkills(goal: GoalRow) = update.associatedSkills match {
+        case Some(associatedSkills) =>
+          for {
+            _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
+            result <- insertGoalSkillsAction(goal.id, associatedSkills)
+          } yield result.zip(associatedSkills.map(_.skillId))
+        case None => DBIO.successful(Seq.empty[(GoalSkillRow, UUID)])
+      }
+
+      val action = (for {
+        goalAndBacklog <- getGoalAction(uuid).map(_.getOrElse(throw GoalNotFoundException()))
+        (old, _, _) = goalAndBacklog
+        _ <- updateGoal(uuid, update, old)
+        _ <- updateBacklogItems(old)
+        _ <- updateAssociatedSkills(old)
+        updatedGoal <- getGoalAction(uuid).map(_.head)
+      } yield updatedGoal.asGoal).transactionally
+
+      db.run(action)
     }
 
     override def updateThread(uuid: UUID, update: UpdateThread): Future[Thread] = {
