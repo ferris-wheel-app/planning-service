@@ -15,6 +15,7 @@ import com.ferris.planning.service.exceptions.Exceptions.{InvalidOneOffsUpdateEx
 import com.ferris.utils.FerrisImplicits._
 import com.ferris.utils.TimerComponent
 import slick.dbio.DBIOAction
+import slick.dbio.Effect.Read
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -289,8 +290,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           themeId = creation.themeId,
           summary = creation.summary,
           description = creation.description,
-          safetyNet = creation.valueDimensions.helpsSafetyNet.toByte,
-          worldView = creation.valueDimensions.expandsWorldView.toByte,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
           status = creation.status.dbValue,
           graduation = creation.graduation.dbValue,
           createdOn = timer.timestampOfNow,
@@ -319,109 +320,146 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createThread(creation: CreateThread): Future[Thread] = {
-//      def insertThreadAction(creation: CreateThread): DBIO[ThreadRow] = {
-//        val row = ThreadRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          goalId = creation.goalId,
-//          summary = creation.summary,
-//          description = creation.description,
-//          performance = creation.performance.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
-//      }
-//
-//      val action = for {
-//        thread <- insertThreadAction(creation)
-//        threadSkills <- insertThreadSkillsAction(thread.id, creation.associatedSkills)
-//      } yield {
-//        (thread, threadSkills.zip(creation.associatedSkills).map {
-//          case (threadSkill, associatedSkill) => (threadSkill, associatedSkill.skillId)
-//        }).asThread
-//      }
-//      db.run(action)
-      ???
+      def insertThreadAction(creation: CreateThread): DBIO[ThreadRow] = {
+        val row = ThreadRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          performance = creation.performance.dbValue,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (ThreadTable returning ThreadTable.map(_.id) into ((thread, id) => thread.copy(id = id))) += row
+      }
+
+      val action = for {
+        thread <- insertThreadAction(creation)
+        threadMissions <- insertThreadMissionsAction(thread.id, creation.valueDimensions.associatedMissions)
+        threadSkills <- insertThreadSkillsAction(thread.id, creation.valueDimensions.associatedSkills)
+        threadRelationships <- insertThreadRelationshipsAction(thread.id, creation.valueDimensions.relationships)
+      } yield {
+        (thread, threadMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, threadSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (threadSkill, associatedSkill) => (threadSkill, associatedSkill.skillId)
+        }, threadRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asThread
+      }
+      db.run(action)
     }
 
     override def createWeave(creation: CreateWeave): Future[Weave] = {
-//      def insertWeaveAction(creation: CreateWeave): DBIO[WeaveRow] = {
-//        val row = WeaveRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          goalId = creation.goalId,
-//          summary = creation.summary,
-//          description = creation.description,
-//          status = creation.status.dbValue,
-//          `type` = creation.`type`.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
-//      }
-//      val action = for {
-//        weave <- insertWeaveAction(creation)
-//        weaveSkills <- insertWeaveSkillsAction(weave.id, creation.associatedSkills)
-//      } yield {
-//        (weave, weaveSkills.zip(creation.associatedSkills).map {
-//          case (weaveSkill, associatedSkill) => (weaveSkill, associatedSkill.skillId)
-//        }).asWeave
-//      }
-//      db.run(action)
-      ???
+      def insertWeaveAction(creation: CreateWeave): DBIO[WeaveRow] = {
+        val row = WeaveRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          status = creation.status.dbValue,
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (WeaveTable returning WeaveTable.map(_.id) into ((weave, id) => weave.copy(id = id))) += row
+      }
+      val action = for {
+        weave <- insertWeaveAction(creation)
+        weaveMissions <- insertWeaveMissionsAction(weave.id, creation.valueDimensions.associatedMissions)
+        weaveSkills <- insertWeaveSkillsAction(weave.id, creation.valueDimensions.associatedSkills)
+        weaveRelationships <- insertWeaveRelationshipsAction(weave.id, creation.valueDimensions.relationships)
+      } yield {
+        (weave, weaveMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, weaveSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (weaveSkill, associatedSkill) => (weaveSkill, associatedSkill.skillId)
+        }, weaveRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asWeave
+      }
+      db.run(action)
     }
 
     override def createLaserDonut(creation: CreateLaserDonut): Future[LaserDonut] = {
-//      val action = laserDonutsByParentId(creation.goalId).result.flatMap { existingLaserDonuts =>
-//        val row = LaserDonutRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          goalId = creation.goalId,
-//          summary = creation.summary,
-//          description = creation.description,
-//          milestone = creation.milestone,
-//          order = existingLaserDonuts.lastOption.map(_.order + 1).getOrElse(1),
-//          status = creation.status.dbValue,
-//          `type` = creation.`type`.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
-//      }.transactionally
-//      db.run(action) map (row => row.asLaserDonut)
-      ???
+      def insertLaserDonutAction(creation: CreateLaserDonut, existingLaserDonuts: Seq[LaserDonutRow]): DBIO[LaserDonutRow] = {
+        val row = LaserDonutRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          milestone = creation.milestone,
+          order = existingLaserDonuts.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (LaserDonutTable returning LaserDonutTable.map(_.id) into ((laserDonut, id) => laserDonut.copy(id = id))) += row
+      }
+      val action = for {
+        existingLaserDonuts <- laserDonutsByParentId(creation.goalId).result
+        laserDonut <- insertLaserDonutAction(creation, existingLaserDonuts)
+        laserDonutMissions <- insertLaserDonutMissionsAction(laserDonut.id, creation.valueDimensions.associatedMissions)
+        laserDonutSkills <- insertLaserDonutSkillsAction(laserDonut.id, creation.valueDimensions.associatedSkills)
+        laserDonutRelationships <- insertLaserDonutRelationshipsAction(laserDonut.id, creation.valueDimensions.relationships)
+      } yield {
+        (laserDonut, laserDonutMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, laserDonutSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (laserDonutSkill, associatedSkill) => (laserDonutSkill, associatedSkill.skillId)
+        }, laserDonutRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asLaserDonut
+      }
+      db.run(action)
     }
 
     override def createPortion(creation: CreatePortion): Future[Portion] = {
-//      def insertPortionAction(creation: CreatePortion, existingPortions: Seq[PortionRow]): DBIO[PortionRow] = {
-//        val row = PortionRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          laserDonutId = creation.laserDonutId,
-//          summary = creation.summary,
-//          order = existingPortions.sortBy(_.order).lastOption.map(_.order + 1).getOrElse(1),
-//          status = creation.status.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
-//      }
-//      val action = for {
-//        existingPortions <- getPortionsByParent(creation.laserDonutId).map(_.map(_._1))
-//        portion <- insertPortionAction(creation, existingPortions)
-//        portionSkills <- insertPortionSkillsAction(portion.id, creation.associatedSkills)
-//      } yield {
-//        (portion, portionSkills.zip(creation.associatedSkills).map {
-//          case (portionSkill, associatedSkill) => (portionSkill, associatedSkill.skillId)
-//        }).asPortion
-//      }
-//      db.run(action)
-      ???
+      def insertPortionAction(creation: CreatePortion, existingPortions: Seq[PortionRow]): DBIO[PortionRow] = {
+        val row = PortionRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          laserDonutId = creation.laserDonutId,
+          summary = creation.summary,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          order = existingPortions.sortBy(_.order).lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (PortionTable returning PortionTable.map(_.id) into ((portion, id) => portion.copy(id = id))) += row
+      }
+      val action = for {
+        existingPortions <- getPortionsByParent(creation.laserDonutId).map(_.map(_._1))
+        portion <- insertPortionAction(creation, existingPortions)
+        portionMissions <- insertPortionMissionsAction(portion.id, creation.valueDimensions.associatedMissions)
+        portionSkills <- insertPortionSkillsAction(portion.id, creation.valueDimensions.associatedSkills)
+        portionRelationships <- insertPortionRelationshipsAction(portion.id, creation.valueDimensions.relationships)
+      } yield {
+        (portion, portionMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, portionSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (portionSkill, associatedSkill) => (portionSkill, associatedSkill.skillId)
+        }, portionRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asPortion
+      }
+      db.run(action)
     }
 
     override def createTodo(creation: CreateTodo): Future[Todo] = {
@@ -447,88 +485,109 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def createHobby(creation: CreateHobby): Future[Hobby] = {
-//      def insertHobbyAction(creation: CreateHobby): DBIO[HobbyRow] = {
-//        val row = HobbyRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          goalId = creation.goalId,
-//          summary = creation.summary,
-//          description = creation.description,
-//          frequency = creation.frequency.dbValue,
-//          `type` = creation.`type`.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
-//      }
-//      val action = for {
-//        hobby <- insertHobbyAction(creation)
-//        hobbySkills <- insertHobbySkillsAction(hobby.id, creation.associatedSkills)
-//      } yield {
-//        (hobby, hobbySkills.zip(creation.associatedSkills).map {
-//          case (hobbySkill, associatedSkill) => (hobbySkill, associatedSkill.skillId)
-//        }).asHobby
-//      }
-//      db.run(action)
-      ???
+      def insertHobbyAction(creation: CreateHobby): DBIO[HobbyRow] = {
+        val row = HobbyRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          summary = creation.summary,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          frequency = creation.frequency.dbValue,
+          `type` = creation.`type`.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (HobbyTable returning HobbyTable.map(_.id) into ((hobby, id) => hobby.copy(id = id))) += row
+      }
+      val action = for {
+        hobby <- insertHobbyAction(creation)
+        hobbyMissions <- insertHobbyMissionsAction(hobby.id, creation.valueDimensions.associatedMissions)
+        hobbySkills <- insertHobbySkillsAction(hobby.id, creation.valueDimensions.associatedSkills)
+        hobbyRelationships <- insertHobbyRelationshipsAction(hobby.id, creation.valueDimensions.relationships)
+      } yield {
+        (hobby, hobbyMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, hobbySkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (hobbySkill, associatedSkill) => (hobbySkill, associatedSkill.skillId)
+        }, hobbyRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asHobby
+      }
+      db.run(action)
     }
 
     override def createOneOff(creation: CreateOneOff): Future[OneOff] = {
-//      def insertOneOffAction(creation: CreateOneOff, existingOneOffs: Seq[OneOffRow]): DBIO[OneOffRow] = {
-//        val row = OneOffRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          goalId = creation.goalId,
-//          description = creation.description,
-//          estimate = creation.estimate,
-//          order = existingOneOffs.lastOption.map(_.order + 1).getOrElse(1),
-//          status = creation.status.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
-//      }
-//      val action = for {
-//        existingOneOffs <- OneOffTable.result
-//        oneOff <- insertOneOffAction(creation, existingOneOffs)
-//        oneOffSkills <- insertOneOffSkillsAction(oneOff.id, creation.associatedSkills)
-//      } yield {
-//        (oneOff, oneOffSkills.zip(creation.associatedSkills).map {
-//          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
-//        }).asOneOff
-//      }
-//      db.run(action)
-      ???
+      def insertOneOffAction(creation: CreateOneOff, existingOneOffs: Seq[OneOffRow]): DBIO[OneOffRow] = {
+        val row = OneOffRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          goalId = creation.goalId,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          estimate = creation.estimate,
+          order = existingOneOffs.lastOption.map(_.order + 1).getOrElse(1),
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (OneOffTable returning OneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      }
+      val action = for {
+        existingOneOffs <- OneOffTable.result
+        oneOff <- insertOneOffAction(creation, existingOneOffs)
+        oneOffMissions <- insertOneOffMissionsAction(oneOff.id, creation.valueDimensions.associatedMissions)
+        oneOffSkills <- insertOneOffSkillsAction(oneOff.id, creation.valueDimensions.associatedSkills)
+        oneOffRelationships <- insertOneOffRelationshipsAction(oneOff.id, creation.valueDimensions.relationships)
+      } yield {
+        (oneOff, oneOffMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, oneOffSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
+        }, oneOffRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asOneOff
+      }
+      db.run(action)
     }
 
     override def createScheduledOneOff(creation: CreateScheduledOneOff): Future[ScheduledOneOff] = {
-//      def insertScheduledOneOffAction(creation: CreateScheduledOneOff): DBIO[ScheduledOneOffRow] = {
-//        val row = ScheduledOneOffRow(
-//          id = 0L,
-//          uuid = UUID.randomUUID,
-//          occursOn = creation.occursOn.toTimestamp,
-//          goalId = creation.goalId,
-//          description = creation.description,
-//          estimate = creation.estimate,
-//          status = creation.status.dbValue,
-//          createdOn = timer.timestampOfNow,
-//          lastModified = None,
-//          lastPerformed = None
-//        )
-//        (ScheduledOneOffTable returning ScheduledOneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
-//      }
-//      val action = for {
-//        oneOff <- insertScheduledOneOffAction(creation)
-//        oneOffSkills <- insertScheduledOneOffSkillsAction(oneOff.id, creation.associatedSkills)
-//      } yield {
-//        (oneOff, oneOffSkills.zip(creation.associatedSkills).map {
-//          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
-//        }).asScheduledOneOff
-//      }
-//      db.run(action)
-      ???
+      def insertScheduledOneOffAction(creation: CreateScheduledOneOff): DBIO[ScheduledOneOffRow] = {
+        val row = ScheduledOneOffRow(
+          id = 0L,
+          uuid = UUID.randomUUID,
+          occursOn = creation.occursOn.toTimestamp,
+          goalId = creation.goalId,
+          description = creation.description,
+          safetyNet = creation.valueDimensions.helpsSafetyNet,
+          worldView = creation.valueDimensions.expandsWorldView,
+          estimate = creation.estimate,
+          status = creation.status.dbValue,
+          createdOn = timer.timestampOfNow,
+          lastModified = None,
+          lastPerformed = None
+        )
+        (ScheduledOneOffTable returning ScheduledOneOffTable.map(_.id) into ((oneOff, id) => oneOff.copy(id = id))) += row
+      }
+      val action = for {
+        oneOff <- insertScheduledOneOffAction(creation)
+        oneOffMissions <- insertOneOffMissionsAction(oneOff.id, creation.valueDimensions.associatedMissions)
+        oneOffSkills <- insertScheduledOneOffSkillsAction(oneOff.id, creation.valueDimensions.associatedSkills)
+        oneOffRelationships <- insertOneOffRelationshipsAction(oneOff.id, creation.valueDimensions.relationships)
+      } yield {
+        (oneOff, oneOffMissions.zip(creation.valueDimensions.associatedMissions).map {
+          case (_, associatedMission) => associatedMission
+        }, oneOffSkills.zip(creation.valueDimensions.associatedSkills).map {
+          case (oneOffSkill, associatedSkill) => (oneOffSkill, associatedSkill.skillId)
+        }, oneOffRelationships.zip(creation.valueDimensions.relationships).map {
+          case (_, associatedRelationship) => associatedRelationship
+        }).asScheduledOneOff
+      }
+      db.run(action)
     }
 
     override def createPyramidOfImportance(pyramid: UpsertPyramidOfImportance): Future[PyramidOfImportance] = {
@@ -615,16 +674,29 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def updateEpoch(uuid: UUID, update: UpdateEpoch): Future[Epoch] = {
-//      val query = epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question, epoch.lastModified))
-//      val action = getEpochAction(uuid).flatMap { maybeObj =>
-//        maybeObj map { old =>
-//          query.update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
-//            Some(timer.timestampOfNow))
-//            .andThen(getEpochAction(uuid).map(_.head))
-//        } getOrElse DBIO.failed(EpochNotFoundException())
-//      }.transactionally
-//      db.run(action).map(row => row.asEpoch)
-      ???
+      def updateEpoch(uuid: UUID, update: UpdateEpoch, old: EpochRow): DBIO[Int] = {
+        epochByUuid(uuid).map(epoch => (epoch.name, epoch.totem, epoch.question, epoch.lastModified))
+          .update(update.name.getOrElse(old.name), update.totem.getOrElse(old.totem), update.question.getOrElse(old.question),
+            Some(timer.timestampOfNow))
+      }
+
+      def updateAssociatedMissions(epoch: EpochRow) = update.associatedMissions match {
+        case Some(associatedMissions) =>
+          for {
+            _ <- EpochMissionTable.filter(_.epochId === epoch.id).delete
+            result <- insertEpochMissionsAction(epoch.id, associatedMissions)
+          } yield result.zip(associatedMissions.map(_.missionId))
+        case None => DBIO.successful(Seq.empty[(EpochMissionRow, UUID)])
+      }
+
+      val action = (for {
+        old <- getEpochAction(uuid).map(_.getOrElse(throw EpochNotFoundException()))
+        _ <- updateEpoch(uuid, update, old)
+        _ <- updateAssociatedMissions(old)
+        updatedEpoch <- getEpochAction(uuid).map(_.head)
+      } yield updatedEpoch.asEpoch).transactionally
+
+      db.run(action)
     }
 
     override def updateYear(uuid: UUID, update: UpdateYear): Future[Year] = {
@@ -1857,7 +1929,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getEpochAction(uuid: UUID) = {
-      epochByUuid(uuid).result.headOption
+      epochWithExtrasByUuid(uuid).map(groupByEpoch(_).headOption)
     }
 
     private def getYearAction(uuid: UUID) = {
@@ -2046,6 +2118,36 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def epochByUuid(uuid: UUID) = {
       EpochTable.filter(_.uuid === uuid.toString)
+    }
+
+    private def epochWithExtrasByUuid(uuid: UUID) = {
+      epochsWithExtras.map(_.filter { case (epoch, _) => epoch.uuid === uuid.toString })
+    }
+
+    private def epochsWithExtras = {
+      EpochTable
+        .joinLeft(EpochMissionTable)
+        .on(_.id === _.epochId)
+        .joinLeft(MissionTable)
+        .on { case ((_, epochMission), mission) => epochMission.map(_.missionId).getOrElse(-1L) === mission.id }
+        .map { case ((epoch, missionLink), mission) => (epoch, missionLink, mission) }
+        .result.map {
+        _.collect {
+          case (epoch, missionLink, mission) =>
+            val missionTuple = (missionLink, mission) match {
+              case (Some(link), Some(msn)) => Some((link, msn))
+              case _ => None
+            }
+            (epoch, missionTuple)
+        }
+      }
+    }
+
+    private def groupByEpoch(epochsWithExtras: Seq[(EpochRow, Option[(EpochMissionRow, MissionRow)])]): Seq[(EpochRow, Seq[(EpochMissionRow, UUID)])] = {
+      epochsWithExtras.groupBy { case (epoch, _) => epoch }
+        .map { case (epoch, links) =>
+          (epoch, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+        }.toSeq
     }
 
     private def yearByUuid(uuid: UUID) = {
