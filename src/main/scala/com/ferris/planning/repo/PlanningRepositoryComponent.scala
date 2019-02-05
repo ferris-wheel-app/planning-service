@@ -742,7 +742,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         case None => DBIO.successful(Seq.empty[GoalBacklogItemRow])
       }
 
-      def updateAssociatedSkills(goal: GoalRow) = update.associatedSkills match {
+      def updateAssociatedSkills(goal: GoalRow) = update.valueDimensions.flatMap(_.associatedSkills) match {
         case Some(associatedSkills) =>
           for {
             _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
@@ -751,12 +751,32 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         case None => DBIO.successful(Seq.empty[(GoalSkillRow, UUID)])
       }
 
+      def updateRelationships(goal: GoalRow) = update.valueDimensions.flatMap(_.relationships) match {
+        case Some(relationships) =>
+          for {
+            _ <- GoalRelationshipTable.filter(_.goalId === goal.id).delete
+            result <- insertGoalRelationshipsAction(goal.id, relationships)
+          } yield result.zip(relationships)
+        case None => DBIO.successful(Seq.empty[(GoalRelationshipRow, UUID)])
+      }
+
+      def updateAssociatedMissions(goal: GoalRow) = update.valueDimensions.flatMap(_.associatedMissions) match {
+        case Some(associatedMissions) =>
+          for {
+            _ <- GoalMissionTable.filter(_.goalId === goal.id).delete
+            result <- insertGoalMissionsAction(goal.id, associatedMissions)
+          } yield result.zip(associatedMissions)
+        case None => DBIO.successful(Seq.empty[(GoalMissionRow, UUID)])
+      }
+
       val action = (for {
         goalAndBacklog <- getGoalAction(uuid).map(_.getOrElse(throw GoalNotFoundException()))
-        (old, _, _) = goalAndBacklog
+        (old, _, _, _, _) = goalAndBacklog
         _ <- updateGoal(uuid, update, old)
         _ <- updateBacklogItems(old)
         _ <- updateAssociatedSkills(old)
+        _ <- updateRelationships(old)
+        _ <- updateAssociatedMissions(old)
         updatedGoal <- getGoalAction(uuid).map(_.head)
       } yield updatedGoal.asGoal).transactionally
 
@@ -1445,7 +1465,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     override def deleteGoal(uuid: UUID): Future[Boolean] = {
       val action = getGoalAction(uuid).flatMap { maybeObj =>
-        maybeObj map { case (goal, _, _) =>
+        maybeObj map { case (goal, _, _, _, _) =>
           for {
             _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
             _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
@@ -1940,11 +1960,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       themeByUuid(uuid).result.headOption
     }
 
-    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow], Seq[(GoalSkillRow, UUID)])]] = {
+    private def getGoalsAction: DBIO[Seq[(GoalRow, Seq[BacklogItemRow], Seq[UUID], Seq[(GoalSkillRow, UUID)], Seq[UUID])]] = {
       goalsWithExtras.map(groupByGoal(_))
     }
 
-    private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow], Seq[(GoalSkillRow, UUID)])]] = {
+    private def getGoalAction(uuid: UUID): DBIO[Option[(GoalRow, Seq[BacklogItemRow], Seq[UUID], Seq[(GoalSkillRow, UUID)], Seq[UUID])]] = {
       goalWithExtrasByUuid(uuid).map(groupByGoal(_).headOption)
     }
 
@@ -2163,7 +2183,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def goalWithExtrasByUuid(uuid: UUID) = {
-      goalsWithExtras.map(_.filter { case (goal, _, _) => goal.uuid === uuid.toString })
+      goalsWithExtras.map(_.filter { case (goal, _, _, _, _) => goal.uuid === uuid.toString })
     }
 
     private def goalsWithExtras = {
@@ -2172,27 +2192,39 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         .on(_.id === _.goalId)
         .joinLeft(BacklogItemTable)
         .on { case ((_, goalBacklogItem), backlogItem) => goalBacklogItem.map(_.backlogItemId).getOrElse(-1L) === backlogItem.id }
+        .joinLeft(GoalMissionTable)
+        .on(_._1._1.id === _.goalId)
+        .joinLeft(MissionTable)
+        .on { case ((((_, _), _), missionLink), mission) => missionLink.map(_.missionId).getOrElse(-1L) === mission.id }
         .joinLeft(GoalSkillTable)
-        .on(_._1._1.id === _.skillId)
+        .on(_._1._1._1._1.id === _.goalId)
         .joinLeft(SkillTable)
-        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((((goal, _), backlogItem), skillLink), skill) => (goal, backlogItem, skillLink, skill) }
+        .on { case ((((((_, _), _), _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(GoalRelationshipTable)
+        .on(_._1._1._1._1._1._1.id === _.goalId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((((_, _), _), _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((((goal, _), backlogItem), _), mission), skillLink), skill), _), relationship) => (goal, backlogItem, mission, skillLink, skill, relationship) }
         .result.map {
           _.collect {
-            case (goal, backlogItem, skillLink, skill) =>
+            case (goal, backlogItem, mission, skillLink, skill, relationship) =>
               val skillTuple = (skillLink, skill) match {
                 case (Some(link), Some(skl)) => Some((link, skl))
                 case _ => None
               }
-              (goal, backlogItem, skillTuple)
+              (goal, backlogItem, mission, skillTuple, relationship)
             }
           }
     }
 
-    private def groupByGoal(goalsWithExtras: Seq[(GoalRow, Option[BacklogItemRow], Option[(GoalSkillRow, SkillRow)])]): Seq[(GoalRow, Seq[BacklogItemRow], Seq[(GoalSkillRow, UUID)])] = {
-      goalsWithExtras.groupBy { case (goal, _, _) => goal }
+    private def groupByGoal(goalsWithExtras: Seq[(GoalRow, Option[BacklogItemRow], Option[MissionRow],
+      Option[(GoalSkillRow, SkillRow)], Option[RelationshipRow])]): Seq[(GoalRow, Seq[BacklogItemRow],
+      Seq[UUID], Seq[(GoalSkillRow, UUID)], Seq[UUID])] = {
+      goalsWithExtras.groupBy { case (goal, _, _, _, _) => goal }
         .map { case (goal, links) =>
-          (goal, links.flatMap(_._2), links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (goal, links.flatMap(_._2), links.flatMap(_._3.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._4.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._5.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
