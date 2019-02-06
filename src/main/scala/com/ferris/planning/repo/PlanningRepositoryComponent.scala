@@ -1479,7 +1479,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteThread(uuid: UUID): Future[Boolean] = {
       val action = (for {
         threadAndSkills <- getThreadAction(uuid).map(_.getOrElse(throw ThreadNotFoundException()))
-        (thread, _) = threadAndSkills
+        (thread, _, _, _) = threadAndSkills
         _ <- ThreadSkillTable.filter(_.threadId === thread.id).delete
         result <- ThreadTable.filter(_.id === thread.id).delete
       } yield result).transactionally
@@ -1489,7 +1489,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteWeave(uuid: UUID): Future[Boolean] = {
       val action = (for {
         weaveAndSkills <- getWeaveAction(uuid).map(_.getOrElse(throw WeaveNotFoundException()))
-        (weave, _) = weaveAndSkills
+        (weave, _, _, _) = weaveAndSkills
         _ <- WeaveSkillTable.filter(_.weaveId === weave.id).delete
         result <- WeaveTable.filter(_.id === weave.id).delete
       } yield result).transactionally
@@ -1517,7 +1517,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteHobby(uuid: UUID): Future[Boolean] = {
       val action = (for {
         hobbyAndSkills <- getHobbyAction(uuid).map(_.getOrElse(throw HobbyNotFoundException()))
-        (hobby, _) = hobbyAndSkills
+        (hobby, _, _, _) = hobbyAndSkills
         _ <- HobbySkillTable.filter(_.hobbyId === hobby.id).delete
         result <- HobbyTable.filter(_.id === hobby.id).delete
       } yield result).transactionally
@@ -1527,7 +1527,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteOneOff(uuid: UUID): Future[Boolean] = {
       val action = (for {
         oneOffAndSkills <- getOneOffAction(uuid).map(_.getOrElse(throw OneOffNotFoundException()))
-        (oneOff, _) = oneOffAndSkills
+        (oneOff, _, _, _) = oneOffAndSkills
         _ <- OneOffSkillTable.filter(_.oneOffId === oneOff.id).delete
         result <- OneOffTable.filter(_.id === oneOff.id).delete
       } yield result).transactionally
@@ -1537,7 +1537,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     override def deleteScheduledOneOff(uuid: UUID): Future[Boolean] = {
       val action = (for {
         scheduledOneOffAndSkills <- getScheduledOneOffAction(uuid).map(_.getOrElse(throw ScheduledOneOffNotFoundException()))
-        (scheduledOneOff, _) = scheduledOneOffAndSkills
+        (scheduledOneOff, _, _, _) = scheduledOneOffAndSkills
         _ <- ScheduledOneOffSkillTable.filter(_.scheduledOneOffId === scheduledOneOff.id).delete
         result <- ScheduledOneOffTable.filter(_.id === scheduledOneOff.id).delete
       } yield result).transactionally
@@ -2237,32 +2237,43 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def threadWithExtrasByUuid(uuid: UUID) = {
-      threadsWithExtras.map(_.filter { case (thread, _) => thread.uuid == uuid.toString })
+      threadsWithExtras.map(_.filter { case (thread, _, _, _) => thread.uuid == uuid.toString })
     }
 
     private def threadsWithExtras = {
       ThreadTable
-        .joinLeft(ThreadSkillTable)
+        .joinLeft(ThreadMissionTable)
         .on(_.id === _.threadId)
+        .joinLeft(MissionTable)
+        .on { case ((_, missionLink), mission) => missionLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(ThreadSkillTable)
+        .on(_._1._1.id === _.threadId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((thread, skillLink), skill) => (thread, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(ThreadRelationshipTable)
+        .on(_._1._1._1._1.id === _.threadId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((thread, _), mission), skillLink), skill), _), relationship) => (thread, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (thread, skillLink, skill) =>
+          case (thread, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (thread, skillTuple)
+            (thread, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByThread(threadsWithExtras: Seq[(ThreadRow, Option[(ThreadSkillRow, SkillRow)])]): Seq[(ThreadRow, Seq[(ThreadSkillRow, UUID)])] = {
-      threadsWithExtras.groupBy { case (thread, _) => thread }
+    private def groupByThread(threadsWithExtras: Seq[(ThreadRow, Option[MissionRow], Option[(ThreadSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(ThreadRow, Seq[UUID], Seq[(ThreadSkillRow, UUID)], Seq[UUID])] = {
+      threadsWithExtras.groupBy { case (thread, _, _, _) => thread }
         .map { case (thread, links) =>
-          (thread, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (thread, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
@@ -2275,32 +2286,43 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def weaveWithExtrasByUuid(uuid: UUID) = {
-      weavesWithExtras.map(_.filter { case (weave, _) => weave.uuid == uuid.toString })
+      weavesWithExtras.map(_.filter { case (weave, _, _, _) => weave.uuid == uuid.toString })
     }
 
     private def weavesWithExtras = {
       WeaveTable
-        .joinLeft(WeaveSkillTable)
+        .joinLeft(WeaveMissionTable)
         .on(_.id === _.weaveId)
+        .joinLeft(MissionTable)
+        .on { case ((_, missionLink), mission) => missionLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(WeaveSkillTable)
+        .on(_._1._1.id === _.weaveId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((weave, skillLink), skill) => (weave, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(WeaveRelationshipTable)
+        .on(_._1._1._1._1.id === _.weaveId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((weave, _), mission), skillLink), skill), _), relationship) => (weave, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (weave, skillLink, skill) =>
+          case (weave, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (weave, skillTuple)
+            (weave, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByWeave(weavesWithExtras: Seq[(WeaveRow, Option[(WeaveSkillRow, SkillRow)])]): Seq[(WeaveRow, Seq[(WeaveSkillRow, UUID)])] = {
-      weavesWithExtras.groupBy { case (weave, _) => weave }
+    private def groupByWeave(weavesWithExtras: Seq[(WeaveRow, Option[MissionRow], Option[(WeaveSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(WeaveRow, Seq[UUID], Seq[(WeaveSkillRow, UUID)], Seq[UUID])] = {
+      weavesWithExtras.groupBy { case (weave, _, _, _) => weave }
         .map { case (weave, links) =>
-          (weave, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (weave, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
@@ -2310,6 +2332,47 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def laserDonutsByParentId(goalId: UUID) = {
       LaserDonutTable.filter(_.goalId === goalId.toString).sortBy(_.order)
+    }
+
+    private def laserDonutWithExtrasByUuid(uuid: UUID) = {
+      laserDonutsWithExtras.map(_.filter { case (laserDonut, _, _, _) => laserDonut.uuid == uuid.toString })
+    }
+
+    private def laserDonutsWithExtras = {
+      LaserDonutTable
+        .joinLeft(LaserDonutMissionTable)
+        .on(_.id === _.laserDonutId)
+        .joinLeft(MissionTable)
+        .on { case ((_, laserDonutLink), mission) => laserDonutLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(LaserDonutSkillTable)
+        .on(_._1._1.id === _.laserDonutId)
+        .joinLeft(SkillTable)
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(LaserDonutRelationshipTable)
+        .on(_._1._1._1._1.id === _.laserDonutId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((laserDonut, _), mission), skillLink), skill), _), relationship) => (laserDonut, mission, skillLink, skill, relationship) }
+        .result.map {
+        _.collect {
+          case (laserDonut, mission, skillLink, skill, relationship) =>
+            val skillTuple = (skillLink, skill) match {
+              case (Some(link), Some(skl)) => Some((link, skl))
+              case _ => None
+            }
+            (laserDonut, mission, skillTuple, relationship)
+        }
+      }
+    }
+
+    private def groupByLaserDonut(laserDonutsWithExtras: Seq[(LaserDonutRow, Option[MissionRow], Option[(LaserDonutSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(LaserDonutRow, Seq[UUID], Seq[(LaserDonutSkillRow, UUID)], Seq[UUID])] = {
+      laserDonutsWithExtras.groupBy { case (laserDonut, _, _, _) => laserDonut }
+        .map { case (laserDonut, links) =>
+          (laserDonut, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
+        }.toSeq
     }
 
     private def portionByUuid(uuid: UUID) = {
@@ -2329,7 +2392,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def portionsWithExtrasByUuid(uuids: Seq[UUID]) = {
-      portionsWithExtras.map(_.filter { case (portion, _) => uuids.map(_.toString).contains(portion.uuid) })
+      portionsWithExtras.map(_.filter { case (portion, _, _, _) => uuids.map(_.toString).contains(portion.uuid) })
     }
 
     private def portionsByParentId(parentId: UUID) = {
@@ -2338,27 +2401,38 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     private def portionsWithExtras = {
       PortionTable
-        .joinLeft(PortionSkillTable)
+        .joinLeft(PortionMissionTable)
         .on(_.id === _.portionId)
+        .joinLeft(MissionTable)
+        .on { case ((_, portionLink), mission) => portionLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(PortionSkillTable)
+        .on(_._1._1.id === _.portionId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((portion, skillLink), skill) => (portion, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(PortionRelationshipTable)
+        .on(_._1._1._1._1.id === _.portionId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((portion, _), mission), skillLink), skill), _), relationship) => (portion, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (portion, skillLink, skill) =>
+          case (portion, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (portion, skillTuple)
+            (portion, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByPortion(portionsWithExtras: Seq[(PortionRow, Option[(PortionSkillRow, SkillRow)])]): Seq[(PortionRow, Seq[(PortionSkillRow, UUID)])] = {
-      portionsWithExtras.groupBy { case (portion, _) => portion }
+    private def groupByPortion(portionsWithExtras: Seq[(PortionRow, Option[MissionRow], Option[(PortionSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(PortionRow, Seq[UUID], Seq[(PortionSkillRow, UUID)], Seq[UUID])] = {
+      portionsWithExtras.groupBy { case (portion, _, _, _) => portion }
         .map { case (portion, links) =>
-          (portion, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (portion, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
@@ -2371,32 +2445,43 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def hobbyWithExtrasByUuid(uuid: UUID) = {
-      hobbiesWithExtras.map(_.filter { case (todo, _) => todo.uuid == uuid.toString })
+      hobbiesWithExtras.map(_.filter { case (todo, _, _, _) => todo.uuid == uuid.toString })
     }
 
     private def hobbiesWithExtras = {
       HobbyTable
-        .joinLeft(HobbySkillTable)
+        .joinLeft(HobbyMissionTable)
         .on(_.id === _.hobbyId)
+        .joinLeft(MissionTable)
+        .on { case ((_, hobbyLink), mission) => hobbyLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(HobbySkillTable)
+        .on(_._1._1.id === _.hobbyId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((hobby, skillLink), skill) => (hobby, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(HobbyRelationshipTable)
+        .on(_._1._1._1._1.id === _.hobbyId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((hobby, _), mission), skillLink), skill), _), relationship) => (hobby, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (hobby, skillLink, skill) =>
+          case (hobby, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (hobby, skillTuple)
+            (hobby, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByHobby(hobbiesWithExtras: Seq[(HobbyRow, Option[(HobbySkillRow, SkillRow)])]): Seq[(HobbyRow, Seq[(HobbySkillRow, UUID)])] = {
-      hobbiesWithExtras.groupBy { case (hobby, _) => hobby }
+    private def groupByHobby(hobbiesWithExtras: Seq[(HobbyRow, Option[MissionRow], Option[(HobbySkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(HobbyRow, Seq[UUID], Seq[(HobbySkillRow, UUID)], Seq[UUID])] = {
+      hobbiesWithExtras.groupBy { case (hobby, _, _, _) => hobby }
         .map { case (hobby, links) =>
-          (hobby, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (hobby, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
@@ -2405,36 +2490,47 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def oneOffWithExtrasByUuid(uuid: UUID) = {
-      oneOffsWithExtras.map(_.filter { case (oneOff, _) => oneOff.uuid == uuid.toString })
+      oneOffsWithExtras.map(_.filter { case (oneOff, _, _, _) => oneOff.uuid == uuid.toString })
     }
 
     private def oneOffsWithExtrasByUuid(uuids: Seq[UUID]) = {
-      oneOffsWithExtras.map(_.filter { case (oneOff, _) => uuids.contains(oneOff.uuid) })
+      oneOffsWithExtras.map(_.filter { case (oneOff, _, _, _) => uuids.contains(oneOff.uuid) })
     }
 
     private def oneOffsWithExtras = {
       OneOffTable
-        .joinLeft(OneOffSkillTable)
+        .joinLeft(OneOffMissionTable)
         .on(_.id === _.oneOffId)
+        .joinLeft(MissionTable)
+        .on { case ((_, oneOffLink), mission) => oneOffLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(OneOffSkillTable)
+        .on(_._1._1.id === _.oneOffId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((oneOff, skillLink), skill) => (oneOff, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(OneOffRelationshipTable)
+        .on(_._1._1._1._1.id === _.oneOffId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((oneOff, _), mission), skillLink), skill), _), relationship) => (oneOff, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (oneOff, skillLink, skill) =>
+          case (oneOff, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (oneOff, skillTuple)
+            (oneOff, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByOneOff(oneOffsWithExtras: Seq[(OneOffRow, Option[(OneOffSkillRow, SkillRow)])]): Seq[(OneOffRow, Seq[(OneOffSkillRow, UUID)])] = {
-      oneOffsWithExtras.groupBy { case (oneOff, _) => oneOff }
+    private def groupByOneOff(oneOffsWithExtras: Seq[(OneOffRow, Option[MissionRow], Option[(OneOffSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(OneOffRow, Seq[UUID], Seq[(OneOffSkillRow, UUID)], Seq[UUID])] = {
+      oneOffsWithExtras.groupBy { case (oneOff, _, _, _) => oneOff }
         .map { case (oneOff, links) =>
-          (oneOff, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (oneOff, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
@@ -2443,36 +2539,47 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def scheduledOneOffWithExtrasByUuid(uuid: UUID) = {
-      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _) => oneOff.uuid == uuid.toString })
+      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _, _, _) => oneOff.uuid == uuid.toString })
     }
 
     private def scheduledOneOffsWithExtrasByUuid(uuids: Seq[UUID]) = {
-      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _) => uuids.contains(oneOff.uuid) })
+      scheduledOneOffsWithExtras.map(_.filter { case (oneOff, _, _, _) => uuids.contains(oneOff.uuid) })
     }
 
     private def scheduledOneOffsWithExtras = {
       ScheduledOneOffTable
-        .joinLeft(ScheduledOneOffSkillTable)
+        .joinLeft(ScheduledOneOffMissionTable)
         .on(_.id === _.scheduledOneOffId)
+        .joinLeft(MissionTable)
+        .on { case ((_, oneOffLink), mission) => oneOffLink.map(_.missionId).getOrElse(-1L) === mission.id }
+        .joinLeft(ScheduledOneOffSkillTable)
+        .on(_._1._1.id === _.scheduledOneOffId)
         .joinLeft(SkillTable)
-        .on { case ((_, skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
-        .map { case ((scheduledOneOff, skillLink), skill) => (scheduledOneOff, skillLink, skill) }
+        .on { case ((((_, _), _), skillLink), skill) => skillLink.map(_.skillId).getOrElse(-1L) === skill.id }
+        .joinLeft(ScheduledOneOffRelationshipTable)
+        .on(_._1._1._1._1.id === _.scheduledOneOffId)
+        .joinLeft(RelationshipTable)
+        .on { case (((((_, _), _), _), relationshipLink), relationship) => relationshipLink.map(_.relationshipId).getOrElse(-1L) === relationship.id }
+        .map { case ((((((oneOff, _), mission), skillLink), skill), _), relationship) => (oneOff, mission, skillLink, skill, relationship) }
         .result.map {
         _.collect {
-          case (scheduledOneOff, skillLink, skill) =>
+          case (oneOff, mission, skillLink, skill, relationship) =>
             val skillTuple = (skillLink, skill) match {
               case (Some(link), Some(skl)) => Some((link, skl))
               case _ => None
             }
-            (scheduledOneOff, skillTuple)
+            (oneOff, mission, skillTuple, relationship)
         }
       }
     }
 
-    private def groupByScheduledOneOff(scheduledOneOffsWithExtras: Seq[(ScheduledOneOffRow, Option[(ScheduledOneOffSkillRow, SkillRow)])]) = {
-      scheduledOneOffsWithExtras.groupBy { case (oneOff, _) => oneOff }
+    private def groupByScheduledOneOff(oneOffsWithExtras: Seq[(ScheduledOneOffRow, Option[MissionRow], Option[(ScheduledOneOffSkillRow, SkillRow)],
+      Option[RelationshipRow])]): Seq[(ScheduledOneOffRow, Seq[UUID], Seq[(ScheduledOneOffSkillRow, UUID)], Seq[UUID])] = {
+      oneOffsWithExtras.groupBy { case (oneOff, _, _, _) => oneOff }
         .map { case (oneOff, links) =>
-          (oneOff, links.flatMap(_._2.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))))
+          (oneOff, links.flatMap(_._2.map(x => UUID.fromString(x.uuid))),
+            links.flatMap(_._3.map(tuple => (tuple._1, UUID.fromString(tuple._2.uuid)))),
+            links.flatMap(_._4.map(x => UUID.fromString(x.uuid))))
         }.toSeq
     }
 
