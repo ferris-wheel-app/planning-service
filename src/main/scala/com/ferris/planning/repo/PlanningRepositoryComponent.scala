@@ -657,7 +657,25 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
     }
 
-    override def updateRelationship(uuid: UUID, update: UpdateRelationship): Future[Relationship] = ???
+    override def updateRelationship(uuid: UUID, update: UpdateRelationship): Future[Relationship] = {
+      val query = relationshipByUuid(uuid).map(relationship => (relationship.name, relationship.category,
+        relationship.traits, relationship.likes, relationship.dislikes, relationship.hobbies, relationship.lastModified,
+        relationship.lastMeet))
+      val action = getRelationshipAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(update.name.getOrElse(old.name),
+            UpdateTypeEnum.keepOrReplace(update.category, old.category),
+            update.traits.map(_.mkString(",")).getOrElse(old.traits),
+            update.likes.map(_.mkString(",")).getOrElse(old.likes),
+            update.dislikes.map(_.mkString(",")).getOrElse(old.dislikes),
+            update.hobbies.map(_.mkString(",")).getOrElse(old.hobbies),
+            Some(timer.timestampOfNow),
+            UpdateDate.keepOrReplace(update.lastMeet, old.lastMeet))
+            .andThen(getRelationshipAction(uuid).map(_.head))
+        } getOrElse DBIO.failed(RelationshipNotFoundException())
+      }.transactionally
+      db.run(action).map(row => row.asRelationship)
+    }
 
     override def updateMission(uuid: UUID, update: UpdateMission): Future[Mission] = ???
 
@@ -1377,13 +1395,21 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(getSkillAction(uuid).map(_.map(_.asSkill)))
     }
 
-    override def getRelationships: Future[Seq[Relationship]] = ???
+    override def getRelationships: Future[Seq[Relationship]] = {
+      db.run(RelationshipTable.result.map(_.sortBy(_.createdOn).map(_.asRelationship)))
+    }
 
-    override def getRelationship(uuid: UUID): Future[Option[Relationship]] = ???
+    override def getRelationship(uuid: UUID): Future[Option[Relationship]] = {
+      db.run(getRelationshipAction(uuid).map(_.map(_.asRelationship)))
+    }
 
-    override def getMissions: Future[Seq[Mission]] = ???
+    override def getMissions: Future[Seq[Mission]] = {
+      db.run(MissionTable.result.map(_.sortBy(_.createdOn).map(_.asRelationship)))
+    }
 
-    override def getMission(uuid: UUID): Future[Option[Mission]] = ???
+    override def getMission(uuid: UUID): Future[Option[Mission]] = {
+      db.run(getMissionAction(uuid).map(_.map(_.asMission)))
+    }
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
       db.run(BacklogItemTable.result.map(_.sortBy(_.createdOn).map(_.asBacklogItem)))
@@ -1394,7 +1420,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getEpochs: Future[Seq[Epoch]] = {
-      db.run(EpochTable.result.map(_.sortBy(_.createdOn).map(_.asEpoch)))
+      db.run(getEpochsAction.map(_.sortBy(_.createdOn).map(_.asEpoch)))
     }
 
     override def getEpoch(uuid: UUID): Future[Option[Epoch]] = {
@@ -1546,18 +1572,62 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
 
     // Delete endpoints
     override def deleteSkillCategory(uuid: UUID): Future[Boolean] = {
-      val action = skillCategoryByUuid(uuid).delete
+      val action = (for {
+        skillCategory <- getSkillCategoryAction(uuid).map(_.getOrElse(throw SkillCategoryNotFoundException()))
+        _ <- SkillTable.filter(_.parentCategory === skillCategory._1.id).delete
+        result <- SkillCategoryTable.filter(_.id === skillCategory._1.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteSkill(uuid: UUID): Future[Boolean] = {
-      val action = skillByUuid(uuid).delete
+      val action = (for {
+        skill <- getSkillAction(uuid).map(_.getOrElse(throw SkillNotFoundException()))
+        _ <- GoalSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- ThreadSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- WeaveSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- LaserDonutSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- PortionSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- HobbySkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- OneOffSkillTable.filter(_.skillId === skill._1.id).delete
+        _ <- ScheduledOneOffSkillTable.filter(_.skillId === skill._1.id).delete
+        result <- SkillTable.filter(_.id === skill._1.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
-    override def deleteRelationship(uuid: UUID): Future[Boolean] = ???
+    override def deleteRelationship(uuid: UUID): Future[Boolean] = {
+      val action = (for {
+        relationship <- getRelationshipAction(uuid).map(_.getOrElse(throw RelationshipNotFoundException()))
+        _ <- GoalRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- ThreadRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- WeaveRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- LaserDonutRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- PortionRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- HobbyRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- OneOffRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        _ <- ScheduledOneOffRelationshipTable.filter(_.relationshipId === relationship.id).delete
+        result <- RelationshipTable.filter(_.id === relationship.id).delete
+      } yield result).transactionally
+      db.run(action).map(_ > 0)
+    }
 
-    override def deleteMission(uuid: UUID): Future[Boolean] = ???
+    override def deleteMission(uuid: UUID): Future[Boolean] = {
+      val action = (for {
+        mission <- getMissionAction(uuid).map(_.getOrElse(throw MissionNotFoundException()))
+        _ <- EpochMissionTable.filter(_.missionId === mission.id).delete
+        _ <- GoalMissionTable.filter(_.missionId === mission.id).delete
+        _ <- ThreadMissionTable.filter(_.missionId === mission.id).delete
+        _ <- WeaveMissionTable.filter(_.missionId === mission.id).delete
+        _ <- LaserDonutMissionTable.filter(_.missionId === mission.id).delete
+        _ <- PortionMissionTable.filter(_.missionId === mission.id).delete
+        _ <- HobbyRMissionTable.filter(_.missionId === mission.id).delete
+        _ <- OneOffMissionTable.filter(_.missionId === mission.id).delete
+        _ <- ScheduledOneOffMissionTable.filter(_.missionId === mission.id).delete
+        result <- MissionTable.filter(_.id === mission.id).delete
+      } yield result).transactionally
+      db.run(action).map(_ > 0)
+    }
 
     override def deleteBacklogItem(uuid: UUID): Future[Boolean] = {
       val action = backlogItemByUuid(uuid).delete
@@ -1565,7 +1635,12 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def deleteEpoch(uuid: UUID): Future[Boolean] = {
-      val action = epochByUuid(uuid).delete
+      val action = (for {
+        epochAndMissions <- getEpochAction(uuid).map(_.getOrElse(throw EpochNotFoundException()))
+        (epoch, _) = epochAndMissions
+        _ <- EpochMissionTable.filter(_.epochId === epoch.id).delete
+        result <- EpochTable.filter(_.id === epoch.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
@@ -1585,6 +1660,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
           for {
             _ <- GoalBacklogItemTable.filter(_.goalId === goal.id).delete
             _ <- GoalSkillTable.filter(_.goalId === goal.id).delete
+            _ <- GoalRelationshipTable.filter(_.goalId === goal.id).delete
+            _ <- GoalMissionTable.filter(_.goalId === goal.id).delete
             result <- GoalTable.filter(_.id === goal.id).delete
           } yield result
         } getOrElse DBIO.failed(GoalNotFoundException())
@@ -1597,6 +1674,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         threadAndSkills <- getThreadAction(uuid).map(_.getOrElse(throw ThreadNotFoundException()))
         (thread, _, _, _) = threadAndSkills
         _ <- ThreadSkillTable.filter(_.threadId === thread.id).delete
+        _ <- ThreadRelationshipTable.filter(_.threadId === thread.id).delete
+        _ <- ThreadMissionTable.filter(_.threadId === thread.id).delete
         result <- ThreadTable.filter(_.id === thread.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
@@ -1607,18 +1686,34 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         weaveAndSkills <- getWeaveAction(uuid).map(_.getOrElse(throw WeaveNotFoundException()))
         (weave, _, _, _) = weaveAndSkills
         _ <- WeaveSkillTable.filter(_.weaveId === weave.id).delete
+        _ <- WeaveRelationshipTable.filter(_.weaveId === weave.id).delete
+        _ <- WeaveMissionTable.filter(_.weaveId === weave.id).delete
         result <- WeaveTable.filter(_.id === weave.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deleteLaserDonut(uuid: UUID): Future[Boolean] = {
-      val action = laserDonutByUuid(uuid).delete
+      val action = (for {
+        laserDonutAndSkills <- getLaserDonutAction(uuid).map(_.getOrElse(throw LaserDonutNotFoundException()))
+        (laserDonut, _, _, _) = laserDonutAndSkills
+        _ <- LaserDonutSkillTable.filter(_.laserDonutId === laserDonut.id).delete
+        _ <- LaserDonutRelationshipTable.filter(_.laserDonutId === laserDonut.id).delete
+        _ <- LaserDonutMissionTable.filter(_.laserDonutId === laserDonut.id).delete
+        result <- LaserDonutTable.filter(_.id === laserDonut.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
     override def deletePortion(uuid: UUID): Future[Boolean] = {
-      val action = portionByUuid(uuid).delete
+      val action = (for {
+        portionAndSkills <- getPortionAction(uuid).map(_.getOrElse(throw PortionNotFoundException()))
+        (portion, _, _, _) = portionAndSkills
+        _ <- PortionSkillTable.filter(_.portionId === portion.id).delete
+        _ <- PortionRelationshipTable.filter(_.portionId === portion.id).delete
+        _ <- PortionMissionTable.filter(_.portionId === portion.id).delete
+        result <- PortionTable.filter(_.id === portion.id).delete
+      } yield result).transactionally
       db.run(action).map(_ > 0)
     }
 
@@ -1635,6 +1730,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         hobbyAndSkills <- getHobbyAction(uuid).map(_.getOrElse(throw HobbyNotFoundException()))
         (hobby, _, _, _) = hobbyAndSkills
         _ <- HobbySkillTable.filter(_.hobbyId === hobby.id).delete
+        _ <- HobbyRelationshipTable.filter(_.hobbyId === hobby.id).delete
+        _ <- HobbyMissionTable.filter(_.hobbyId === hobby.id).delete
         result <- HobbyTable.filter(_.id === hobby.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
@@ -1645,6 +1742,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         oneOffAndSkills <- getOneOffAction(uuid).map(_.getOrElse(throw OneOffNotFoundException()))
         (oneOff, _, _, _) = oneOffAndSkills
         _ <- OneOffSkillTable.filter(_.oneOffId === oneOff.id).delete
+        _ <- OneOffRelationshipTable.filter(_.oneOffId === oneOff.id).delete
+        _ <- OneOffMissionTable.filter(_.oneOffId === oneOff.id).delete
         result <- OneOffTable.filter(_.id === oneOff.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
@@ -1655,6 +1754,8 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         scheduledOneOffAndSkills <- getScheduledOneOffAction(uuid).map(_.getOrElse(throw ScheduledOneOffNotFoundException()))
         (scheduledOneOff, _, _, _) = scheduledOneOffAndSkills
         _ <- ScheduledOneOffSkillTable.filter(_.scheduledOneOffId === scheduledOneOff.id).delete
+        _ <- ScheduledOneOffRelationshipTable.filter(_.scheduledOneOffId === scheduledOneOff.id).delete
+        _ <- ScheduledOneOffMissionTable.filter(_.scheduledOneOffId === scheduledOneOff.id).delete
         result <- ScheduledOneOffTable.filter(_.id === scheduledOneOff.id).delete
       } yield result).transactionally
       db.run(action).map(_ > 0)
@@ -2056,12 +2157,24 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       }
     }
 
+    private def getRelationshipAction(uuid: UUID) = {
+      relationshipByUuid(uuid).result.headOption
+    }
+
+    private def getMissionAction(uuid: UUID) = {
+      missionByUuid(uuid).result.headOption
+    }
+
     private def getBacklogItemsAction(uuids: Seq[UUID]) = {
       backlogItemsByUuid(uuids).result
     }
 
     private def getBacklogItemAction(uuid: UUID) = {
       backlogItemByUuid(uuid).result.headOption
+    }
+
+    private def getEpochsAction = {
+      epochWithExtrasByUuid(uuid).map(groupByEpoch(_))
     }
 
     private def getEpochAction(uuid: UUID) = {
