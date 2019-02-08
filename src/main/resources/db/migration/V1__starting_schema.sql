@@ -343,7 +343,7 @@ create table relationship (
   hobbies VARCHAR(2000) NOT NULL,
   created_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP,
-  last_meet TIMESTAMP,
+  last_meet DATE,
   PRIMARY KEY (id),
   UNIQUE KEY (uuid)
 ) ENGINE=InnoDB;

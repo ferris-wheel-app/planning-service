@@ -193,7 +193,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         created.likes shouldBe SD.relationshipCreation.likes
         created.dislikes shouldBe SD.relationshipCreation.dislikes
         created.hobbies shouldBe SD.relationshipCreation.hobbies
-        created.lastMeet.value shouldBe SD.relationshipCreation.lastMeet.value
+        created.lastMeet shouldBe empty
       }
     }
 
@@ -211,7 +211,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
         updated.likes shouldBe SD.relationshipUpdate.likes.value
         updated.dislikes shouldBe SD.relationshipUpdate.dislikes.value
         updated.hobbies shouldBe SD.relationshipUpdate.hobbies.value
-        updated.lastMeet shouldBe SD.relationshipUpdate.lastMeet.value
+        updated.lastMeet.value shouldBe SD.relationshipUpdate.lastMeet.value
       }
 
       it("should throw an exception if a relationship is not found") {
@@ -872,7 +872,7 @@ class PlanningRepositoryTest extends AsyncFunSpec
     }
 
     describe("deleting") {
-      it("should delete a laser-donuts") {
+      it("should delete a laser-donut") {
         val created = repo.createLaserDonut(SD.laserDonutCreation).futureValue
         val deletion = repo.deleteLaserDonut(created.uuid).futureValue
         val retrieved = repo.getLaserDonut(created.uuid).futureValue

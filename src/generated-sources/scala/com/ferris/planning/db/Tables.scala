@@ -1035,12 +1035,12 @@ trait Tables {
    *  @param hobbies Database column HOBBIES SqlType(VARCHAR), Length(2000,true)
    *  @param createdOn Database column CREATED_ON SqlType(TIMESTAMP)
    *  @param lastModified Database column LAST_MODIFIED SqlType(TIMESTAMP)
-   *  @param lastMeet Database column LAST_MEET SqlType(TIMESTAMP) */
-  case class RelationshipRow(id: Long, uuid: String, name: String, category: String, traits: String, likes: String, dislikes: String, hobbies: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastMeet: Option[java.sql.Timestamp])
+   *  @param lastMeet Database column LAST_MEET SqlType(DATE) */
+  case class RelationshipRow(id: Long, uuid: String, name: String, category: String, traits: String, likes: String, dislikes: String, hobbies: String, createdOn: java.sql.Timestamp, lastModified: Option[java.sql.Timestamp], lastMeet: Option[java.sql.Date])
   /** GetResult implicit for fetching RelationshipRow objects using plain SQL queries */
-  implicit def GetResultRelationshipRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]]): GR[RelationshipRow] = GR{
+  implicit def GetResultRelationshipRow(implicit e0: GR[Long], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[java.sql.Timestamp]], e4: GR[Option[java.sql.Date]]): GR[RelationshipRow] = GR{
     prs => import prs._
-    RelationshipRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Timestamp]))
+    RelationshipRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<?[java.sql.Date]))
   }
   /** Table description of table RELATIONSHIP. Objects of this class serve as prototypes for rows in queries. */
   class RelationshipTable(_tableTag: Tag) extends profile.api.Table[RelationshipRow](_tableTag, "RELATIONSHIP") {
@@ -1068,8 +1068,8 @@ trait Tables {
     val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_ON")
     /** Database column LAST_MODIFIED SqlType(TIMESTAMP) */
     val lastModified: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MODIFIED")
-    /** Database column LAST_MEET SqlType(TIMESTAMP) */
-    val lastMeet: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("LAST_MEET")
+    /** Database column LAST_MEET SqlType(DATE) */
+    val lastMeet: Rep[Option[java.sql.Date]] = column[Option[java.sql.Date]]("LAST_MEET")
 
     /** Uniqueness Index over (uuid) (database name CONSTRAINT_INDEX_7) */
     val index1 = index("CONSTRAINT_INDEX_7", uuid, unique=true)

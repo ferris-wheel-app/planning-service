@@ -358,7 +358,7 @@ class DomainConversions(val tables: Tables) {
       hobbies = row.hobbies.split(",").map(_.trim),
       createdOn = row.createdOn.toLocalDateTime,
       lastModified = row.lastModified.map(_.toLocalDateTime),
-      lastMeet = row.lastMeet.map(_.toLocalDateTime.toLocalDate)
+      lastMeet = row.lastMeet.map(_.toLocalDate)
     )
   }
 
@@ -438,6 +438,10 @@ class DomainConversions(val tables: Tables) {
   object UpdateDate extends Update[LocalDate, Date] {
     override def keepOrReplace(newVersion: Option[LocalDate], oldVersion: Date): Date = {
       newVersion.map(localDate2SqlDate).getOrElse(oldVersion)
+    }
+
+    def keepOrReplace(newVersion: Option[LocalDate], oldVersion: Option[Date]): Option[Date] = {
+      newVersion.map(localDate2SqlDate).orElse(oldVersion)
     }
   }
 

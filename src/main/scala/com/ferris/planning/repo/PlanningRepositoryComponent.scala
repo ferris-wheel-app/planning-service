@@ -677,7 +677,18 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
       db.run(action).map(row => row.asRelationship)
     }
 
-    override def updateMission(uuid: UUID, update: UpdateMission): Future[Mission] = ???
+    override def updateMission(uuid: UUID, update: UpdateMission): Future[Mission] = {
+      val query = missionByUuid(uuid).map(mission => (mission.name, mission.description, mission.lastModified))
+      val action = getMissionAction(uuid).flatMap { maybeObj =>
+        maybeObj map { old =>
+          query.update(update.name.getOrElse(old.name),
+            update.description.getOrElse(old.description),
+            Some(timer.timestampOfNow))
+            .andThen(getMissionAction(uuid).map(_.head))
+        } getOrElse DBIO.failed(MissionNotFoundException())
+      }.transactionally
+      db.run(action).map(row => row.asMission)
+    }
 
     override def updateBacklogItem(uuid: UUID, update: UpdateBacklogItem): Future[BacklogItem] = {
       val query = backlogItemByUuid(uuid).map(item => (item.summary, item.description, item.`type`, item.lastModified))
@@ -1396,7 +1407,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getRelationships: Future[Seq[Relationship]] = {
-      db.run(RelationshipTable.result.map(_.sortBy(_.createdOn).map(_.asRelationship)))
+      db.run(RelationshipTable.result.map(_.sortBy(_.id).map(_.asRelationship)))
     }
 
     override def getRelationship(uuid: UUID): Future[Option[Relationship]] = {
@@ -1404,7 +1415,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getMissions: Future[Seq[Mission]] = {
-      db.run(MissionTable.result.map(_.sortBy(_.createdOn).map(_.asRelationship)))
+      db.run(MissionTable.result.map(_.sortBy(_.id).map(_.asMission)))
     }
 
     override def getMission(uuid: UUID): Future[Option[Mission]] = {
@@ -1412,7 +1423,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getBacklogItems: Future[Seq[BacklogItem]] = {
-      db.run(BacklogItemTable.result.map(_.sortBy(_.createdOn).map(_.asBacklogItem)))
+      db.run(BacklogItemTable.result.map(_.sortBy(_.id).map(_.asBacklogItem)))
     }
 
     override def getBacklogItem(uuid: UUID): Future[Option[BacklogItem]] = {
@@ -1420,7 +1431,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getEpochs: Future[Seq[Epoch]] = {
-      db.run(getEpochsAction.map(_.sortBy(_.createdOn).map(_.asEpoch)))
+      db.run(getEpochsAction.map(_.sortBy(_._1.id).map(_.asEpoch)))
     }
 
     override def getEpoch(uuid: UUID): Future[Option[Epoch]] = {
@@ -1436,7 +1447,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getThemes: Future[Seq[Theme]] = {
-      db.run(ThemeTable.result.map(_.sortBy(_.createdOn).map(_.asTheme)))
+      db.run(ThemeTable.result.map(_.sortBy(_.id).map(_.asTheme)))
     }
 
     override def getTheme(uuid: UUID): Future[Option[Theme]] = {
@@ -1444,7 +1455,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getGoals: Future[Seq[Goal]] = {
-      db.run(getGoalsAction.map(_.sortBy(_._1.createdOn).map(_.asGoal)))
+      db.run(getGoalsAction.map(_.sortBy(_._1.id).map(_.asGoal)))
     }
 
     override def getGoal(uuid: UUID): Future[Option[Goal]] = {
@@ -1452,11 +1463,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getThreads: Future[Seq[Thread]] = {
-      db.run(getThreadsAction.map(_.sortBy(_._1.createdOn).map(_.asThread)))
+      db.run(getThreadsAction.map(_.sortBy(_._1.id).map(_.asThread)))
     }
 
     override def getThreads(goalId: UUID): Future[Seq[Thread]] = {
-      db.run(getThreadsByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asThread)))
+      db.run(getThreadsByParent(goalId).map(_.sortBy(_._1.id).map(_.asThread)))
     }
 
     override def getThread(uuid: UUID): Future[Option[Thread]] = {
@@ -1464,11 +1475,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getWeaves: Future[Seq[Weave]] = {
-      db.run(getWeavesAction.map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+      db.run(getWeavesAction.map(_.sortBy(_._1.id).map(_.asWeave)))
     }
 
     override def getWeaves(goalId: UUID): Future[Seq[Weave]] = {
-      db.run(getWeavesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asWeave)))
+      db.run(getWeavesByParent(goalId).map(_.sortBy(_._1.id).map(_.asWeave)))
     }
 
     override def getWeave(uuid: UUID): Future[Option[Weave]] = {
@@ -1476,11 +1487,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getLaserDonuts: Future[Seq[LaserDonut]] = {
-      db.run(getLaserDonutsAction.map(_.sortBy(_._1.createdOn).map(_.asLaserDonut)))
+      db.run(getLaserDonutsAction.map(_.sortBy(_._1.id).map(_.asLaserDonut)))
     }
 
     override def getLaserDonuts(goalId: UUID): Future[Seq[LaserDonut]] = {
-      db.run(getLaserDonutsByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asLaserDonut)))
+      db.run(getLaserDonutsByParent(goalId).map(_.sortBy(_._1.id).map(_.asLaserDonut)))
     }
 
     override def getLaserDonut(uuid: UUID): Future[Option[LaserDonut]] = {
@@ -1534,11 +1545,11 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     override def getHobbies: Future[Seq[Hobby]] = {
-      db.run(getHobbiesAction.map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+      db.run(getHobbiesAction.map(_.sortBy(_._1.id).map(_.asHobby)))
     }
 
     override def getHobbies(goalId: UUID): Future[Seq[Hobby]] = {
-      db.run(getHobbiesByParent(goalId).map(_.sortBy(_._1.createdOn).map(_.asHobby)))
+      db.run(getHobbiesByParent(goalId).map(_.sortBy(_._1.id).map(_.asHobby)))
     }
 
     override def getHobby(uuid: UUID): Future[Option[Hobby]] = {
@@ -1621,7 +1632,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
         _ <- WeaveMissionTable.filter(_.missionId === mission.id).delete
         _ <- LaserDonutMissionTable.filter(_.missionId === mission.id).delete
         _ <- PortionMissionTable.filter(_.missionId === mission.id).delete
-        _ <- HobbyRMissionTable.filter(_.missionId === mission.id).delete
+        _ <- HobbyMissionTable.filter(_.missionId === mission.id).delete
         _ <- OneOffMissionTable.filter(_.missionId === mission.id).delete
         _ <- ScheduledOneOffMissionTable.filter(_.missionId === mission.id).delete
         result <- MissionTable.filter(_.id === mission.id).delete
@@ -2174,7 +2185,7 @@ trait SqlPlanningRepositoryComponent extends PlanningRepositoryComponent {
     }
 
     private def getEpochsAction = {
-      epochWithExtrasByUuid(uuid).map(groupByEpoch(_))
+      epochsWithExtras.map(groupByEpoch(_))
     }
 
     private def getEpochAction(uuid: UUID) = {
