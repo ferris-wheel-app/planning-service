@@ -5,7 +5,8 @@ object TypeFields {
   object BacklogItemType {
     val idea = "idea"
     val issue = "issue"
-    val values = Set(idea, issue)
+    val chipOnAShoulder = "chip_on_a_shoulder"
+    val values = Set(idea, issue, chipOnAShoulder)
   }
 
   object Status {

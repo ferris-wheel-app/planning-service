@@ -29,6 +29,7 @@ object TypeResolvers {
     override def withName(name: String): BacklogItemType = name match {
       case `idea` => BacklogItemTypes.Idea
       case `issue` => BacklogItemTypes.Issue
+      case `chipOnAShoulder` => BacklogItemTypes.ChipOnAShoulder
       case o => throw new IllegalArgumentException(s"Invalid backlog-item type: $o")
     }
 
